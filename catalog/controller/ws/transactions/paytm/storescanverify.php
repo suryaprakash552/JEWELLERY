@@ -1,0 +1,105 @@
+<?php
+class ControllerTransactionsPaytmstorescanverify extends Controller {
+    public function index($data)
+    {
+        $json=array();
+        $this->load->language('transactions/common');
+        $this->load->model('transactions/common');
+        $cust_info=$this->model_transactions_common->getCustInfo($data['userid']);
+        $pgvalue=0;
+        $clientid=date('YmdaHis').RAND(100000,999999);
+        if(!$cust_info['exstatus'])
+        {
+            $json['success']="0";
+            $json['message']=$this->language->get('error_user');
+        }
+        if($cust_info['exstatus'])
+        {
+            $serviceInfo=$this->model_transactions_common->getServiceIdByName('STORESCAN');
+            $service_assignment=$this->model_transactions_common->getServiceAssignment($data['userid'],$serviceInfo['serviceid']);
+            if(!$service_assignment['exstatus'])
+            {
+                $json['success']="0";
+                $json['message']=$this->language->get('error_serviceassignment');
+            }
+            
+            if($service_assignment['exstatus'])
+            {
+                $balance=$this->model_transactions_common->getWalletInfo($cust_info['customer_id']);
+                $record=array(
+                                "source"=>$data['source'],
+                                'customerid'=>$data['userid'],
+                                'remitterid'=>'0',
+                                'ourrequestid'=>$clientid,
+                                'yourrequestid'=>$this->request->post['yourrequestid'],
+                                'accountnumber'=>$cust_info['telephone'],
+                                'ifsc'=>$cust_info['customer_id'],
+                                'bank'=>$cust_info['customer_id'],
+                                'name'=>"NA",
+                                'amount'=>0,
+                                'profit'=>0,
+                                'dt'=>0,
+                                'sd'=>0,
+                                'wt'=>0,
+                                'beforebal'=>$balance['amount'],
+                                'admin'=>0,
+                                'afterbal'=>$balance['amount'],
+                                'type'=>"STORESCAN_VERIFY",
+                                'transfermode'=>$this->request->post['transferMode'],
+                                'message'=>$this->language->get('text_pending_message'),
+                                'chargetype'=>1
+                             );
+                $save_record=$this->model_transactions_common->doCreateDMTRecord($record);
+                if(!$save_record['exstatus'])
+                {
+                    $json['success']="0";
+                    $json['message']=$this->language->get('error_save_record'); 
+                }
+                
+                if($save_record['exstatus'])
+                {
+                    $custom_field=json_decode($cust_info['custom_field'],true);
+            		foreach($custom_field as $key=>$name)
+            		{
+            		    $custom_field_name=$this->model_transactions_common->getCustomField($key);
+            		    $custom_name[$custom_field_name]=$name;
+            		}
+            		if(isset($custom_name['StoreScan']) && !empty($custom_name['StoreScan']) && $custom_name['StoreScan']!='')
+            		{
+            		    $pgvalue=$custom_name['StoreScan'];
+            		}
+            		if($pgvalue==4 || !$pgvalue)
+                    {
+                        $response=array(
+                                        "success"=>0,
+                                        "message"=>$this->language->get('error_not_allowed'),
+                                        "ourrequestid"=>$clientid,
+                                        "yourrequestid"=>$this->request->post['yourrequestid'],
+                                        "apirequestid"=>'',
+                                        "rrn"=>'',
+                                        "beneficiaryName"=>''
+                                        );
+                        $this->model_transactions_common->doUpdateDMTRecord($response);
+                        $json['success']="0";
+                        $json['message']=$this->language->get('error_not_allowed');
+                    }else
+                        {
+                            $response=array(
+                                        "success"=>1,
+                                        "message"=>$this->language->get('scan_allowed'),
+                                        "ourrequestid"=>$clientid,
+                                        "yourrequestid"=>$this->request->post['yourrequestid'],
+                                        "apirequestid"=>'',
+                                        "rrn"=>'',
+                                        "beneficiaryName"=>''
+                                        );
+                            $this->model_transactions_common->doUpdateDMTRecord($response);
+                            $json['success']="1";
+                            $json['message']=$this->language->get('scan_allowed');
+                        }
+                }
+            }
+        }
+        return $json;
+    }
+}

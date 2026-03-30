@@ -1,0 +1,412 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+    	<div class="float-end">
+    		<a type="button" data-toggle="tooltip" title="{{ button_export }}" id="button-export" class="btn btn-warning"><i class="fa fa-download"></i></a>
+    	</div>
+      <h1>{{ heading_title }}</h1>
+      <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li class="breadcrumb-item"><a href="{{ breadcrumb['href'] }}">{{ breadcrumb['text'] }}</a></li>
+		{% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+   {% if success %} 
+    <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+     {% endif %}
+    <div class="panel-body" style="background-color: #1a1a1a; padding: 20px;">
+  <div style="background-color: #2d2d2d; padding: 20px; border-radius: 4px; margin-bottom: 20px;">
+    
+    <div class="single-row">
+
+  <!-- Product Name -->
+  <div class="col-inline">
+    <input type="text" name="filter_name" value="{{ filter_name }}" placeholder="{{ entry_name }}"
+      id="input-name" class="form-control"
+      data-oc-target="autocomplete-name" autocomplete="off"
+      style="background: #0f172a; border: 1px solid #334155; color: #fff!important; padding: 8px 10px;" >
+    <ul id="autocomplete-name" class="dropdown-menu"></ul>
+  </div>
+
+  <!-- Model -->
+  <div class="col-inline">
+    <input type="text" name="filter_model" value="{{ filter_model }}" placeholder="{{ entry_model }}"
+      id="input-model" class="form-control"
+      data-oc-target="autocomplete-model" autocomplete="off"
+      style="background: #0f172a; border: 1px solid #334155; color: #fff!important; padding: 8px 10px;" >
+    <ul id="autocomplete-model" class="dropdown-menu"></ul>
+  </div>
+
+  <!-- Supplier -->
+  <div class="col-inline">
+    <input type="text" name="filter_supplier" value="{{ filter_supplier }}" placeholder="{{ entry_supplier }}"
+      id="input-supplier" class="form-control"
+      data-oc-target="autocomplete-supplier" autocomplete="off"
+    style="background: #0f172a; border: 1px solid #334155; color: #fff!important; padding: 8px 10px;" >
+    <ul id="autocomplete-supplier" class="dropdown-menu"></ul>
+  </div>
+  <!-- Buttons -->
+  <div class="col-inline d-flex align-items-center" style="gap:10px;white-space:nowrap;">
+    <button type="button" id="button-filter" class="btn btn-info"
+      style="border-radius:20px;padding:10px 25px;height:40px;">
+      <i class="fa fa-filter"></i> {{ button_filter }}
+    </button>
+
+    <button id="clear-btn" class="btn"
+      style="background:#ef4444;color:white;border-radius:20px;padding:10px 25px;height:40px;">
+      <i class="fa fa-times"></i> clear
+    </button>
+  </div>
+
+  <!-- Product + Add Supplier (combined pill) -->
+  <div class="col-inline">
+    <div class="product-combined">
+      <input type="text" name="filter_product" value="" placeholder="{{ entry_product }}"
+        id="input-product"class="form-control" data-oc-target="autocomplete-product" autocomplete="off"style="background: #0f172a; border: 1px solid #334155; color: #fff!important; padding: 8px 10px;" >
+
+      <ul id="autocomplete-product" class="dropdown-menu"></ul>
+
+      <input type="hidden" name="filter_product_id" id="filter-product-id" value="">
+      
+      <button type="button" class="btn-add addsupplier"style=color:white;background-color:#32a2c2;margin-left:-25px;>Add Supplier</button>
+    </div>
+  </div>
+</div>
+
+
+        <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-product">
+         <div class="table-container" style="background: #1e293b; overflow: hidden;">
+            <div class="table-responsive">
+        <table class="table table-dark table-hover m-0" style="color: #fff;">
+          <thead style="background: #0f172a;">
+            <tr>
+                  <td style="width: 50px; vertical-align: middle; border: 2px solid #fff; padding: 15px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                  <td class="text-center" style="vertical-align: middle;border: 2px solid #fff; padding: 15px; font-weight: 700; color: #fff;">{{ column_image }}</td>
+                  <td class="text-left" style="vertical-align: middle; border: 2px solid #fff;  padding: 15px; font-weight: 700; color: #fff;">{% if sort == 'pd.name' %}
+                    <a href="{{ sort_name }}"  style="color: #fff;">{{ column_name }}</a>
+                    {% else %}
+                    <a href="{{ sort_name }}" style="color: #fff;">{{ column_name }}</a>
+                    {% endif %}</td>
+                  <td class="text-left" style="vertical-align: middle;border: 2px solid #fff; padding: 15px; font-weight: 700; color: #fff;">{% if sort == 'p.model' %}
+                    <a href="{{ sort_model }}" class="{{ order|lower }}" style="color: #fff;">{{ column_model }}</a>
+                    {% else %}
+                    <a href="{{ sort_model }}" style="color: #fff;">{{ column_model }}</a>
+                    {% endif %}</td>
+                  <td class="text-left" style="vertical-align: middle; border: 2px solid #fff; padding: 15px; font-weight: 700; color: #fff;">{% if sort == 'sale_price' %}
+                    <a href="{{ sort_sale_price }}" class="{{ order|lower }}" style="color: #fff;">{{ column_sale_price }}</a>
+                    {% else %}
+                    <a href="{{ sort_sale_price }}" style="color: #fff;">{{ column_sale_price }}</a>
+                    {% endif %}</td>
+                  <td class="text-left" style="vertical-align: middle; border: 2px solid #fff; padding: 15px; font-weight: 700; color: #fff;">{% if sort == 'sp.price' %}
+                    <a href="{{ sort_price }}" class="{{ order|lower }}" style="color: #fff;">{{ column_price }}</a>
+                    {% else %}
+                    <a href="{{ sort_price }}" style="color: #fff;">{{ column_price }}</a>
+                    {% endif %}</td>
+				  <td class="text-left" style="vertical-align: middle; border: 2px solid #fff; padding: 15px; font-weight: 700; color: #fff;">{% if sort == 'supplier' %}
+                    <a href="{{ sort_supplier }}" class="{{ order|lower }}" style="color: #fff;">{{ column_supplier }}</a>
+                    {% else %}
+                    <a href="{{ sort_supplier }}" style="color: #fff;">{{ column_supplier }}</a>
+                    {% endif %}</td>
+				  <td class="text-right" style="width: 100px; vertical-align: middle;border: 2px solid #fff; padding: 15px; font-weight: 700; color: #fff;">{{ column_action }}</td>
+                </tr>
+              </thead>
+              <tbody>
+				{% if products %}
+				{% for product in products %}
+                <tr style="background-color: #000;">
+                  <td class="text-center" style="vertical-align: middle;border: 2px solid #fff; background-color: #000; padding: 15px;">{% if product['product_id'] in selected %}
+                    <input type="checkbox" name="selected[]" value="{{ product['product_id'] }}" checked="checked" />
+                    {% else %}
+                    <input type="checkbox" name="selected[]" value="{{ product['product_id'] }}" />
+                    {% endif %}</td>
+                  <td class="text-center" style="vertical-align: middle;border: 2px solid #fff; background-color: #000; padding: 15px;">{% if product['image'] %}
+                    <img src="{{ product['image'] }}" alt="{{ product['name'] }}" class="img-thumbnail" />
+                    {% else %}
+                    <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span>
+                    {% endif %}</td>
+                  <td class="text-left" style="vertical-align: middle;border: 2px solid #fff; background-color: #000; padding: 15px; color: #999;">{{ product['name'] }}</td>
+                  <td class="text-left" style="vertical-align: middle;border: 2px solid #fff; background-color: #000; padding: 15px; color: #999;">{{ product['model'] }}</td>
+                  <td class="text-left" style="vertical-align: middle;border: 2px solid #fff; background-color: #000; padding: 15px; color: #999;">{{ product['sale_price'] }}</td>
+                  <td class="text-left" style="vertical-align: middle; border: 2px solid #fff; background-color: #000; padding: 15px; color: #999;">{{ product['price'] }}</td>
+                  <td class="text-left" style="vertical-align: middle; border: 2px solid #fff; background-color: #000; padding: 15px; color: #999;">{% set i = 0 %}
+                  	{% if product['supplier'] %}
+                  	{% for supplier in product['supplier'] %}
+                  		{% if i > 0 %}<br/>{% endif %}{{ supplier.name ? supplier.name : supplier.company }}{% set i = i + 1 %}
+                  	{% endfor %}
+                  {% endif %}</td>
+                  <td class="text-right" style="vertical-align: middle; border: 2px solid #fff; background-color: #000; padding: 15px;"><a href="{{ product['edit'] }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary btn-sm"><i class="fa fa-pencil"></i></a></td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr style="background-color: #000;">
+                  <td class="text-center" colspan="8" style="border: 2px solid #fff; background-color: #000; padding: 30px; color: #666;">{{ text_no_results }}</td>
+                </tr>
+               {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </form>
+        <div class="row" style="padding: 20px 0; margin: 0; background-color: #000;" >
+          <div class="col-sm-6 text-left" style="color: #fff;">{{ pagination }}</div>
+          <div class="col-sm-6 text-right" style="color: #fff;">{{ results }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <style>
+  /* Alignment & zoom-fix patch (add after your current CSS) */
+.single-row {
+  display: flex;
+  flex-wrap: nowrap;        /* keep single line as you chose */
+  align-items: center;
+  gap: 14px;
+  padding: 10px 20px;       /* extra horizontal padding so end pills don't touch/clip */
+  overflow-x: hidden;       /* still hide horizontal scrollbar */
+  width: 100%;
+  box-sizing: border-box;
+  justify-content: flex-start;
+}
+
+/* Default flex behaviour for each inline column:
+   - prefer 260px but allow shrink/grow
+   - allow shrinking below content (min-width: 0) so flex math works correctly */
+.single-row .col-inline {
+  flex: 0 1 260px;   /* preferred width 260px, but can shrink */
+  min-width: 0;      /* IMPORTANT -> allows children to shrink */
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+}
+
+/* Keep the action buttons group stable and not squished */
+.single-row .col-inline.d-flex,
+.single-row .col-inline.actions {
+  flex: 0 0 auto;    /* don't shrink/grow; keeps buttons stable */
+  min-width: 140px;
+  gap: 10px;
+}
+
+/* Inputs - override inline width and make them responsive but bounded */
+.single-row input[type="text"],
+.product-combined input[type="text"] {
+  width: auto !important;       /* ignore inline fixed width */
+  flex: 1 1 220px;              /* grow & shrink; preferred base 220px */
+  min-width: 120px;             /* don't shrink beyond usable value */
+  max-width: 100%;
+  height: 40px;
+  padding-left: 16px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+/* Product + Add Supplier pill: input flexible, button fixed */
+.product-combined {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 40px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  height: 40px;
+  background: #fff;
+}
+
+.product-combined input {
+  flex: 1 1 180px;    /* preferred 180, shrink to min-width */
+  min-width: 140px;
+  padding: 0 14px;
+  border: 0;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.product-combined button,
+.single-row .btn {
+  flex: 0 0 auto;     /* keep intrinsic size; don't let buttons shrink */
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 20px;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+/* Extra safety at extreme zoom/small screens: allow wrap to preserve usability */
+@media (max-width: 480px) {
+  .single-row { flex-wrap: wrap; overflow-x: hidden; padding: 10px; }
+  .single-row .col-inline { flex: 1 1 100%; min-width: 100%; }
+  .product-combined { width: 100%; }
+}
+input::placeholder {
+  color: #fff !important;
+  opacity: 1; /* for Firefox */
+}
+</style>
+  <script type="text/javascript"><!--
+$('#button-filter').on('click', function() {
+	var url = 'index.php?route=extension/me_posupplier_product&user_token={{ user_token }}';
+
+	var filter_name = $('input[name=\'filter_name\']').val();
+
+	if (filter_name) {
+		url += '&filter_name=' + encodeURIComponent(filter_name);
+	}
+
+	var filter_model = $('input[name=\'filter_model\']').val();
+
+	if (filter_model) {
+		url += '&filter_model=' + encodeURIComponent(filter_model);
+	}
+	
+	var filter_supplier = $('input[name=\'filter_supplier\']').val();
+
+	if (filter_supplier) {
+		url += '&filter_supplier=' + encodeURIComponent(filter_supplier);
+	}
+
+	location = url;
+});
+
+$('#button-export').on('click', function() {
+	var url = 'index.php?route=extension/me_posupplier_product.export&user_token={{ user_token }}';
+
+	var filter_name = $('input[name=\'filter_name\']').val();
+
+	if (filter_name) {
+		url += '&filter_name=' + encodeURIComponent(filter_name);
+	}
+
+	var filter_model = $('input[name=\'filter_model\']').val();
+
+	if (filter_model) {
+		url += '&filter_model=' + encodeURIComponent(filter_model);
+	}
+	
+	var filter_supplier = $('input[name=\'filter_supplier\']').val();
+
+	if (filter_supplier) {
+		url += '&filter_supplier=' + encodeURIComponent(filter_supplier);
+	}
+
+		var $selected = $("input[name='selected[]']:checked");
+	
+	if ($selected.length) {
+		url += '&'+$selected.serialize();
+	}
+
+	location = url;
+});
+//--></script>
+  <script type="text/javascript"><!--
+$('input[name=\'filter_name\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/product.autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['name'],
+						value: item['product_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_name\']').val(item['label']);
+	}
+});
+
+$('input[name=\'filter_product\']').autocomplete({
+    'source': function(request, response) {
+        $.ajax({
+            url: 'index.php?route=catalog/product.autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+            dataType: 'json',
+            success: function(json) {
+                response($.map(json, function(item) {
+                    return {
+                        label: item['name'],
+                        value: item['product_id']
+                    }
+                }));
+            }
+        });
+    },
+    'select': function(item) {
+        $('input[name=\'filter_product\']').val(item['label']);
+ 		$('input[name=\'filter_product_id\']').val(item['value']);
+    }
+});
+
+$('.addsupplier').on('click',function(){
+	var product = $('input[name=\'filter_product\']').val();
+	var product_id = $('input[name=\'filter_product_id\']').val();
+	alert(product_id);
+	$('.text-danger').remove();
+	if(product != '' && product_id != ''){
+		var url = 'index.php?route=extension/me_posupplier_product.edit&user_token={{ user_token }}&product_id='+product_id;
+		location = url;
+	}else{
+		$('input[name=\'filter_product\']').parent().after('<div class="text-danger">Choose Product</div>');
+	}
+});
+$('input[name=\'filter_model\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/product.autocomplete&user_token={{ user_token }}&filter_model=' +  encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['model'],
+						value: item['product_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_model\']').val(item['label']);
+	}
+});
+
+//vendor
+$('input[name=\'filter_supplier\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=extension/me_posupplier.autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['name'],
+						value: item['supplier_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_supplier\']').val(item['label']);
+		$('input[name=\'supplier_id\']').val(item['value']);
+	}
+});
+ document.getElementById('clear-btn').addEventListener('click', function() {
+    document.getElementById('input-name').value = '';
+    document.getElementById('input-model').value = '';
+    document.getElementById('input-supplier').value = '';
+ });
+    
+//--></script></div>
+{{ footer }}

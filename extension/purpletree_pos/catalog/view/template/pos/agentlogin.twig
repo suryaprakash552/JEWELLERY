@@ -1,0 +1,54 @@
+{{ header }}
+<div id="content">
+  <div class="container-fluid">
+  <br>
+    <br>
+    <div class="row">
+				<div class="col-sm-offset-4 col-sm-4">
+				  {% if success %}
+	<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}</div>
+	{% endif %}
+	{% if error_warning %}
+	<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}</div>
+	{% endif %} 
+					<div class="pts-well pos-login-form">
+						<h2 class="text-center">{{ text_agent_login }}</h2>
+						<form action="{{ action }}" method="post" id="regForm" enctype="multipart/form-data">
+							<div class="pts-form-group">
+								<label class="pts-control-label col-form-label" for="agent-email">{{ entry_email }}</label>
+								<input type="text" name="email" value="{{ email }}" placeholder="{{ entry_email }}" id="agent-email" class="pts-form-control" />
+							</div>
+							<div class="pts-form-group ">
+								<label class="pts-control-label col-form-label" for="agent-password">{{ entry_password }}</label>
+								<input type="password" name="password" value="{{ password }}" placeholder="{{ entry_password }}" id="agent-password" class="pts-form-control" />
+							</div>
+							<a href="{{ forgotten }}">{{ text_forgotten }}</a>
+							<div class="pts-row">
+								<div class="pts-col-sm-5 pts-pull-left-1  pts-mt-3">
+									<input id="agent-login-button" type="submit" value="{{ button_login }}" class="pts-btn pts-btn-primary" />
+								</div>
+								<div class="pts-pr-3 text-center pts-pull-right-1 pts-mt-3">
+									<!--<p class="new-agent-register-here"><span class="login-agent" ><i class="fa fa-user-o fa-users"></i> {{ text_new_agent }}  </span><a href="{{ agentregister }}" class="ptsc-sregister-sellog" id="pts-reg-agent"> {{ text_register_new }} </a></p>-->
+									</div>
+								</div>
+								{% if redirect %}
+								<input type="hidden" name="redirect" value="{{ redirect }}" />
+								{% endif %}
+							</form>
+						</div>
+					</div>
+				</div>
+		</div>
+</div>
+<link href="{{ baseurl }}extension/purpletree_pos/catalog/view/javascript/purpletree/css/stylesheet/commonstylesheet.css" type="text/css" rel="stylesheet" />
+<style>
+#button-menu {
+	display: none;
+}
+.pos-login-form {
+    margin-top: 20px;
+    background: #ffffff;
+    border: 1px solid #e3e3e3;
+}
+</style>
+{{ footer }}      

@@ -1,0 +1,204 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        <button type="button" data-bs-toggle="tooltip" title="{{ button_filter }}" onclick="$('#filter-user').toggleClass('d-none');" class="btn btn-light d-lg-none">
+          <i class="fa-solid fa-filter"></i>
+        </button>
+        <a href="{{ add }}" data-bs-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary">
+          <i class="fa-solid fa-plus"></i>
+        </a>
+        <button type="submit" form="form-user" formaction="{{ delete }}" data-bs-toggle="tooltip" title="{{ button_delete }}" onclick="return confirm('{{ text_confirm }}');" class="btn btn-danger">
+          <i class="fa-regular fa-trash-can"></i>
+        </button>
+      </div> 
+      <h1>{{ heading_title }}</h1>
+      <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+
+    <!-- FILTER SECTION FIRST (TOP) -->
+           <div class="row mb-3">
+            <div id="filter-user" class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <form id="form-filter">
+                            <div class="row">
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label">{{ entry_username }}</label>
+                                    <input type="text" name="filter_username" value="{{ filter_username }}" placeholder="{{ entry_username }}" id="input-username" data-oc-target="autocomplete-username" class="form-control" autocomplete="off"/>
+                                    <ul id="autocomplete-username" class="dropdown-menu"></ul>
+                                </div>
+        
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label">{{ entry_name }}</label>
+                                    <input type="text" name="filter_name" value="{{ filter_name }}" placeholder="{{ entry_name }}" id="input-name" data-oc-target="autocomplete-name" class="form-control" autocomplete="off"/>
+                                    <ul id="autocomplete-name" class="dropdown-menu"></ul>
+                                </div>
+        
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label">{{ entry_email }}</label>
+                                    <input type="text" name="filter_email" value="{{ filter_email }}" placeholder="{{ entry_email }}" id="input-email" data-oc-target="autocomplete-email" class="form-control" autocomplete="off"/>
+                                    <ul id="autocomplete-email" class="dropdown-menu"></ul>
+                                </div>
+        
+                                <div class="col-md-2 mb-3">
+                                    <label for="input-user-group" class="form-label">{{ entry_user_group }}</label>
+                                    <select name="filter_user_group_id" id="input-user-group" class="form-select"style="width:100%;">
+                                        <option value=""></option>
+                                        {% for user_group in user_groups %}
+                                        <option value="{{ user_group.user_group_id }}"{% if user_group.user_group_id == filter_user_group_id %} selected{% endif %}>
+                                            {{ user_group.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+        
+                                <div class="col-md-2 mb-3">
+                                    <label for="input-status" class="form-label">{{ entry_status }}</label>
+                                    <select name="filter_status" id="input-status" class="form-select"style="width:100%;">
+                                        <option value=""></option>
+                                        <option value="1"{% if filter_status == '1' %} selected{% endif %}>{{ text_enabled }}</option>
+                                        <option value="0"{% if filter_status == '0' %} selected{% endif %}>{{ text_disabled }}</option>
+                                    </select>
+                                </div>
+        
+                                <div class="col-md-2 mb-3">
+                                    <label for="input-ip" class="form-label">{{ entry_ip }}</label>
+                                    <input type="text" name="filter_ip" value="{{ filter_ip }}" placeholder="{{ entry_ip }}" id="input-ip" class="form-control"/>
+                                </div>
+        
+                                <div class="col-md-2 mb-3 d-flex align-items-end gap-2">
+                                    <button type="button" id="button-filter" class="btn btn-primary flex-grow-1">
+                                        <i class="fa-solid fa-filter"></i> {{ button_filter }}
+                                    </button>
+        
+                                    <button type="reset" data-bs-toggle="tooltip" title="{{ button_reset }}" class="btn btn-outline-secondary">
+                                        <i class="fa-solid fa-filter-circle-xmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+  </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fa-solid fa-list"></i> {{ text_list }}
+                    </div>
+                    <div id="user" class="card-body">{{ list }}</div>
+                </div>
+            </div>
+        </div>
+
+<script type="text/javascript"><!--
+$(document).ready(function() {
+    // Helper to load user list
+    function loadUserList(url) {
+        $('#user').load(url);
+    }
+
+    // Handle pagination and sorting inside user list
+    $('#user').on('click', 'thead a, .pagination a', function(e) {
+        e.preventDefault();
+        loadUserList(this.href);
+    });
+
+    // Filter button click
+    $('#button-filter').on('click', function(e) {
+        e.preventDefault();
+
+        var params = [];
+
+        var filter_username = $('#input-username').val();
+        if (filter_username) params.push('filter_username=' + encodeURIComponent(filter_username));
+
+        var filter_name = $('#input-name').val();
+        if (filter_name) params.push('filter_name=' + encodeURIComponent(filter_name));
+
+        var filter_email = $('#input-email').val();
+        if (filter_email) params.push('filter_email=' + encodeURIComponent(filter_email));
+
+        var filter_user_group_id = $('#input-user-group').val();
+        if (filter_user_group_id !== '') params.push('filter_user_group_id=' + encodeURIComponent(filter_user_group_id));
+
+        var filter_status = $('#input-status').val();
+        if (filter_status !== '') params.push('filter_status=' + encodeURIComponent(filter_status));
+
+        var filter_ip = $('#input-ip').val();
+        if (filter_ip) params.push('filter_ip=' + encodeURIComponent(filter_ip));
+
+        var query = params.length ? '&' + params.join('&') : '';
+
+        // Update the browser URL
+        window.history.pushState({}, null, 'index.php?route=user/user&user_token={{ user_token }}' + query);
+
+        // Load filtered list
+        loadUserList('index.php?route=user/user.list&user_token={{ user_token }}' + query);
+    });
+
+    // Autocomplete setup
+    $('#input-username').autocomplete({
+        'source': function(request, response) {
+            $.ajax({
+                url: 'index.php?route=user/user.autocomplete&user_token={{ user_token }}&filter_username=' + encodeURIComponent(request),
+                dataType: 'json',
+                success: function(json) {
+                    response($.map(json, function(item) {
+                        return { label: item['username'], value: item['user_id'] };
+                    }));
+                }
+            });
+        },
+        'select': function(item) {
+            $('#input-username').val(decodeHTMLEntities(item['label']));
+        }
+    });
+
+    $('#input-name').autocomplete({
+        'source': function(request, response) {
+            $.ajax({
+                url: 'index.php?route=user/user.autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+                dataType: 'json',
+                success: function(json) {
+                    response($.map(json, function(item) {
+                        return { label: item['name'], value: item['user_id'] };
+                    }));
+                }
+            });
+        },
+        'select': function(item) {
+            $('#input-name').val(decodeHTMLEntities(item['label']));
+        }
+    });
+
+    $('#input-email').autocomplete({
+        'source': function(request, response) {
+            $.ajax({
+                url: 'index.php?route=user/user.autocomplete&user_token={{ user_token }}&filter_email=' + encodeURIComponent(request),
+                dataType: 'json',
+                success: function(json) {
+                    response($.map(json, function(item) {
+                        return { label: item['email'], value: item['user_id'] };
+                    }));
+                }
+            });
+        },
+        'select': function(item) {
+            $('#input-email').val(decodeHTMLEntities(item['label']));
+        }
+    });
+});
+//--></script>
+{{ footer }}

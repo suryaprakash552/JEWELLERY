@@ -1,0 +1,271 @@
+{{ header }}{{ column_left }}
+<div id="content" style="background: #0f172a; min-height: 100vh;">
+  <div class="page-header" style="background: #1e293b; border-bottom: 1px solid #334155; padding: 20px 30px;">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h1 style="color: #fff; margin: 0; font-size: 24px; font-weight: 600;">
+          <i class="fa fa-arrow-right"></i> {{ text_form }}
+        </h1>
+        <ol class="breadcrumb" style="background: transparent; padding: 5px 0; margin: 5px 0;">
+          {% for breadcrumb in breadcrumbs %}
+            <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}" style="color: #3b82f6;">{{ breadcrumb.text }}</a></li>
+          {% endfor %}
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid" style="padding: 20px 30px;">
+    {% if error_warning %}
+      <div class="alert alert-danger alert-dismissible" style="background: #ef4444; color: #fff; border: none; border-radius: 6px; margin-bottom: 20px;">
+        <i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endif %}
+
+    <form action="{{ save }}" method="post" id="form-stock-usage">
+      {# Stock Information - Single Row #}
+      <div class="card" style="background: #1e293b; border: 1px solid #334155; border-radius: 8px; margin-bottom: 20px;">
+        <div class="card-header" style="background: #0f172a; border-bottom: 1px solid #334155; padding: 15px 20px;">
+          <h3 style="color: #fff; margin: 0; font-size: 18px;"><i class="fa fa-info-circle"></i> Stock Information</h3>
+        </div>
+        <div class="card-body" style="padding: 20px;">
+          <div class="row g-3">
+            <div class="col-md-2">
+              <label style="color: #94a3b8; font-size: 12px; margin-bottom: 5px; display: block;">PO Number</label>
+              <div style="color: #3b82f6; font-size: 16px; font-weight: 600;">{{ po_number }}</div>
+            </div>
+            {#<div class="col-md-2">#}
+            {#  <label style="color: #94a3b8; font-size: 12px; margin-bottom: 5px; display: block;">Current Store</label>#}
+            {#  <div style="color: #10b981; font-size: 14px; font-weight: 600;">{{ current_store }}</div>#}
+            {#</div>#}
+            <div class="col-md-3">
+              <label style="color: #94a3b8; font-size: 12px; margin-bottom: 5px; display: block;">Product</label>
+              <div style="color: #fff; font-size: 14px; font-weight: 600;">{{ product_name }}</div>
+            </div>
+            <div class="col-md-2">
+              <label style="color: #94a3b8; font-size: 12px; margin-bottom: 5px; display: block;">Supplier</label>
+              <div style="color: #fff; font-size: 14px;">{{ supplier_name }}</div>
+            </div>
+            <div class="col-md-3">
+              <label style="color: #94a3b8; font-size: 12px; margin-bottom: 5px; display: block;">Created Time</label>
+              <div style="color: #fff; font-size: 14px;"><i class="fa fa-clock-o"></i> {{ createdtime }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# Current Stock Status - Single Row #}
+      <div class="card" style="background: #1e293b; border: 1px solid #334155; border-radius: 8px; margin-bottom: 20px;">
+        <div class="card-header" style="background: #0f172a; border-bottom: 1px solid #334155; padding: 15px 20px;">
+          <h3 style="color: #fff; margin: 0; font-size: 18px;"><i class="fa fa-cubes"></i> Current Stock Status</h3>
+        </div>
+        <div class="card-body" style="padding: 20px;">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 20px; border-radius: 8px; text-align: center;">
+                <div style="color: rgba(255,255,255,0.9); font-size: 12px; margin-bottom: 5px;">Received Qty</div>
+                <div style="color: #fff; font-size: 28px; font-weight: 700;">{{ received_qty }}</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div style="background: linear-gradient(135deg, #3b82f6, #2563eb); padding: 20px; border-radius: 8px; text-align: center;">
+                <div style="color: rgba(255,255,255,0.9); font-size: 12px; margin-bottom: 5px;">Unit Price</div>
+                <div style="color: #fff; font-size: 28px; font-weight: 700;">₹{{ unit_price }}</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div style="background: linear-gradient(135deg, #ef4444, #dc2626); padding: 20px; border-radius: 8px; text-align: center;">
+                <div style="color: rgba(255,255,255,0.9); font-size: 12px; margin-bottom: 5px;">Total Used</div>
+                <div style="color: #fff; font-size: 28px; font-weight: 700;">{{ total_used }}</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 20px; border-radius: 8px; text-align: center;">
+                <div style="color: rgba(255,255,255,0.9); font-size: 12px; margin-bottom: 5px;">Available</div>
+                <div style="color: #fff; font-size: 28px; font-weight: 700;" id="current-balance">{{ balance_qty }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# Send Stock - Single Row #}
+      <div class="card" style="background: #1e293b; border: 1px solid #334155; border-radius: 8px; margin-bottom: 20px;">
+        <div class="card-header" style="background: #0f172a; border-bottom: 1px solid #334155; padding: 15px 20px;">
+          <h3 style="color: #fff; margin: 0; font-size: 18px;"><i class="fa fa-arrow-right"></i> Send Stock</h3>
+        </div>
+        <div class="card-body" style="padding: 20px;">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+              <label style="color: #94a3b8; font-size: 13px; margin-bottom: 8px; display: block;">
+                Quantity to Send <span style="color: #ef4444;">*</span>
+              </label>
+              <input type="number" name="used_qty" id="input-used-qty" value="{{ used_qty }}" step="0.01" min="0.01" max="{{ balance_qty }}" class="form-control" style="background: #0f172a; border: 1px solid {% if error_used_qty %}#ef4444{% else %}#334155{% endif %}; color: #fff; padding: 12px 15px; font-size: 16px; border-radius: 6px; font-weight: 600;" placeholder="Enter quantity">
+              {% if error_used_qty %}
+                <small style="color: #ef4444; display: block; margin-top: 5px; font-size: 11px;">
+                  <i class="fa fa-exclamation-circle"></i> {{ error_used_qty }}
+                </small>
+              {% endif %}
+            </div>
+
+            <div class="col-md-3">
+              <label style="color: #94a3b8; font-size: 13px; margin-bottom: 8px; display: block;">
+                Destination Store <span style="color: #ef4444;">*</span>
+              </label>
+              <select name="destination_store" id="destination-store" class="form-control" style="background: #0f172a; border: 1px solid {% if error_destination_store %}#ef4444{% else %}#334155{% endif %}; color: #fff; padding: 12px 15px; font-size: 14px; border-radius: 6px;">
+                <option value="">-- Select Store --</option>
+                {% for store in stores %}
+                  <option value="{{ store.store_id }}" {% if destination_store == store.store_id %}selected{% endif %}>{{ store.name }}</option>
+                {% endfor %}
+              </select>
+              {% if error_destination_store %}
+                <small style="color: #ef4444; display: block; margin-top: 5px; font-size: 11px;">
+                  <i class="fa fa-exclamation-circle"></i> {{ error_destination_store }}
+                </small>
+              {% endif %}
+            </div>
+
+            <div class="col-md-2">
+              <label style="color: #94a3b8; font-size: 13px; margin-bottom: 8px; display: block;">Will Be Sent</label>
+              <div style="background: rgba(239, 68, 68, 0.1); border: 2px solid #ef4444; padding: 12px; border-radius: 6px; text-align: center;">
+                <div style="color: #ef4444; font-size: 24px; font-weight: 700;" id="qty-to-send">0.00</div>
+              </div>
+            </div>
+
+            <div class="col-md-2">
+              <label style="color: #94a3b8; font-size: 13px; margin-bottom: 8px; display: block;">Will Remain</label>
+              <div style="background: rgba(16, 185, 129, 0.1); border: 2px solid #10b981; padding: 12px; border-radius: 6px; text-align: center;">
+                <div style="color: #10b981; font-size: 24px; font-weight: 700;" id="new-balance">{{ balance_qty }}</div>
+              </div>
+            </div>
+
+            <div class="col-md-2">
+              <button type="submit" class="btn w-100" style="background: #10b981; border: none; padding: 14px; border-radius: 6px; font-size: 14px; font-weight: 600; color: #fff;">
+                <i class="fa fa-check"></i> Confirm & Send
+              </button>
+            </div>
+          </div>
+          
+          <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; padding: 12px 15px; border-radius: 6px; margin-top: 15px;">
+            <div style="color: #3b82f6; font-size: 12px;">
+              <i class="fa fa-info-circle"></i> <strong>Note:</strong> This transaction will be recorded in the stock history with the destination store name.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# Back Button #}
+      <div style="text-align: center;">
+        <a href="{{ back }}" class="btn" style="background: #6b7280; border: none; padding: 12px 30px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none; color: #fff;">
+          <i class="fa fa-arrow-left"></i> Back to List
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  transition: all 0.2s;
+}
+
+.form-control:focus, select:focus {
+  outline: none;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+select {
+  cursor: pointer;
+}
+
+select option {
+  background: #1e293b;
+  color: #fff;
+}
+</style>
+
+<script type="text/javascript">
+$(document).ready(function() {
+  var availableBalance = parseFloat('{{ balance_qty }}'.replace(/,/g, ''));
+  
+  $('#input-used-qty').on('input', function() {
+    var usedQty = parseFloat($(this).val()) || 0;
+    var newBalance = Math.max(0, availableBalance - usedQty);
+    
+    $('#qty-to-send').text(usedQty.toFixed(2));
+    $('#new-balance').text(newBalance.toFixed(2));
+    
+    if (usedQty > availableBalance) {
+      $(this).css('border-color', '#ef4444');
+      $('#new-balance').css('color', '#ef4444');
+    } else if (usedQty <= 0) {
+      $(this).css('border-color', '#f59e0b');
+    } else {
+      $(this).css('border-color', '#10b981');
+      $('#new-balance').css('color', '#10b981');
+    }
+  });
+  
+  $('#form-stock-usage').on('submit', function(e) {
+    var usedQty = parseFloat($('#input-used-qty').val()) || 0;
+    var destinationStore = $('#destination-store').val();
+    
+    if (!destinationStore) {
+      e.preventDefault();
+      alert('Please select a destination store!');
+      $('#destination-store').focus();
+      return false;
+    }
+    
+    if (usedQty <= 0) {
+      e.preventDefault();
+      alert('Quantity to send must be greater than 0!');
+      $('#input-used-qty').focus();
+      return false;
+    }
+    
+    if (usedQty > availableBalance) {
+      e.preventDefault();
+      alert('Quantity to send cannot exceed available balance (' + availableBalance.toFixed(2) + ')!');
+      $('#input-used-qty').focus();
+      return false;
+    }
+    
+    var storeName = $('#destination-store option:selected').text();
+    var confirmMsg = 'Are you sure you want to send ' + usedQty.toFixed(2) + ' units to ' + storeName + '?';
+    
+    if (!confirm(confirmMsg)) {
+      e.preventDefault();
+      return false;
+    }
+  });
+});
+</script>
+
+{{ footer }}

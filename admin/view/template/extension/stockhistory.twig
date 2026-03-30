@@ -1,0 +1,250 @@
+{{ header }}{{ column_left }}
+<div id="content" style="background: #1a1a1a; min-height: 100vh;">
+  <div class="page-header" style="background: #1e293b; border-bottom: 1px solid #334155; padding: 20px 30px;">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h1 style="color: #fff; margin: 0; font-size: 24px; font-weight: 600;">
+          <i class="fa fa-history"></i> Stock Transaction History
+        </h1>
+        <ol class="breadcrumb" style="background: transparent; padding: 5px 0; margin: 5px 0;">
+          {% for breadcrumb in breadcrumbs %}
+            <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}" style="color: #3b82f6;">{{ breadcrumb.text }}</a></li>
+          {% endfor %}
+        </ol>
+      </div>
+      <div>
+        <button onclick="exportToExcel()" class="btn" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+          <i class="fa fa-file-excel"></i> Export to Excel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid" style="padding: 20px 30px;">
+    {% if batches %}
+      {% for batch in batches %}
+        {# Batch Header Card #}
+        <div class="batch-card" style="background: #1e293b; border: 1px solid #334155; border-radius: 8px; margin-bottom: 20px; overflow: hidden;">
+          {# Batch Summary Header #}
+          <div class="batch-header" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 20px; color: white;">
+            <div class="row align-items-center">
+              <div class="col-md-8">
+                <h3 style="margin: 0 0 10px 0; font-size: 20px; font-weight: 600;">
+                  <i class="fa fa-cube"></i> Batch #{{ batch.batchid }} - {{ batch.po_number }}
+                </h3>
+                <div style="font-size: 14px; opacity: 0.9;">
+                  <strong>Product:</strong> {{ batch.product_name }} | 
+                  <strong>Supplier:</strong> {{ batch.supplier_name }} | 
+                  <strong>Store:</strong> {{ batch.store_name }}
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="row text-center">
+                  <div class="col-4">
+                    <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 6px;">
+                      <small style="display: block; margin-bottom: 3px; font-size: 11px;">Received</small>
+                      <strong style="font-size: 18px;">{{ batch.total_received }}</strong>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 6px;">
+                      <small style="display: block; margin-bottom: 3px; font-size: 11px;">Used</small>
+                      <strong style="font-size: 18px;">{{ batch.total_used }}</strong>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 6px;">
+                      <small style="display: block; margin-bottom: 3px; font-size: 11px;">Balance</small>
+                      <strong style="font-size: 18px;">{{ batch.total_balance }}</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {# Transaction History Table #}
+          <div class="table-responsive">
+            <table class="table m-0 stock-table" style="color: #fff;">
+              <thead style="background: #0f172a;">
+                <tr>
+                  <th style="padding: 12px; border-bottom: 2px solid #334155;">Transaction ID</th>
+                  <th style="padding: 12px; border-bottom: 2px solid #334155; text-align: right;">Received</th>
+                  <th style="padding: 12px; border-bottom: 2px solid #334155; text-align: right;">Used</th>
+                  <th style="padding: 12px; border-bottom: 2px solid #334155; text-align: right;">Remaining Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if batch.transactions %}
+                  {% for txn in batch.transactions %}
+                    <tr style="background: {% if txn.action_type == 'RECEIVED' or txn.action_type == 'SYNCED' %}#1e3a28{% else %}#1e2a3a{% endif %}; border-bottom: 1px solid #334155;">
+                      <td style="padding: 12px;">
+                        <code style="background: #0f172a; padding: 4px 8px; border-radius: 4px; color: #94a3b8; font-size: 11px;">{{ txn.txt_id }}</code>
+                      </td>
+                      <td style="padding: 12px; text-align: right;" data-value="{{ txn.amount_value if txn.action_type == 'RECEIVED' or txn.action_type == 'SYNCED' else '0' }}">
+                        {% if txn.action_type == 'RECEIVED' or txn.action_type == 'SYNCED' %}
+                          <span style="color: #10b981; font-weight: 600;">+{{ txn.amount_value }}</span>
+                        {% else %}
+                          <span style="color: #64748b;">-</span>
+                        {% endif %}
+                      </td>
+                      <td style="padding: 12px; text-align: right;" data-value="{{ txn.amount_value if txn.action_type != 'RECEIVED' and txn.action_type != 'SYNCED' else '0' }}">
+                        {% if txn.action_type == 'RECEIVED' or txn.action_type == 'SYNCED' %}
+                          <span style="color: #64748b;">-</span>
+                        {% else %}
+                          <span style="color: #ef4444; font-weight: 600;">{{ txn.amount_value }}</span>
+                        {% endif %}
+                      </td>
+                      <td style="padding: 12px; text-align: right;" data-value="{{ txn.balance }}">
+                        <span style="color: #3b82f6; font-weight: 700; font-size: 15px;">{{ txn.balance }}</span>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="4" style="padding: 30px; text-align: center; color: #64748b;">
+                      <i class="fa fa-inbox fa-2x" style="margin-bottom: 10px;"></i>
+                      <p>No transaction history found for this batch</p>
+                    </td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="text-center" style="padding: 60px; background: #1e293b; border-radius: 8px;">
+        <i class="fa fa-inbox fa-4x" style="color: #475569; margin-bottom: 20px;"></i>
+        <h3 style="color: #94a3b8;">No Stock History Found</h3>
+        <p style="color: #64748b;">There are no stock transactions to display</p>
+        <a href="{{ back }}" class="btn btn-primary" style="background: #3b82f6; border: none; padding: 12px 24px; border-radius: 6px; margin-top: 20px;">
+          <i class="fa fa-arrow-left"></i> Back to Stock Register
+        </a>
+      </div>
+    {% endif %}
+
+    {% if batches %}
+      <div class="text-center" style="margin-top: 30px;">
+        <a href="{{ back }}" class="btn btn-secondary" style="background: #6b7280; border: none; padding: 12px 24px; border-radius: 6px; color: #fff; text-decoration: none;">
+          <i class="fa fa-arrow-left"></i> Back to Stock Register
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+.batch-card {
+  transition: transform 0.2s;
+}
+
+.batch-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+}
+
+.table tbody tr:hover {
+  background: #334155 !important;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+function exportToExcel() {
+  // Create a new workbook
+  const wb = XLSX.utils.book_new();
+  
+  // Get all batch cards
+  const batchCards = document.querySelectorAll('.batch-card');
+  
+  batchCards.forEach((batchCard, index) => {
+    // Get batch info
+    const batchHeader = batchCard.querySelector('.batch-header h3').textContent.trim();
+    const batchInfo = batchCard.querySelector('.batch-header .row .col-md-8 div').textContent.trim();
+    
+    // Get summary data
+    const summaryDivs = batchCard.querySelectorAll('.batch-header .col-md-4 .col-4');
+    const totalReceived = summaryDivs[0].querySelector('strong').textContent.trim();
+    const totalUsed = summaryDivs[1].querySelector('strong').textContent.trim();
+    const totalBalance = summaryDivs[2].querySelector('strong').textContent.trim();
+    
+    // Create data array
+    const data = [];
+    
+    // Add batch header
+    data.push([batchHeader]);
+    data.push([batchInfo]);
+    data.push([]);
+    data.push(['Summary']);
+    data.push(['Total Received', totalReceived]);
+    data.push(['Total Used', totalUsed]);
+    data.push(['Current Balance', totalBalance]);
+    data.push([]);
+    
+    // Add table headers
+    data.push(['Transaction ID', 'Received', 'Used', 'Remaining Balance']);
+    
+    // Get table rows
+    const rows = batchCard.querySelectorAll('.stock-table tbody tr');
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length === 4) {
+        const txnId = cells[0].textContent.trim();
+        const received = cells[1].getAttribute('data-value') || '0';
+        const used = cells[2].getAttribute('data-value') || '0';
+        const balance = cells[3].getAttribute('data-value') || '0';
+        
+        data.push([
+          txnId,
+          received === '0' ? '-' : received,
+          used === '0' ? '-' : used,
+          balance
+        ]);
+      }
+    });
+    
+    // Create worksheet
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 20 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 20 }
+    ];
+    
+    // Add worksheet to workbook
+    const sheetName = `Batch ${index + 1}`;
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  });
+  
+  // Generate filename with current date
+  const date = new Date();
+  const filename = `Stock_Transaction_History_${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getDate().toString().padStart(2,'0')}.xlsx`;
+  
+  // Save file
+  XLSX.writeFile(wb, filename);
+}
+</script>
+
+{{ footer }}

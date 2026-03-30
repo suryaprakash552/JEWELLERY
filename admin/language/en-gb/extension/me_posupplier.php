@@ -1,0 +1,116 @@
+<?php
+// Heading
+$_['heading_title']     = 'PO Supplier';
+
+// Text
+$_['text_success']      = 'Success: You have modified Purchase Order Supplier!';
+$_['text_list']         = 'Purchase Order Supplier List';
+$_['text_add']          = 'Add Purchase Order Supplier';
+$_['text_edit']         = 'Edit Purchase Order Supplier';
+$_['text_default']      = 'Default';
+$_['text_percent']      = 'Percentage';
+$_['text_amount']       = 'Fixed Amount';
+$_['text_assign']       = 'Assign';
+$_['text_clear']       = 'Clear';
+$_['text_filter']       = 'Filter';
+$_['text_keyword']      = 'Do not use spaces, instead replace spaces with - and make sure the SEO URL is globally unique.';
+
+// Column
+$_['column_name']       = 'Supplier Name';
+$_['column_email'] 		= 'Email';
+$_['column_telephone'] 	= 'Telephone';
+$_['column_product'] 	= 'Product';
+$_['column_sku'] 	= 'SKU';
+$_['column_mpn']	= 'MPN';
+$_['column_ean']	= 'EAN';
+$_['column_cost_price']	= 'Cost Price';
+$_['column_manufacturer']	= 'Manufacturer';
+$_['column_supplier']	= 'Supplier';
+$_['column_action']     = 'Action';
+$_['column_box_size']     = 'Box Size';
+$_['column_order_id']       = 'Order ID';
+$_['column_po_number']       = 'PO No.';
+$_['column_name']       = 'Supplier Name';
+$_['column_supplier']     = 'Supplier';
+$_['column_status'] = 'Status';
+$_['column_action']     = 'Action';
+$_['column_description']             = 'Name';
+$_['column_model']               = 'Model No.';
+$_['column_quantity']            = 'Order Qty';
+$_['column_price']               = 'Unit Price';
+$_['column_total']               = 'Total';
+$_['column_image']               = 'Image';
+$_['column_mpn']               = 'MPN';
+$_['column_date_added']               = 'PO Date';
+$_['column_pl_no']               = 'Pl No.';
+$_['column_date_modified']               = 'Date Modified';
+$_['column_serial_no']               = 'S No.';
+$_['column_sku']               = 'SKU';
+$_['column_size']               = 'Size';
+$_['column_color']               = 'Option';
+$_['column_ali_link']               = 'Ali Link';
+$_['column_stock']               = 'Stock';
+$_['column_exp_sales']               = 'Exp Sales';
+$_['column_comment']               = 'Comments';
+$_['column_sub_total']               = 'Sub Total';
+$_['column_shipping']               = 'Shipping';
+$_['column_balance']               = 'Balance';
+$_['column_delivery_date']               = 'Arrival Date';
+$_['column_supplier_company']               = 'Forwarder';
+$_['column_weight']               = 'Weight';
+$_['column_dimension']               = 'Dimension';
+$_['column_company']               = 'Company';
+
+// Entry
+$_['entry_supplier']      = 'Supplier Name';
+$_['entry_manufacturer']= 'Manufacturer';
+$_['entry_email']    	= 'E-Mail';
+$_['entry_telephone']	= 'Tel.';
+$_['entry_address']	= 'Address';
+$_['entry_address_2']	= 'Address 2';
+$_['entry_city']	= 'City';
+$_['entry_country']	= 'Country';
+$_['entry_zone']	= 'Zone';
+$_['entry_postcode']	= 'Postcode';
+$_['entry_reference']	= 'Supplier Reference';
+$_['entry_min_order_value']	= 'Min order value';
+$_['entry_loadtime']	= 'Load time';
+$_['entry_tax_class']	= 'Tax class';
+$_['entry_delivery_charge']	= 'Delivery Charge';
+$_['entry_name']	= 'Product Name';
+$_['entry_sku']	= 'SKU';
+$_['entry_mpn']	= 'MPN';
+$_['entry_company']	= 'Company';
+$_['entry_id']	= 'ID';
+$_['entry_brand']	= 'Brand';
+$_['entry_company_address']	= 'Company Address';
+$_['entry_ext']	= 'Ext.';
+$_['entry_official_url']	= 'Official URL';
+$_['entry_ali_url']	= 'ALi URL';
+$_['entry_warehouse_address']	= 'Warehouse Address';
+$_['entry_department']	= 'Department';
+$_['entry_wechatid']	= 'WeChat ID';
+$_['entry_skype']	= 'Skype';
+$_['entry_contact']	= 'Contact';
+$_['entry_mobile']	= 'Mobile';
+$_['entry_other_infomation']	= 'Other Information';
+$_['entry_product']	= 'Product';
+$_['entry_supplier_id']	= 'Supplier ID';
+$_['entry_telephone_ext']	= 'Telephone Extn.';
+$_['entry_date_added']	= 'Date Added';
+$_['entry_date_modified']	= 'Date Modified';
+$_['entry_status']	= 'Status';
+$_['entry_zip_code']	= 'Postcode';
+$_['entry_logo']	= 'Logo';
+$_['entry_supplier_name']	= 'Name';
+$_['entry_vat_number']	= 'Tax/VAT Number';
+
+// Error
+$_['error_warning']          = 'Warning: Please check the form carefully for errors!';
+$_['error_permission']  = 'Warning: You do not have permission to modify Purchase Order Supplier!';
+$_['error_supplier']      = 'Please Enter the Supplier Name!';
+$_['error_company']      = 'Please Enter the Supplier Company!';
+$_['error_email']     	= 'Please Enter the Email!';
+$_['error_city']         = 'City must be between 2 and 128 characters!';
+$_['error_address_1']    = 'Address must be between 3 and 128 characters!';
+$_['error_telephone']      = 'Telephone must be between 3 and 32 characters!';

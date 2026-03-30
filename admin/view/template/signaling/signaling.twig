@@ -1,0 +1,261 @@
+{{ header }}{{ column_left }}
+ <style>
+.my-filter-input {
+    display: none;
+}
+.my-filter{
+    display: block;    
+    padding: 10px;
+    margin: 0 0 1px 0;
+    cursor: pointer;
+    border: 1px solid #A7A7A7;
+    background: #6AAB95;
+    border-radius: 3px;
+    color: #FFF;
+    transition: ease .5s;
+
+}
+.my-filter:hover {
+    background: #4E8774;
+}
+
+.my-filter-content {
+    background: #313941;
+    padding: 50px 7px;
+    border: 1px solid #A7A7A7;
+    margin: 0 0 1px 0;
+    border-radius: 3px;
+    display: grid; 
+    
+   
+}
+
+.my-filter-input + .my-filter + .my-filter-content {
+    display: none;
+    padding-right: -2px;
+}
+
+.my-filter-input:checked + .my-filter + .my-filter-content {
+    display: block;
+}
+
+.myfilter-container
+{
+    padding-left: 250px;
+}
+</style>
+<div id="content"><br><br>
+    <div class="page-header">
+        <div class="container-fluid">
+      <div class="float-end">
+        <button type="button" data-bs-toggle="tooltip" title="{{button_submit}}" onclick= "$('#filter-signaling').toggleClass('d-none');" class="btn btn-lightd-lg-none"><i class="fa-solid fa-filter"></i></button>
+        <button type="button" data-bs-toggle="tooltip" title="{{ button_filter }}" onclick="$('#filter-signaling').toggleClass('d-none');" class="btn btn-light d-lg-none"><i class="fa-solid fa-filter"></i></button>
+        <a href="{{ add }}" data-bs-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa-solid fa-plus"></i></a>
+        <button type="submit" form="form-signaling" formaction="{{ delete }}" data-bs-toggle="tooltip" title="{{ button_delete }}" onclick="return confirm('{{ text_confirm }}');" class="btn btn-danger"><i class="fa-regular fa-trash-can"></i></button>
+      </div>
+    </div>
+        <div class="container-fluid myfilter-container">
+            <div class="pull-right">
+                <!--<button type="button" data-toggle="tooltip" title="{{ button_filter }}" onclick="$('#filter-product').toggleClass('hidden-sm hidden-xs');" class="btn btn-default hidden-md hidden-lg"><i class="fa fa-filter"></i></button> -->
+                <!--<button type="submit" form="form-product" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></button>-->
+                {# <button type="button" form="form-product" formaction="{{ delete }}" data-bs-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger"  onclick=" return confirm('{{ text_confirm }}') ? $('#form-product').submit() : false;" style="float:right"><i class="fa-regular fa-trash-can" ></i></button>
+                <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary" style="float:right" ><i class="fa fa-plus"></i></a>#}
+            </div>
+                <h1>{{ heading_title }}</h1>
+      <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+        </div>
+    </div>
+    <div class="container-fluid myfilter-container">
+       <div class="row">
+      
+      <div class="col-sm-13">
+        <div class="panel panel-default">
+        <div id="filter-signaling" class="col-sm-15 hidden-sm hidden-xs">
+        <div class="panel panel-default">
+          <input class="my-filter-input"type="checkbox" id="title2" />
+        <label class='my-filter panel-heading'for="title2" style="background-color:#313941;color:white;"><i class="fa fa-filter"></i> {{ text_filter }}<span style="float:right;"><i class="fa fas fa-chevron-down  fa-1x"  ></i></span>
+        </label>
+        <div class="my-filter-content panel-body" >
+     
+            
+         <div class="row mb-12" style="row-gap: 20px;">
+            <div class="col-sm-4" style="color:white">
+                <label for="input-update-date-from" class="form-label">{{ entry_update_date_from }}</label>
+                <input type="date" name="filter_update_date_from" value="{{ filter_update_date_from }}" placeholder="{{ entry_update_date_from }}" id="input-update-date-from" class="form-control"/>
+              </div>
+            <div class="col-sm-4" style="color:white">
+                <label for="input-update-date-to" class="form-label">{{ entry_update_date_to }}</label>
+                <input type="date" name="filter_update_date_to" value="{{ filter_update_date_to }}" placeholder="{{ entry_update_date_to }}" id="input-update-date-to" class="form-control"/>
+              </div>
+            
+            <div class="col-sm-4" style="color:white">
+                <label class="form-label">{{ entry_theme }}</label> <input type="text" name="filter_theme" value="{{ filter_theme }}" placeholder="{{ entry_theme }}" id="input-theme" data-oc-target="autocomplete-theme" class="form-control" autocomplete="off"/>
+                <ul id="autocomplete-theme" class="dropdown-menu"></ul>
+              </div>
+            
+           <div class="col-sm-4" style="color:white">
+                <label class="form-label">{{ entry_amc }}</label> <input type="text" name="filter_amc" value="{{ filter_amc }}" placeholder="{{ entry_amc }}" id="input-amc" data-oc-target="autocomplete-amc" class="form-control" autocomplete="off"/>
+                <ul id="autocomplete-amc" class="dropdown-menu"></ul>
+              </div>
+            
+            <div class="col-sm-4" style="color:white">
+                <label for="input-current_signal_id" class="form-label">{{ entry_current_signal_id }}</label> 
+                <select name="filter_current_signal_id" id="input-current_signal_id" class="form-select">
+                  <option value=""></option>
+                  {% for current_signal in current_signals %}
+                    <option value="{{ current_signal.current_signal_id }}">{{ current_signal.current_signal }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+             
+            <div class="col-sm-4">
+              <div class="text-end" style="margin-top:27px;margin-left:57px">
+                <button type="button" id="button-filter" class="btn btn-light" style="float:left; background-color:white;color:black;"><i class="fa-solid fa-filter"></i> {{ button_filter }}</button>
+              </div>
+            </div>
+        </div>
+        </div>
+       </div>
+      </div>
+    </div>
+          
+          <div class="col-lg-12 col-md-12">
+        <div class="card">
+          <div class="card-header"><i class="fa-solid fa-list"></i> {{ text_list }}</div>
+          <div id="signaling" class="card-body">{{ list }}</div>
+        </div>
+      </div>
+        </div>
+      </div>
+    </div>
+  </div>
+ 
+  <script type="text/javascript"><!--
+$('#signaling').on('click', 'thead a, .pagination a', function(e) {
+    e.preventDefault();
+
+    $('#signaling').load(this.href);
+});
+
+$('#button-filter').on('click', function() {
+    url = '';
+
+    var filter_theme = $('#input-theme').val();
+
+    if (filter_theme) {
+        url += '&filter_theme=' + encodeURIComponent(filter_theme);
+    }
+
+    var filter_amc = $('#input-amc').val();
+
+    if (filter_amc) {
+        url += '&filter_amc=' + encodeURIComponent(filter_amc);
+    }
+
+    var filter_current_signal_id = $('#input-current_signal_id').val();
+
+    if (filter_current_signal_id !== '') {
+        url += '&filter_current_signal_id=' + encodeURIComponent(filter_current_signal_id);
+    }
+   
+
+  /*  var filter_status = $('#input-status').val();
+
+    if (filter_status !== '') {
+        url += '&filter_status=' + filter_status;
+    }
+
+    var filter_ip = $('#input-ip').val();
+
+    if (filter_ip) {
+        url += '&filter_ip=' + encodeURIComponent(filter_ip);
+    }*/
+
+    var filter_update_date_from = $('#input-update-date-from').val();
+
+    if (filter_update_date_from) {
+        url += '&filter_update_date_from=' + encodeURIComponent(filter_update_date_from);
+    }
+
+    var filter_update_date_to = $('#input-update-date-to').val();
+
+    if (filter_update_date_to) {
+        url += '&filter_update_date_to=' + encodeURIComponent(filter_update_date_to);
+    }
+
+    window.history.pushState({}, null, 'index.php?route=signaling/signaling&user_token={{ user_token }}' + url);
+    $('#signaling').load('index.php?route=signaling/signaling.list&user_token={{ user_token }}' + url);
+});
+
+$('#input-theme').autocomplete({
+    'source': function(request, response) {
+        $.ajax({
+            url: 'index.php?route=signaling/signaling.autocomplete&user_token={{ user_token }}&filter_theme=' + encodeURIComponent(request),
+            dataType: 'json',
+            success: function(json) {
+                response($.map(json, function(item) {
+                    return {
+                        label: item['theme'],
+                        value: item['signaling_id']
+                    }
+                }));
+            }
+        });
+    },
+    'select': function(item) {
+        $('#input-theme').val(decodeHTMLEntities(item['label']));
+    }
+});
+
+$('#input-amc').autocomplete({
+    'source': function(request, response) {
+        $.ajax({
+            url: 'index.php?route=signaling/signaling.autocomplete&user_token={{ user_token }}&filter_amc=' + encodeURIComponent(request),
+            dataType: 'json',
+            success: function(json) {
+                response($.map(json, function(item) {
+                    return {
+                        label: item['amc'],
+                        value: item['signaling_id']
+                    }
+                }));
+            }
+        });
+    },
+    'select': function(item) {
+        $('#input-amc').val(decodeHTMLEntities(item['label']));
+    }
+});
+
+$('#signaling').on('click', '[data-oc-toggle=\'unlock\']', function(e) {
+    e.preventDefault();
+
+    var element = this;
+
+    $.ajax({
+        url: $(element).attr('href'),
+        dataType: 'json',
+        success: function(json) {
+            console.log(json);
+
+            $('.alert-dismissible').remove();
+
+            if (json['error']) {
+                $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+            }
+
+            if (json['success']) {
+                $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-circle-check"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
+});
+//--></script>{{ footer }}</div>
+ 

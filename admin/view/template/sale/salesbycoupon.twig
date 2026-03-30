@@ -1,0 +1,67 @@
+{{ header }}{{ column_left }}
+
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <h1>{{ heading_title }}</h1>
+            <ul class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ home }}">Home</a></li>
+                <li class="breadcrumb-item active">{{ heading_title }}</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>SRNO</th>
+                        <th>Date</th>
+                        <th>Number</th>
+                        <th>Name</th>
+                        <th>Coupon</th>
+                        <th>No. Orders</th>
+                        <th>No. Products</th>
+                        <th>R Price</th>
+                        <th>R Tax</th>
+                        <th>R Total</th>
+                        <th>S Price</th>
+                        <th>S Tax</th>
+                        <th>S Total</th>
+                        <th>Discount</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <td>{{ row.srno }}</td>
+                        <td>{{ row.date }}</td>
+                        <td>{{ row.number }}</td>
+                        <td>{{ row.name }}</td>
+                        <td>{{ row.coupon }}</td>
+                        <td>{{ row.no_orders }}</td>
+                        <td>{{ row.no_products }}</td>
+                        <td>{{ row.r_price }}</td>
+                        <td>{{ row.r_tax }}</td>
+                        <td>{{ row.r_total }}</td>
+                        <td>{{ row.s_price }}</td>
+                        <td>{{ row.s_tax }}</td>
+                        <td>{{ row.s_total }}</td>
+                        <td>{{ row.discount }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="row">
+                <div class="col-sm-6 text-left">{{ pagination }}</div>
+                <div class="col-sm-6 text-right">{{ results }}</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{{ footer }}

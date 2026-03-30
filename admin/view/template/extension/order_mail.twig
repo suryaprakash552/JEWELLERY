@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>{{ title }}</title>
+</head>
+<body style="font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #000000;">
+<div style="width: 680px;"><table style="width: 100%">
+	<tr>
+		<td style="width:50%;"><h3>{{ text_title }}</h3></td>
+		<td style="width:25%;">{{ text_po_no }}: {{ order['po_number'] }}</td>
+		<td style="width:25%;">{{ text_po_date }}: {{ order['delivery_date'] }}</td>
+	</tr>
+  </table>
+	<table style="width: 100%">
+      <thead>
+        <tr>
+          <th style="width:50%;background-color:#A1926B;color:#fff;text-align:left;">{{ text_buyer }}</th>
+          <th style="width:50%;background-color:#A1926B;color:#fff;text-align:left;">{{ text_supplier }}</th>
+        </tr>
+      </thead>
+      <tbody>
+		<tr>
+          <td style="width:50%;"><table class="table-supplier" style="width: 100%">
+				<tr>
+					<td style="width:20%;"><b>{{ entry_company }}</b></td>
+					<td>{{ order['buyer_company'] }}</td>
+				</tr>
+				<tr>
+					<td style="width:20%;"><b>{{ entry_address }}</b></td>
+					<td>{{ order['buyer_address'] }}</td>
+				</tr>
+				<tr>
+					<td style="width:20%;"><b>{{ entry_zip_code }}</b></td>
+					<td>{{ order['buyer_zip_code'] }}</td>
+				</tr>
+				<tr>
+					<td style="width:20%;"><b>{{ entry_telephone }}</b></td>
+					<td>{{ order['buyer_tel'] }}</td>
+				</tr>
+				<tr>
+					<td style="width:20%;"><b>{{ entry_contact }}</b></td>
+					<td>{{ order['buyer_contact'] }}</td>
+				</tr>
+				<tr>
+					<td style="width:20%;"><b>{{ entry_email }}</b></td>
+					<td>{{ order['buyer_email'] }}</td>
+				</tr>
+				<tr>
+					<td style="width:20%;"><b>{{ entry_telephone }}</b></td>
+					<td>{{ order['buyer_contact_tel'] }}</td>
+				</tr>
+			</table></td>
+          <td style="width:50%;"><table class="table-supplier" style="width: 100%">
+			<tr>
+				<td style="width:20%;"><b>{{ entry_company }}</b></td>
+				<td>{{ order['supplier_company'] }}</td>
+			</tr>
+			<tr>
+				<td style="width:20%;"><b>{{ entry_address }}</b></td>
+				<td>{{ order['supplier_address'] }}</textarea></td>
+			</tr>
+			<tr>
+				<td style="width:20%;"><b>{{ entry_zip_code }}</b></td>
+				<td>{{ order['supplier_zip_code'] }}</td>
+			</tr>
+			<tr>
+				<td style="width:20%;"><b>{{ entry_telephone }}</b></td>
+				<td>{{ order['supplier_tel'] }}</td>
+			</tr>
+			<tr>
+				<td style="width:20%;"><b>{{ entry_contact }}</b></td>
+				<td>{{ order['supplier_contact'] }}</td>
+			</tr>
+			<tr>
+				<td style="width:20%;"><b>{{ entry_email }}</b></td>
+				<td>{{ order['supplier_email'] }}</td>
+			</tr>
+			<tr>
+				<td style="width:20%;"><b>{{ entry_telephone }}</b></td>
+				<td>{{ order['supplier_contact_tel'] }}</td>
+			</tr>
+		</table></td>
+        </tr>
+      </tbody>
+	 </table>
+    <table class="table-order" style="border-collapse: collapse; width: 100%; border-top: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; margin-bottom: 20px;">
+		<tr>
+			<td style="width:50%;">
+				{{ entry_shipping_method }}: {{ order['shipping_method'] }}
+			</td>
+			<td style="width:50%;">
+				{{ entry_shipping_term }}: {{ order['shipping_term'] }}
+			</td>
+		</tr>
+		<tr>
+			<td style="width:50%;">
+				{{ entry_payment_method }}: {{ order['payment_method'] }}
+			</td>
+			<td style="width:50%;">
+				{{ entry_status }}: {{ order['status'] }}
+			</td>
+		</tr>
+	</table>
+    <div class="table-responsive">
+		<table style="border-collapse: collapse; width: 100%; border-top: 1px solid #DDDDDD; border-left: 1px solid #DDDDDD; margin-bottom: 20px;">
+		  <thead>
+			<tr>
+			{% set colspan = 1 %}
+			{% for key,column in purchase_order_column %}
+				{% if column['status'] %}
+			  <th style="font-size: 12px; border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; background-color: #EFEFEF; font-weight: bold; text-align: left; padding: 7px; color: #222222;" class="text-left">{{ column['name'] }}</th>
+			  {% set colspan = colspan + 1 %}
+			{% endif %}
+			{% endfor %}
+			</tr>
+		  </thead>
+		  <tbody id="cart">
+			{% if order['product'] %}
+			  {% for order_product in order['product'] %}
+			<tr>
+			{% for key,column in purchase_order_column %}
+			{% if column['status'] %}
+			{% if key == 'serial_no' %}
+			<td style="font-size: 12px; border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: left; padding: 7px;">{{ order_product['serial_no'] }}</td>
+			{% endif %}
+			{% if key == 'sku' %}
+			<td style="font-size: 12px; border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: left; padding: 7px;" class="text-left">{{ order_product['sku'] }}</td>
+			  {% endif %}
+			{% if key == 'description' %}
+			<td style="font-size: 12px; border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: left; padding: 7px;" class="text-left">{{ order_product['name'] }}</td>
+			   {% endif %}
+			{% if key == 'image' %}
+			<td style="font-size: 12px; border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: left; padding: 7px;" class="text-center"><img src="{{ order_product['pdf_image'] }}" alt="{{ order_product['name'] }}"></td>
+			  {% endif %}
+			{% if key == 'model' %}
+			<td style="font-size: 12px; border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: left; padding: 7px;" class="text-left">{{ order_product['model'] }}</td>
+			  {% endif %}
+			{% if key == 'size' %}
+			<td style="font-size: 12px; border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: left; padding: 7px;" class="text-left">{{ order_product['size'] }}</td>
+			  {% endif %}
+			{% if key == 'pcs_ctn' %}
+			<td style="font-size: 12px; border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: left; padding: 7px;" class="text-left">{{ order_product['pcs_ctn'] }}</td>
+			  {% endif %}
+			{% if key == 'color' %}
+			<td style="font-size: 12px; border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: left; padding: 7px;" class="text-left">
+				{% for option in order_product['option'] %}
+				<small>{{ option['value'] }}</small><br />
+				 {% endfor %}
+			</td>
+			  {% endif %}
+			{% if key == 'ali_link' %}
+			<td style="font-size: 12px; border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: left; padding: 7px;" class="text-left">{{ order_product['ali_link'] }}</td>
+			  {% endif %}
+			{% if key == 'stock' %}
+			<td style="font-size: 12px; border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: left; padding: 7px;" class="text-left">{{ order_product['po_stock'] }}</td>
+			  {% endif %}
+			{% if key == 'weight' %}
+			<td style="font-size: 12px; border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: left; padding: 7px;" class="text-left">{{ order_product['weight'] }}</td>
+			  {% endif %}
+			{% if key == 'dimension' %}
+			<td style="font-size: 12px; border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: left; padding: 7px;" class="text-left">{{ order_product['dimension'] }}</td>
+			  {% endif %}
+			{% if key == 'exp_sales' %}
+			<td style="font-size: 12px; border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: left; padding: 7px;" class="text-left">{{ order_product['exp_sales'] }}</td>
+			  {% endif %}
+			{% if key == 'price' %}
+			<td style="font-size: 12px; border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: left; padding: 7px;" class="text-right">{{ order_product['price'] }}</td>
+			  {% endif %}
+			{% if key == 'quantity' %}
+			<td style="font-size: 12px; border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: left; padding: 7px;" class="text-right">{{ order_product['quantity'] }}</td>
+			   {% endif %}
+			{% if key == 'total' %}
+			 <td style="font-size: 12px; border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: left; padding: 7px;" class="text-right">{{ order_product['total'] }}</td>
+			   {% endif %}
+			{% if key == 'comment' %}
+			<td style="font-size: 12px; border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: left; padding: 7px;" class="text-left">
+			<table class="table-comments" style="margin:0;">
+			{% for comments in order_product['comments'] %}
+				<tr>
+				<td style="width:100px;">{{ comments['date_added'] }}<br/>{{ comments['username'] }}</td>
+				<td>{{ comments['comment'] }}</td>
+				</tr>
+			 {% endfor %}
+			</table>
+			</td>
+			   {% endif %}
+			  {% endif %}
+			 {% endfor %}
+			</tr>
+			 {% endfor %}
+			 {% else %}
+			<tr>
+			  <td class="text-center" colspan="{{ colspan  }}">{{ text_no_results }}</td>
+			</tr>
+		  </tbody>
+		   {% endif %}
+		</table>
+	</div>
+    <table style="border-collapse: collapse; width: 100%; border-top: 1px solid #DDDDDD; border-left: 1px solid #DDDDDD; margin-bottom: 20px;">
+		<tbody>
+        {% for total in order['total'] %}
+        <tr>
+          <td style="font-size: 12px;	border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: right; padding: 7px;"  class="text-right" colspan="{{ colspan }}"><b>{{ total['title'] }}</b></td>
+          <td style="font-size: 12px;	border-right: 1px solid #DDDDDD; border-bottom: 1px solid #DDDDDD; text-align: right; padding: 7px;" class="text-right">{{ total['text'] }}</td>
+        </tr>
+       {% endfor %}
+      </tbody>
+    </table>
+  <p style="margin-top: 0px; margin-bottom: 20px;">{{ text_footer }}</p>
+</div>
+</body>
+</html>

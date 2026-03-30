@@ -1,0 +1,73 @@
+{{ header }}{{ column_left }}
+
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <h1>Seller Summary Report</h1>
+
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                    <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>SRNO</th>
+                        <th>Seller ID</th>
+                        <th>Seller Name</th>
+                        <th>Date</th>
+                        <th>Total Products</th>
+                        <th>Sale</th>
+                        <th>Tax</th>
+                        <th>Total Sale</th>
+                        <th>Discount</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% if seller_rows %}
+                        {% for row in seller_rows %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                    
+                            <td>{{ row.seller_id }}</td>
+                    
+                            <td>{{ row.seller_name }}</td>
+                    
+                            <td>{{ row.last_order_date }}</td>
+                    
+                            <td>{{ row.total_products }}</td>
+                    
+                            <td>{{ row.sale_total|number_format(2) }}</td>
+                    
+                            <td>{{ row.tax_total|number_format(2) }}</td>
+                    
+                            <td>{{ row.grand_total|number_format(2) }}</td>
+                    
+                            <td>{{ row.discount_total|number_format(2) }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center">No Data Found</td>
+                        </tr>
+                    {% endif %}
+                    </tbody>
+
+            </table>
+            <div class="row">
+                <div class="col-sm-6 text-left">{{ pagination }}</div>
+                <div class="col-sm-6 text-right">{{ results }}</div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{{ footer }}

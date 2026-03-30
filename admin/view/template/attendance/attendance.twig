@@ -1,0 +1,1113 @@
+{{ header }}{{ column_left }}
+
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <h1><i class="fa-solid fa-fingerprint"></i> {{ title }}</h1>
+    </div>
+  </div>
+
+  <div class="attendance-container">
+    <div class="row">
+      <div class="col-lg-6 col-md-12">
+        <div class="card">
+          <h2>⚡ Attendance Status</h2>
+          <div class="status-container">
+            <div class="status-item">
+              <div class="status-label">Current Status</div>
+              <div class="status-value status-offline" id="statusText">OUT OF OFFICE</div>
+              <div class="status-subtitle" id="statusSubtitle">Outside all office areas</div>
+              <div class="current-location" id="currentLocation" style="margin-top: 8px; font-size: 0.85rem; color: #17a2b8; font-weight: 500;">
+                <i class="fa-solid fa-map-pin"></i> <span id="detectedLocation">--</span>
+              </div>
+            </div>
+            <div class="status-item">
+              <div class="status-label">Distance to Nearest</div>
+              <div class="status-value" id="distanceText">--</div>
+              <div class="status-subtitle" id="nearestOffice">Checking locations...</div>
+              <div class="distance-bar">
+                <div class="distance-indicator" id="distanceIndicator"></div>
+              </div>
+            </div>
+          </div>
+          <div class="accuracy-info" id="accuracyInfo" style="margin-top: 10px; padding: 10px; background: #1a1d29; border-radius: 6px; font-size: 0.85rem; color: #8b92a9;">
+            <i class="fa-solid fa-satellite-dish"></i> GPS Accuracy: <span id="accuracyText">--</span>
+          </div>
+          <div class="location-info" id="locationInfo" style="margin-top: 10px; padding: 10px; background: #1a1d29; border-radius: 6px; font-size: 0.85rem; color: #8b92a9;">
+            <i class="fa-solid fa-map-marker-alt"></i> <span id="locationText">Detecting location...</span>
+          </div>
+          <div class="location-info" id="locationInfo" style="margin-top: 10px; padding: 10px; background: #1a1d29; border-radius: 6px; font-size: 0.85rem; color: #8b92a9;">
+            <i class="fa-solid fa-map-marker-alt"></i> <span id="locationText">Current location:</span>
+            <span class="coordinate-label"></span>
+            <span class="coordinate-value" id="userLat"></span>
+            <span class="coordinate-label">,</span>
+             <span class="coordinate-value" id="userLng"></span>
+          </div>
+        </div>
+
+        <div class="card">
+           <div class="office-header-row">
+            <h2><i class="fa-solid fa-building"></i> Office Locations</h2>
+        
+            <button class="map-button" onclick="refreshLocation()" 
+                    style="background: #28a745; white-space: nowrap;">
+              <i class="fa-solid fa-sync"></i> Refresh Location
+            </button>
+          </div>
+
+          <div class="office-locations-list">
+            {% for key, location in office_locations %}
+            <div class="location-card" data-location="{{ key }}">
+              <div class="location-header">
+                <span class="location-name">{{ location.name }}</span>
+                <span class="location-badge" id="badge-{{ key }}">--</span>
+              </div>
+              <div class="location-details">
+                <div class="location-coord">
+                  <i class="fa-solid fa-location-dot"></i>
+                  {{ location.lat|number_format(6) }}°N, {{ location.lng|number_format(6) }}°E
+                </div>
+                <div class="location-radius">
+                  <i class="fa-solid fa-circle-dot"></i> Radius: {{ location.radius }}m
+                </div>
+                <div class="location-distance" id="distance-{{ key }}">
+                  <i class="fa-solid fa-route"></i> Distance: <span>Calculating...</span>
+                </div>
+              </div>
+              <button class="location-map-btn" onclick="viewLocationOnMap({{ location.lat }}, {{ location.lng }}, '{{ location.name }}')">
+                <i class="fa-solid fa-map"></i> View on Map
+              </button>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        {#<div class="card">#}
+        {#  <h2><i class="fa-solid fa-map-marker-alt"></i> Your Coordinates</h2>#}
+        {#  <div class="coordinates">#}
+        {#    <div class="coordinate-item">#}
+        {#      <span class="coordinate-label">Your Latitude</span>#}
+        {#      <span class="coordinate-value" id="userLat">--</span>#}
+        {#    </div>#}
+        {#    <div class="coordinate-item">#}
+        {#      <span class="coordinate-label">Your Longitude</span>#}
+        {#      <span class="coordinate-value" id="userLng">--</span>#}
+        {#    </div>#}
+        {#  </div>#}
+        {#</div>#}
+      </div>
+
+      <div class="col-lg-6 col-md-12">
+        <div class="card">
+          <h2><i class="fa-solid fa-tasks"></i> Quick Actions</h2>
+          {% if has_active_session %}
+          <div class="alert alert-info" style="margin-bottom: 15px; padding: 12px; background: rgba(23, 162, 184, 0.15); border-left: 4px solid #17a2b8; color: #17a2b8; border-radius: 4px;">
+            <i class="fa-solid fa-info-circle"></i> <strong>Active Session:</strong> Started on <strong>{{ active_session_date }}</strong>. You can punch out multiple times until next punch in.
+          </div>
+          {% endif %}
+          <div class="action-buttons">
+            <button class="btn btn-punch-in" id="punchInBtn" onclick="initiatePunchIn()" disabled>
+              <i class="fa-solid fa-sign-in-alt"></i> PUNCH IN
+            </button>
+            <button class="btn btn-punch-out" id="punchOutBtn" onclick="initiatePunchOut()" disabled>
+              <i class="fa-solid fa-sign-out-alt"></i> PUNCH OUT
+            </button>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h2><i class="fa-solid fa-clipboard-list"></i> Today's Attendance Log</h2>
+          <table class="log-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Type</th>
+                <th>Location</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="logBody">
+              {% if today_log|length > 0 %}
+                {% for log in today_log %}
+                  <tr>
+                    <td>{{ log.formatted_time }}</td>
+                    <td>{{ log.type_label }}</td>
+                    <td>{{ log.location_label }}</td>
+                    <td style="color: #28a745; font-weight: 500;">Success</td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="4" style="text-align: center; padding: 40px; color: #6c757d;">
+                    <i class="fa-solid fa-clipboard"></i><br>
+                    No attendance records yet
+                  </td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="camera-modal" id="cameraModal">
+  <div class="camera-container">
+    <h3 id="cameraTitle"><i class="fa-solid fa-camera"></i> Take Your Photo</h3>
+    <div class="camera-preview">
+      <video id="cameraVideo" autoplay playsinline></video>
+      <canvas id="capturedCanvas"></canvas>
+      <div class="camera-overlay"></div>
+    </div>
+    <div class="camera-controls" id="cameraControls">
+      <button class="btn-capture" onclick="capturePhoto()">
+        <i class="fa-solid fa-camera"></i> Capture
+      </button>
+      <button class="btn-cancel" onclick="closeCamera()">
+        <i class="fa-solid fa-times"></i> Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="notification" id="notification">
+  <i class="fa-solid fa-bell"></i>
+  <span id="notificationText"></span>
+</div>
+
+<script>
+  // Office locations from backend
+  const OFFICE_LOCATIONS = {{ office_locations|json_encode|raw }};
+  const GEO_FENCE_RADIUS = {{ geo_fence_radius }};
+  const USER_TOKEN = '{{ user_token }}';
+  const BASE_URL = '{{ base_url }}';
+  
+  let userLocation = null;
+  let isInOffice = false;
+  let currentOfficeLocation = null;
+  let hasPunchedIn = {{ has_punched_in ? 'true' : 'false' }};
+  let hasActiveSession = {{ has_active_session ? 'true' : 'false' }};
+  let cameraStream = null;
+  let capturedPhotoData = null;
+  let punchType = null;
+  let watchId = null;
+
+  function init() {
+    console.log('Office Locations:', OFFICE_LOCATIONS);
+    
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        handleLocationSuccess,
+        handleLocationError,
+        { 
+          enableHighAccuracy: true, 
+          timeout: 15000, 
+          maximumAge: 0
+        }
+      );
+      
+      watchId = navigator.geolocation.watchPosition(
+        handleLocationSuccess,
+        handleLocationError,
+        { 
+          enableHighAccuracy: true, 
+          timeout: 10000, 
+          maximumAge: 5000
+        }
+      );
+      
+      showNotification('🛰️ GPS tracking activated (Multi-Location Mode)', 'success');
+    } else {
+      showNotification('Geolocation not supported by your browser', 'error');
+    }
+    
+    setInterval(updateAttendanceStatus, 30000);
+  }
+
+  function refreshLocation() {
+    showNotification('🔄 Refreshing location...', 'success');
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          handleLocationSuccess(position);
+          showNotification('✅ Location refreshed successfully', 'success');
+        },
+        handleLocationError,
+        { 
+          enableHighAccuracy: true, 
+          timeout: 15000, 
+          maximumAge: 0
+        }
+      );
+    }
+  }
+
+  async function updateAttendanceStatus() {
+    try {
+      const response = await fetch(`index.php?route=attendance/attendance.getStatus&user_token=${USER_TOKEN}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        hasPunchedIn = data.has_punched_in;
+        hasActiveSession = data.has_active_session;
+        updateButtons();
+      }
+    } catch (error) {
+      console.error('Status update error:', error);
+    }
+  }
+
+  function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  function detectClosestLocation(userLat, userLng) {
+    let closestLocation = null;
+    let minDistance = Infinity;
+    let withinFence = false;
+
+    for (const [key, location] of Object.entries(OFFICE_LOCATIONS)) {
+      const distance = calculateDistance(userLat, userLng, location.lat, location.lng);
+      
+      // Update distance display for this location
+      const distanceEl = document.getElementById(`distance-${key}`);
+      const badgeEl = document.getElementById(`badge-${key}`);
+      
+      if (distanceEl) {
+        distanceEl.querySelector('span').textContent = Math.round(distance) + 'm';
+      }
+      
+      // Check if within this location's geofence
+      if (distance <= location.radius) {
+        badgeEl.textContent = 'IN RANGE';
+        badgeEl.className = 'location-badge in-range';
+        
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestLocation = {
+            key: key,
+            name: location.name,
+            distance: distance,
+            within_fence: true
+          };
+          withinFence = true;
+        }
+      } else {
+        badgeEl.textContent = Math.round(distance) + 'm away';
+        badgeEl.className = 'location-badge out-range';
+        
+        if (!withinFence && distance < minDistance) {
+          minDistance = distance;
+          closestLocation = {
+            key: key,
+            name: location.name,
+            distance: distance,
+            within_fence: false
+          };
+        }
+      }
+    }
+
+    return closestLocation;
+  }
+
+  async function handleLocationSuccess(position) {
+    const coords = position.coords;
+    
+    userLocation = {
+      lat: coords.latitude,
+      lng: coords.longitude,
+      accuracy: coords.accuracy
+    };
+
+    console.log('📍 Location Update:', {
+      lat: userLocation.lat.toFixed(6),
+      lng: userLocation.lng.toFixed(6),
+      accuracy: Math.round(userLocation.accuracy) + 'm'
+    });
+
+    document.getElementById('userLat').textContent = userLocation.lat.toFixed(6) + '° N';
+    document.getElementById('userLng').textContent = userLocation.lng.toFixed(6) + '° E';
+
+    // Update GPS accuracy
+    const accuracyText = document.getElementById('accuracyText');
+    const accuracy = Math.round(userLocation.accuracy);
+    accuracyText.textContent = accuracy + 'm';
+    
+    if (accuracy > 100) {
+      accuracyText.style.color = '#f87171';
+      accuracyText.textContent += ' (Low - Move to open area)';
+    } else if (accuracy > 50) {
+      accuracyText.style.color = '#ffc107';
+      accuracyText.textContent += ' (Medium)';
+    } else {
+      accuracyText.style.color = '#28a745';
+      accuracyText.textContent += ' (Good)';
+    }
+
+    // Detect closest location
+    currentOfficeLocation = detectClosestLocation(userLocation.lat, userLocation.lng);
+    
+    if (currentOfficeLocation) {
+      document.getElementById('distanceText').textContent = Math.round(currentOfficeLocation.distance) + 'm';
+      document.getElementById('nearestOffice').textContent = currentOfficeLocation.name;
+      document.getElementById('detectedLocation').textContent = currentOfficeLocation.name;
+      
+      isInOffice = currentOfficeLocation.within_fence;
+      
+      if (isInOffice) {
+        document.getElementById('statusText').textContent = 'IN OFFICE';
+        document.getElementById('statusText').className = 'status-value status-online';
+        document.getElementById('statusSubtitle').textContent = 'Inside ' + currentOfficeLocation.name;
+      } else {
+        document.getElementById('statusText').textContent = 'OUT OF OFFICE';
+        document.getElementById('statusText').className = 'status-value status-offline';
+        document.getElementById('statusSubtitle').textContent = 'Outside all office areas';
+      }
+      
+      // Update distance indicator (relative to current location's radius)
+      const radius = OFFICE_LOCATIONS[currentOfficeLocation.key].radius;
+      const percentage = Math.min((currentOfficeLocation.distance / (radius * 3)) * 100, 100);
+      document.getElementById('distanceIndicator').style.left = percentage + '%';
+    }
+
+    updateButtons();
+  }
+
+  function handleLocationError(error) {
+    let errorMsg = 'Location error: ';
+    switch(error.code) {
+      case error.PERMISSION_DENIED:
+        errorMsg += 'Please allow location access';
+        break;
+      case error.POSITION_UNAVAILABLE:
+        errorMsg += 'Location unavailable';
+        break;
+      case error.TIMEOUT:
+        errorMsg += 'Request timeout - Please try again';
+        break;
+      default:
+        errorMsg += error.message;
+    }
+    showNotification(errorMsg, 'error');
+    console.error('Geolocation Error:', error);
+  }
+
+  function updateButtons() {
+    const punchInBtn = document.getElementById('punchInBtn');
+    const punchOutBtn = document.getElementById('punchOutBtn');
+    
+    punchInBtn.disabled = !isInOffice || hasPunchedIn;
+    punchOutBtn.disabled = !isInOffice || !hasActiveSession;
+  }
+
+  function viewLocationOnMap(lat, lng, name) {
+    window.open(`https://www.google.com/maps?q=${lat},${lng}&label=${encodeURIComponent(name)}`, '_blank');
+  }
+
+  async function openCamera(type) {
+    punchType = type;
+    capturedPhotoData = null;
+    
+    const modal = document.getElementById('cameraModal');
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.getElementById('capturedCanvas');
+    const title = document.getElementById('cameraTitle');
+    
+    title.innerHTML = '<i class="fa-solid fa-camera"></i> ' + 
+      (type === 'in' ? 'Punch In Photo' : 'Punch Out Photo');
+    
+    modal.classList.add('show');
+    video.style.display = 'block';
+    canvas.style.display = 'none';
+
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 }}
+      });
+      video.srcObject = cameraStream;
+      
+      document.getElementById('cameraControls').innerHTML = `
+        <button class="btn-capture" onclick="capturePhoto()">
+          <i class="fa-solid fa-camera"></i> Capture
+        </button>
+        <button class="btn-cancel" onclick="closeCamera()">
+          <i class="fa-solid fa-times"></i> Cancel
+        </button>
+      `;
+    } catch (error) {
+      showNotification('Camera access denied', 'error');
+      closeCamera();
+    }
+  }
+
+  function capturePhoto() {
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.getElementById('capturedCanvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+
+    capturedPhotoData = canvas.toDataURL('image/jpeg', 0.6);
+
+    video.style.display = 'none';
+    canvas.style.display = 'block';
+
+    document.getElementById('cameraControls').innerHTML = `
+      <button class="btn-retake" onclick="retakePhoto()">
+        <i class="fa-solid fa-redo"></i> Retake
+      </button>
+      <button class="btn-submit" onclick="submitPunch()">
+        <i class="fa-solid fa-check"></i> Confirm
+      </button>
+      <button class="btn-cancel" onclick="closeCamera()">
+        <i class="fa-solid fa-times"></i> Cancel
+      </button>
+    `;
+  }
+
+  function retakePhoto() {
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.getElementById('capturedCanvas');
+    
+    video.style.display = 'block';
+    canvas.style.display = 'none';
+    capturedPhotoData = null;
+
+    document.getElementById('cameraControls').innerHTML = `
+      <button class="btn-capture" onclick="capturePhoto()">
+        <i class="fa-solid fa-camera"></i> Capture
+      </button>
+      <button class="btn-cancel" onclick="closeCamera()">
+        <i class="fa-solid fa-times"></i> Cancel
+      </button>
+    `;
+  }
+
+  function closeCamera() {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      cameraStream = null;
+    }
+    document.getElementById('cameraModal').classList.remove('show');
+    document.getElementById('cameraVideo').srcObject = null;
+    capturedPhotoData = null;
+  }
+
+  function initiatePunchIn() {
+    if (!isInOffice) {
+      showNotification('You must be inside an office area to punch in', 'error');
+      return;
+    }
+    if (hasPunchedIn) {
+      showNotification('You have already punched in today', 'error');
+      return;
+    }
+    openCamera('in');
+  }
+
+  function initiatePunchOut() {
+    if (!isInOffice) {
+      showNotification('You must be inside an office area to punch out', 'error');
+      return;
+    }
+    if (!hasActiveSession) {
+      showNotification('No active session found. Please punch in first.', 'error');
+      return;
+    }
+    openCamera('out');
+  }
+
+  async function submitPunch() {
+    if (!capturedPhotoData) {
+      showNotification('Please capture a photo first', 'error');
+      return;
+    }
+
+    const endpoint = punchType === 'in' ? 'punchIn' : 'punchOut';
+    
+    try {
+      const formData = new FormData();
+      formData.append('latitude', userLocation.lat);
+      formData.append('longitude', userLocation.lng);
+      formData.append('photo', capturedPhotoData);
+
+      const response = await fetch(
+        `index.php?route=attendance/attendance.${endpoint}&user_token=${USER_TOKEN}`,
+        { method: 'POST', body: formData }
+      );
+
+      const result = await response.json();
+      closeCamera();
+
+      if (result.success) {
+        if (punchType === 'in') {
+          hasPunchedIn = true;
+          hasActiveSession = true;
+        }
+        updateButtons();
+        refreshLog();
+        showNotification(result.message, 'success');
+      } else {
+        showNotification(result.message, 'error');
+      }
+    } catch (error) {
+      closeCamera();
+      showNotification('Error: ' + error.message, 'error');
+    }
+  }
+
+  function refreshLog() {
+    fetch(`index.php?route=attendance/attendance.getLog&user_token=${USER_TOKEN}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.log) {
+          const logBody = document.getElementById('logBody');
+          if (data.log.length > 0) {
+            logBody.innerHTML = data.log.map(entry => `
+              <tr>
+                <td>${entry.formatted_time}</td>
+                <td>${entry.type_label}</td>
+                <td>${entry.location_label}</td>
+                <td style="color: #28a745; font-weight: 500;">Success</td>
+              </tr>
+            `).join('');
+          }
+        }
+      });
+  }
+
+  function showNotification(message, type) {
+    const notification = document.getElementById('notification');
+    const text = document.getElementById('notificationText');
+    
+    text.textContent = message;
+    notification.className = 'notification ' + type + ' show';
+
+    setTimeout(() => {
+      notification.classList.remove('show');
+    }, 5000);
+  }
+
+  window.addEventListener('load', init);
+  
+  window.addEventListener('beforeunload', () => {
+    if (watchId) {
+      navigator.geolocation.clearWatch(watchId);
+    }
+  });
+</script>
+<style>
+  * { box-sizing: border-box; }
+
+  #content {
+    background: #1a1d29;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .page-header {
+    background: #1a1d29;
+    border-bottom: 1px solid #2a2d3a;
+    padding: 20px 30px;
+    margin-bottom: 0;
+  }
+
+  .page-header h1 {
+    color: #ffffff;
+    font-size: 1.8rem;
+    margin: 0;
+    font-weight: 500;
+  }
+
+  .attendance-container {
+    max-width: 100%;
+    margin: 0;
+    padding: 20px 30px;
+  }
+
+  .card {
+    background: #262936;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    margin-bottom: 20px;
+    border: 1px solid #2a2d3a;
+  }
+
+  .card h2 {
+    color: #ffffff;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    border-bottom: 1px solid #2a2d3a;
+    padding-bottom: 15px;
+  }
+
+  .status-container {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .status-item {
+    flex: 1;
+    text-align: center;
+    padding: 20px;
+    border-radius: 6px;
+    background: #1a1d29;
+    border: 1px solid #2a2d3a;
+  }
+
+  .status-label {
+    font-size: 0.85rem;
+    color: #8b92a9;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .status-value {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin: 10px 0;
+  }
+
+  .status-subtitle {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 5px;
+  }
+
+  .status-online { color: #28a745; }
+  .status-offline { color: #dc3545; }
+
+  .current-location {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .distance-bar {
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(to right, 
+      #28a745 0%, 
+      #28a745 33%, 
+      #ffc107 33%, 
+      #ffc107 66%, 
+      #dc3545 66%, 
+      #dc3545 100%);
+    border-radius: 4px;
+    position: relative;
+    margin-top: 10px;
+  }
+
+  .distance-indicator {
+    position: absolute;
+    top: -5px;
+    width: 18px;
+    height: 18px;
+    background: #007bff;
+    border-radius: 50%;
+    border: 3px solid #1a1d29;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, 0.5);
+    transform: translateX(-50%);
+    transition: left 0.3s ease;
+  }
+
+  .office-locations-list {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+  }
+
+  .location-card {
+    background: #1a1d29;
+    border: 1px solid #2a2d3a;
+    border-radius: 6px;
+    padding: 15px;
+    transition: all 0.3s;
+    width:236px;
+  }
+
+  .location-card:hover {
+    border-color: #007bff;
+    transform: translateY(-2px);
+  }
+
+  .location-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #2a2d3a;
+  }
+
+  .location-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  .location-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .location-badge.in-range {
+    background: rgba(40, 167, 69, 0.2);
+    color: #28a745;
+  }
+
+  .location-badge.out-range {
+    background: rgba(108, 117, 125, 0.2);
+    color: #6c757d;
+  }
+
+  .location-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+    color: #8b92a9;
+  }
+
+  .location-details > div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .location-details i {
+    width: 16px;
+    color: #007bff;
+  }
+
+  .location-map-btn {
+    width: auto;
+    padding: 8px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .location-map-btn:hover {
+    background: #0056b3;
+  }
+
+  .coordinates {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .coordinate-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 15px;
+    background: #1a1d29;
+    border-radius: 6px;
+    border: 1px solid #2a2d3a;
+  }
+
+  .coordinate-label {
+    color: #8b92a9;
+    font-size: 0.9rem;
+  }
+
+  .coordinate-value {
+    font-weight: 600;
+    color: #ffffff;
+    font-size: 0.95rem;
+  }
+
+  .map-button {
+    width: 25%;
+    padding: 11px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background 0.2s;
+  }
+
+  .map-button:hover {
+    background: #0056b3;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 1rem;
+    border: none;
+  }
+
+  .btn-punch-in {
+    background: #28a745;
+    color: white;
+  }
+
+  .btn-punch-in:hover:not(:disabled) {
+    background: #218838;
+  }
+
+  .btn-punch-out {
+    background: #dc3545;
+    color: white;
+  }
+
+  .btn-punch-out:hover:not(:disabled) {
+    background: #c82333;
+  }
+
+  .btn:disabled {
+    background: #495057;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .camera-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .camera-modal.show {
+    display: flex;
+  }
+
+  .camera-container {
+    background: #262936;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 600px;
+    width: 90%;
+    text-align: center;
+  }
+
+  .camera-container h3 {
+    color: #ffffff;
+    margin-bottom: 20px;
+    font-size: 1.4rem;
+  }
+
+  .camera-preview {
+    position: relative;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  #cameraVideo {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  #capturedCanvas {
+    display: none;
+    width: 100%;
+  }
+
+  .camera-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    border: 3px solid rgba(40, 167, 69, 0.5);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .camera-controls {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+  }
+
+  .camera-controls button {
+    padding: 12px 30px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-capture {
+    background: #28a745;
+    color: white;
+  }
+
+  .btn-cancel {
+    background: #6c757d;
+    color: white;
+  }
+
+  .btn-retake {
+    background: #ffc107;
+    color: #212529;
+  }
+
+  .btn-submit {
+    background: #007bff;
+    color: white;
+  }
+
+  .log-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+
+  .log-table th {
+    background: #1a1d29;
+    color: #8b92a9;
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 500;
+    border-bottom: 1px solid #2a2d3a;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+  }
+
+  .log-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #2a2d3a;
+    color: #ffffff;
+    font-size: 0.9rem;
+  }
+
+  .log-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 6px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 10000;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 300px;
+  }
+
+  .notification.show {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .notification.success { background: #28a745; }
+  .notification.error { background: #dc3545; }
+
+  .accuracy-info, .location-info {
+    margin-top: 10px;
+    padding: 10px;
+    background: #1a1d29;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: #8b92a9;
+  }
+  .office-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.office-header-row h2 {
+    margin: 0;
+}
+
+.office-header-row .map-button {
+    padding: 8px 14px;
+    font-size: 14px;
+    width:auto;
+}
+
+
+  @media (max-width: 768px) {
+    .status-container {
+      flex-direction: column;
+    }
+    .action-buttons {
+      flex-direction: column;
+    }
+    .camera-container {
+      padding: 20px;
+    }
+    .camera-controls {
+      flex-direction: column;
+    }
+  }
+</style>
+
+{{ footer }}

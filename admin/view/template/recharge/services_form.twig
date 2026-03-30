@@ -1,0 +1,143 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        <button type="submit" form="form-product" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <h1 style="color:white">{{ heading_title }}</h1>
+            <ol class="breadcrumb">
+            {% for breadcrumb in breadcrumbs %}
+            <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid"> {% if error_warning %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i></i> </h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-product" class="form-horizontal">
+          <ul class="nav nav-tabs">
+          <h3>  <li class="active" ><a href="#tab-data" data-toggle="tab"  style="color:white"><b>{{ tab_data }}</b></a></li></h3>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active" id="tab-data">
+                
+               <div class="row mb-3" style="row-gap: 20px;"> 
+             
+                  <div class="col-sm-4">
+                <label class="col-sm-2 control-label" for="input-category" style="color:white">{{ entry_category }}</label>
+                
+                  <input type="text" name="category"  readonly value="{{ category }}" placeholder="{{ entry_category }}" id="input-category" class=" form-control "/>
+                  </div>
+             
+                <div class="col-sm-4">
+                <label class="col-sm-2 control-label" for="input-amount" style="color:white">{{ column_amount }}</label>
+                
+                  <input type="text" name="amount" value="{{ amount }}" placeholder="{{ column_amount }}" id="input-amount" class="form-control"/>
+                  {% if error_amount %}
+                    <div class="text-danger">{{ error_amount }}</div>
+                  {% endif %}
+                  </div>
+              
+                 <div class="col-sm-4">
+                <label class="col-sm-2 control-label" for="input-status" style="color:white"><span data-toggle="tooltip" title="{{ column_status }}">{{ column_status }}</span></label>
+                
+                  <select name="status" id="input-status-class" class="form-control">
+                    {% if status %}
+
+
+                      <option value="1" selected="selected">{{ text_enabled }}</option>
+                      <option value="0">{{ text_disabled }}</option>
+
+
+                    {% else %}
+
+
+                      <option value="1">{{ text_enabled }}</option>
+                      <option value="0" selected="selected">{{ text_disabled }}</option>
+
+
+                    {% endif %}
+
+                  </select>
+                </div>
+              </div><br>
+                <div class="row mb-3" style="margin-left:400px">
+                    <div class="col-sm-7">
+                   <label for="input-logo" class="col-sm-6 col-form-label" style="color:white">IMAGE</label>
+                    <div class="border rounded p-2 mx-auto" style="max-width:200px;">
+                     <img src="{{banner}}" alt="banner" title="" id="thumb-logo" data-oc-placeholder="{{banner}}" class="img-fluid" style="width:200px">  
+                     <input type="hidden" name="banner" value="{{banner_path}}" id="input-logo"/>
+                      <div class="d-grid gap-2 mt-2">
+                        <button type="button" data-oc-toggle="image" data-oc-target="#input-logo" data-oc-thumb="#thumb-logo" class="btn btn-primary rounded-0"><i class="fa-solid fa-pencil"></i> Edit</button>
+                        <button type="button" data-oc-toggle="clear" data-oc-target="#input-logo" data-oc-thumb="#thumb-logo" class="btn btn-warning rounded-0"><i class="fa-regular fa-trash-can"></i> Clear</button>
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+             
+           </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <link href="view/javascript/codemirror/lib/codemirror.css" rel="stylesheet"/>
+  <link href="view/javascript/codemirror/theme/monokai.css" rel="stylesheet"/>
+  <script type="text/javascript" src="view/javascript/codemirror/lib/codemirror.js"></script>
+  <script type="text/javascript" src="view/javascript/codemirror/lib/xml.js"></script>
+  <script type="text/javascript" src="view/javascript/codemirror/lib/formatting.js"></script>
+  <script type="text/javascript" src="view/javascript/summernote/summernote.js"></script>
+  <link href="view/javascript/summernote/summernote.css" rel="stylesheet"/>
+  <script type="text/javascript" src="view/javascript/summernote/summernote-image-attributes.js"></script>
+  <script type="text/javascript" src="view/javascript/summernote/opencart.js"></script>
+  <script type="text/javascript"><!--
+  var image_row = {{ image_row }};
+
+  function addImage() {
+	  html = '<tr id="image-row' + image_row + '">';
+	  html += '  <td class="text-left"><a href="" id="thumb-image' + image_row + '"data-toggle="image" class="img-thumbnail"><img src="{{ placeholder }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a><input type="hidden" name="product_image[' + image_row + '][image]" value="" id="input-image' + image_row + '" /></td>';
+	  html += '  <td class="text-right"><input type="text" name="product_image[' + image_row + '][sort_order]" value="" placeholder="{{ entry_sort_order }}" class="form-control" /></td>';
+	  html += '  <td class="text-left"><button type="button" onclick="$(\'#image-row' + image_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+	  html += '</tr>';
+
+	  $('#images tbody').append(html);
+
+	  image_row++;
+  }
+
+  //--></script>
+  <script type="text/javascript"><!--
+// IE and Edge fix!
+
+$('input[name=\'category\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=recharge/services/autocompleteforcategorybyserviceid&user_token={{ user_token }}&serviceid={{ serviceid }}&category=' +  encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['category'],
+						value: item['serviceid']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'category\']').val(item['label']);
+	}
+});
+
+//--></script>
+</div>
+{{ footer }} 

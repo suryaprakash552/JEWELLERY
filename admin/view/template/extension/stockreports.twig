@@ -1,0 +1,593 @@
+{{ header }}{{ column_left }}
+<div id="content" style="background: #1a1a1a; min-height: 100vh;">
+  <div class="page-header" style="background: #1e293b; border-bottom: 1px solid #334155; padding: 20px 30px;">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h1 style="color: #fff; margin: 0; font-size: 24px; font-weight: 600;">
+          <i class="fa fa-bar-chart"></i> Stock Register Reports
+        </h1>
+      </div>
+      <div>
+        <a href="index.php?route=extension/stockregister&user_token={{ user_token }}" class="btn" style="background: #6b7280; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; text-decoration: none;">
+          <i class="fa fa-arrow-left"></i> Back to Stock Register
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid" style="padding: 20px 30px;">
+    
+    {# Report Tabs #}
+    <ul class="nav nav-tabs mb-3" id="reportTabs" role="tablist" style="border-bottom: 2px solid #334155;">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="daily-tab" data-bs-toggle="tab" data-bs-target="#daily" type="button" role="tab" style="color: #fff; background: transparent; border: none; padding: 15px 25px; font-weight: 600;">
+          <i class="fa fa-calendar-day"></i> Daily Report
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="monthly-tab" data-bs-toggle="tab" data-bs-target="#monthly" type="button" role="tab" style="color: #94a3b8; background: transparent; border: none; padding: 15px 25px; font-weight: 600;">
+          <i class="fa fa-calendar"></i> Monthly Report
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="store-tab" data-bs-toggle="tab" data-bs-target="#store" type="button" role="tab" style="color: #94a3b8; background: transparent; border: none; padding: 15px 25px; font-weight: 600;">
+          <i class="fa fa-store"></i> Store-Based Report
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="reportTabContent">
+      
+      {# DAILY REPORT TAB #}
+      <div class="tab-pane fade show active" id="daily" role="tabpanel">
+        <div class="filter-bar" style="background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label style="color: #94a3b8; margin-bottom: 8px; display: block;">From Date</label>
+              <input type="date" id="daily_date_from" value="{{ "now"|date("Y-m-d") }}" class="form-control" style="background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px;">
+            </div>
+            <div class="col-md-3">
+              <label style="color: #94a3b8; margin-bottom: 8px; display: block;">To Date</label>
+              <input type="date" id="daily_date_to" value="{{ "now"|date("Y-m-d") }}" class="form-control" style="background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px;">
+            </div>
+            <div class="col-md-2">
+              <label style="color: #94a3b8; margin-bottom: 8px; display: block;">Store</label>
+              <select id="daily_store" class="form-control" style="background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px;">
+                <option value="">All Stores</option>
+                {% for store in stores %}
+                  <option value="{{ store.store_id }}">{{ store.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label style="color: #94a3b8; margin-bottom: 8px; display: block;">Product</label>
+              <input type="text" id="daily_product" placeholder="Product name" class="form-control" style="background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px;">
+            </div>
+            <div class="col-md-2">
+              <label style="color: #94a3b8; margin-bottom: 8px; display: block;">&nbsp;</label>
+              <button type="button" onclick="loadDailyReport()" class="btn btn-primary w-100" style="background: #3b82f6; border: none; padding: 10px;">
+                <i class="fa fa-search"></i> Generate
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {# Stats Cards #}
+        <div id="daily_stats" class="row mb-4" style="display: none;"></div>
+
+        {# Export Button #}
+        <div class="d-flex justify-content-end mb-3" id="daily_export_btn" style="display: none !important;">
+          <button type="button" onclick="exportDailyReport()" class="btn btn-success" style="background: #10b981; border: none; padding: 10px 20px; border-radius: 6px;">
+            <i class="fa fa-download"></i> Export CSV
+          </button>
+        </div>
+
+        {# Results Table #}
+        <div id="daily_results" style="background: #1e293b; border-radius: 8px; overflow: hidden; display: none;">
+          <div class="table-responsive">
+            <table class="table table-dark table-hover m-0" style="color: #fff;">
+              <thead style="background: #0f172a;">
+                <tr>
+                  <th style="padding: 15px; font-weight: 600;">Date</th>
+                  <th style="padding: 15px; font-weight: 600;">PO Number</th>
+                  <th style="padding: 15px; font-weight: 600;">Product Line</th>
+                  <th style="padding: 15px; font-weight: 600;">Product</th>
+                  <th style="padding: 15px; font-weight: 600;">Supplier</th>
+                  <th style="padding: 15px; font-weight: 600;">Store</th>
+                  <th style="padding: 15px; font-weight: 600; text-align: right;">Qty Used</th>
+                  <th style="padding: 15px; font-weight: 600; text-align: right;">Unit Price</th>
+                  <th style="padding: 15px; font-weight: 600; text-align: right;">Total Cost</th>
+                </tr>
+              </thead>
+              <tbody id="daily_table_body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="daily_loading" class="text-center p-5" style="display: none;">
+          <div class="spinner-border" style="color: #3b82f6;"></div>
+          <p style="color: #94a3b8; margin-top: 15px;">Loading report...</p>
+        </div>
+
+        <div id="daily_empty" class="text-center p-5" style="background: #1e293b; border-radius: 8px; display: none;">
+          <i class="fa fa-inbox fa-3x" style="color: #475569; margin-bottom: 15px;"></i>
+          <p style="color: #94a3b8;">No data found for selected filters</p>
+        </div>
+      </div>
+
+      {# MONTHLY REPORT TAB #}
+      <div class="tab-pane fade" id="monthly" role="tabpanel">
+        <div class="filter-bar" style="background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label style="color: #94a3b8; margin-bottom: 8px; display: block;">Month</label>
+              <input type="month" id="monthly_month" value="{{ "now"|date("Y-m") }}" class="form-control" style="background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px;">
+            </div>
+           <div class="col-md-3">
+              <label style="color: #94a3b8; margin-bottom: 8px; display: block;">Store</label>
+          <select id="monthly_store" class="form-control store-dropdown">
+            <option value="">All Stores</option>
+           {% for store in stores %}
+          <option value="{{ store.store_id }}">{{ store.name }}</option>
+                {% endfor %}
+            </select>
+            </div>
+            <div class="col-md-3">
+              <label style="color: #94a3b8; margin-bottom: 8px; display: block;">Product</label>
+              <input type="text" id="monthly_product" placeholder="Product name" class="form-control" style="background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px;">
+            </div>
+            <div class="col-md-3">
+              <label style="color: #94a3b8; margin-bottom: 8px; display: block;">&nbsp;</label>
+              <button type="button" onclick="loadMonthlyReport()" class="btn btn-primary w-100" style="background: #3b82f6; border: none; padding: 10px;">
+                <i class="fa fa-search"></i> Generate
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {# Stats Cards #}
+        <div id="monthly_stats" class="row mb-4" style="display: none;"></div>
+
+        {# Export Button #}
+        <div class="d-flex justify-content-end mb-3" id="monthly_export_btn" style="display: none !important;">
+          <button type="button" onclick="exportMonthlyReport()" class="btn btn-success" style="background: #10b981; border: none; padding: 10px 20px; border-radius: 6px;">
+            <i class="fa fa-download"></i> Export CSV
+          </button>
+        </div>
+
+        {# Results Table #}
+        <div id="monthly_results" style="background: #1e293b; border-radius: 8px; overflow: hidden; display: none;">
+          <div class="table-responsive">
+            <table class="table table-dark table-hover m-0" style="color: #fff;">
+              <thead style="background: #0f172a;">
+                <tr>
+                  <th style="padding: 15px; font-weight: 600;">Month</th>
+                  <th style="padding: 15px; font-weight: 600;">PO Number</th>
+                  <th style="padding: 15px; font-weight: 600;">Product</th>
+                  <th style="padding: 15px; font-weight: 600;">Supplier</th>
+                  <th style="padding: 15px; font-weight: 600;">Store</th>
+                  <th style="padding: 15px; font-weight: 600; text-align: right;">Qty Used</th>
+                  <th style="padding: 15px; font-weight: 600; text-align: right;">Unit Price</th>
+                  <th style="padding: 15px; font-weight: 600; text-align: right;">Total Cost</th>
+                </tr>
+              </thead>
+              <tbody id="monthly_table_body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="monthly_loading" class="text-center p-5" style="display: none;">
+          <div class="spinner-border" style="color: #3b82f6;"></div>
+          <p style="color: #94a3b8; margin-top: 15px;">Loading report...</p>
+        </div>
+
+        <div id="monthly_empty" class="text-center p-5" style="background: #1e293b; border-radius: 8px; display: none;">
+          <i class="fa fa-inbox fa-3x" style="color: #475569; margin-bottom: 15px;"></i>
+          <p style="color: #94a3b8;">No data found for selected filters</p>
+        </div>
+      </div>
+
+      {# STORE-BASED REPORT TAB #}
+      <div class="tab-pane fade" id="store" role="tabpanel">
+        <div class="filter-bar" style="background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label style="color: #94a3b8; margin-bottom: 8px; display: block;">Store</label>
+              <select id="store_store" class="form-control" style="background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px;">
+                <option value="">All Stores</option>
+                {% for store in stores %}
+                  <option value="{{ store.store_id }}">{{ store.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label style="color: #94a3b8; margin-bottom: 8px; display: block;">From Date</label>
+              <input type="date" id="store_date_from" class="form-control" style="background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px;">
+            </div>
+            <div class="col-md-2">
+              <label style="color: #94a3b8; margin-bottom: 8px; display: block;">To Date</label>
+              <input type="date" id="store_date_to" class="form-control" style="background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px;">
+            </div>
+            <div class="col-md-3">
+              <label style="color: #94a3b8; margin-bottom: 8px; display: block;">Product</label>
+              <input type="text" id="store_product" placeholder="Product name" class="form-control" style="background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px;">
+            </div>
+            <div class="col-md-2">
+              <label style="color: #94a3b8; margin-bottom: 8px; display: block;">&nbsp;</label>
+              <button type="button" onclick="loadStoreReport()" class="btn btn-primary w-100" style="background: #3b82f6; border: none; padding: 10px;">
+                <i class="fa fa-search"></i> Generate
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {# Stats Cards #}
+        <div id="store_stats" class="row mb-4" style="display: none;"></div>
+
+        {# Export Button #}
+        <div class="d-flex justify-content-end mb-3" id="store_export_btn" style="display: none !important;">
+          <button type="button" onclick="exportStoreReport()" class="btn btn-success" style="background: #10b981; border: none; padding: 10px 20px; border-radius: 6px;">
+            <i class="fa fa-download"></i> Export CSV
+          </button>
+        </div>
+
+        {# Results Table #}
+        <div id="store_results" style="background: #1e293b; border-radius: 8px; overflow: hidden; display: none;">
+          <div class="table-responsive">
+            <table class="table table-dark table-hover m-0" style="color: #fff;">
+              <thead style="background: #0f172a;">
+                <tr>
+                  <th style="padding: 15px; font-weight: 600;">Store</th>
+                  <th style="padding: 15px; font-weight: 600;">PO Number</th>
+                  <th style="padding: 15px; font-weight: 600;">Product Line</th>
+                  <th style="padding: 15px; font-weight: 600;">Product</th>
+                  <th style="padding: 15px; font-weight: 600;">Supplier</th>
+                  <th style="padding: 15px; font-weight: 600; text-align: center;">Transfers</th>
+                  <th style="padding: 15px; font-weight: 600; text-align: right;">Total Qty</th>
+                  <th style="padding: 15px; font-weight: 600; text-align: right;">Unit Price</th>
+                  <th style="padding: 15px; font-weight: 600; text-align: right;">Total Cost</th>
+                  <th style="padding: 15px; font-weight: 600;">Period</th>
+                </tr>
+              </thead>
+              <tbody id="store_table_body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="store_loading" class="text-center p-5" style="display: none;">
+          <div class="spinner-border" style="color: #3b82f6;"></div>
+          <p style="color: #94a3b8; margin-top: 15px;">Loading report...</p>
+        </div>
+
+        <div id="store_empty" class="text-center p-5" style="background: #1e293b; border-radius: 8px; display: none;">
+          <i class="fa fa-inbox fa-3x" style="color: #475569; margin-bottom: 15px;"></i>
+          <p style="color: #94a3b8;">No data found for selected filters</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+.nav-tabs .nav-link.active {
+  color: #3b82f6 !important;
+  border-bottom: 3px solid #3b82f6 !important;
+}
+
+.nav-tabs .nav-link:hover {
+  color: #60a5fa !important;
+}
+
+input[type="date"], input[type="month"] {
+  color-scheme: dark;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+.table-dark tbody tr:hover {
+  background: #334155 !important;
+}
+</style>
+
+<script>
+// Daily Report
+function loadDailyReport() {
+  var params = {
+    filter_date_from: $('#daily_date_from').val(),
+    filter_date_to: $('#daily_date_to').val(),
+    filter_store: $('#daily_store').val(),
+    filter_product: $('#daily_product').val()
+  };
+
+  $.ajax({
+    url: 'index.php?route=extension/stockreports.getDailyReport&user_token={{ user_token }}',
+    type: 'get',
+    data: params,
+    dataType: 'json',
+    beforeSend: function() {
+      $('#daily_results, #daily_empty, #daily_stats, #daily_export_btn').hide();
+      $('#daily_loading').show();
+    },
+    success: function(json) {
+      $('#daily_loading').hide();
+      
+      if (json.success && json.data && json.data.length > 0) {
+        renderDailyTable(json.data);
+        renderStats('daily', json.stats);
+        $('#daily_results, #daily_stats, #daily_export_btn').show();
+      } else {
+        $('#daily_empty').show();
+      }
+    }
+  });
+}
+
+function renderDailyTable(data) {
+  var html = '';
+  var totalQty = 0;
+  var totalCost = 0;
+
+  for (var i = 0; i < data.length; i++) {
+    var row = data[i];
+    totalQty += parseFloat(row.total_used_qty);
+    totalCost += parseFloat(row.total_cost);
+
+    html += '<tr style="border-bottom: 1px solid #334155;">';
+    html += '<td style="padding: 15px;">' + row.usage_date + '</td>';
+    html += '<td style="padding: 15px;"><span style="color: #3b82f6; font-weight: 600;">' + row.po_number + '</span></td>';
+    html += '<td style="padding: 15px;"><span style="background: #3b82f6; color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 12px;">' + row.purchase_order_product_id + '</span></td>';
+    html += '<td style="padding: 15px;"><div style="font-weight: 600;">' + row.product_name + '</div><small style="color: #94a3b8;">' + row.product_model + '</small></td>';
+    html += '<td style="padding: 15px;">' + row.supplier_name + '</td>';
+    html += '<td style="padding: 15px;"><span style="color: #10b981; font-weight: 600;">' + row.store_name + '</span></td>';
+    html += '<td style="padding: 15px; text-align: right; font-weight: 600;">' + parseFloat(row.total_used_qty).toFixed(2) + '</td>';
+    html += '<td style="padding: 15px; text-align: right; color: #94a3b8;">₹' + parseFloat(row.unit_price).toFixed(2) + '</td>';
+    html += '<td style="padding: 15px; text-align: right; font-weight: 700; color: #10b981;">₹' + parseFloat(row.total_cost).toFixed(2) + '</td>';
+    html += '</tr>';
+  }
+
+  // Total row
+  html += '<tr style="background: #0f172a; border-top: 2px solid #3b82f6;">';
+  html += '<td colspan="6" style="padding: 15px; font-weight: 700; color: #fff;">TOTAL</td>';
+  html += '<td style="padding: 15px; text-align: right; font-weight: 700; color: #fff;">' + totalQty.toFixed(2) + '</td>';
+  html += '<td style="padding: 15px;"></td>';
+  html += '<td style="padding: 15px; text-align: right; font-weight: 700; font-size: 18px; color: #10b981;">₹' + totalCost.toFixed(2) + '</td>';
+  html += '</tr>';
+
+  $('#daily_table_body').html(html);
+}
+
+// Monthly Report
+function loadMonthlyReport() {
+  var params = {
+    filter_month: $('#monthly_month').val(),
+    filter_store: $('#monthly_store').val(),
+    filter_product: $('#monthly_product').val()
+  };
+
+  $.ajax({
+    url: 'index.php?route=extension/stockreports.getMonthlyReport&user_token={{ user_token }}',
+    type: 'get',
+    data: params,
+    dataType: 'json',
+    beforeSend: function() {
+      $('#monthly_results, #monthly_empty, #monthly_stats, #monthly_export_btn').hide();
+      $('#monthly_loading').show();
+    },
+    success: function(json) {
+      $('#monthly_loading').hide();
+      
+      if (json.success && json.data && json.data.length > 0) {
+        renderMonthlyTable(json.data);
+        renderStats('monthly', json.stats);
+        $('#monthly_results, #monthly_stats, #monthly_export_btn').show();
+      } else {
+        $('#monthly_empty').show();
+      }
+    }
+  });
+}
+
+function renderMonthlyTable(data) {
+  var html = '';
+  var totalQty = 0;
+  var totalCost = 0;
+
+  for (var i = 0; i < data.length; i++) {
+    var row = data[i];
+    totalQty += parseFloat(row.total_used_qty);
+    totalCost += parseFloat(row.total_cost);
+
+    html += '<tr style="border-bottom: 1px solid #334155;">';
+    html += '<td style="padding: 15px; font-weight: 600;">' + row.month_name + '</td>';
+    html += '<td style="padding: 15px;"><span style="color: #3b82f6; font-weight: 600;">' + row.po_number + '</span></td>';
+    html += '<td style="padding: 15px;"><div style="font-weight: 600;">' + row.product_name + '</div><small style="color: #94a3b8;">' + row.product_model + '</small></td>';
+    html += '<td style="padding: 15px;">' + row.supplier_name + '</td>';
+    html += '<td style="padding: 15px;"><span style="color: #10b981; font-weight: 600;">' + row.store_name + '</span></td>';
+    html += '<td style="padding: 15px; text-align: right; font-weight: 600;">' + parseFloat(row.total_used_qty).toFixed(2) + '</td>';
+    html += '<td style="padding: 15px; text-align: right; color: #94a3b8;">₹' + parseFloat(row.unit_price).toFixed(2) + '</td>';
+    html += '<td style="padding: 15px; text-align: right; font-weight: 700; color: #10b981;">₹' + parseFloat(row.total_cost).toFixed(2) + '</td>';
+    html += '</tr>';
+  }
+
+  // Total row
+  html += '<tr style="background: #0f172a; border-top: 2px solid #3b82f6;">';
+  html += '<td colspan="5" style="padding: 15px; font-weight: 700; color: #fff;">TOTAL</td>';
+  html += '<td style="padding: 15px; text-align: right; font-weight: 700; color: #fff;">' + totalQty.toFixed(2) + '</td>';
+  html += '<td style="padding: 15px;"></td>';
+  html += '<td style="padding: 15px; text-align: right; font-weight: 700; font-size: 18px; color: #10b981;">₹' + totalCost.toFixed(2) + '</td>';
+  html += '</tr>';
+
+  $('#monthly_table_body').html(html);
+}
+
+// Store Report
+function loadStoreReport() {
+  var params = {
+    filter_store: $('#store_store').val(),
+    filter_date_from: $('#store_date_from').val(),
+    filter_date_to: $('#store_date_to').val(),
+    filter_product: $('#store_product').val()
+  };
+
+  $.ajax({
+    url: 'index.php?route=extension/stockreports.getStoreReport&user_token={{ user_token }}',
+    type: 'get',
+    data: params,
+    dataType: 'json',
+    beforeSend: function() {
+      $('#store_results, #store_empty, #store_stats, #store_export_btn').hide();
+      $('#store_loading').show();
+    },
+    success: function(json) {
+      $('#store_loading').hide();
+      
+      if (json.success && json.data && json.data.length > 0) {
+        renderStoreTable(json.data);
+        renderStats('store', json.stats);
+        $('#store_results, #store_stats, #store_export_btn').show();
+      } else {
+        $('#store_empty').show();
+      }
+    }
+  });
+}
+
+function renderStoreTable(data) {
+  var html = '';
+  var totalQty = 0;
+  var totalCost = 0;
+  var totalTransfers = 0;
+
+  for (var i = 0; i < data.length; i++) {
+    var row = data[i];
+    totalQty += parseFloat(row.total_used_qty);
+    totalCost += parseFloat(row.total_cost);
+    totalTransfers += parseInt(row.transfer_count);
+
+    html += '<tr style="border-bottom: 1px solid #334155;">';
+    html += '<td style="padding: 15px;"><span style="color: #10b981; font-weight: 700;">' + row.store_name + '</span></td>';
+    html += '<td style="padding: 15px;"><span style="color: #3b82f6; font-weight: 600;">' + row.po_number + '</span></td>';
+    html += '<td style="padding: 15px;"><span style="background: #3b82f6; color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 12px;">' + row.purchase_order_product_id + '</span></td>';
+    html += '<td style="padding: 15px;"><div style="font-weight: 600;">' + row.product_name + '</div><small style="color: #94a3b8;">' + row.product_model + '</small></td>';
+    html += '<td style="padding: 15px;">' + row.supplier_name + '</td>';
+    html += '<td style="padding: 15px; text-align: center;"><span style="background: #f59e0b; color: #fff; padding: 4px 12px; border-radius: 12px; font-weight: 600;">' + row.transfer_count + '</span></td>';
+    html += '<td style="padding: 15px; text-align: right; font-weight: 600;">' + parseFloat(row.total_used_qty).toFixed(2) + '</td>';
+    html += '<td style="padding: 15px; text-align: right; color: #94a3b8;">₹' + parseFloat(row.unit_price).toFixed(2) + '</td>';
+    html += '<td style="padding: 15px; text-align: right; font-weight: 700; color: #10b981;">₹' + parseFloat(row.total_cost).toFixed(2) + '</td>';
+    html += '<td style="padding: 15px;"><small style="color: #94a3b8;">' + row.first_transfer + ' to ' + row.last_transfer + '</small></td>';
+    html += '</tr>';
+  }
+
+  // Total row
+  html += '<tr style="background: #0f172a; border-top: 2px solid #3b82f6;">';
+  html += '<td colspan="5" style="padding: 15px; font-weight: 700; color: #fff;">TOTAL</td>';
+  html += '<td style="padding: 15px; text-align: center; font-weight: 700; color: #f59e0b;">' + totalTransfers + '</td>';
+  html += '<td style="padding: 15px; text-align: right; font-weight: 700; color: #fff;">' + totalQty.toFixed(2) + '</td>';
+  html += '<td style="padding: 15px;"></td>';
+  html += '<td style="padding: 15px; text-align: right; font-weight: 700; font-size: 18px; color: #10b981;">₹' + totalCost.toFixed(2) + '</td>';
+  html += '<td style="padding: 15px;"></td>';
+  html += '</tr>';
+
+  $('#store_table_body').html(html);
+}
+
+// Render Stats Cards
+function renderStats(type, stats) {
+  var html = '';
+  
+  html += '<div class="col-md-3">';
+  html += '<div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 20px; border-radius: 10px; color: white;">';
+  html += '<div style="font-size: 14px; margin-bottom: 8px; opacity: 0.9;">Total Batches</div>';
+  html += '<div style="font-size: 32px; font-weight: 700;">' + (stats.total_batches || 0) + '</div>';
+  html += '</div></div>';
+
+  html += '<div class="col-md-3">';
+  html += '<div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 20px; border-radius: 10px; color: white;">';
+  html += '<div style="font-size: 14px; margin-bottom: 8px; opacity: 0.9;">Total Products</div>';
+  html += '<div style="font-size: 32px; font-weight: 700;">' + (stats.total_products || 0) + '</div>';
+  html += '</div></div>';
+
+  html += '<div class="col-md-3">';
+  html += '<div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 20px; border-radius: 10px; color: white;">';
+  html += '<div style="font-size: 14px; margin-bottom: 8px; opacity: 0.9;">Total Quantity Used</div>';
+  html += '<div style="font-size: 32px; font-weight: 700;">' + parseFloat(stats.total_qty_used || 0).toFixed(2) + '</div>';
+  html += '</div></div>';
+
+  html += '<div class="col-md-3">';
+  html += '<div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); padding: 20px; border-radius: 10px; color: white;">';
+  html += '<div style="font-size: 14px; margin-bottom: 8px; opacity: 0.9;">Total Cost</div>';
+  html += '<div style="font-size: 32px; font-weight: 700;">₹' + parseFloat(stats.total_cost || 0).toFixed(2) + '</div>';
+  html += '</div></div>';
+
+  $('#' + type + '_stats').html(html);
+}
+
+// Export Functions
+function exportDailyReport() {
+  var params = {
+    filter_date_from: $('#daily_date_from').val(),
+    filter_date_to: $('#daily_date_to').val(),
+    filter_store: $('#daily_store').val(),
+    filter_product: $('#daily_product').val()
+  };
+
+  var url = 'index.php?route=extension/stockreports.exportDaily&user_token={{ user_token }}';
+  url += '&filter_date_from=' + encodeURIComponent(params.filter_date_from);
+  url += '&filter_date_to=' + encodeURIComponent(params.filter_date_to);
+  if (params.filter_store) url += '&filter_store=' + params.filter_store;
+  if (params.filter_product) url += '&filter_product=' + encodeURIComponent(params.filter_product);
+  
+  window.open(url, '_blank');
+}
+
+function exportMonthlyReport() {
+  var params = {
+    filter_month: $('#monthly_month').val(),
+    filter_store: $('#monthly_store').val(),
+    filter_product: $('#monthly_product').val()
+  };
+
+  var url = 'index.php?route=extension/stockreports.exportMonthly&user_token={{ user_token }}';
+  url += '&filter_month=' + encodeURIComponent(params.filter_month);
+  if (params.filter_store) url += '&filter_store=' + params.filter_store;
+  if (params.filter_product) url += '&filter_product=' + encodeURIComponent(params.filter_product);
+  
+  window.open(url, '_blank');
+}
+
+function exportStoreReport() {
+  var params = {
+    filter_store: $('#store_store').val(),
+    filter_date_from: $('#store_date_from').val(),
+    filter_date_to: $('#store_date_to').val(),
+    filter_product: $('#store_product').val()
+  };
+
+  var url = 'index.php?route=extension/stockreports.exportStore&user_token={{ user_token }}';
+  if (params.filter_store) url += '&filter_store=' + params.filter_store;
+  if (params.filter_date_from) url += '&filter_date_from=' + encodeURIComponent(params.filter_date_from);
+  if (params.filter_date_to) url += '&filter_date_to=' + encodeURIComponent(params.filter_date_to);
+  if (params.filter_product) url += '&filter_product=' + encodeURIComponent(params.filter_product);
+  
+  window.open(url, '_blank');
+}
+
+// Tab change handler
+$('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+  // Reset all tabs
+  $('#daily_results, #daily_empty, #daily_stats, #daily_export_btn').hide();
+  $('#monthly_results, #monthly_empty, #monthly_stats, #monthly_export_btn').hide();
+  $('#store_results, #store_empty, #store_stats, #store_export_btn').hide();
+});
+
+// Auto-load daily report on page load
+$(document).ready(function() {
+  loadDailyReport();
+});
+</script>
+
+{{ footer }}

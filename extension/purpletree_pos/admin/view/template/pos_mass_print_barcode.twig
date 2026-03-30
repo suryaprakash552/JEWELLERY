@@ -1,0 +1,56 @@
+<style type="text/css" media="print">
+        @media print {
+  #printPageButton {
+    display: none;
+  }
+}        
+</style>
+<link rel="stylesheet" href="view/stylesheet/bootstrap.css">
+<link rel="stylesheet" href="view/stylesheet/stylesheet.css">
+<link rel="stylesheet" href="{{baseurl}}extension/purpletree_pos/admin/view/stylesheet/posproduct/customproduct.css">
+<link rel="stylesheet" href="view/javascript/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="view/javascript/font-awesome/css/font-awesome.css">
+{% for massprintbarcodes in massprintbarcode %}
+ {% if massprintbarcodes.upc %}
+      {% set result_barcode = massprintbarcodes.upc %}
+  {% elseif massprintbarcodes.ean %}
+	  {% set result_barcode = massprintbarcodes.ean %}
+  {% elseif massprintbarcodes.mpn %}
+	  {% set result_barcode = massprintbarcodes.mpn %}
+  {% elseif massprintbarcodes.jan %}
+	  {% set result_barcode = massprintbarcodes.jan %}
+  {% elseif massprintbarcodes.isbn %}
+	  {% set result_barcode = massprintbarcodes.isbn %}
+  {% elseif massprintbarcodes.sku %}
+	  {% set result_barcode = massprintbarcodes.sku %}
+ {% endif %}
+ {% for i in 1..qty %}
+    <div class="massprintpage">
+	<img class="barcodes"
+		 jsbarcode-format="code39"
+		 jsbarcode-value="{{ result_barcode }}"
+		 jsbarcode-displayValue="false"
+		 jsbarcode-width="1px"
+		 jsbarcode-height="30px"
+		 jsbarcode-fontSize="15px">
+ </img><br>
+ Name:{{ massprintbarcodes.name }}<br>
+ <!-- {% if massprintbarcodes.special %} -->
+  <!-- Price:{{ massprintbarcodes.special }} -->
+  <!-- {% else %} -->
+  Price:{{ massprintbarcodes.price }} 
+  <!-- {% endif %} -->
+  </div>
+ {% endfor %}
+ {% endfor %}
+<br><br>
+<div class="btn-group massprintbutton">
+<!--<a href="{{ action_back }}" id="printPageButton" class="btn btn-warning"><i class="fa fa-arrow-left"></i>Back</a>-->
+<button id="printPageButton" class="btn btn-success" onclick="window.print()"><i class="fa fa-print"></i>Print</button>
+</div> 
+    
+<script type="text/javascript" src="{{baseurl}}extension/purpletree_pos/admin/view/javascript/ptsbarcode/JsBarcode.all.min.js"></script> 
+<script type="text/javascript" src="{{baseurl}}extension/purpletree_pos/admin/view/javascript/ptsbarcode/jquery.min.js"></script>
+<script type="text/javascript">	         
+		JsBarcode(".barcodes").init();       
+</script>

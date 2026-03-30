@@ -1,0 +1,557 @@
+{{ header }}{{ column_left }}
+<style>
+#input-order-status {
+    background-color: #0f172a !important;
+    color: white !important;
+}
+#input-order-status option {
+    background-color: #0f172a;
+    color: white;
+}
+/* Button wrapper */
+.filter-actions {
+  display: flex;
+  justify-content: flex-end;   
+  align-items: center;         
+  gap: 8px;                    
+  margin-top: -5px;           
+}
+
+/* Buttons */
+.filter-actions .btn {
+  width: 95px;
+  height: 36px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.filter-bar .input-group.date {
+    background: #0f172a !important;
+    border: 1px solid #334155 !important;
+    border-radius: 8px !important;
+    padding: 0 !important;
+    height: 36px; /* match other inputs */
+    overflow: hidden;
+}
+
+/* The input look same as other inputs */
+.filter-bar .input-group.date input {
+    background: #0f172a !important;
+    color: #fff !important;
+    border: none !important;
+    padding: 8px 10px !important;
+    height: 36px !important;
+    border-radius: 8px 0 0 8px !important;
+}
+
+/* The calendar button style */
+.filter-bar .input-group.date button {
+    background: #334155 !important;
+    border: none !important;
+    color: #fff !important;
+    padding: 8px 10px !important;
+    height: 36px !important;
+    border-radius: 0 8px 8px 0 !important;
+}
+ .table-container {
+            background: #000;
+            border: 3px solid #fff;
+            overflow: hidden;
+        }
+        
+        .table {
+            width: 100%;
+            margin: 0;
+            border-collapse: collapse;
+            background: #000;
+            color: #fff;
+        }
+        
+        .table thead {
+            background: #000;
+        }
+        
+        .table thead tr td {
+            padding: 15px 20px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #fff;
+            border: 1px solid #4a5568;
+            background: #000;
+        }
+        
+        .table tbody tr {
+            background: #000;
+        }
+        
+        .table tbody tr:hover {
+            background: #1a1a1a;
+        }
+        
+        .table tbody tr td {
+            padding: 18px 20px;
+            font-size: 14px;
+            color: #fff;
+            border: 1px solid #4a5568;
+            opacity: 1.0;
+            background: #000;
+        }
+        
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #3b82f6;
+        }
+        
+        .text-center {
+            text-align: center !important;
+        }
+        
+        .text-left {
+            text-align: left !important;
+        }
+        
+        .text-right {
+            text-align: right !important;
+        }
+        
+        .table thead a {
+            color: #fff;
+            text-decoration: none;
+        }
+        
+        .table thead a:hover {
+            color: #3b82f6;
+        }
+input::placeholder {
+  color: #fff !important;
+  opacity: 1; /* for Firefox */
+}
+</style>
+
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+      	<a type="button" data-toggle="tooltip" title="{{ button_export }}" id="button-export" class="btn btn-warning" style="width:38px; height:38px; padding:6px 0; text-align:center; border-radius:4px;"><i class="fa fa-download"></i></a>
+        <button type="submit" id="button-invoice" form="form-poorder" formaction="{{ invoice }}" data-toggle="tooltip" title="{{ button_invoice_print }}" class="btn btn-info" style="width:38px; height:38px; padding:6px 0; text-align:center; border-radius:4px;"><i class="fa fa-print"></i></button>
+		<button type="submit" form="form-poorder" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default" style="width:38px; height:38px; padding:6px 0; text-align:center; border-radius:4px; background-color: cornflowerblue;"><i class="fa fa-copy"></i></button>
+        <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary" style="width:38px; height:38px; padding:6px 0; text-align:center; border-radius:4px;"><i class="fa fa-plus"></i></a>
+        <button type="submit" 
+                form="form-poorder" 
+                formaction="{{ delete }}"
+                class="btn btn-danger"
+                data-toggle="tooltip"
+                title="{{ button_delete }}"
+                onclick="return confirm('{{ text_confirm }}');"
+                style="width:38px; height:38px; padding:6px 0; text-align:center; border-radius:4px;">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+		{% for breadcrumb in breadcrumbs %}
+        <li class="breadcrumb-item"><a href="{{ breadcrumb['href'] }}">{{ breadcrumb['text'] }}</a></li>
+		{% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">{% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+   {% if success %} 
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+   {% endif %}
+	<div class="panel panel-default">
+	 {# <div class="panel-heading">#}
+		{#<h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>#}
+	 {# </div>#}
+	  <div class="panel-body">
+		<div class="filter-bar" style="background: #1e293b; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px;">
+          <div class="d-flex flex-wrap align-items-end gap-3">
+        
+            <div class="d-flex flex-column">
+              {#<label class="control-label mb-1" for="input-po_number">{{ entry_po_number }}</label>#}
+              <input type="text" name="filter_po_number" value="{{ filter_po_number }}" placeholder="{{ entry_po_number }}" id="input-po_number" class="form-control" style="width:195px; background: #0f172a; border: 1px solid #334155; color: #fff;padding: 8px 10px;">
+            </div>
+        
+            <div class="d-flex flex-column">
+              {#<label class="control-label mb-1" for="input-supplier">{{ entry_supplier }}</label>#}
+              <input type="text" name="filter_supplier" value="{{ filter_supplier }}" placeholder="{{ entry_supplier }}" id="input-supplier" class="form-control" style="width:195px; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 8px 10px;" data-oc-target="autocomplete-supplier" autocomplete="off">
+              <ul id="autocomplete-supplier" class="dropdown-menu"></ul>
+              <input type="hidden" name="filter_supplier_id" id="input-supplier-id" value="{{ filter_supplier_id }}">
+            </div>
+        
+            <div class="d-flex flex-column">
+              {#<label class="control-label mb-1" for="input-order-status">{{ entry_order_status }}</label>#}
+              <select name="filter_order_status_id" id="input-order-status" class="form-control" style="width:195px; background: #0f172a; border: 1px solid #334155; color: #fff;padding: 8px 10px;">
+                <option value="">{{ entry_order_status }}</option>
+                {% if order_statuses %}
+                  {% for order_status in order_statuses %}
+                    <option value="{{ order_status['name'] }}" {% if order_status['name'] == filter_order_status_id %}selected{% endif %} style="width:195px; background: #0f172a; border: 1px solid #334155; color: #fff;padding: 8px 10px;">{{ order_status['name'] }}</option>
+                  {% endfor %}
+                {% endif %}
+              </select>
+            </div>
+        
+            <div class="d-flex flex-column">
+              {#<label class="control-label mb-1" for="input-total">{{ entry_total }}</label>#}
+              <input type="text" name="filter_total" value="{{ filter_total }}" placeholder="{{ entry_total }}" id="input-total" class="form-control" style="width:195px; background: #0f172a; border: 1px solid #334155; color: #fff;padding: 8px 10px;">
+            </div>
+        
+            <div class="d-flex flex-column">
+              {#<label class="control-label mb-1" for="input-date-added">{{ entry_from_date }}</label>#}
+              <div class="input-group input-group-sm date" style="width:195px; background: #1e293b; border: 1px solid #334155; color: #fff;padding: 8px 10px;">
+                <input type="text" name="filter_date_added" value="{{ filter_date_added }}" placeholder="{{ entry_from_date }}" data-date-format="YYYY-MM-DD" id="input-date-added" class="form-control" style="background: #1e293b; color: white">
+                <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
+              </div>
+            </div>
+        
+            <div class="d-flex flex-column">
+              {#<label class="control-label mb-1" for="input-date-modified">{{ entry_to_date }}</label>#}
+              <div class="input-group input-group-sm date" style="width:195px; background: #1e293b; border: 1px solid #334155; color: #fff;padding: 8px 10px;">
+                <input type="text" name="filter_date_modified" value="{{ filter_date_modified }}" placeholder="{{ entry_to_date }}" data-date-format="YYYY-MM-DD" id="input-date-modified" class="form-control" style="background: #1e293b; color: white">
+                <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
+              </div>
+            </div>
+        
+           <div class="filter-actions">
+  <button type="button" id="button-filter" class="btn btn-info btn-sm">
+    <i class="fa fa-filter"></i> {{ text_filter }}
+  </button>
+
+  <a href="{{ clear }}" class="btn btn-danger btn-sm">
+    <i class="fa fa-eraser"></i> {{ text_clear }}
+  </a>
+</div>
+
+        
+          </div>
+        </div>
+
+		<form method="post" action="{{ delete }}" enctype="multipart/form-data" id="form-poorder">
+			<div class="table-container" style="background: #1e293b; border-radius: 8px; overflow: hidden;">
+              <div class="table-responsive">
+                <table class="table table-dark table-hover m-0" style="color: #fff;">
+                  <thead style="background: #0f172a;">
+				  <tr>
+					<td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+					<td class="text-left">{% if sort == 'o.po_number' %} <a href="{{ sort_po_number }}" class="{{ order|lower }}">{{ column_po_number }}</a> {% else %} <a href="{{ sort_po_number }}">{{ column_po_number }}</a> {% endif %}</td>
+					<td class="text-left">{% if sort == 'o.date_added' %} <a href="{{ sort_date_added }}" class="{{ order|lower }}">{{ column_date_added }}</a> {% else %} <a href="{{ sort_date_added }}">{{ column_date_added }}</a> {% endif %}</td>
+					<td class="text-left">{% if sort == 'product' %} <a href="{{ sort_product }}" class="{{ order|lower }}">{{ column_product }}</a> {% else %} <a href="{{ sort_product }}">{{ column_product }}</a> {% endif %}</td>
+					<td class="text-left">{% if sort == 'sub_total' %} <a href="{{ sort_sub_total }}" class="{{ order|lower }}">{{ column_sub_total }}</a> {% else %} <a href="{{ sort_sub_total }}">{{ column_sub_total }}</a> {% endif %}</td>
+					<td class="text-left">{% if sort == 'shipping' %} <a href="{{ sort_shipping }}" class="{{ order|lower }}">{{ column_shipping }}</a> {% else %} <a href="{{ sort_shipping }}">{{ column_shipping }}</a> {% endif %}</td>
+					<td class="text-left">{% if sort == 'tax' %} <a href="{{ sort_tax }}" class="{{ order|lower }}">{{ column_tax }}</a> {% else %} <a href="{{ sort_tax }}">{{ column_tax }}</a> {% endif %}</td>
+					<td class="text-right">{% if sort == 'o.total' %} <a href="{{ sort_total }}" class="{{ order|lower }}">{{ column_total }}</a> {% else %} <a href="{{ sort_total }}">{{ column_total }}</a> {% endif %}</td>
+					<td class="text-left">{% if sort == 'status' %} <a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}">{{ column_status }}</a> {% endif %}</td>
+					<td class="text-left">{% if sort == 'o.delivery_date' %} <a href="{{ sort_delivery_date }}" class="{{ order|lower }}">{{ column_delivery_date }}</a> {% else %} <a href="{{ sort_delivery_date }}">{{ column_delivery_date }}</a> {% endif %}</td>
+					<td class="text-left">{% if sort == 'o.supplier_company' %} <a href="{{ sort_supplier_company }}" class="{{ order|lower }}">{{ column_supplier_company }}</a> {% else %} <a href="{{ sort_supplier_company }}">{{ column_supplier_company }}</a> {% endif %}</td>
+					<td>{{ column_action }}</td>
+				  </tr>
+				</thead>
+				<tbody>
+				{% if orders %}
+				{% for order in orders %}
+				<tr id="order{{ order['order_id'] }}">
+				  <td class="text-center"> {% if order['order_id'] in selected %}
+					<input type="checkbox" name="selected[]" value="{{ order['order_id'] }}" checked="checked" />
+					{% else %}
+					<input type="checkbox" name="selected[]" value="{{ order['order_id'] }}" />
+					{% endif %}
+					</td>
+				  <td class="text-left">{{ order['po_number'] ? order['po_number'] : 'PO No.' }}</td>
+				  <td class="text-left">{{ order['date_added'] }}</td>
+				  <td class="text-left"><span class="label label-success" style="font-size: 13px;">{{ order['product'] }}</span></td>
+					<td class="text-left">{{ order['sub_total'] }}</td>
+				  <td class="text-left">{{ order['shipping'] }}</td>
+				  <td class="text-left">{{ order['tax'] }}</td>
+				  <td class="text-right">{{ order['total'] }}</td>
+				  <td class="text-left order_status">{{ order['status'] }}</td>
+				  <td class="text-left">{{ order['delivery_date'] }}</td>
+				  <td class="text-left">{{ order['supplier_contact'] }} ({{ order['supplier_company'] }})</td>
+				  <td class="text-left">
+                    {# Conditional button based on order status #}
+                    {% if order['status']|lower == 'received' %}
+                        {# View button for Received orders #}
+                        <a href="{{ order['view'] }}" 
+                           data-toggle="tooltip" 
+                           title="View Order" 
+                           class="btn btn-primary">
+                            <i class="fa fa-eye"></i>
+                        </a>
+                    {% else %}
+                        {# Edit button for Pending/Other orders #}
+                        <a href="{{ order['view'] }}" 
+                           data-toggle="tooltip" 
+                           title="Edit Order" 
+                           class="btn btn-primary">
+                            <i class="fa fa-pencil"></i>
+                        </a>
+                    {% endif %}
+                    
+                    {# Print button - always available #}
+				  	<a href="{{ order['invoice'] }}" 
+				  	   data-toggle="tooltip" 
+				  	   title="Print Invoice" 
+				  	   class="btn btn-info" 
+				  	   target="_blank">
+				  	    <i class="fa fa-print"></i>
+				  	</a>
+				  	
+				  	{# Export button - always available #}
+				  	<a href="{{ order['export'] }}" 
+				  	   data-toggle="tooltip" 
+				  	   title="Export" 
+				  	   class="btn btn-success">
+				  	    <i class="fa fa-download"></i>
+				  	</a>
+				  </td>
+				</tr>
+				{% endfor %}
+				<tr>
+				  <td class="text-center"></td>
+				  <td class="text-left"><b>{{ orders|length }}</b></td>
+				  <td class="text-left"></td>
+				  <td class="text-left"><b>{{ total_products }}</b></td>
+				  <td class="text-left"><b>{{ sub_total }}</b></td>
+				  <td class="text-left"><b>{{ shipping }}</b></td>
+				  <td class="text-left"><b>{{ tax }}</b></td>
+				  <td class="text-right"><b>{{ total_order }}</b></td>
+				  <td class="text-left"></td>
+				  <td class="text-left"></td>
+				  <td class="text-left"></td>
+				  <td class="text-left"></td>
+				</tr>
+				{% else %}
+				<tr>
+				  <td class="text-center" colspan="13">{{ text_no_results }}</td>
+				</tr>
+				{% endif %}
+				  </tbody>
+				
+			  </table>
+			</div>
+			</div>
+		</form>
+		<div class="row">
+		  <div class="col-sm-6 text-left">{{ pagination }}</div>
+		  <div class="col-sm-6 text-right">{{ results }}</div>
+		</div>
+	  </div>
+	</div>
+  </div>
+  <script type="text/javascript">
+$('#button-filter').on('click', function() {
+	url = '';
+    const supplier_id = $('#input-supplier-id').val();
+    const supplier = $('input[name="filter_supplier"]').val();
+
+    if (supplier_id) {
+      url += '&filter_supplier_id=' + encodeURIComponent(supplier_id);
+    } else if (supplier) {
+      url += '&filter_supplier=' + encodeURIComponent(supplier);
+    }
+
+	var filter_po_number = $('input[name=\'filter_po_number\']').val();
+
+	if (filter_po_number) {
+		url += '&filter_po_number=' + encodeURIComponent(filter_po_number);
+	}
+
+	var filter_supplier = $('input[name=\'filter_supplier\']').val();
+
+	if (filter_supplier) {
+		url += '&filter_supplier=' + encodeURIComponent(filter_supplier);
+	}
+
+	var filter_order_status_id = $('select[name=\'filter_order_status_id\']').val();
+
+	if (filter_order_status_id !== '') {
+		url += '&filter_order_status_id=' + encodeURIComponent(filter_order_status_id);
+	}
+
+	var filter_total = $('input[name=\'filter_total\']').val();
+
+	if (filter_total) {
+		url += '&filter_total=' + encodeURIComponent(filter_total);
+	}
+
+	var filter_date_added = $('input[name=\'filter_date_added\']').val();
+
+	if (filter_date_added) {
+		url += '&filter_date_added=' + encodeURIComponent(filter_date_added);
+	}
+	
+	var filter_date_modified = $('input[name=\'filter_date_modified\']').val();
+
+	if (filter_date_modified) {
+		url += '&filter_date_modified=' + encodeURIComponent(filter_date_modified);
+	}
+
+	location = 'index.php?route=extension/me_purchase_order&user_token={{ user_token }}' + url;
+});
+
+$('#button-export').on('click', function() {
+	url = '';
+    const supplier_id = $('#input-supplier-id').val();
+    const supplier = $('input[name="filter_supplier"]').val();
+    
+    if (supplier_id) {
+      url += '&filter_supplier_id=' + encodeURIComponent(supplier_id);
+    } else if (supplier) {
+      url += '&filter_supplier=' + encodeURIComponent(supplier);
+    }
+
+	var filter_po_number = $('input[name=\'filter_po_number\']').val();
+
+	if (filter_po_number) {
+		url += '&filter_po_number=' + encodeURIComponent(filter_po_number);
+	}
+
+	var filter_supplier = $('input[name=\'filter_supplier\']').val();
+
+	if (filter_supplier) {
+		url += '&filter_supplier=' + encodeURIComponent(filter_supplier);
+	}
+
+	var filter_order_status_id = $('select[name=\'filter_order_status_id\']').val();
+
+	if (filter_order_status_id !== '') {
+		url += '&filter_order_status_id=' + encodeURIComponent(filter_order_status_id);
+	}
+
+	var filter_total = $('input[name=\'filter_total\']').val();
+
+	if (filter_total) {
+		url += '&filter_total=' + encodeURIComponent(filter_total);
+	}
+
+	var filter_date_added = $('input[name=\'filter_date_added\']').val();
+
+	if (filter_date_added) {
+		url += '&filter_date_added=' + encodeURIComponent(filter_date_added);
+	}
+	
+	var filter_date_modified = $('input[name=\'filter_date_modified\']').val();
+
+	if (filter_date_modified) {
+		url += '&filter_date_modified=' + encodeURIComponent(filter_date_modified);
+	}
+
+	var $selected = $("input[name='selected[]']:checked");
+	
+	if ($selected.length) {
+		url += '&'+$selected.serialize();
+	}
+
+	location = 'index.php?route=extension/me_purchase_order.exportOrder&user_token={{ user_token }}' + url;
+});
+//--></script> 
+<script type="text/javascript"><!--
+$('input[name^=\'selected\']').on('change', function() {
+	$('#button-invoice').prop('disabled', true);
+
+	var selected = $('input[name^=\'selected\']:checked');
+
+	if (selected.length) {
+		$('#button-invoice').prop('disabled', false);
+	}
+});
+
+$('#button-shipping, #button-invoice').prop('disabled', true);
+
+$('input[name^=\'selected\']:first').trigger('change');
+
+// IE and Edge fix!
+$('#button-shipping, #button-invoice').on('click', function(e) {
+	$('#form-order').attr('action', this.getAttribute('formAction'));
+});
+//--></script> 
+  <script type="text/javascript"><!--
+//vendor
+$('input[name="filter_supplier"]').autocomplete({
+  'source': function(request, response) {
+    $.ajax({
+      url: 'index.php?route=extension/me_posupplier.autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+      dataType: 'json',
+      success: function(json) {
+        response($.map(json, function(item) {
+          return { label: item['name'], value: item['supplier_id'] }
+        }));
+      }
+    });
+  },
+  'select': function(item) {
+    $('input[name="filter_supplier"]').val(item['label']);
+    $('#input-supplier-id').val(item['value']);
+  }
+});
+
+$('input[name="filter_supplier"]').on('input', function() {
+  $('#input-supplier-id').val(''); // clear id if user types manually
+});
+
+
+$('#addorderhistory').on('click', function() {
+	$.ajax({
+		url: 'index.php?route=extension/me_purchase_order.Updateorder&user_token={{ user_token }}',
+		type: 'post',
+		dataType: 'json',
+		data: $("input[name^=\'selected\']:checked,#form-order_history select,#form-order_history input[type='checkbox']:checked"),
+		beforeSend: function() {
+			$('#addorderhistory').button('loading');
+		},
+		complete: function() {
+			$('#addorderhistory').button('reset');
+		},
+		success: function(json) {
+			$('.alert-dismissible,.alert-danger').remove();
+
+			if (json['error']) {
+				if(json['error']['warning']){
+					$('#form-order_history').before('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> '+ json['error']['warning'] +'<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				}
+			}
+
+			if (json['success']) {
+				if(json['order']){
+					for(i in json['order']){
+						$('#order'+i+' .date_modified').html(json['order'][i]['date_modified']);
+						$('#order'+i+' .order_status span').html(json['order'][i]['order_status']);
+					}
+				}
+				$('input[name^=\'selected\']').prop('checked',false);
+				$('#quickorderhistory').modal('hide');
+			}
+		}
+	});
+});
+
+//--></script>
+ <script src="view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+  <link href="view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.css" type="text/css" rel="stylesheet" media="screen" />
+  <script type="text/javascript"><!--
+$('.date').datetimepicker({
+	pickTime: false
+});
+//--></script>
+
+<style>
+/* If headers use <td> instead of <th> */
+table thead td {
+  font-weight: 700 !important;
+  color: #fff;
+}
+</style>
+
+
+</div>
+{{ footer }}

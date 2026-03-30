@@ -1,0 +1,44 @@
+<?php
+class ControllerTransactionsCouponstatus extends Controller {
+    public function index($data)
+    {
+        $json=array();
+        $this->load->language('transactions/common');
+        $this->load->model('transactions/common');
+        $cust_info=$this->model_transactions_common->getCustInfo($data['userid']);
+        if(!$cust_info['exstatus'])
+        {
+            $json['success']="0";
+            $json['message']=$this->language->get('error_user');
+        }
+        if($cust_info['exstatus'])
+        {
+            $psa=$this->model_transactions_common->getCouponInfo($data['userid'],$this->request->post['ourrequestid']);
+            if(!$psa['exstatus'])
+            {
+                $json['success']="0";
+                $json['message']=$this->language->get('error_psa');
+            }
+           if($psa['exstatus'])
+           {
+               $json['success']="1";
+               if($psa['status']==17)
+               {
+                   $json['coupon_status']="Approved";
+               }elseif($psa['status']==19)
+               {
+                   $json['coupon_status']="Rejected";
+               }elseif($psa['status']==21)
+               {
+                   $json['coupon_status']="Pending";
+               }else
+                    {
+                        $json['coupon_status']="Pending";
+                    }
+               $json['message']=$psa['message'];
+               $json['psaid']=$psa['psaid'];
+           }
+        }
+        return $json;
+    }
+}

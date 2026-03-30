@@ -1,0 +1,515 @@
+{{ header }}{{ column_left }}
+ <style>
+.my-filter-input {
+    display: none;
+}
+.my-filter{
+    display: block;    
+    padding: 10px;
+    margin: 0 0 1px 0;
+    cursor: pointer;
+    border: 1px solid #A7A7A7;
+    background: #6AAB95;
+    border-radius: 3px;
+    color: #FFF;
+    transition: ease .5s;
+
+}
+.my-filter:hover {
+    background: #4E8774;
+}
+
+.my-filter-content {
+    background: #313941;
+    padding: 45px 7px;
+    border: 1px solid #A7A7A7;
+    margin: 0 0 1px 0;
+    border-radius: 3px;
+   
+    
+   
+}
+
+.my-filter-input + .my-filter + .my-filter-content {
+    display: none;
+    padding-right: -2px;
+}
+
+.my-filter-input:checked + .my-filter + .my-filter-content {
+    display: block;
+}
+
+.myfilter-container
+{
+    padding-left: 250px;
+}
+</style>
+<div id="content"><br><br>
+    <div class="page-header">
+        <div class="container-fluid myfilter-container">
+            <div class="pull-right">
+                <!--<button type="button" data-toggle="tooltip" title="{{ button_filter }}" onclick="$('#filter-product').toggleClass('hidden-sm hidden-xs');" class="btn btn-default hidden-md hidden-lg"><i class="fa fa-filter"></i></button> -->
+                <!--<button type="submit" form="form-product" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></button>-->
+                {# <button type="button" form="form-product" formaction="{{ delete }}" data-bs-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger"  onclick=" return confirm('{{ text_confirm }}') ? $('#form-product').submit() : false;" style="float:right"><i class="fa-regular fa-trash-can" ></i></button>
+                <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary" style="float:right" ><i class="fa fa-plus"></i></a>#}
+            </div>
+                <h1>{{ heading_title }}</h1>
+      <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+        </div>
+    </div>
+    <div class="container-fluid myfilter-container">{% if error_warning %}
+        <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        {% endif %}
+        {% if success %}
+        <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        {% endif %}
+    
+            {#<div class="row">
+            <div id="filter-product" class="col-sm-12 hidden-sm hidden-xs">
+                <div class="panel panel-default">
+                    <input class="my-filter-input"type="checkbox" id="title2" />
+                    <label class='my-filter panel-heading'for="title2" style="background-color:#861f41;color:white;"><i class="fa fa-filter"></i> {{ text_filter }}<span style="float:right;"><i class="fa fas fa-chevron-down fa-1x" ></i></span>
+                    </label>
+            <div class="my-filter-content panel-body">
+            <p>#}
+       <div class="row">
+      
+      <div class="col-sm-13">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                  <thead style="background-color:#a86c85">
+                    {#<tr>
+                      <!--<td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>-->
+                      <td class="text-center"><h3 class="panel-title"><b><i class="fa fa-line-chart" style="color:black"></i> {{ product_total_sale }}</b></h3></td>
+                      <td class="text-center"><h3 class="panel-title"><b><i class="fa fa-thumbs-up" style="color:green"></i> {{ product_total_success }}</b></h3></td>
+                      <td class="text-center"><h3 class="panel-title"><b><i class="fa fa-thumbs-down" style="color:brown"></i> {{ product_total_failed }}</b></h3></td>
+                      <td class="text-center"><h3 class="panel-title"><b><i class="fa fa-hand-rock-o" style="color:orange"></i> {{ product_total_pending }}</b></h3></td>
+                    </tr>
+                     <tr>
+                      <!--<td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>-->
+                      <td class="text-center"><h3 class="panel-title" style="color:black"><b>{{ADMIN_PROFIT}} {{ product_total_adminprofit }}</b></h3></td>
+                      <td class="text-center"><h3 class="panel-title" style="color:green"><b>{{AGENT_PROFIT}} {{ product_total_agentprofit }}</b></h3></td>
+                      <td class="text-center"><h3 class="panel-title" style="color:brown"><b>{{AGENT_SURCHARGE}} {{ product_total_surcharge }}</b></h3></td>
+                      <td class="text-center"><h3 class="panel-title" style="color:orange"><b>{{TOTAL_UPWORD}} {{ product_total_upword }}</b></h3></td>
+                    </tr>#}
+                  </thead>
+                </table>
+              </div>
+          </div>
+          
+      <div id="filter-product" class="col-sm-15 hidden-sm hidden-xs">
+        <div class="panel panel-default">
+          <input class="my-filter-input"type="checkbox" id="title2" />
+        <label class='my-filter panel-heading'for="title2" style="background-color:#313941;color:white;"><i class="fa fa-filter"></i> {{ text_filter }}<span style="float:right;"><i class="fa fas fa-chevron-down  fa-1x"  ></i></span>
+        </label>
+        <div class="my-filter-content panel-body" >
+     
+            
+         <div class="row mb-12" style="row-gap: 20px;">
+            <div class="col-sm-3">
+              <label class="control-label" class="col-sm-2" style="color:white"  for="input-fdate">{{ entry_fdate }}</label> 
+             <input type="date" name="filter_fdate"  style="color:#black" value="{{ filter_fdate }}"  id="input-fdate" class="form-control" />
+            </div>
+            <div class="col-sm-3">
+              <label class="control-label" class="col-sm-2"style="color:white"  for="input-tdate">{{ entry_tdate}}</label>
+              <input type="date" name="filter_tdate"  style="color:#black" value="{{ filter_tdate }}"  id="input-tdate" class="form-control" />
+            </div>
+            
+            <div class="col-sm-3">
+              <label class="control-label" style="color:white"  for="input-customerid">{{ entry_customerid }}</label>
+              <input type="text" name="filter_customerid"  style="color:#black" value="{{ filter_customerid }}"  id="input-customerid" class="form-control" />
+            </div>
+            
+            <div class="col-sm-3">
+              <label class="control-label" style="color:white"  for="input-snumber">{{ entry_snumber }}</label>
+              <input type="text" style="color:black"  name="filter_snumber" value="{{ filter_snumber }}"  id="input-snumber" class="form-control" />
+            </div>
+            
+            <div class="col-sm-3">
+              <label class="control-label" style="color:white"  for="input-ourrequestid">{{ entry_ourrequestid }}</label>
+              <input type="text"  style="color:black" name="filter_ourrequestid" value="{{ filter_ourrequestid }}"  id="input-ourrequestid" class="form-control" />
+            </div>
+            <div class="col-sm-3">
+              <label class="control-label" style="color:white"  for="input-yourrequestid">{{ entry_yourrequestid }}</label>
+              <input type="text"  style="color:#black" name="filter_yourrequestid" value="{{ filter_yourrequestid }}"  id="input-yourrequestid" class="form-control" />
+            </div>
+            <div class="col-sm-3">
+              <label class="control-label" style="color:white" for="input-apirequestid">{{ entry_apirequestid }}</label>
+              <input type="text"  style="color:black" name="filter_apirequestid" value="{{ filter_apirequestid }}"  id="input-apirequestid" class="form-control" />
+            </div>
+            <div class="col-sm-3">
+              <label class="control-label"  style="color:white" for="input-accountnumber">{{ entry_accountnumber }}</label>
+              <input type="text"  style="color:black" name="filter_accountnumber" value="{{ filter_accountnumber }}"  id="input-accountnumber" class="form-control" />
+            </div>
+            <!--<div class="form-group">
+              <label style="color:#861f41"  class="control-label" for="input-type">{{ entry_type }}</label>
+              <input  style="color:#861f41" type="text" name="filter_type" value="{{ filter_type }}" placeholder="{{ entry_type}}" id="input-type" class="form-control" />
+            </div>-->
+            <div class="col-sm-3">
+              <label  style="color:white" class="control-label" for="input-ifsc">{{ entry_ifsc }}</label>
+              <input  style="color:black" type="text" name="filter_ifsc" value="{{ filter_ifsc }}"  id="input-ifsc" class="form-control" />
+            </div>
+            <div class="col-sm-3">
+              <label style="color:white"  class="control-label" for="input-rrn">{{ entry_rrn }}</label>
+              <input  style="color:black" type="text" name="filter_rrn" value="{{ filter_rrn }}"  id="input-rrn" class="form-control" />
+            </div>
+            <div class="col-sm-3">
+              <label  style="color:white" class="control-label" for="input-type">{{ entry_type }}</label>
+              <select name="filter_type" id="input-type" class="form-control" style="color:black" >
+                <option value=""></option>
+                    {% if filter_type == 'ACCOUNT_TRANSFER' %}
+                        <option value="ACCOUNT_TRANSFER" selected="selected">{{ ACCOUNTTRANSFER }}</option>
+                        <option value="UPI_TRANSFER">{{ UPITRANSFER }}</option>
+                        <option value="WALLET_TRANSFER">{{ WALLETTRANSFER }}</option>
+                        <option value="ACCOUNT_VERIFY">{{ ACCOUNTVERIFY }}</option>
+                        <option value="UPI_VERIFY">{{ UPIVERIFY }}</option>
+                        <option value="WALLET_VERIFY">{{ WALLETVERIFY }}</option>
+                        <option value="STORESCAN_VERIFY">{{ STORESCANVERIFY }}</option>
+                        <option value="STORESCAN_TRANSFER">{{ STORESCANTRANSFER }}</option>
+                    {% elseif filter_type == 'UPI_TRANSFER' %}
+                        <option value="ACCOUNT_TRANSFER">{{ ACCOUNTTRANSFER }}</option>
+                        <option value="UPI_TRANSFER" selected="selected">{{ UPITRANSFER }}</option>
+                        <option value="WALLET_TRANSFER">{{ WALLETTRANSFER }}</option>
+                        <option value="ACCOUNT_VERIFY">{{ ACCOUNTVERIFY }}</option>
+                        <option value="UPI_VERIFY">{{ UPIVERIFY }}</option>
+                        <option value="WALLET_VERIFY">{{ WALLETVERIFY }}</option>
+                        <option value="STORESCAN_VERIFY">{{ STORESCANVERIFY }}</option>
+                        <option value="STORESCAN_TRANSFER">{{ STORESCANTRANSFER }}</option>
+                    {% elseif filter_type == 'WALLET_TRANSFER' %}
+                        <option value="ACCOUNT_TRANSFER">{{ ACCOUNTTRANSFER }}</option>
+                        <option value="UPI_TRANSFER">{{ UPITRANSFER }}</option>
+                        <option value="WALLET_TRANSFER" selected="selected">{{ WALLETTRANSFER }}</option>
+                        <option value="ACCOUNT_VERIFY">{{ ACCOUNTVERIFY }}</option>
+                        <option value="UPI_VERIFY">{{ UPIVERIFY }}</option>
+                        <option value="WALLET_VERIFY">{{ WALLETVERIFY }}</option>
+                        <option value="STORESCAN_VERIFY">{{ STORESCANVERIFY }}</option>
+                        <option value="STORESCAN_TRANSFER">{{ STORESCANTRANSFER }}</option>
+                    {% elseif filter_type == 'ACCOUNT_VERIFY' %}
+                        <option value="ACCOUNT_TRANSFER">{{ ACCOUNTTRANSFER }}</option>
+                        <option value="UPI_TRANSFER">{{ UPITRANSFER }}</option>
+                        <option value="WALLET_TRANSFER">{{ WALLETTRANSFER }}</option>
+                        <option value="ACCOUNT_VERIFY" selected="selected">{{ ACCOUNTVERIFY }}</option>
+                        <option value="UPI_VERIFY">{{ UPIVERIFY }}</option>
+                        <option value="WALLET_VERIFY">{{ WALLETVERIFY }}</option>
+                        <option value="STORESCAN_VERIFY">{{ STORESCANVERIFY }}</option>
+                        <option value="STORESCAN_TRANSFER">{{ STORESCANTRANSFER }}</option>
+                    {% elseif filter_type == 'UPI_VERIFY' %}
+                        <option value="ACCOUNT_TRANSFER">{{ ACCOUNTTRANSFER }}</option>
+                        <option value="UPI_TRANSFER">{{ UPITRANSFER }}</option>
+                        <option value="WALLET_TRANSFER">{{ WALLETTRANSFER }}</option>
+                        <option value="ACCOUNT_VERIFY">{{ ACCOUNTVERIFY }}</option>
+                        <option value="UPI_VERIFY" selected="selected">{{ UPIVERIFY }}</option>
+                        <option value="WALLET_VERIFY">{{ WALLETVERIFY }}</option>
+                        <option value="STORESCAN_VERIFY">{{ STORESCANVERIFY }}</option>
+                        <option value="STORESCAN_TRANSFER">{{ STORESCANTRANSFER }}</option>
+                    {% elseif filter_type == 'WALLET_VERIFY' %}
+                        <option value="ACCOUNT_TRANSFER">{{ ACCOUNTTRANSFER }}</option>
+                        <option value="UPI_TRANSFER">{{ UPITRANSFER }}</option>
+                        <option value="WALLET_TRANSFER">{{ WALLETTRANSFER }}</option>
+                        <option value="ACCOUNT_VERIFY">{{ ACCOUNTVERIFY }}</option>
+                        <option value="UPI_VERIFY">{{ UPIVERIFY }}</option>
+                        <option value="WALLET_VERIFY"  selected="selected">{{ WALLETVERIFY }}</option>
+                        <option value="STORESCAN_VERIFY">{{ STORESCANVERIFY }}</option>
+                        <option value="STORESCAN_TRANSFER">{{ STORESCANTRANSFER }}</option>
+                    {% elseif filter_type == 'STORESCAN_VERIFY' %}
+                        <option value="ACCOUNT_TRANSFER">{{ ACCOUNTTRANSFER }}</option>
+                        <option value="UPI_TRANSFER">{{ UPITRANSFER }}</option>
+                        <option value="WALLET_TRANSFER">{{ WALLETTRANSFER }}</option>
+                        <option value="ACCOUNT_VERIFY">{{ ACCOUNTVERIFY }}</option>
+                        <option value="UPI_VERIFY">{{ UPIVERIFY }}</option>
+                        <option value="WALLET_VERIFY">{{ WALLETVERIFY }}</option>
+                        <option value="STORESCAN_VERIFY"  selected="selected">{{ STORESCANVERIFY }}</option>
+                        <option value="STORESCAN_TRANSFER">{{ STORESCANTRANSFER }}</option>
+                    {% elseif filter_type == 'STORESCAN_TRANSFER' %}
+                        <option value="ACCOUNT_TRANSFER">{{ ACCOUNTTRANSFER }}</option>
+                        <option value="UPI_TRANSFER">{{ UPITRANSFER }}</option>
+                        <option value="WALLET_TRANSFER">{{ WALLETTRANSFER }}</option>
+                        <option value="ACCOUNT_VERIFY">{{ ACCOUNTVERIFY }}</option>
+                        <option value="UPI_VERIFY">{{ UPIVERIFY }}</option>
+                        <option value="WALLET_VERIFY">{{ WALLETVERIFY }}</option>
+                        <option value="STORESCAN_VERIFY">{{ STORESCANVERIFY }}</option>
+                        <option value="STORESCAN_TRANSFER"  selected="selected">{{ STORESCANTRANSFER }}</option>
+                    {% else %}
+                        <option value="ACCOUNT_TRANSFER">{{ ACCOUNTTRANSFER }}</option>
+                        <option value="UPI_TRANSFER">{{ UPITRANSFER }}</option>
+                        <option value="WALLET_TRANSFER">{{ WALLETTRANSFER }}</option>
+                        <option value="ACCOUNT_VERIFY">{{ ACCOUNTVERIFY }}</option>
+                        <option value="UPI_VERIFY">{{ UPIVERIFY }}</option>
+                        <option value="WALLET_VERIFY">{{ WALLETVERIFY }}</option>
+                        <option value="STORESCAN_VERIFY">{{ STORESCANVERIFY }}</option>
+                        <option value="STORESCAN_TRANSFER">{{ STORESCANTRANSFER }}</option>
+                    {% endif %}
+              </select>
+            </div>
+            
+            
+            <div class="col-sm-3">
+              <label  style="color:white" class="control-label" for="input-status">{{ entry_status }}</label>
+              <select name="filter_status" id="input-status" class="form-control" style="color:#black" >
+                <option value=""></option>
+                    {% if filter_status == '0' %}
+                        <option value="0" selected="selected">{{ recharge_failed }}</option>
+                        <option value="1">{{ recharge_success }}</option>
+                        <option value="2">{{ recharge_pending }}</option>
+                        <option value="4">{{ recharge_unknown }}</option>
+                    {% elseif filter_status == '1' %}
+                        <option value="0">{{ recharge_failed }}</option>
+                        <option value="1" selected="selected">{{ recharge_success }}</option>
+                        <option value="2">{{ recharge_pending }}</option>
+                        <option value="4">{{ recharge_unknown }}</option>
+                    {% elseif filter_status == '2' %}
+                        <option value="0">{{ recharge_failed }}</option>
+                        <option value="1">{{ recharge_success }}</option>
+                        <option value="2" selected="selected">{{ recharge_pending }}</option>
+                        <option value="4">{{ recharge_unknown }}</option>
+                    {% elseif filter_status == '4' %}
+                        <option value="0">{{ recharge_failed }}</option>
+                        <option value="1">{{ recharge_success }}</option>
+                        <option value="2">{{ recharge_pending }}</option>
+                        <option value="4"  selected="selected">{{ recharge_unknown }}</option>
+                    {% else %}
+                        <option value="0">{{ recharge_failed }}</option>
+                        <option value="1">{{ recharge_success }}</option>
+                        <option value="2">{{ recharge_pending }}</option>
+                        <option value="4">{{ recharge_unknown }}</option>
+                    {% endif %}
+                        
+              
+              </select>
+            </div>
+        </div>
+            <tbody>
+                <tr>
+              <td>{{ transaction.fdate }}</td>
+              <td>{{ transaction.tdate}}</td>
+              <td>{{ transaction.customerid }}</td>
+              <td>{{ transaction.snumber }}</td>
+              <td>{{ transaction.ourrequestid }}</td>
+              <td>{{ transaction.yourrequestid }}</td>
+              <td>{{ transaction.apirequestid }}</td>
+              <td>{{ transaction.accountnumber }}</td>
+              <td>{{ transaction.ifsc }}</td>
+               <td>{{ transaction.rrn }}</td>
+              <td>{{ transaction.type }}</td>
+              <td>{{ transaction.status }}</td>
+              </tr><br>
+              
+         <div class="form-group col-sm-2" style="float:right;">
+              <button  style="float:right; background-color:white;color:black;" type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
+            <!--<h3 class="panel-title" style="float:left;"><a href="{{export}}"><i class="fa fa-file-excel-o" style="font-size:30px;color:green"></i></a> </h3> -->
+            </div>
+         
+            </tbody>
+            
+           
+            
+         
+        </div>
+       </div>
+      </div>
+    </div>
+          <div class="panel-heading">
+            <h3 style="color:white" class="panel-title "><i class="fa fa-list"></i> {{ text_list }}</h3>
+            </div>
+          <div class="panel-body">
+            <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-product">
+              <div class="table-responsive"><table class="table table-bordered table-hover">
+                  <thead style="background-color:white" >
+                    <tr>
+                     {# <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>#}
+                      <td class="text-center" style="color:#ffffff">{{ column_srno }}</td>
+                      <td class="text-center">{% if sort == 'p.customerid' %} <a style="color:#ffffff" href="{{ sort_custmerid }}" class="{{ order|lower }}">{{ column_custmerid }}</a> {% else %} <a style="color:#ffffff" href="{{ sort_custmerid }}">{{ column_custmerid }}</a> {% endif %}</td>
+                      <td class="text-center" style="color:#ffffff">{{ column_number }}</td>
+                      <td class="text-center" style="color:#ffffff">{{ column_transid }}</td>
+                      <td class="text-center">{% if sort == 'p.created' %} <a style="color:#ffffff" href="{{ sort_created }}" class="{{ order|lower }}">{{ column_created }}</a> {% else %} <a style="color:#ffffff" href="{{ sort_created }}">{{ column_created }}</a> {% endif %}</td>
+                      <td class="text-center" style="color:#ffffff">{{ column_accountnumber }}</td>
+                      <td class="text-center" style="color:#ffffff" >{{ column_amount }}</td>
+                      <td class="text-center">{% if sort == 'p.status' %} <a style="color:#ffffff" href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a> {% else %} <a style="color:#ffffff" href="{{ sort_status }}">{{ column_status }}</a> {% endif %}</td>
+                      <td class="text-center" style="color:#ffffff" >{{ column_type }}</td>
+                      <td class="text-center" style="color:#ffffff">{{ column_source }}</td>
+                        <!-- <td class="text-center" style="color:black" >{{ column_action }}</td> -->
+                      
+                      
+                    </tr>
+                  </thead>
+                  <tbody>
+                  
+                  {% if products %}
+                  {% for product in products %}
+                  <tr class="table-active opacity-50">
+                    {#<td class="text-center">{% if product.product_id in selected %}
+                      <input type="checkbox" name="selected[]" value="{{ product.product_id }}" checked="checked" />
+                      {% else %}
+                      <input type="checkbox" name="selected[]" value="{{ product.product_id }}" />
+                      {% endif %}</td>#}
+                    <td class="text-center">{{ product.srno }}</td>
+                   
+                    <td class="text-left">{{ product.customerid }}</td>
+                    <td class="text-left">{{ product.number }}</td>
+                    <td class="text-left">{{ product.ourrequestid }}</td>
+                    <td class="text-left">{{ product.created }}</td>
+                    <td class="text-left">{{ product.accountnumber }}</td>
+                    <td class="text-left">{{ product.amount }}</td>
+                    <td class="text-right">{% if product.status == recharge_pending %} <span class="label label-warning">{{ product.status }}</span> {% elseif product.status == recharge_failed %} <span class="label label-danger">{{ product.status }}</span>{% elseif product.status == recharge_success %} <span class="label label-success">{{ product.status }}</span> {% else %} <span class="label label-info">{{ product.status }}</span> {% endif %}</td>
+                    <td class="text-left">{{ product.type }}</td>
+                    <td class="text-center">{{ product.source }}</td>
+                    <{#td class="text-right"><a href="{{ product.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>#}
+                    
+                  </tr>
+                  {% endfor %}
+                  {% else %}
+                  <tr>
+                    <td class="text-center" colspan="12">{{ text_no_results }}</td>
+                  </tr>
+                  {% endif %}
+                    </tbody>
+                  
+                </table>
+              </div>
+            </form>
+            <div class="row">
+              <div class="col-sm-6 text-start">{{ pagination }}</div>
+              <div class="col-sm-6 text-end"style="color:white">{{ results }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+ 
+  <script type="text/javascript"><!--
+$('#button-filter').on('click', function() {
+	var url = '';
+    
+    var filter_fdate = $('input[name=\'filter_fdate\']').val();
+
+	if (filter_fdate) {
+		url += '&filter_fdate=' + encodeURIComponent(filter_fdate);
+	}
+	
+	var filter_tdate = $('input[name=\'filter_tdate\']').val();
+
+	if (filter_tdate) {
+		url += '&filter_tdate=' + encodeURIComponent(filter_tdate);
+	}
+	
+	var filter_customerid = $('input[name=\'filter_customerid\']').val();
+
+	if (filter_customerid) {
+		url += '&filter_customerid=' + encodeURIComponent(filter_customerid);
+	}
+
+	var filter_snumber = $('input[name=\'filter_snumber\']').val();
+
+	if (filter_snumber) {
+		url += '&filter_snumber=' + encodeURIComponent(filter_snumber);
+	}
+
+	var filter_ourrequestid = $('input[name=\'filter_ourrequestid\']').val();
+
+	if (filter_ourrequestid) {
+		url += '&filter_ourrequestid=' + encodeURIComponent(filter_ourrequestid);
+	}
+
+	var filter_yourrequestid = $('input[name=\'filter_yourrequestid\']').val();
+
+	if (filter_yourrequestid) {
+		url += '&filter_yourrequestid=' + encodeURIComponent(filter_yourrequestid);
+	}
+	
+	var filter_apirequestid = $('input[name=\'filter_apirequestid\']').val();
+
+	if (filter_apirequestid) {
+		url += '&filter_apirequestid=' + encodeURIComponent(filter_apirequestid);
+	}
+	
+	var filter_accountnumber = $('input[name=\'filter_accountnumber\']').val();
+
+	if (filter_accountnumber) {
+		url += '&filter_accountnumber=' + encodeURIComponent(filter_accountnumber);
+	}
+	
+	var filter_ifsc = $('input[name=\'filter_ifsc\']').val();
+
+	if (filter_ifsc) {
+		url += '&filter_ifsc=' + encodeURIComponent(filter_ifsc);
+	}
+	
+	var filter_type = $('select[name=\'filter_type\']').val();
+
+	if (filter_type !== '') {
+		url += '&filter_type=' + encodeURIComponent(filter_type);
+	}
+	
+	var filter_rrn = $('input[name=\'filter_rrn\']').val();
+
+	if (filter_rrn) {
+		url += '&filter_rrn=' + encodeURIComponent(filter_rrn);
+	}
+
+	var filter_status = $('select[name=\'filter_status\']').val();
+
+	if (filter_status !== '') {
+		url += '&filter_status=' + encodeURIComponent(filter_status);
+	}
+
+	location = 'index.php?route=dmt/history&user_token={{ user_token }}' + url;
+});
+//--></script> 
+  <script type="text/javascript"><!--
+// IE and Edge fix!
+$('button[form=\'form-product\']').on('click', function(e) {
+	$('#form-product').attr('action', $(this).attr('formaction'));
+});
+  
+$('input[name=\'filter_customerid\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/product/autocomplete&user_token={{ user_token }}&filter_customerid=' +  encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['name'],
+						value: item['product_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_customerid\']').val(item['label']);
+	}
+});
+
+$('input[name=\'filter_rechargenumber\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/product/autocomplete&user_token={{ user_token }}&filter_rechargenumber=' +  encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['model'],
+						value: item['product_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_rechargenumber\']').val(item['label']);
+	}
+});
+//--></script>{{ footer }}</div>
+ 

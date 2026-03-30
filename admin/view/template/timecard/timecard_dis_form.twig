@@ -1,0 +1,674 @@
+{{ header }}{{ column_left }}
+ <style>
+.my-filter-input {
+    display: none;
+}
+.my-filter{
+    display: block;    
+    padding: 10px;
+    margin: 0 0 1px 0;
+    cursor: pointer;
+    border: 1px solid #A7A7A7;
+    background: #6AAB95;
+    border-radius: 3px;
+    color: #FFF;
+    transition: ease .5s;
+
+}
+.my-filter:hover {
+    background: #4E8774;
+}
+
+.my-filter-content {
+    background: #313941;
+    padding: 15px;
+    border: 1px solid #A7A7A7;
+    margin: 0 0 1px 0;
+    border-radius: 3px;
+    display: grid; 
+    
+   
+}
+
+.my-filter-input + .my-filter + .my-filter-content {
+    display: none;
+    padding-right: -2px;
+}
+
+.my-filter-input:checked + .my-filter + .my-filter-content {
+    display: block;
+}
+
+.myfilter-container
+{
+    padding-left: 250px;
+}
+#btn-sync-biometric:hover {
+    background: #138496 !important;
+    transform: scale(1.02);
+    transition: all 0.2s;
+}
+
+#btn-sync-biometric:disabled {
+    background: #6c757d !important;
+}
+</style>
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+          {#<button type="button" id="btn-sync-biometric" onclick="syncBiometricData()" #}
+          {#          style="background: #17a2b8; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">#}
+          {#      <span id="sync-icon">🔄</span> Sync Biometric#}
+          {#  </button>#}
+            <button type="submit" form="form-product" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+              <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+           <h1 style="color:white;">{{ heading_title }}</h1>
+            <ol class="breadcrumb">
+            {% for breadcrumb in breadcrumbs %}
+            <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid"> {% if error_warning %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+        <div id="filter-product" class="col-sm-12 hidden-sm hidden-xs">
+         <div class="panel panel-default">
+        <input class="my-filter-input"type="checkbox" id="title2" />
+        <label class='my-filter panel-heading'for="title2" style="background-color:#313941;color:white;"><i class="fa fa-filter"></i> {{ text_filter }}<span style="float:right;"><i class="fa fas fa-chevron-down fa-1x" ></i></span>
+        </label>
+        <div class="my-filter-content panel-body">
+       <p>
+      <div class="row mb-12" style="row-gap: 20px;">
+      <div class="col-sm-3">
+          <label class="control-label" style="color:white;" for="input-fdate">{{ entry_fdate }}</label>
+          <input type="date" name="filter_fdate" style="color:black;" value="{{ filter_fdate }}" placeholder="{{ entry_fdate }}" id="input-fdate" class="form-control" />
+        </div>
+        <div class="col-sm-3">
+          <label class="control-label" style="color:white;"  for="input-tdate">{{ entry_tdate }}</label>
+          <input type="date" style="color:black;" name="filter_tdate" value="{{ filter_tdate }}" placeholder="{{ entry_tdate }}" id="input-tdate" class="form-control" />
+        </div>
+        <div class="col-sm-3">
+          <label class="control-label" style="color:white;"  for="input-status">{{ entry_status }}</label>
+          <select name="filter_status" style="color:black;" id="input-status" class="form-control">
+            <option value=""></option>
+                {% if filter_status == '0' %}
+                    <option value="0" selected="selected">SUBMITTED</option>
+                    <option value="1">APPROVED</option>
+                    <option value="2">REJECTED</option>
+                    <option value="3">CANCELLED</option>
+                {% elseif filter_status == '1' %}
+                    <option value="0">SUBMITTED</option>
+                    <option value="1" selected="selected">APPROVED</option>
+                    <option value="2">REJECTED</option>
+                    <option value="3">CANCELLED</option>
+                {% elseif filter_status == '2' %}
+                    <option value="0">SUBMITTED</option>
+                    <option value="1">APPROVED</option>
+                    <option value="2" selected="selected">REJECTED</option>
+                    <option value="3">CANCELLED</option>
+                {% elseif filter_status == '3' %}
+                    <option value="0">SUBMITTED</option>
+                    <option value="1">APPROVED</option>
+                    <option value="2">REJECTED</option>
+                    <option value="3"  selected="selected">CANCELLED</option>
+                {% else %}
+                    <option value="0">SUBMITTED</option>
+                    <option value="1">APPROVED</option>
+                    <option value="2">REJECTED</option>
+                    <option value="3">CANCELLED</option>
+                {% endif %}
+                    
+          
+          </select>
+        </div>
+        <div class="form-group col-sm-3" style="float:right;margin-top:20px">
+              <button  style="color:white;background-color:#1872a2;" type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
+              <h3 class="panel-title" class="col-sm-2" style="float:left;"><a href="{{export}}"><i class="fa fa-file-excel-o" style="font-size:30px;color:green"></i></a> </h3>
+            </div>
+            
+        </div>
+        </p>
+    </div>
+    </div>
+      
+      </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+      <!--  <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_form }}</h3> -->
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-product" class="form-horizontal">
+          <ul class="nav nav-tabs">
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active" id="tab-discount">
+              <div class="table-responsive">
+                <table id="discount" class="table table-striped table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <td class="text-center">{{ entry_date }}</td>
+                      <td class="text-center">{{ entry_project }}</td>
+                      <td class="text-center">{{ entry_task }}</td>
+                      <td class="text-center">{{ entry_description }}</td>
+                      <td class="text-center">{{entry_work_form_home}}</td>
+                      <td class="text-center">{{ entry_approval_document }}</td>
+                      <td class="text-center">{{ entry_hours_spent }}</td>
+                      <td class="text-center">{{ entry_approvedby }}</td>
+                      <td class="text-center">{{ entry_status }}</td>
+                      <td></td>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    
+                    {% set timecard_row = 0 %}
+                    {% for timecard in timecards %}
+                      <tr id="timecard-row{{ timecard_row }}">
+                        <td class="text-left">{{ timecard.date }}</td>
+                        <td class="text-left">{{ timecard.projectname }}</td>
+                        <td class="text-left">{{ timecard.taskname }}</td>
+                        <td class="text-left">{{ timecard.description }}</td>
+                        {% if timecard.work_from_home == '1' %}
+                         <td class="text-left" align="center" ><input type="checkbox" disabled checked name="timecard[{{ timecard_row }}][work_from_home]" class="form-check-input" style="width:20px" style="height:20px"></td>
+                         <td class="text-left"><a href="{{ timecard.approval_document }}" data-bs-toggle="tooltip" title="Download" class="btn btn-info"><i class="fa-solid fa-download"></i></a></td>
+                        {% else %}
+                         <td class="text-left" align="center" ><input type="checkbox" disabled name="timecard[{{ timecard_row }}][work_from_home]" class="form-check-input" style="width:20px" style="height:20px"></td>
+                         <td class="text-left"></td>
+                        {% endif %}
+                        
+                        <td class="text-left">{{ timecard.hours }}</td>
+                        <td class="text-left">{{ timecard.approvedby }}</td>
+                        {% if timecard.status == '0' %}
+                        <td class="text-left">SUBMITTED</td>
+                        {% elseif timecard.status == '1' %}
+                        <td class="text-left">APPROVED</td>
+                        {% elseif timecard.status == '2' %}
+                        <td class="text-left">REJECTED</td>
+                        {% elseif timecard.status == '3' %}
+                        <td class="text-left">CANCELLED</td>
+                        {% else %}
+                        <td class="text-left">SUBMITTED</td>
+                        {% endif %}
+                        {% if timecard.status == '0' %}
+                        <td class="text-left"><a type="button" href="{{ timecard.cancel }}"  data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></a></td>
+                        {% else %}
+                        <td class="text-left"></td>
+                        {% endif %}
+                      </tr>
+                      {% set timecard_row = timecard_row + 1 %}
+                    {% endfor %}
+                    <input type="hidden" id="timecardrowNumber" name="timecardrowNumber" value="{{ timecard_row }}"/>
+                  </tbody>
+
+                  <tfoot>
+                    <tr>
+                      <td colspan="9"></td>
+                      <td class="text-left"><button type="button" onclick="addtimecard();" data-toggle="tooltip" title="{{ button_timecard_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <link href="view/javascript/codemirror/lib/codemirror.css" rel="stylesheet"/>
+  <link href="view/javascript/codemirror/theme/monokai.css" rel="stylesheet"/>
+  <script type="text/javascript" src="view/javascript/codemirror/lib/codemirror.js"></script>
+  <script type="text/javascript" src="view/javascript/codemirror/lib/xml.js"></script>
+  <script type="text/javascript" src="view/javascript/codemirror/lib/formatting.js"></script>
+  <script type="text/javascript" src="view/javascript/summernote/summernote.js"></script>
+  <link href="view/javascript/summernote/summernote.css" rel="stylesheet"/>
+  <script type="text/javascript" src="view/javascript/summernote/summernote-image-attributes.js"></script>
+  <script type="text/javascript" src="view/javascript/summernote/opencart.js"></script>
+  <script type="text/javascript"><!--
+  // Manufacturer
+  $('input[name=\'manufacturer\']').autocomplete({
+	  'source': function(request, response) {
+		  $.ajax({
+			  url: 'index.php?route=catalog/manufacturer/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+			  dataType: 'json',
+			  success: function(json) {
+				  json.unshift({
+					  manufacturer_id: 0,
+					  name: '{{ text_none }}'
+				  });
+
+				  response($.map(json, function(item) {
+					  return {
+						  label: item['name'],
+						  value: item['manufacturer_id']
+					  }
+				  }));
+			  }
+		  });
+	  },
+	  'select': function(item) {
+		  $('input[name=\'manufacturer\']').val(item['label']);
+		  $('input[name=\'manufacturer_id\']').val(item['value']);
+	  }
+  });
+
+  // Category
+  $('input[name=\'category\']').autocomplete({
+	  'source': function(request, response) {
+		  $.ajax({
+			  url: 'index.php?route=catalog/category/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+			  dataType: 'json',
+			  success: function(json) {
+				  response($.map(json, function(item) {
+					  return {
+						  label: item['name'],
+						  value: item['category_id']
+					  }
+				  }));
+			  }
+		  });
+	  },
+	  'select': function(item) {
+		  $('input[name=\'category\']').val('');
+
+		  $('#product-category' + item['value']).remove();
+
+		  $('#product-category').append('<div id="product-category' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="product_category[]" value="' + item['value'] + '" /></div>');
+	  }
+  });
+
+  $('#product-category').delegate('.fa-minus-circle', 'click', function() {
+	  $(this).parent().remove();
+  });
+
+  // Filter
+  $('input[name=\'filter\']').autocomplete({
+	  'source': function(request, response) {
+		  $.ajax({
+			  url: 'index.php?route=catalog/filter/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+			  dataType: 'json',
+			  success: function(json) {
+				  response($.map(json, function(item) {
+					  return {
+						  label: item['name'],
+						  value: item['filter_id']
+					  }
+				  }));
+			  }
+		  });
+	  },
+	  'select': function(item) {
+		  $('input[name=\'filter\']').val('');
+
+		  $('#product-filter' + item['value']).remove();
+
+		  $('#product-filter').append('<div id="product-filter' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="product_filter[]" value="' + item['value'] + '" /></div>');
+	  }
+  });
+
+  $('#product-filter').delegate('.fa-minus-circle', 'click', function() {
+	  $(this).parent().remove();
+  });
+
+  // Downloads
+  $('input[name=\'download\']').autocomplete({
+	  'source': function(request, response) {
+		  $.ajax({
+			  url: 'index.php?route=catalog/download/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+			  dataType: 'json',
+			  success: function(json) {
+				  response($.map(json, function(item) {
+					  return {
+						  label: item['name'],
+						  value: item['download_id']
+					  }
+				  }));
+			  }
+		  });
+	  },
+	  'select': function(item) {
+		  $('input[name=\'download\']').val('');
+
+		  $('#product-download' + item['value']).remove();
+
+		  $('#product-download').append('<div id="product-download' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="product_download[]" value="' + item['value'] + '" /></div>');
+	  }
+  });
+
+  $('#product-download').delegate('.fa-minus-circle', 'click', function() {
+	  $(this).parent().remove();
+  });
+
+  // Related
+  $('input[name=\'related\']').autocomplete({
+	  'source': function(request, response) {
+		  $.ajax({
+			  url: 'index.php?route=catalog/product/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+			  dataType: 'json',
+			  success: function(json) {
+				  response($.map(json, function(item) {
+					  return {
+						  label: item['name'],
+						  value: item['product_id']
+					  }
+				  }));
+			  }
+		  });
+	  },
+	  'select': function(item) {
+		  $('input[name=\'related\']').val('');
+
+		  $('#product-related' + item['value']).remove();
+
+		  $('#product-related').append('<div id="product-related' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="product_related[]" value="' + item['value'] + '" /></div>');
+	  }
+  });
+
+  $('#product-related').delegate('.fa-minus-circle', 'click', function() {
+	  $(this).parent().remove();
+  });
+  //--></script>
+  <script type="text/javascript"><!--
+  var attribute_row = {{ attribute_row }};
+
+  function addAttribute() {
+	  html = '<tr id="attribute-row' + attribute_row + '">';
+	  html += '  <td class="text-left" style="width: 20%;"><input type="text" name="product_attribute[' + attribute_row + '][name]" value="" placeholder="{{ entry_attribute }}" class="form-control" /><input type="hidden" name="product_attribute[' + attribute_row + '][attribute_id]" value="" /></td>';
+	  html += '  <td class="text-left">';
+    {% for language in languages %}
+	  html += '<div class="input-group"><span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span><textarea name="product_attribute[' + attribute_row + '][product_attribute_description][{{ language.language_id }}][text]" rows="5" placeholder="{{ entry_text }}" class="form-control"></textarea></div>';
+    {% endfor %}
+	  html += '  </td>';
+	  html += '  <td class="text-right"><button type="button" onclick="$(\'#attribute-row' + attribute_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+	  html += '</tr>';
+
+	  $('#attribute tbody').append(html);
+
+	  attributeautocomplete(attribute_row);
+
+	  attribute_row++;
+  }
+
+  function attributeautocomplete(attribute_row) {
+	  $('input[name=\'product_attribute[' + attribute_row + '][name]\']').autocomplete({
+		  'source': function(request, response) {
+			  $.ajax({
+				  url: 'index.php?route=catalog/attribute/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+				  dataType: 'json',
+				  success: function(json) {
+					  response($.map(json, function(item) {
+						  return {
+							  category: item.attribute_group,
+							  label: item.name,
+							  value: item.attribute_id
+						  }
+					  }));
+				  }
+			  });
+		  },
+		  'select': function(item) {
+			  $('input[name=\'product_attribute[' + attribute_row + '][name]\']').val(item['label']);
+			  $('input[name=\'product_attribute[' + attribute_row + '][attribute_id]\']').val(item['value']);
+		  }
+	  });
+  }
+
+  $('#attribute tbody tr').each(function(index, element) {
+	  attributeautocomplete(index);
+  });
+  //--></script>
+  
+    <script type="text/javascript"><!--
+$('#button-filter').on('click', function() {
+	var url = '';
+    
+    var filter_fdate = $('input[name=\'filter_fdate\']').val();
+
+	if (filter_fdate) {
+		url += '&filter_fdate=' + encodeURIComponent(filter_fdate);
+	}
+	
+	var filter_tdate = $('input[name=\'filter_tdate\']').val();
+
+	if (filter_tdate) {
+		url += '&filter_tdate=' + encodeURIComponent(filter_tdate);
+	}
+
+	var filter_status = $('select[name=\'filter_status\']').val();
+
+	if (filter_status !== '') {
+		url += '&filter_status=' + encodeURIComponent(filter_status);
+	}
+
+	location = 'index.php?route=timecard/timecard&user_token={{ user_token }}' + url;
+});
+//--></script> 
+
+ 
+  <script>
+document.addEventListener("input", function(e) {
+  if (e.target.classList.contains("hours-input")) {
+    let value = parseInt(e.target.value, 10);
+    let msg = e.target.parentElement.querySelector("small");
+
+    if (isNaN(value)) {
+      msg.classList.add("d-none");
+      return;
+    }
+
+    if (value < 4 || value > 12) {
+      msg.classList.remove("d-none"); // show error inside box
+    } else {
+      msg.classList.add("d-none"); // hide error if valid
+    }
+  }
+});
+</script>
+
+<script>
+    $(document).on('change', '.work-from-home', function() {
+    let row = $(this).data('row');
+    let button = $('#button-upload-' + row);
+
+    if ($(this).is(':checked')) {
+        button.prop('disabled', false);  // enable upload
+    } else {
+        button.prop('disabled', true);   // disable upload
+    }
+})
+$(document).on('click', '.upload-btn', function(e) {
+    e.preventDefault(); // ⛔ stop form submission
+    let row = $(this).attr('id').split('-').pop();
+    $('#file-input-' + row).click(); // trigger hidden file input
+});
+</script>
+  <script type="text/javascript"><!--
+  var timecard_row = {{ timecard_row }};
+
+  function addtimecard() {
+// Get today's date
+const baseDate = new Date();
+
+// Offset the date by timecard_row days
+const offsetDate = new Date(baseDate);
+offsetDate.setDate(baseDate.getDate() + timecard_row);
+
+// Format date as YYYY-MM-DD
+const formattedDate = offsetDate.toISOString().split('T')[0];
+timecard_row = document.getElementById('timecardrowNumber').value;
+    
+	  html = '<tr id="timecard-row' + timecard_row + '">';
+html += '  <td class="text-right"><input type="date" name="timecard[' + timecard_row + '][date]" value="' + formattedDate + '" class="form-control"/></td>';
+html += '  <td class="text-left"><select name="timecard[' + timecard_row + '][projectid]" class="form-control">';
+                    {% for project in projects %}
+                	  html += '<option value="{{ project.projectid }}">{{ project.projectname }}</option>';
+                    {% endfor %}
+                	  html += '  </select>';
+     html += '  </td>';
+
+     html += '  <td class="text-left"><select name="timecard[' + timecard_row + '][taskid]" class="form-control">'; 
+                    {% for task in tasks %}
+                	  html += '<option value="{{ task.taskid }}">{{ task.taskname }}</option>';
+                    {% endfor %}
+                	  html += '  </select>';
+     html += '  </td>';
+html += '  <td class="text-right">' +
+    '<input type="text" name="timecard['+ timecard_row +'][description]" ' +
+    'value="" ' +   
+    'placeholder="Enter Description" ' +
+    'class="form-control"/>' +
+    '</td>';
+    html += '  <td class="text-right" align="center">' +
+    '    <input type="checkbox" name="timecard['+ timecard_row +'][work_from_home]" ' +
+    '      value="'+ timecard_row +'" ' +
+    '      class="form-check-input work-from-home" ' +
+    '      style="width:20px;height:20px" ' +
+    '      data-row="'+ timecard_row +'">' +
+    '  </td>';           
+ html += '  <td class="text-right">' +
+    '    <input type="file" name="timecard['+ timecard_row +']" id="file-input-'+ timecard_row +'" class="d-none file-input">' +
+    '    <button type="button" ' +
+    '      id="button-upload-'+ timecard_row +'" ' +
+    '      data-bs-toggle="tooltip" ' +
+    '      title="{{ button_upload }}" ' +
+    '      class="btn btn-primary upload-btn" ' +
+    '      disabled>' + 
+    '      <i class="fa-solid fa-upload"></i>' +
+    '    </button>' +
+    '  </td>';
+      html += ' <td class="text-right">';
+      html += '   <div>';
+        html += ' <input type="number" name="timecard['+ timecard_row +'][hours_spent]" id="hours_spent_'+ timecard_row +'" value="9" min="4" max="12" placeholder="Enter hours (4–12)" class="form-control hours-input"/>';
+       html += '  <small class="text-danger d-none">Hours must be between 4 and 12</small>';
+     html += '  </div>';
+    html += ' </td>';
+      html += '  <td class="text-right"><input type="text" disabled name="timecard['+ timecard_row +'][approvedby]" value="" placeholder="{{ entry_approvedby }}" class="form-control"/></td>';
+      html += '  <td class="text-right"><input type="text" name="timecard['+ timecard_row +'][status]" disabled value="OPEN" placeholder="{{ entry_status }}" class="form-control"/></td>';
+        html += '  <td class="text-left"><button type="button" onclick="$(\'#timecard-row'+ timecard_row +'\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+	  
+	  html += '</tr>';
+
+	  $('#discount tbody').append(html);
+
+	  timecard_row++;
+	  document.getElementById('timecardrowNumber').value=timecard_row;
+  }
+
+  //--></script>
+  
+  <script type="text/javascript"><!--
+  var image_row = {{ image_row }};
+
+  function addImage() {
+	  html = '<tr id="image-row' + image_row + '">';
+	  html += '  <td class="text-left"><a href="" id="thumb-image' + image_row + '"data-toggle="image" class="img-thumbnail"><img src="{{ placeholder }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a><input type="hidden" name="product_image[' + image_row + '][image]" value="" id="input-image' + image_row + '" /></td>';
+	  html += '  <td class="text-right"><input type="text" name="product_image[' + image_row + '][sort_order]" value="" placeholder="{{ entry_sort_order }}" class="form-control" /></td>';
+	  html += '  <td class="text-left"><button type="button" onclick="$(\'#image-row' + image_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+	  html += '</tr>';
+
+	  $('#images tbody').append(html);
+
+	  image_row++;
+  }
+
+  //--></script>
+
+  <script type="text/javascript"><!--
+  $('.date').datetimepicker({
+	  language: '{{ datepicker }}',
+	  pickTime: false
+  });
+
+  $('.time').datetimepicker({
+	  language: '{{ datepicker }}',
+	  pickDate: false
+  });
+
+  $('.datetime').datetimepicker({
+	  language: '{{ datepicker }}',
+	  pickDate: true,
+	  pickTime: true
+  });
+  //--></script>
+  <script type="text/javascript"><!--
+  $('#language a:first').tab('show');
+  $('#option a:first').tab('show');
+  //--></script>
+  <script type="text/javascript">
+    function syncBiometricData() {
+    var btn = document.getElementById('btn-sync-biometric');
+    var icon = document.getElementById('sync-icon');
+    
+    // Get dates from your filters if they exist
+    var fromDateInput = document.querySelector('input[name="filter_fdate"]');
+    var toDateInput = document.querySelector('input[name="filter_tdate"]');
+    
+    var fromDate = fromDateInput ? fromDateInput.value : '{{ filter_fdate }}';
+    var toDate = toDateInput ? toDateInput.value : '{{ filter_tdate }}';
+    
+    // Confirm before sync
+    if (!confirm('Sync biometric data from ' + fromDate + ' to ' + toDate + '?')) {
+        return;
+    }
+    
+    // Disable button
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    btn.style.cursor = 'not-allowed';
+    icon.innerHTML = '⏳';
+    
+    // Create XMLHttpRequest
+    var xhr = new XMLHttpRequest();
+    var url = 'index.php?route=timecard/timecard.syncBiometric&user_token={{ user_token }}';
+    
+    xhr.open('POST', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            // Re-enable button
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            icon.innerHTML = '🔄';
+            
+            if (xhr.status === 200) {
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    
+                    if (response.error) {
+                        alert('Error: ' + response.error);
+                    } else if (response.success) {
+                        alert('Success!\n\n' + response.success + 
+                              '\n\nTotal Records: ' + response.total + 
+                              '\nNew Records: ' + response.inserted);
+                        
+                        // Reload page to show updated data
+                        window.location.reload();
+                    }
+                } catch (e) {
+                    alert('Error parsing response: ' + e.message);
+                    console.error('Response:', xhr.responseText);
+                }
+            } else {
+                alert('HTTP Error: ' + xhr.status + '\n' + xhr.statusText);
+            }
+        }
+    };
+    
+    // Send request
+    var params = 'from_date=' + encodeURIComponent(fromDate) + '&to_date=' + encodeURIComponent(toDate);
+    xhr.send(params);
+}
+
+// Also add this to handle errors
+window.addEventListener('error', function(e) {
+    console.error('JavaScript Error:', e.message);
+}, true);
+    </script>
+</div>
+{{ footer }} 

@@ -1,0 +1,42 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        <button type="submit" form="form-festivals" formaction="{{ save }}" data-bs-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i></button>
+        <a href="{{ back }}" data-bs-toggle="tooltip" title="{{ button_back }}" class="btn btn-light"><i class="fa-solid fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="card">
+      <div class="card-header"><i class="fa-solid fa-pencil"></i> {{ text_form }}</div>
+      <div class="card-body">
+        <form id="form-festivals" action="{{ save }}" method="post" data-oc-toggle="ajax">
+          <div class="row mb-3 " style="margin-left:200px">
+              <div class="col-sm-5 required">
+             <label for="input-date" class="col-form-label">Date</label> 
+             
+                 <input type="date" name="date" value="{{ date }}" placeholder="date" id="input-date" class="form-control"/>
+              <div id="error-date" class="invalid-feedback"></div>
+              </div>
+              <div class="col-sm-5 required">
+            <label for="input-festival" class="col-form-label">{{ entry_name }}</label>
+            
+              <input type="text" name="festival" value="{{ festival }}" placeholder="{{ entry_name }}" id="input-festival" class="form-control"/>
+              <div id="error-festival" class="invalid-feedback"></div>
+            </div>
+          </div>
+            <input type="hidden" name="festivals_id" value="{{ festivals_id }}" id="input-festivals-id"/>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}

@@ -1,0 +1,816 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <h1><i class="fa-solid fa-chart-line"></i> Attendance Reports</h1>
+    </div>
+  </div>
+
+  <div class="report-container">
+    <div class="card">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('daily')">
+          <i class="fa-solid fa-calendar-day"></i> Daily Report
+        </button>
+      </div>
+
+      <!-- Daily Report Tab -->
+      <div class="tab-content active" id="daily-tab">
+        <div class="filters">
+          <div class="filter-group">
+            <label>From Date</label>
+            <input type="date" id="startDate" value="{{ "now"|date("Y-m-d") }}">
+          </div>
+          <div class="filter-group">
+            <label>To Date</label>
+            <input type="date" id="endDate" value="{{ "now"|date("Y-m-d") }}">
+          </div>
+          <div class="filter-group">
+            <label>Filter by Employee</label>
+            <select id="dailyEmployee">
+              <option value="">All Employees</option>
+              {% for employee in employees %}
+                <option value="{{ employee.user_id }}">{{ employee.firstname }} {{ employee.lastname }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Filter by Source of Hire</label>
+            <select id="sourceOfHire">
+              <option value="">All Sources</option>
+              {% for source in source_of_hire_list %}
+                <option value="{{ source.sourceofhire_id }}">{{ source.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="loadDailyReport()">
+            <i class="fa-solid fa-search"></i> View Report
+          </button>
+          <button class="btn btn-success" onclick="exportDaily()">
+            <i class="fa-solid fa-download"></i> Export CSV
+          </button>
+        </div>
+
+        <div id="dailyReportContent">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading report...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Photos Modal -->
+<div class="photo-modal" id="photoModal">
+  <div class="photo-modal-content">
+    <div class="photo-modal-header">
+      <h3 id="photoModalTitle">Attendance Photos</h3>
+      <button class="close-modal" onclick="closePhotoModal()">×</button>
+    </div>
+    <div id="photoModalBody">
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        <p>Loading photos...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const USER_TOKEN = '{{ user_token }}';
+  const BASE_URL = '{{ base_url }}';
+  const CATALOG_URL = BASE_URL.replace('/admin/', '/');
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    
+    event.target.classList.add('active');
+    document.getElementById(tab + '-tab').classList.add('active');
+
+    if (tab === 'daily') loadDailyReport();
+  }
+
+  async function loadDailyReport() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const userId = document.getElementById('dailyEmployee').value;
+    const sourceOfHireId = document.getElementById('sourceOfHire').value;
+    
+    document.getElementById('dailyReportContent').innerHTML = `
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        <p>Loading report...</p>
+      </div>
+    `;
+
+    try {
+      const response = await fetch(
+        `index.php?route=attendance/attendancereport.getDailyReport&user_token=${USER_TOKEN}&start_date=${startDate}&end_date=${endDate}&user_id=${userId}&source_of_hire_id=${sourceOfHireId}`
+      );
+      const data = await response.json();
+
+      if (data.success && data.report.length > 0) {
+        let html = `
+          <div class="report-summary">
+            <div class="summary-item">
+              <i class="fa-solid fa-calendar-check"></i>
+              <div>
+                <div class="summary-label">Total Records</div>
+                <div class="summary-value">${data.report.length}</div>
+              </div>
+            </div>
+            <div class="summary-item">
+              <i class="fa-solid fa-user-check"></i>
+              <div>
+                <div class="summary-label">Completed</div>
+                <div class="summary-value">${data.report.filter(r => r.status === 'completed').length}</div>
+              </div>
+            </div>
+            <div class="summary-item">
+              <i class="fa-solid fa-clock"></i>
+              <div>
+                <div class="summary-label">Active</div>
+                <div class="summary-value">${data.report.filter(r => r.status === 'active').length}</div>
+              </div>
+            </div>
+          </div>
+          
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Source of Hire</th>
+                <th>Date</th>
+                <th>Punch In</th>
+                <th>In Location</th>
+                <th>Punch Out</th>
+                <th>Out Location</th>
+                <th>Total Hours</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        data.report.forEach(row => {
+          const statusBadge = row.status === 'completed' ? 'success' : 
+                             row.status === 'active' ? 'warning' : 'danger';
+          const statusText = row.status === 'completed' ? 'Completed' : 
+                            row.status === 'active' ? 'Active' : 'Absent';
+
+          const viewButton = row.has_photos ? 
+            `<button class="btn-view" onclick="viewEmployeePhotos(${row.user_id}, '${row.raw_date}', '${row.employee_name}')">
+              <i class="fa-solid fa-eye"></i>
+            </button>` : 
+            `<span style="color: #6c757d;">--</span>`;
+
+          html += `
+            <tr>
+              <td>${row.employee_name}</td>
+              <td>${row.source_of_hire}</td>
+              <td>${row.date}</td>
+              <td>${row.punch_in}</td>
+              <td><span class="location-badge">${row.punch_in_location}</span></td>
+              <td>${row.punch_out}</td>
+              <td><span class="location-badge">${row.punch_out_location}</span></td>
+              <td>${row.total_hours}</td>
+              <td><span class="badge badge-${statusBadge}">${statusText}</span></td>
+              <td style="text-align: center;">${viewButton}</td>
+            </tr>
+          `;
+        });
+
+        html += '</tbody></table>';
+        document.getElementById('dailyReportContent').innerHTML = html;
+      } else {
+        document.getElementById('dailyReportContent').innerHTML = `
+          <div class="no-data">
+            <i class="fa-solid fa-inbox"></i>
+            <p>No attendance records found for selected date range</p>
+          </div>
+        `;
+      }
+    } catch (error) {
+      document.getElementById('dailyReportContent').innerHTML = `
+        <div class="no-data">
+          <i class="fa-solid fa-exclamation-triangle"></i>
+          <p>Error loading report</p>
+        </div>
+      `;
+    }
+  }
+
+  async function viewEmployeePhotos(userId, date, employeeName) {
+    document.getElementById('photoModalTitle').textContent = `${employeeName} - ${date}`;
+    document.getElementById('photoModal').classList.add('show');
+    
+    document.getElementById('photoModalBody').innerHTML = `
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        <p>Loading photos...</p>
+      </div>
+    `;
+
+    try {
+      const response = await fetch(
+        `index.php?route=attendance/attendancereport.getEmployeePhotos&user_token=${USER_TOKEN}&user_id=${userId}&date=${date}`
+      );
+      const data = await response.json();
+
+      if (data.success) {
+        let html = `
+          <div class="photo-info">
+            <div class="info-row">
+              <span class="info-label">Employee:</span>
+              <span class="info-value">${data.employee_name}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Date:</span>
+              <span class="info-value">${data.date}</span>
+            </div>
+          </div>
+          
+          <div class="photos-container">
+            <div class="photo-section">
+              <h4><i class="fa-solid fa-sign-in-alt"></i> Punch In</h4>
+              <div class="photo-details">
+                <div class="detail-item">
+                  <span class="detail-label">Time:</span>
+                  <span class="detail-value">${data.punch_in_time}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Location:</span>
+                  <span class="detail-value location-badge">${data.in_location.name}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Distance:</span>
+                  <span class="detail-value">${data.in_distance}</span>
+                </div>
+              </div>
+        `;
+        
+        if (data.in_photo) {
+          html += `
+              <div class="photo-wrapper">
+                <img src="${CATALOG_URL}image/${data.in_photo}" alt="Punch In Photo" class="attendance-photo">
+              </div>
+          `;
+        } else {
+          html += `
+              <div class="no-photo">
+                <i class="fa-solid fa-image"></i>
+                <p>No photo available</p>
+              </div>
+          `;
+        }
+        
+        html += `
+            </div>
+            
+            <div class="photo-section">
+              <h4><i class="fa-solid fa-sign-out-alt"></i> Punch Out</h4>
+              <div class="photo-details">
+                <div class="detail-item">
+                  <span class="detail-label">Time:</span>
+                  <span class="detail-value">${data.punch_out_time}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Location:</span>
+                  <span class="detail-value location-badge">${data.out_location.name}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Distance:</span>
+                  <span class="detail-value">${data.out_distance}</span>
+                </div>
+              </div>
+        `;
+        
+        if (data.out_photo) {
+          html += `
+              <div class="photo-wrapper">
+                <img src="${CATALOG_URL}image/${data.out_photo}" alt="Punch Out Photo" class="attendance-photo">
+              </div>
+          `;
+        } else {
+          html += `
+              <div class="no-photo">
+                <i class="fa-solid fa-image"></i>
+                <p>No photo available</p>
+              </div>
+          `;
+        }
+        
+        html += `
+            </div>
+          </div>
+        `;
+        
+        document.getElementById('photoModalBody').innerHTML = html;
+      } else {
+        document.getElementById('photoModalBody').innerHTML = `
+          <div class="no-data">
+            <i class="fa-solid fa-exclamation-triangle"></i>
+            <p>${data.message || 'Error loading photos'}</p>
+          </div>
+        `;
+      }
+    } catch (error) {
+      document.getElementById('photoModalBody').innerHTML = `
+        <div class="no-data">
+          <i class="fa-solid fa-exclamation-triangle"></i>
+          <p>Error loading photos</p>
+        </div>
+      `;
+    }
+  }
+
+  function closePhotoModal() {
+    document.getElementById('photoModal').classList.remove('show');
+  }
+
+  function exportDaily() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const sourceOfHireId = document.getElementById('sourceOfHire').value;
+    window.location.href = `index.php?route=attendance/attendancereport.exportDaily&user_token=${USER_TOKEN}&start_date=${startDate}&end_date=${endDate}&source_of_hire_id=${sourceOfHireId}`;
+  }
+
+  window.addEventListener('load', () => {
+    loadDailyReport();
+  });
+</script>
+
+<style>
+  * { box-sizing: border-box; }
+
+  #content {
+    background: #1a1d29;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .page-header {
+    background: #1a1d29;
+    border-bottom: 1px solid #2a2d3a;
+    padding: 20px 30px;
+    margin-bottom: 0;
+  }
+
+  .page-header h1 {
+    color: #ffffff;
+    font-size: 1.8rem;
+    margin: 0;
+    font-weight: 500;
+  }
+
+  .report-container {
+    max-width: 100%;
+    margin: 0;
+    padding: 20px 30px;
+  }
+
+  .card {
+    background: #262936;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    margin-bottom: 20px;
+    border: 1px solid #2a2d3a;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #2a2d3a;
+  }
+
+  .tab {
+    padding: 12px 24px;
+    background: transparent;
+    color: #8b92a9;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    position: relative;
+    transition: all 0.3s;
+  }
+
+  .tab:hover {
+    color: #ffffff;
+  }
+
+  .tab.active {
+    color: #007bff;
+  }
+
+  .tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #007bff;
+  }
+
+  .tab-content {
+    display: none;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  .filters {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+
+  .filter-group {
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .filter-group label {
+    display: block;
+    color: #8b92a9;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+  }
+
+  .filter-group select,
+  .filter-group input {
+    width: 100%;
+    padding: 10px 15px;
+    background: #1a1d29;
+    border: 1px solid #2a2d3a;
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 0.95rem;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: #007bff;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #0056b3;
+  }
+
+  .btn-success {
+    background: #28a745;
+    color: white;
+  }
+
+  .btn-success:hover {
+    background: #218838;
+  }
+
+  .btn-view {
+    background: #17a2b8;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+
+  .btn-view:hover {
+    background: #138496;
+  }
+
+  .report-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .summary-item {
+    background: #1a1d29;
+    padding: 20px;
+    border-radius: 6px;
+    border: 1px solid #2a2d3a;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .summary-item i {
+    font-size: 2rem;
+    color: #007bff;
+  }
+
+  .summary-label {
+    color: #8b92a9;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .summary-value {
+    color: #ffffff;
+    font-size: 1.8rem;
+    font-weight: 600;
+  }
+
+  .report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+
+  .report-table th {
+    background: #1a1d29;
+    color: #8b92a9;
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 500;
+    border-bottom: 1px solid #2a2d3a;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+  }
+
+  .report-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #2a2d3a;
+    color: #ffffff;
+    font-size: 0.9rem;
+  }
+
+  .report-table tr:hover {
+    background: rgba(0, 123, 255, 0.05);
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  .badge-success {
+    background: rgba(40, 167, 69, 0.2);
+    color: #28a745;
+  }
+
+  .badge-danger {
+    background: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+  }
+
+  .badge-warning {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+  }
+
+  .location-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    background: rgba(23, 162, 184, 0.15);
+    color: #17a2b8;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: #8b92a9;
+  }
+
+  .loading-spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: #007bff;
+    animation: spin 1s ease-in-out infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+  }
+
+  .no-data i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    opacity: 0.3;
+  }
+
+  .photo-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto;
+  }
+
+  .photo-modal.show {
+    display: flex;
+  }
+
+  .photo-modal-content {
+    background: #262936;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 1000px;
+    width: 95%;
+    margin: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .photo-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #2a2d3a;
+  }
+
+  .photo-modal-header h3 {
+    color: #ffffff;
+    font-size: 1.4rem;
+    margin: 0;
+  }
+
+  .photo-info {
+    background: #1a1d29;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #2a2d3a;
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    color: #8b92a9;
+    font-weight: 500;
+  }
+
+  .info-value {
+    color: #ffffff;
+  }
+
+  .photos-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+  }
+
+  .photo-section {
+    background: #1a1d29;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #2a2d3a;
+  }
+
+  .photo-section h4 {
+    color: #ffffff;
+    margin: 0 0 15px 0;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .photo-details {
+    margin-bottom: 15px;
+  }
+
+  .detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #2a2d3a;
+  }
+
+  .detail-item:last-child {
+    border-bottom: none;
+  }
+
+  .detail-label {
+    color: #8b92a9;
+    font-size: 0.9rem;
+  }
+
+  .detail-value {
+    color: #ffffff;
+    font-weight: 500;
+  }
+
+  .photo-wrapper {
+    text-align: center;
+    background: #000;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .attendance-photo {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .no-photo {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+    background: #000;
+    border-radius: 6px;
+  }
+
+  .no-photo i {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    opacity: 0.3;
+  }
+
+  .no-photo p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  .close-modal {
+    background: #6c757d;
+    color: white;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background 0.2s;
+  }
+
+  .close-modal:hover {
+    background: #5a6268;
+  }
+
+  @media (max-width: 768px) {
+    .filters {
+      flex-direction: column;
+    }
+    .filter-group {
+      min-width: 100%;
+    }
+    .report-summary {
+      grid-template-columns: 1fr;
+    }
+    .photos-container {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{{ footer }}

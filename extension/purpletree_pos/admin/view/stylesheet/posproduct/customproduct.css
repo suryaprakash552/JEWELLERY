@@ -1,0 +1,19 @@
+.massprintpage{
+	display: inline-block;
+	margin: 10px 5px;
+	text-align: center;
+}
+.massprintbutton{
+	margin-left: 45px;
+	display: block;
+}
+.masspopup{
+width: 50%;
+margin-left: 25%;
+}
+.masspopuplabel{
+font-size: 15px;
+}
+.massinputpopup{
+height: 32px;
+}

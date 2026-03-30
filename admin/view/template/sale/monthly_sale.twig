@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<style>
+* { box-sizing: border-box; }
+
+@page {
+    size: A4;
+    margin: 15mm;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    font-size: 11.5px;
+    color: #000;
+    margin: 0;
+}
+
+/* ================= PRINT ================= */
+@media print {
+    .no-print { display: none !important; }
+    header, nav, #header, #column-left, #footer { display: none !important; }
+}
+
+/* ================= PDF FIX ================= */
+.pdf-page {
+    width: 180mm;
+    margin: 0 auto;
+}
+
+/* ================= PAGE ================= */
+/*.page { page-break-after: always; }*/
+/*.page:last-child { page-break-after: auto; }*/
+/* ================= SMART PRINT PAGINATION ================= */
+@media print {
+
+    /* Allow browser to auto-fit content */
+    .page {
+        page-break-after: auto;
+        page-break-before: auto;
+    }
+
+    /* Prevent table splitting */
+    table {
+        page-break-inside: avoid;
+    }
+
+    /* Prevent owner details from moving to next page unnecessarily */
+    .owner-table {
+        page-break-inside: avoid;
+    }
+}
+
+/* ================= HEADER ================= */
+.header {
+    text-align: center;
+    border-bottom: 2px solid #000;
+    padding-bottom: 6px;
+}
+
+.header h2 {
+    margin: 0;
+    font-size: 17px;
+}
+
+.header .sub { font-size: 10.5px; }
+
+/* ================= TITLE ================= */
+.title {
+    text-align: center;
+    margin: 8px 0 6px;
+    font-size:13px;
+}
+.title span { font-size: 12px; font-weight:700; }
+
+/* ================= TABLE ================= */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+th, td {
+    border: 1px solid #000;
+    padding: 4px;
+    text-align: center;
+}
+
+th { background: #f2f2f2; }
+.text-right { text-align: right; }
+
+/* ================= OWNER TABLE ================= */
+.owner-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+.owner-table td {
+    border: 1px solid #000;
+    padding: 8px;
+    font-size: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="monthly-sale-wrapper">
+<div class="pdf-page">
+
+<!-- ================= PAGE 1 ================= -->
+<div class="page">
+
+<div class="header">
+    <h2>SALEEM GOLD COVERINGS</h2>
+    <div class="sub">
+        62/125 Room 1, Sukurmiya Street, Rayachoti, Andhra Pradesh – 516269<br>
+        Phone: 9985595645 | GSTIN: 37BBBBP0893F1Z4
+    </div>
+</div>
+
+<div class="no-print" style="text-align:right; margin-bottom:10px;">
+    <button onclick="printMonthlySale()">Print</button>
+    <button onclick="downloadMonthlyPDF()">Download PDF</button>
+</div>
+
+<div class="title">
+    <strong>Monthly Sales Bill</strong><br>
+    <span id="dateRange">From Date: -- | To Date: --</span>
+</div>
+
+<table>
+<thead>
+<tr>
+    <th>S.No</th>
+    <th>Date</th>
+    <th>Per Day Sale (₹)</th>
+    <th>GST %</th>
+    <th>Without GST (₹)</th>
+    <th>GST Amount (₹)</th>
+    <th>Total (₹)</th>
+</tr>
+</thead>
+
+<tbody id="bill-body">
+<tr><td colspan="7">Loading...</td></tr>
+</tbody>
+
+<tfoot>
+<tr>
+    <th colspan="6" style="text-align:right;">TOTAL</th>
+    <th id="grandTotal" class="text-right">0.00</th>
+</tr>
+</tfoot>
+</table>
+
+<p style="margin-top:6px;font-size:10.5px;">
+<strong>Amount in Words:</strong>
+<span id="amountWords">Zero Rupees Only</span>
+</p>
+
+<p style="font-size:10px;text-align:center;font-style:italic;">
+Reminder : TOTAL MONTHLY SALE BILL INCLUDES GST.
+</p>
+
+</div>
+
+<!-- ================= PAGE 2 ================= -->
+<div class="page">
+
+<h3 style="text-align:center;">Owner & Shop Details</h3>
+
+<table class="owner-table">
+<tr><td><strong>Owner Name</strong></td><td>Shaik Saleem Basha</td></tr>
+<tr><td><strong>Shop Name</strong></td><td>Saleem Gold Coverings</td></tr>
+<tr><td><strong>Mobile No</strong></td><td>9985595645</td></tr>
+<tr>
+    <td><strong>Address</strong></td>
+    <td>62/125 Room 1, Sukurmiya Street, Rayachoti, Andhra Pradesh – 516269</td>
+</tr>
+<tr>
+    <td><strong>Total Monthly Sale</strong></td>
+    <td id="finalAmount">₹ 0.00</td>
+</tr>
+</table>
+
+<p style="margin-top:40px;">
+<strong>Owner Signature:</strong> ___________________________
+</p>
+
+<p style="font-size:11px;text-align:center;">
+NOTE : THIS IS COMPUTER GENERATED BILL
+</p>
+
+</div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+function numberToWords(num) {
+    if (!num || isNaN(num)) return 'Zero Rupees Only';
+
+    const a = ['', 'One','Two','Three','Four','Five','Six','Seven','Eight','Nine',
+    'Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+    const b = ['', '', 'Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+
+    function w(n) {
+        if (n < 20) return a[n];
+        if (n < 100) return b[Math.floor(n/10)] + ' ' + a[n%10];
+        if (n < 1000) return a[Math.floor(n/100)] + ' Hundred ' + w(n%100);
+        if (n < 100000) return w(Math.floor(n/1000)) + ' Thousand ' + w(n%1000);
+        if (n < 10000000) return w(Math.floor(n/100000)) + ' Lakh ' + w(n%100000);
+        return w(Math.floor(n/10000000)) + ' Crore ' + w(n%10000000);
+    }
+    return w(Math.floor(num)).trim() + ' Rupees Only';
+}
+
+/* ================= AUTO FROM / TO DATE ================= */
+function updateDateRange(rows) {
+    if (!rows || !rows.length) return;
+
+    const dates = rows.map(r => new Date(r.date));
+    const minDate = new Date(Math.min(...dates));
+    const maxDate = new Date(Math.max(...dates));
+
+    const format = d =>
+        String(d.getDate()).padStart(2, '0') + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        d.getFullYear();
+
+    document.getElementById('dateRange').innerText =
+        `From Date: ${format(minDate)}  |  To Date: ${format(maxDate)}`;
+}
+
+/* ================= LOAD DATA ================= */
+const billData = JSON.parse(sessionStorage.getItem('MONTHLY_BILL_DATA'));
+
+if (billData && billData.rows && billData.rows.length) {
+
+    const tbody = document.getElementById('bill-body');
+    tbody.innerHTML = '';
+    let grandTotal = 0;
+
+    billData.rows.forEach((row, index) => {
+        grandTotal += parseFloat(row.total);
+
+        tbody.innerHTML += `
+        <tr>
+            <td>${index + 1}</td>
+            <td>${row.date}</td>
+            <td class="text-right">${row.sale}</td>
+            <td>${billData.gstPct}%</td>
+            <td class="text-right">${row.sale}</td>
+            <td class="text-right">${row.gst}</td>
+            <td class="text-right">${row.total}</td>
+        </tr>`;
+    });
+
+    document.getElementById('grandTotal').innerText = grandTotal.toFixed(2);
+    document.getElementById('finalAmount').innerText = '₹ ' + grandTotal.toFixed(2);
+    document.getElementById('amountWords').innerText = numberToWords(grandTotal);
+
+    updateDateRange(billData.rows);
+}
+
+function printMonthlySale() { window.print(); }
+
+function downloadMonthlyPDF() {
+    html2pdf().set({
+        margin: [10,10,10,10],
+        filename: 'Monthly_Sales_Bill.pdf',
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(document.querySelector('.pdf-page')).save();
+}
+</script>
+
+</body>
+</html>

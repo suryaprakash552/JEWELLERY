@@ -1,0 +1,415 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end"></div>
+      <h1 style="color:white">Apply Leave</h1>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ home }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="#">Leave Management</a></li>
+        <li class="breadcrumb-item active">Apply Leave</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    <!-- Alert Messages -->
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible">
+      <i class="fa-solid fa-circle-exclamation"></i> {{ error_warning }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
+    {% if success %}
+    <div class="alert alert-success alert-dismissible">
+      <i class="fa-solid fa-circle-check"></i> {{ success }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
+    <div class="row">
+      <!-- Leave Balance Summary -->
+      <div class="col-lg-3 col-md-12 order-lg-last mb-3">
+        <div class="card">
+          <div class="card-header" style="font-size:large; font-weight:bold;"><i class="fa-solid fa-chart-pie"></i> Leave Balance</div>
+          <div class="card-body">
+            {% if leave_balances %}
+            {% for type, balance in leave_balances %}
+            <div class="mb-3 p-2 border rounded bg-light" data-leave-type="{{ type }}">
+              <h6 class="text-capitalize mb-1">{{ leave_types[type] }}</h6>
+              <div class="progress mb-1" style="height: 8px;">
+                {% set percentage = balance.total_allowance > 0 ? (balance.remaining / balance.total_allowance) * 100 : 0 %}
+                {% set bar_class = percentage < 20 ? 'bg-danger' : (percentage < 40 ? 'bg-warning' : 'bg-success') %}
+                <div class="progress-bar {{ bar_class }}" style="width: {{ percentage }}%"></div>
+              </div>
+              <small class="d-block">
+                <strong>Total:</strong> {{ balance.total_allowance }} | 
+                <strong>Remaining:</strong> {{ balance.remaining }} | 
+                <strong>Used:</strong> {{ balance.used_days }}
+              </small>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="text-muted">No leave balance information available</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-lg-9 col-md-12">
+        <!-- Leave Application Form (Collapsible) -->
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center" style="cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#new-leave-request-form">
+            <span style=font-size:large;font-weight:bold;><i class="fa-solid fa-calendar-plus" > </i> New Leave Request</span>
+            <i class="fa-solid fa-chevron-down rotate-icon"></i>
+          </div>
+
+<form id="form-applyleave" action="{{ action }}" method="post"style="width:88%;margin-left:45px;">
+
+  <!-- ROW 1: Start / End Date -->
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label for="input-start-date" class="form-label">Start Date</label>
+      <input type="date"
+             name="start_date"
+             value="{{ start_date }}"
+             id="input-start-date"
+             class="form-control"
+             required>
+       </div>
+
+    <div class="col-md-6">
+      <label for="input-end-date" class="form-label">End Date</label>
+      <input type="date"
+             name="end_date"
+             value="{{ end_date }}"
+             id="input-end-date"
+             class="form-control"
+             required>
+    </div>
+  </div>
+
+  <!-- ROW 2: Leave Type / Reason -->
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label for="input-leave-type" class="form-label">Leave Type</label>
+      <select name="leave_type"
+              id="input-leave-type"
+              class="form-select"style="width:100%;"
+              required>
+        <option value="">Select Leave Type</option>
+        {% for key, type in leave_types %}
+          <option value="{{ key }}" {% if leave_type == key %}selected{% endif %}>
+            {{ type }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-6">
+      <label for="input-reason" class="form-label">Reason</label>
+      <textarea name="reason"
+                rows="2"
+                id="input-reason"
+                class="form-control"
+                required>{{ reason }}</textarea>
+    </div>
+  </div>
+
+  <!-- Balance Info -->
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <div id="leave-balance-info"
+           class="alert alert-info d-none p-2">
+        <small>
+          <strong>Available Balance:</strong>
+          <span id="available-days">0</span> days
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBMIT (CENTERED) -->
+  <div class="row">
+    <div class="col-12 text-center">
+      <button type="submit" class="btn btn-primary px-4">
+        <i class="fa-solid fa-paper-plane"></i> Submit Request
+      </button>
+    </div>
+  </div>
+
+</form>
+
+        </div>
+
+        <!-- Leave History -->
+        <div class="card mt-4">
+          <div class="card-header" style="font-size:large; font-weight:bold"><i class="fa-solid fa-history"></i> Leave History</div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th>Leave Type</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Days</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Applied On</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% if leaves %}
+                  {% for leave in leaves %}
+                  <tr>
+                    <td class="text-capitalize">{{ leave_types[leave.leave_type] ?? leave.leave_type }}</td>
+                    <td>{{ leave.formatted_start_date ?? leave.start_date|date('d/m/Y') }}</td>
+                    <td>{{ leave.formatted_end_date ?? leave.end_date|date('d/m/Y') }}</td>
+                    <td>{{ leave.total_days }}</td>
+                    <td>{{ leave.reason|e }}</td>
+                    <td>
+                      {% set status_classes = {'0': 'warning', '1': 'success', '2': 'danger', '3': 'secondary'} %}
+                      {% set class = status_classes[leave.status] ?? 'secondary' %}
+                      <span class="badge bg-{{ class }}">{{ leave.status_text }}</span>
+                    </td>
+                    <td>{{ leave.formatted_created_at ?? leave.created_at|date('d/m/Y H:i') }}</td>
+                    <td>
+              {% if leave.status == '0' %}
+             <a href="{{ cancel_url }}&leave_id={{ leave.leave_id ?? leave.id }}" 
+           onclick="return confirm('Are you sure you want to cancel this leave request?');" 
+           class="btn btn-sm btn-outline-danger" title="Cancel Request">
+          <i class="fa-solid fa-times"></i>
+              </a>
+              {% else %}
+           <span class="text-muted">-</span>
+            {% endif %}
+          </td>
+               </tr>
+                  {% endfor %}
+                  {% else %}
+                  <tr>
+                    <td colspan="8" class="text-center">No leave records found</td>
+                  </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- PAGINATION SECTION WITH ROWS PER PAGE -->
+       {#   {% if pagination %}#}
+       {#   <div class="row mt-3 align-items-center">#}
+       {#    <div class="col-sm-6">#}
+       {#     <nav>#}
+       {#    {{ pagination|raw }}#}
+       {#   </nav>#}
+       {#  </div>#}
+       {# <div class="col-sm-6 text-end">#}
+       {#   <small class="text-muted">{{ results }}</small>#}
+       {#     </div>#}
+       {#</div>#}
+       {# {% endif %}#}
+       <div class="row">
+    <div class="col-sm-6 text-start">{{ pagination }}</div>
+    <div class="col-sm-6 text-end">{{ results }}</div>
+  </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Styles -->
+<style>
+/* Custom pagination styling to match the design */
+{#.pagination .page-link {#}
+{#  border: 1px solid #dee2e6;#}
+{#  color: #6c757d;#}
+{#  padding: 0.375rem 0.75rem;#}
+{#  margin: 0 2px;#}
+{#  border-radius: 50px !important;#}
+{#  background-color: #fff;#}
+{#  transition: all 0.2s ease-in-out;#}
+{#}#}
+
+{#.pagination .page-link:hover {#}
+{#  background-color: #e9ecef;#}
+{#  border-color: #adb5bd;#}
+{#  color: #495057;#}
+{#}#}
+
+{#.pagination .page-item.active .page-link {#}
+{#  background-color: #007bff;#}
+{#  border-color: #007bff;#}
+{#  color: #fff;#}
+{#}#}
+
+{#.pagination .page-item:not(:last-child) .page-link {#}
+{#  margin-right: 4px;#}
+{#}#}
+
+{#.dataTables_info {#}
+{#  color: #6c757d;#}
+{#  font-size: 0.875rem;#}
+{#}#}
+
+/* Progress bar styling */
+{#.progress {#}
+{#  background-color: #e9ecef;#}
+{#  border-radius: 0.375rem;#}
+{#}#}
+
+/* Card styling */
+{#.card {#}
+{#  border: 1px solid rgba(0,0,0,.125);#}
+{#  border-radius: 0.375rem;#}
+{#  box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075);#}
+{#}#}
+
+/* Form styling */
+{#.form-control:focus, .form-select:focus {#}
+{#  border-color: #86b7fe;#}
+{#  box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);#}
+{#}#}
+
+/* Rows per page styling */
+{#.dataTables_length label {#}
+{#  font-weight: normal;#}
+{#  margin-bottom: 0;#}
+{#  display: flex;#}
+{#  align-items: center;#}
+{#  gap: 0.5rem;#}
+{#  font-size: 0.875rem;#}
+{#  color: #6c757d;#}
+{#}#}
+
+{#.dataTables_length .form-select {#}
+{#  width: auto !important;#}
+{#  min-width: 70px;#}
+{#  padding: 0.25rem 1.5rem 0.25rem 0.5rem;#}
+{#}#}
+</style>
+
+<!-- JavaScript -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Chevron rotation for collapsible form
+  var header = document.querySelector('[data-bs-target="#new-leave-request-form"]');
+  var icon = header.querySelector('.rotate-icon');
+  var collapse = document.getElementById('new-leave-request-form');
+
+  if (collapse) {
+    collapse.addEventListener('hide.bs.collapse', function () {
+      icon.classList.remove('fa-chevron-up');
+      icon.classList.add('fa-chevron-down');
+    });
+
+    collapse.addEventListener('show.bs.collapse', function () {
+      icon.classList.remove('fa-chevron-down');
+      icon.classList.add('fa-chevron-up');
+    });
+  }
+
+  // AJAX for calculating working days and showing leave balance
+  const startDateInput = document.getElementById('input-start-date');
+  const endDateInput = document.getElementById('input-end-date');
+  const leaveTypeInput = document.getElementById('input-leave-type');
+  const totalDaysInput = document.getElementById('input-total-days');
+  const leaveBalanceInfo = document.getElementById('leave-balance-info');
+  const availableDaysSpan = document.getElementById('available-days');
+
+  function calculateDays() {
+    const startDate = startDateInput.value;
+    const endDate = endDateInput.value;
+    const leaveType = leaveTypeInput.value;
+
+    if (startDate && endDate) {
+      // Calculate working days via AJAX
+      fetch('{{ action }}/calculateDays', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          start_date: startDate,
+          end_date: endDate
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          totalDaysInput.value = data.working_days;
+          
+          // Show leave balance for selected type
+          if (leaveType) {
+            updateLeaveBalance(leaveType, data.working_days);
+          }
+        } else {
+          totalDaysInput.value = '';
+          console.error('Error calculating days:', data.error);
+        }
+      })
+      .catch(error => {
+        console.error('AJAX error:', error);
+        totalDaysInput.value = '';
+      });
+    }
+  }
+
+  function updateLeaveBalance(leaveType, requestedDays) {
+    // Get balance from the leave balance section
+    const balanceElement = document.querySelector(`[data-leave-type="${leaveType}"]`);
+    if (balanceElement) {
+      const balanceText = balanceElement.querySelector('small').textContent;
+      const remainingMatch = balanceText.match(/Remaining:\s*(\d+)/);
+      
+      if (remainingMatch) {
+        const remaining = parseInt(remainingMatch[1]);
+        availableDaysSpan.textContent = remaining;
+        
+        // Show/hide the balance info
+        leaveBalanceInfo.classList.remove('d-none');
+        
+        // Change alert class based on availability
+        leaveBalanceInfo.className = 'alert d-block';
+        if (requestedDays > remaining) {
+          leaveBalanceInfo.classList.add('alert-danger');
+          leaveBalanceInfo.innerHTML = `<small><strong>Warning:</strong> Requested ${requestedDays} days exceeds available ${remaining} days!</small>`;
+        } else {
+          leaveBalanceInfo.classList.add('alert-info');
+          leaveBalanceInfo.innerHTML = `<small><strong>Available Balance:</strong> ${remaining} days</small>`;
+        }
+      }
+    }
+  }
+
+  // Event listeners
+  if (startDateInput && endDateInput) {
+    startDateInput.addEventListener('change', calculateDays);
+    endDateInput.addEventListener('change', calculateDays);
+  }
+  
+  if (leaveTypeInput && totalDaysInput) {
+    leaveTypeInput.addEventListener('change', function() {
+      if (totalDaysInput.value && this.value) {
+        updateLeaveBalance(this.value, parseInt(totalDaysInput.value));
+      }
+    });
+  }
+});
+
+// Function to change rows per page
+function changeLimit(limit) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('limit', limit);
+  url.searchParams.set('page', 1); // Reset to first page
+  window.location.href = url.toString();
+}
+</script>
+
+{{ footer }}

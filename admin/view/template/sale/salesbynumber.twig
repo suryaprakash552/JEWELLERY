@@ -1,0 +1,61 @@
+{{ header }}{{ column_left }}
+
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <h1>{{ heading_title }}</h1>
+            <ol class="breadcrumb">
+                <li><a href="{{ home }}">Home</a></li>
+                <li class="active">{{ heading_title }}</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+     <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>SRNO</th>
+                    <th>Date</th>
+                    <th>Number</th>
+                    <th>Name</th>
+                    <th>No. Orders</th>
+                    <th>No. Products</th>
+                    <th>R Price</th>
+                    <th>R Tax</th>
+                    <th>R Total</th>
+                    <th>S Price</th>
+                    <th>S Tax</th>
+                    <th>S Total</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for r in rows %}
+                    <tr>
+                        <td>{{ r.srno }}</td>
+                        <td>{{ r.date }}</td>
+                        <td>{{ r.number }}</td>
+                        <td>{{ r.name }}</td>
+                        <td>{{ r.no_orders }}</td>
+                        <td>{{ r.no_products }}</td>
+
+                        <td>{{ r.r_price }}</td>
+                        <td>{{ r.r_tax }}</td>
+                        <td>{{ r.r_total }}</td>
+
+                        <td>{{ r.s_price }}</td>
+                        <td>{{ r.s_tax }}</td>
+                        <td>{{ r.s_total }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="row">
+                <div class="col-sm-6 text-left">{{ pagination }}</div>
+                <div class="col-sm-6 text-right">{{ results }}</div>
+            </div>
+    </div>
+</div>
+
+{{ footer }}

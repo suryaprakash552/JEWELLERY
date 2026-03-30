@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html dir="{{ direction }}" lang="{{ lang }}">
+<head>
+  <meta charset="UTF-8"/>
+  <title>{{ title }}</title>
+  <base href="{{ base }}"/>
+  {% if description %}
+    <meta name="description" content="{{ description }}"/>
+  {% endif %}
+  {% if keywords %}
+    <meta name="keywords" content="{{ keywords }}"/>
+  {% endif %}
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  <link href="{{ bootstrap }}" rel="stylesheet" media="screen"/>
+  <link href="{{ icons }}" rel="stylesheet" type="text/css"/>
+  <link href="{{ stylesheet }}" rel="stylesheet" type="text/css"/>
+  <script src="{{ jquery }}" type="text/javascript"></script>
+  <script type="text/javascript" src="view/javascript/common.js"></script>
+  {% for style in styles %}
+    <link type="text/css" href="{{ style.href }}" rel="{{ style.rel }}" media="{{ style.media }}"/>
+  {% endfor %}
+  {% for link in links %}
+    <link href="{{ link.href }}" rel="{{ link.rel }}"/>
+  {% endfor %}
+  {% for script in scripts %}
+    <script type="text/javascript" src="{{ script.href }}"></script>
+  {% endfor %}
+</head>
+<body>
+    <div id="sidebar-overlay"></div>
+<div id="alert"></div>
+<div id="container">
+  <header id="header" class="navbar navbar-expand navbar-light bg-light">
+    <div class="container-fluid">
+      <a href="{{ home }}" class="navbar-brand d-none d-lg-block"><img src="view/image/logo.png" alt="{{ heading_title }}" title="{{ heading_title }}"/>
+      </a>
+            <h3 style="
+    font-size:33px; margin:0; font-weight:bold; color:#C9A24D; font-family:initial;text-align:left;">
+SALEEM GOLD COVERING</h3>
+
+      {% if logged %}
+        <button type="button" id="button-menu" class="btn btn-link d-inline-block d-lg-none"><i class="fa-solid fa-bars"></i></button>
+        <ul class="nav navbar-nav">
+          <li id="nav-notification" class="nav-item dropdown">
+            <a href="#" data-bs-toggle="dropdown" class="nav-link dropdown-toggle"><i class="fa-regular fa-bell"></i>{% if notification_total %} <span class="badge bg-danger">{{ notification_total }}</span>{% endif %}</a>
+            <div class="dropdown-menu dropdown-menu-end">
+              {% if notifications %}
+                {% for notification in notifications %}
+                  <a href="{{ notification.href }}" data-bs-toggle="modal" class="dropdown-item">{{ notification.title }}</a>
+                {% endfor %}
+                <a href="{{ notification_all }}" class="dropdown-item text-center text-primary">{{ text_notification_all }}</a>
+              {% else %}
+                <span class="dropdown-item text-center">{{ text_no_results }}</span>
+              {% endif %}
+            </div>
+          </li>
+          <li class="nav-item">
+  <a href="{{ setting_store }}" class="nav-link" title="Settings"style="font-size:23px;margin-top:6px;">
+    <i class="fa-solid fa-gear"></i>
+  </a>
+</li>
+
+
+          <li id="nav-language" class="nav-item dropdown">{{ language }}</li>
+          <li id="nav-profile" class="nav-item dropdown">
+            <a href="#" data-bs-toggle="dropdown" class="nav-link dropdown-toggle"><img src="{{ logoimage }}" alt="{{ firstname }} {{ lastname }}" title="{{ firstname }} {{ lastname }}" class="rounded-circle"/><span class="d-none d-md-inline d-lg-inline">&nbsp;&nbsp;&nbsp;{{ firstname }} {{ lastname }} <i class="fa-solid fa-caret-down fa-fw"></i></span></a>
+            {#<ul class="dropdown-menu dropdown-menu-end">#}
+            {#  <li><a href="{{ profile }}" class="dropdown-item"><i class="fa-solid fa-user-circle fa-fw"></i> {{ text_profile }}</a></li>#}
+            {#  <li><hr class="dropdown-divider"></li>#}
+            {#  <li><h6 class="dropdown-header">{{ text_store }}</h6></li>#}
+            {#  {% for store in stores %}#}
+            {#    <a href="{{ store.href }}" target="_blank" class="dropdown-item">{{ store.name }}</a>#}
+            {#  {% endfor %}#}
+            {#  <li><hr class="dropdown-divider"></li>#}
+            {#  <li><h6 class="dropdown-header">{{ text_help }}</h6></li>#}
+            {#  <li><a href="https://www.opencart.com" target="_blank" class="dropdown-item"><i class="fa-brands fa-opencart fa-fw"></i> {{ text_homepage }}</a></li>#}
+            {#  <li><a href="https://docs.opencart.com" target="_blank" class="dropdown-item"><i class="fa-solid fa-file fa-fw"></i> {{ text_documentation }}</a></li>#}
+            {#  <li><a href="https://forum.opencart.com" target="_blank" class="dropdown-item"><i class="fa-solid fa-comments fa-fw"></i> {{ text_support }}</a></li>#}
+            {#</ul>#}
+          </li>
+          <li id="nav-logout" class="nav-item"><a href="{{ logout }}" class="nav-link"><i class="fa-solid fa-sign-out"></i> <span class="d-none d-md-inline">{{ text_logout }}</span></a></li>
+        </ul>
+      {% endif %}
+    </div>
+  </header>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Get current URL (without query parameters)
+  const currentURL = window.location.href.split('&')[0];
+
+  // Remove 'active' from all
+  document.querySelectorAll('#top-nav .nav-link, #top-nav .dropdown-item').forEach(el => {
+    el.classList.remove('active');
+  });
+
+  // Find and highlight the matching dropdown item
+  let activeItem = null;
+  document.querySelectorAll('#top-nav .dropdown-item').forEach(item => {
+    const href = item.getAttribute('href');
+    if (href && currentURL.includes(href.split('&')[0])) {
+      activeItem = item;
+      item.classList.add('active'); // highlight the exact page link
+    }
+  });
+
+  // Highlight the parent dropdown button (if submenu clicked)
+  if (activeItem) {
+    let parentDropdown = activeItem.closest('.dropdown');
+    if (parentDropdown) {
+      let parentLink = parentDropdown.querySelector('.nav-link');
+      if (parentLink) {
+        parentLink.classList.add('active');
+      }
+    }
+
+    // If it's a sub-dropdown, also highlight the higher parent
+    let subParent = activeItem.closest('.dropdown-submenu');
+    if (subParent) {
+      let subParentLink = subParent.querySelector('.dropdown-toggle');
+      if (subParentLink) {
+        subParentLink.classList.add('active');
+      }
+      let higherParent = subParent.closest('.dropdown');
+      if (higherParent) {
+        let higherLink = higherParent.querySelector('.nav-link');
+        if (higherLink) {
+          higherLink.classList.add('active');
+        }
+      }
+    }
+  }
+
+  // Also handle top-level nav items
+  document.querySelectorAll('#top-nav .nav-link').forEach(link => {
+    const href = link.getAttribute('href');
+    if (href && currentURL.includes(href.split('&')[0])) {
+      link.classList.add('active');
+    }
+  });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const MOBILE_W = 992;
+
+  function isMobileWidth() {
+    return window.innerWidth <= MOBILE_W;
+  }
+
+  // Prevent bootstrap native toggles interfering on mobile
+  function setupMobileToggles() {
+    // Parent dropdown toggles and submenu toggles
+    const toggles = document.querySelectorAll('#top-nav .nav-item.dropdown > .nav-link, #top-nav .dropdown-submenu > a');
+
+    toggles.forEach(toggle => {
+      // Remove any existing handler we might have added earlier
+      toggle.onclick = null;
+
+      toggle.addEventListener('click', function (e) {
+        if (!isMobileWidth()) return; // keep desktop default behavior
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        // find closest dropdown or dropdown-submenu parent
+        let parent = this.closest('.dropdown-submenu') || this.closest('.dropdown');
+
+        if (!parent) return;
+
+        // close siblings on same level
+        const siblings = Array.from(parent.parentElement ? parent.parentElement.children : []);
+        siblings.forEach(sib => {
+          if (sib !== parent) {
+            sib.classList.remove('open', 'show');
+          }
+        });
+
+        // toggle this parent
+        parent.classList.toggle('open');
+        parent.classList.toggle('show');
+      });
+    });
+  }
+
+  // close all when tapping outside
+  function setupDocumentClose() {
+    document.addEventListener('click', function (e) {
+      if (!isMobileWidth()) return;
+      if (!e.target.closest('#top-nav')) {
+        document.querySelectorAll('#top-nav .dropdown.open, #top-nav .dropdown.show, #top-nav .dropdown-submenu.open, #top-nav .dropdown-submenu.show').forEach(el => {
+          el.classList.remove('open', 'show');
+        });
+      }
+    });
+  }
+
+  // reset on resize
+  let rtimer;
+  window.addEventListener('resize', function () {
+    clearTimeout(rtimer);
+    rtimer = setTimeout(function () {
+      // remove mobile-only classes on desktop
+      if (!isMobileWidth()) {
+        document.querySelectorAll('#top-nav .dropdown.open, #top-nav .dropdown.show, #top-nav .dropdown-submenu.open, #top-nav .dropdown-submenu.show').forEach(el => {
+          el.classList.remove('open', 'show');
+        });
+      }
+      // re-setup toggles (in case DOM changed)
+      setupMobileToggles();
+    }, 120);
+  });
+
+  // initial setup
+  setupMobileToggles();
+  setupDocumentClose();
+});
+</script>

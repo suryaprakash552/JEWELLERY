@@ -1,0 +1,1287 @@
+<!-- admin/view/template/payroll/payroll.twig -->
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        <div class="btn-group">
+          {#<button type="button" class="btn btn-info" id="view-reports-btn" data-bs-toggle="tooltip" title="View Reports">#}
+          {#  <i class="fa-solid fa-chart-line"></i> Reports#}
+          {#</button>#}
+          {#<button type="button" class="btn btn-warning" id="process-payments" data-bs-toggle="tooltip" title="Process Payments">#}
+          {#  <i class="fa-solid fa-money-check-alt"></i> Process Payments#}
+          {#</button>#}
+        </div>
+      </div>
+      <h1>Payroll Management</h1>
+      <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if success %}
+    <div class="alert alert-success alert-dismissible">
+      <i class="fa-solid fa-circle-check"></i> {{ success }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible">
+      <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+    {% if warning %}
+    <div class="alert alert-warning alert-dismissible">
+      <i class="fa-solid fa-triangle-exclamation"></i> {{ warning }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+      <div class="col-lg-3 col-md-6">
+        <div class="card text-white bg-primary">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <div>
+                <h4>{{ statuses.total_employees }}</h4>
+                <p class="mb-0">Total Employees</p>
+              </div>
+              <div class="align-self-center">
+                <i class="fa-solid fa-users fa-2x"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="card text-white bg-success">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <div>
+                <h4>{{ statuses.processed_payroll }}</h4>
+                <p class="mb-0">Processed Payroll: ₹{{ statuses.total_paid }}</p>
+              </div>
+              <div class="align-self-center">
+                <i class="fa-solid fa-check-circle fa-2x"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="card text-white bg-warning">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <div>
+                <h4>{{ statuses.pending_payroll }}</h4>
+                <p class="mb-0">Unreleased Payrolls: ₹{{ statuses.total_pending_amount }}</p>
+              </div>
+              <div class="align-self-center">
+                <i class="fa-solid fa-clock fa-2x"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="card text-white bg-danger">
+          <div class="card text-white bg-danger">
+              <div class="card-body">
+                <!-- Label and Amount in same line -->
+                <div class="d-flex align-items-baseline">
+                  <h6 class="mb-0 fw-semibold me-2" style="font-size: 14px;">Total Payout</h6>
+                  <h3 class="mb-0 fw-bold" style="font-size: 30px;padding: 05px;">₹{{ "%.2f"|format(statuses.total_payout) }}</h3>
+                </div>
+                {#<small class="d-block mt-1" style="font-size: 0.85rem;">Remaining: ₹{{ statuses.remaining_payment }}</small>#}
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generate Payroll Form -->
+    {#<div class="card mb-4">#}
+    {#  <div class="card-header">#}
+    {#    <h3 class="card-title">#}
+    {#      <i class="fa-solid fa-calculator"></i> Generate Monthly Payroll#}
+    {#    </h3>#}
+    {#  </div>#}
+    {#  <div class="card-body">#}
+    {#    <form id="payroll-form" action="{{ action }}" method="post">#}
+    {#      <div class="row">#}
+    {#        <div class="col-md-4">#}
+    {#          <div class="form-group">#}
+    {#            <label for="year" class="form-label">Year</label>#}
+    {#            <select class="form-select" id="year" name="year" required>#}
+    {#              <option value="">Select Year</option>#}
+    {#              {% for year in years %}#}
+    {#              <option value="{{ year }}" {{ year == current_year ? 'selected' : '' }}>{{ year }}</option>#}
+    {#              {% endfor %}#}
+    {#            </select>#}
+    {#          </div>#}
+    {#        </div>#}
+    {#        <div class="col-md-4">#}
+    {#          <div class="form-group">#}
+    {#            <label for="month" class="form-label">Month</label>#}
+    {#            <select class="form-select" id="month" name="month" required>#}
+    {#              <option value="">Select Month</option>#}
+    {#              {% for key, month_name in months %}#}
+    {#              <option value="{{ key }}" {{ key == current_month ? 'selected' : '' }}>{{ month_name }}</option>#}
+    {#              {% endfor %}#}
+    {#            </select>#}
+    {#          </div>#}
+    {#        </div>#}
+    {#        <div class="col-md-4 d-flex align-items-end">#}
+    {#          <div class="form-group w-100">#}
+    {#            <button type="submit" class="btn btn-primary w-100">#}
+    {#              <i class="fa-solid fa-play"></i> Generate Payroll#}
+    {#            </button>#}
+    {#          </div>#}
+    {#        </div>#}
+    {#      </div>#}
+    {#    </form>#}
+    {#  </div>#}
+    {#</div>#}
+
+    <!-- Employee List -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="fa-solid fa-users"></i> Employee List
+        </h3>
+        <div class="card-tools">
+          <div class="d-flex gap-2 align-items-center">
+            <!-- Month Filter -->
+            <select id="filterMonth" class="form-select form-select-sm" style="width: 1000px;">
+                <option value="">All Months</option>
+            </select>
+            <!-- Year Filter -->
+            <select id="filterYear" class="form-select form-select-sm" style="width: 1000px;">
+                <option value="">All Years</option>
+            </select>
+            <!-- Search Input -->
+            <div class="input-group input-group-sm" style="width: 1500px;">
+              <input type="text" id="employee-search" class="form-control" placeholder="Search employees...">
+              <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+                <i class="fa-solid fa-search"></i>
+              </button>
+            </div>
+            <!-- Generate Payroll button -->
+            <button class="btn btn-primary btn-sm" type="button" id="generatePayrollBtn" style="white-space: nowrap;margin-left: 464px;">
+              <i class="fa-solid fa-calculator"></i> Generate Payroll
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        {% if payrollDetails %}
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover" id="employee-table">
+            <thead class="table-light">
+              <tr>
+                <th style="color:black"><b>Name</b></th>
+                <th style="color:black"><b>CurrentMonth</b></th>
+                <th style="color:black"><b>WorkingDays</b></th>
+                <th style="color:black"><b>NetSalary</b></th>
+                <th style="color:black"><b>PayableSalary</b></th>
+                <th style="color:black"><b>Status</b></th>
+                <th class="text-center" style="color:black"><b>Actions</b></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for payrollDetail in payrollDetails %}
+                    
+                        {#<tr data-employee-name="{{ payrollDetail.name|lower }}" data-employee-email="{{ payrollDetail.email|lower }}">#}
+                        {#<td>{{ payrollDetail.user_id }}</td>#}
+                        <td>
+                          <strong>{{ payrollDetail.name }}</strong>
+                          <br><small class="text-muted">Emp_ID: {{ payrollDetail.user_id }}</small>
+                          <br><small class="text-muted">Payroll_ID: {{ payrollDetail.payroll.id }}</small>
+                        </td>
+                        <td>
+                          <strong>{{ payrollDetail.payroll.year }}/{{ payrollDetail.payroll.month }}</strong>
+                          <br><small class="text-muted"> {{ payrollDetail.payroll.run_date }}</small>
+                        </td>
+                        <td>
+                          <strong> TOTAL: {{ payrollDetail.payroll.total_days }}</strong>
+                          <br><small class="text-muted"> LAG: {{ payrollDetail.payroll.balance_days }}</small>
+                        </td>
+                        <td>{{ payrollDetail.payroll.net_salary }}</td>
+                        <td>{{ payrollDetail.payroll.payable_salary }}</td>
+                        <td>
+                          {% if payrollDetail.payroll.status == 'Pending' %}
+                          <span class="badge bg-success">Pending</span>
+                          {% else %}
+                          <span class="badge bg-danger">Paid</span>
+                          {% endif %}
+                        </td>
+                        <td class="text-center">
+                         <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-primary view-payroll" 
+                                        data-payroll-id="{{ payrollDetail.payroll.id }}" 
+                                        data-bs-toggle="tooltip" title="View Payroll">
+                                    <i class="fa-solid fa-eye"></i>
+                            </button>
+                            {% if payrollDetail.payroll.status != 'pending' and payrollDetail.payroll.status != 'Pending' %}
+                                <button type="button" class="btn btn-outline-success print-payslip" 
+                                        data-payroll-id="{{ payrollDetail.payroll.id }}"  
+                                        data-bs-toggle="tooltip" title="Print Payslip">
+                                    <i class="fa-solid fa-print"></i>
+                                </button>
+                            {% endif %}
+                            {#<button type="button" class="btn btn-outline-warning pay-employee" #}
+                            {#        data-employee-id="{{ payrollDetail.payroll.id  }}"#}
+                            {#        data-bs-toggle="tooltip" title="Pay Employee">#}
+                            {#  <i class="fa-solid fa-dollar-sign"></i>#}
+                            {#</button>#}
+                            {% if payrollDetail.payroll.status == 'pending' or payrollDetail.payroll.status == 'Pending' %}
+                                <button type="button" 
+                                        class="btn btn-outline-danger delete-payroll" 
+                                        data-payroll-id="{{ payrollDetail.payroll.id }}" 
+                                        data-bs-toggle="tooltip" 
+                                        title="Delete Payroll">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            {% endif %}
+                          </div>
+                        </td>
+                      </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-sm-6">
+                <div class="text-muted">
+                    Showing <span id="visible-count">{{ payrollDetails|length }}</span> of {{ payrollDetails|length }} employees
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+          <i class="fa-solid fa-users fa-3x text-muted mb-3"></i>
+          <h4>No Employees Found</h4>
+          <p class="text-muted">No active employees found in the system.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2" id="loading-text">Processing...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- View Payroll Modal - Always Visible -->
+    <div class="modal" id="payrollModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content" style="background-color:#292727;">
+                <!-- Header Box -->
+                <div class="modal-header bg-white text-dark flex-column align-items-start" style="margin-right: 17px; margin-left: 17px;">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title w-100"style="color:white;"><i class="fa-solid fa-file-invoice-dollar"></i> Payroll Details</h5>
+                    
+                    <!-- Row 1: Payroll & Employee -->
+                    <div class="w-100 d-flex justify-content-between small mt-2">
+                        <div>🆔 Payroll ID: <span id="modalId">37</span></div>
+                        <div style="margin-left:-11px;">📅 Month/Year: <span id="modalMonth">/</span><span id="modalYear"></span></div>
+                        <div style="margin-right:33px;">📝 Effective Days: <span id="modalEffectiveDays"></span></div>
+                    </div>
+                    
+                    <!-- Row 2: Month/Days -->
+                    <div class="w-100 d-flex justify-content-between small mt-1">
+                        <div>👤 Emp ID: <span id="modalEmpId">1</span></div>
+                        <div>📚 Month Days: <span id="modalDaysInMonth"></span></div>
+                        <div class="me-3">✅ Attendance: <span id="modalPresent"></span> days</div>
+                    </div>
+                    
+                    <!-- Row 3: Attendance & Leaves -->
+                    <div class="w-100 d-flex flex-wrap small mt-1">
+                        <div class="me-3" style="margin-top:12px;">📅 Weekends: <span id="modalWeekends">4</span> days</div>
+                        <div class="me-3" style="margin-top:12px; margin-left:20px">🌞 Festivals: <span id="modalFestivals">2</span> days</div>
+                        <div class="me-3" style="margin-top:12px; margin-left:20px">☂️ Leaves: <span id="modalLeaves"></span> days</div>
+                        <div class="me-3" style="margin-top:12px; margin-left:20px">💰 Paid Leaves: <span id="modalPaidLeaves">0</span> days</div>
+                        <div class="me-3" style="margin-top:12px; margin-left:20px">📚 Total Days: <span id="modalTotalDays"></span> days</div>
+                        <div class="me-3" style="margin-top:12px; margin-left:20px">⏳ Balance Days: <span id="modalBalance">17.00</span> days</div>
+                    </div>
+                </div>
+                
+                <!-- Body -->
+                <div class="modal-body">
+                    <div class="row g-3" style="margin-top: -34px; --bs-border-radius: 1px;">
+                        <!-- Earnings Box -->
+                        <div class="col-md-6 p-3 border rounded">
+                            <h6 class="text-success"><i class="fa-solid fa-wallet"></i>Earnings <hr style="width:558px; margin-left:-16px;"> </h6>
+                            {#<div class="mb-2">💵 Earnings</div>#}
+                            <div class="mb-2">💵 Basic: <i class="fa-solid fa-indian-rupee-sign"></i> <span id="modalBasic"></span></div>
+                            <div class="mb-2">🏠 HRA: <i class="fa-solid fa-indian-rupee-sign"></i> <span id="modalHRA">0.00</span></div>
+                            <div class="mb-2">📊 Variable: <i class="fa-solid fa-indian-rupee-sign"></i> <span id="modalVariable">0.00</span></div>
+                            <div class="mb-2">💳 Fixed Allowance: <i class="fa-solid fa-indian-rupee-sign"></i> <span id="modalFixed">0.00</span></div>
+                            <div class="mb-2">💰 Other Earning: <i class="fa-solid fa-indian-rupee-sign"></i> <span id="modelOtherEarning">0.00</span></div>
+                            <div class="mb-2 fw-bold text-warning"><hr style="width:558px; margin-left:-17px; margin-top:66px;">💰Total Earnings: <i class="fa-solid fa-indian-rupee-sign"></i> <span id="modalTotalEarnings"></span></div>
+                        </div>
+                        
+                        <!-- Deductions Box -->
+                        <div class="col-md-6 p-3 border rounded">
+                            <h6 class="text-danger"><i class="fa-solid fa-circle-minus"></i>Deductions <hr style="width:558px; margin-left:-16px;"> </h6>
+                            <div class="mb-2">🏦 PF: <i class="fa-solid fa-indian-rupee-sign"></i> <span id="modalPF">0.00</span></div>
+                            <div class="mb-2">💱 Other Deductions: <i class="fa-solid fa-indian-rupee-sign"></i> <span id="modalOtherDeduction"></span></div>
+                            <div class="mb-2 fw-bold text-warning" style="margin-top: 144px;"> <hr style="width:558px; margin-left:-18px;">💰Total Deductions: <i class="fa-solid fa-indian-rupee-sign"></i> <span id="modalTotalDeductions"></span></div>
+                        </div>
+                    </div>
+                </div>
+                
+               <!-- Footer Box -->
+                <div class="modal-footer bg-white fw-bold justify-content-center align-items-center" style="margin-top:-18px; position: relative;">
+                    <span>
+                        🟩 Total Pay:   <i class="fa-solid fa-indian-rupee-sign"></i><span id="modalTotalPay"></span>
+                    </span>
+                    <button type="button" class="btn btn-success btn-sm" id="btnOpenPaymentModal" style="position: absolute; right: 34px;">
+                        <i class="fa-solid fa-money-bill-wave"></i> Make Payment
+                    </button>
+                </div>
+                {#<div>#}
+                {#    <div class="text-end">#}
+                    {#<button type="button" class="btn btn-success btn-sm" id="btnOpenPaymentModal" style="margin-right: 10px; margin-bottom: 10px;">#}
+                    {#    <i class="fa-solid fa-money-bill-wave"></i> Make Payment#}
+                    {#</button>#}
+                {#</div>#}
+
+                {#</div>#}
+            </div>
+        </div>
+    </div>
+
+<!-- Payment Modal (Opens from View Modal) -->
+<div class="modal fade" id="paymentProcessModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title"><i class="fa-solid fa-credit-card"></i> Process Payment</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="paymentProcessForm">
+          <input type="hidden" id="paymentPayrollId" name="payroll_id">
+          
+          <!-- Employee Info -->
+          <div class="alert alert-info">
+            <div class="row">
+              <div class="col-md-6">
+                <strong>Employee:</strong> <span id="paymentEmployeeName"></span><br>
+                <strong>Payroll ID:</strong> <span id="paymentPayrollIdDisplay"></span>
+              </div>
+              <div class="col-md-6">
+                <strong>Period:</strong> <span id="paymentPeriod"></span><br>
+                <strong>Amount:</strong> <i class="fa-solid fa-indian-rupee-sign"></i> <span id="paymentAmount" class="text-success fw-bold"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Method Selection -->
+          <div class="mb-3">
+            <label for="paymentMethodSelect" class="form-label">Payment Method <span class="text-danger">*</span></label>
+            <select class="form-select" id="paymentMethodSelect" name="payment_method" required>
+              <option value="">-- Select Payment Method --</option>
+              <option value="cash">💵 Cash Payment</option>
+              <option value="Cheque">📝 Cheque Payment</option>
+              <option value="netbanking">🌐 Net Banking / UPI</option>
+              <option value="autopay">🤖 Auto Pay (Automated)</option>
+            </select>
+          </div>
+
+          <!-- Dynamic Payment Details Section -->
+          <div id="paymentDetailsSection" style="display: none;">
+            
+            <!-- Cash Payment Details -->
+            <div id="cashDetails" class="payment-method-details" style="display: none;">
+              <div class="card border-success mb-3">
+                <div class="card-header bg-success text-white">
+                  <i class="fa-solid fa-money-bill"></i> Cash Payment Details
+                </div>
+                <div class="card-body">
+                  {#<div class="mb-3">#}
+                  {#  <label for="cashReceivedBy" class="form-label">Received By <span class="text-danger">*</span></label>#}
+                  {#  <input type="text" class="form-control" id="cashReceivedBy" placeholder="Enter receiver name">#}
+                  {#</div>#}
+                  <div class="mb-3">
+                    <label for="cashReceiptNo" class="form-label">Receipt Number</label>
+                    <input type="text" class="form-control" id="cashReceiptNo" placeholder="Enter receipt number">
+                  </div>
+                  <div class="mb-3">
+                    <label for="cashNotes" class="form-label">Notes</label>
+                    <textarea class="form-control" id="cashNotes" rows="2" placeholder="Additional notes..."></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cheque Payment Details -->
+            <div id="chequeDetails" class="payment-method-details" style="display: none;">
+              <div class="card border-warning mb-3">
+                <div class="card-header bg-warning text-dark">
+                  <i class="fa-solid fa-money-check"></i> Cheque Payment Details
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="chequeNumber" class="form-label">Cheque Number <span class="text-danger">*</span></label>
+                      <input type="text" class="form-control" id="chequeNumber" placeholder="Enter Cheque number">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="chequeDate" class="form-label">Cheque Date <span class="text-danger">*</span></label>
+                      <input type="date" class="form-control" id="chequeDate">
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="chequeBankName" class="form-label">Bank Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="chequeBankName" placeholder="Enter bank name">
+                  </div>
+                  <div class="mb-3">
+                    <label for="chequeBranch" class="form-label">Branch</label>
+                    <input type="text" class="form-control" id="chequeBranch" placeholder="Enter branch name">
+                  </div>
+                  <div class="mb-3">
+                    <label for="chequeNotes" class="form-label">Notes</label>
+                    <textarea class="form-control" id="chequeNotes" rows="2" placeholder="Additional notes..."></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Net Banking Details -->
+            <div id="netbankingDetails" class="payment-method-details" style="display: none;">
+              <div class="card border-primary mb-3">
+                <div class="card-header bg-primary text-white">
+                  <i class="fa-solid fa-building-columns"></i> Net Banking / UPI Details
+                </div>
+                <div class="card-body">
+                  <div class="mb-3">
+                    <label for="transactionId" class="form-label">Transaction ID / UTR <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="transactionId" placeholder="Enter transaction ID">
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="transferMode" class="form-label">Transfer Mode</label>
+                      <select class="form-select" id="transferMode">
+                        <option value="neft">NEFT</option>
+                        <option value="rtgs">RTGS</option>
+                        <option value="imps">IMPS</option>
+                        <option value="upi">UPI</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="transferDate" class="form-label">Transfer Date</label>
+                      <input type="date" class="form-control" id="transferDate">
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="fromAccount" class="form-label">From Account</label>
+                    <input type="text" class="form-control" id="fromAccount" placeholder="Account number (last 4 digits)">
+                  </div>
+                  <div class="mb-3">
+                    <label for="netbankingNotes" class="form-label">Notes</label>
+                    <textarea class="form-control" id="netbankingNotes" rows="2" placeholder="Additional notes..."></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Auto Pay Details -->
+            <div id="autopayDetails" class="payment-method-details" style="display: none;">
+              <div class="card border-info mb-3">
+                <div class="card-header bg-info text-white">
+                  <i class="fa-solid fa-robot"></i> Auto Pay Details
+                </div>
+                <div class="card-body">
+                  <div class="alert alert-warning">
+                    <i class="fa-solid fa-info-circle"></i> This payment will be processed automatically through the configured payment gateway.
+                  </div>
+                  <div class="mb-3">
+                    <label for="autopayReference" class="form-label">Batch Reference</label>
+                    <input type="text" class="form-control" id="autopayReference" placeholder="Enter batch reference (optional)">
+                  </div>
+                  <div class="mb-3">
+                    <label for="autopayNotes" class="form-label">Notes</label>
+                    <textarea class="form-control" id="autopayNotes" rows="2" placeholder="Additional notes..."></textarea>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="autopayConfirm" required>
+                    <label class="form-check-label" for="autopayConfirm">
+                      I confirm that automatic payment should be processed
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fa-solid fa-times"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-success" id="btnConfirmPayment">
+          <i class="fa-solid fa-check-circle"></i> Confirm Payment
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Payslip Preview Modal -->
+<div class="modal fade" id="payslipModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" style="font-weight: bold;">
+          <i class="fa-solid fa-file-invoice"></i> Payslip Preview
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+        <div id="payslipContent" class="p-3">
+          <iframe type="application/pdf" src="https://myteknoland.com/MTL/admin/payroll/payslips/payslip_49_20251009_073407.pdf" style="width:100%; height:100%; border:none;"></iframe>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fa-solid fa-times"></i> Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="deleteModalBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Process Payments Modal -->
+<div class="modal fade" id="processPaymentsModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Process Payments</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to process all pending payments for <strong id="processPaymentPeriod"></strong>?</p>
+        <div class="alert alert-info">
+          <i class="fa-solid fa-info-circle"></i> 
+          This will mark all pending payroll records as "Released" for manual processing.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" id="confirmProcessPayments">
+          <i class="fa-solid fa-money-check-alt"></i> Process Payments
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reports Modal -->
+<div class="modal fade" id="reportsModal" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reportsModalTitle">Payroll Reports</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-3">
+          <div class="col-md-3">
+            <label for="reportYear" class="form-label">Year</label>
+            <select class="form-select" id="reportYear">
+              {% for year in years %}
+              <option value="{{ year }}" {{ year == current_year ? 'selected' : '' }}>{{ year }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="reportMonth" class="form-label">Month</label>
+            <select class="form-select" id="reportMonth">
+              {% for key, month_name in months %}
+              <option value="{{ key }}" {{ key == current_month ? 'selected' : '' }}>{{ month_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="reportType" class="form-label">Report Type</label>
+            <select class="form-select" id="reportType">
+              <option value="monthly">Monthly Report</option>
+              <option value="annual">Annual Report</option>
+            </select>
+          </div>
+          <div class="col-md-3 d-flex align-items-end">
+            <button type="button" class="btn btn-primary" id="generateReport">
+              <i class="fa-solid fa-chart-line"></i> Generate Report
+            </button>
+          </div>
+        </div>
+        <div id="reportContent">
+          <!-- Report content will be loaded here -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-success" id="exportReport">
+          <i class="fa-solid fa-download"></i> Export Report
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+    var currentPayrollData = null; // Global variable for payment modal
+    
+    // Handle view payroll button
+   $(document).on('click', '.view-payroll', function () {
+    const id = $(this).data('payroll-id');
+    $.ajax({
+        url: 'index.php?route=payroll/payroll.view&user_token={{ user_token }}',
+        type: 'post',
+        dataType: 'json',
+        data: { id: id },
+        success: function (response) {
+            const payroll = response['payroll'];
+
+            // Store this payroll globally so payment modal can access it later
+            currentPayrollData = payroll;
+            
+            otherEarnings=0;
+            otherDeductions=0;
+            
+            // Earnings
+            const basic = parseFloat(payroll['basic']) || 0;
+            const hra = parseFloat(payroll['hra']) || 0;
+            const variablePay = parseFloat(payroll['variable_pay']) || 0;
+            const fixedAllowance = parseFloat(payroll['fixed_allowance']) || 0;
+            const perDayPayment = parseFloat(payroll['net_salary'])/parseInt(payroll['current_month_days']);
+            // Deductions
+            const pf = parseFloat(payroll['pf']) || 0;
+            
+            if(parseInt(payroll['over_time']) === 0)
+            {
+                otherDeductions = perDayPayment * parseFloat(payroll['balance_days']);
+            }else
+            {
+                otherDeductions=0;
+            }
+        
+            if(parseInt(payroll['over_time']) === 1)
+            {
+                otherEarnings = perDayPayment * parseFloat(payroll['balance_days']);
+            }else
+            {
+                otherEarnings=0;
+            }
+
+            // Totals
+            const totalEarnings = basic + hra + variablePay + fixedAllowance + otherEarnings;
+            const totalDeductions = pf + otherDeductions;
+            const totalPay = totalEarnings - otherDeductions;
+            const effectiveDays = parseInt(payroll['current_month_days']) - (parseInt(payroll['Total_Weekends']) + parseInt(payroll['total_festivals']));
+            
+            // Basic Info
+            $('#modalId').text(payroll['id']);
+            $('#modalEmpId').text(payroll['emp_id']);
+            $('#modalMonth').text(payroll['month'] + '/' + payroll['year']);
+            $('#modalDaysInMonth').text(payroll['current_month_days']);
+            $('#modalPresent').text(payroll['total_attendees']);
+            $('#modalLeaves').text(payroll['leaves_applied']);
+            $('#modalWeekends').text(payroll['Total_Weekends']);
+            $('#modalFestivals').text(payroll['total_festivals']);
+            $('#modalTotalDays').text(payroll['total_days']);
+            $('#modalPaidLeaves').text(payroll['paid_leaves']);
+            $('#modalBalance').text(payroll['balance_days']);
+            $('#modalEffectiveDays').text(effectiveDays);
+            
+            // Update Fields
+            $('#modalBasic').text( basic.toFixed(2));
+            $('#modalHRA').text(hra.toFixed(2));
+            $('#modalVariable').text( variablePay.toFixed(2));
+            $('#modalFixed').text( fixedAllowance.toFixed(2));
+            $('#modalPF').text( pf.toFixed(2));
+            
+            $('#modalOtherDeduction').text(otherDeductions.toFixed(2));
+            $('#modelOtherEarning').text(otherEarnings.toFixed(2));
+            
+            $('#modalTotalEarnings').text(totalEarnings.toFixed(2));
+            $('#modalTotalDeductions').text(totalDeductions.toFixed(2));
+            $('#modalTotalPay').text(totalPay.toFixed(2));
+            
+            // Show Modal
+            $('#payrollModal').modal('show');
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.responseText);
+        }
+    });
+  });
+
+  // Handle delete button click
+    $(document).on('click', '.delete-payroll', function(e) {
+        e.preventDefault();
+    
+        const id = $(this).data('payroll-id');
+        $('#confirmDeleteBtn').data('payroll-id', id);
+        $('#deleteModalBody').text('Are you sure you want to delete payroll record #' + id + '?');
+        $('#deleteConfirmModal').modal('show');
+    });
+    
+    // Confirm delete with refresh
+    $('#confirmDeleteBtn').on('click', function(e) {
+        e.preventDefault();
+    
+        const id = $(this).data('payroll-id');
+        $('#deleteConfirmModal').modal('hide');
+        
+        // Show loading
+        $('#loading-text').text('Deleting payroll...');
+        $('#loadingModal').modal('show');
+    
+        $.ajax({
+            url: 'index.php?route=payroll/payroll.delete&user_token={{ user_token }}',
+            type: 'POST',
+            dataType: 'json',
+            data: { id: id },
+            success: function(response) {
+                $('#loadingModal').modal('hide');
+                
+                if (response.success) {
+                    alert('Payroll record deleted successfully!');
+                    // Refresh the filtered data
+                    filterEmployees();
+                } else {
+                    alert(response.error || 'Failed to delete record.');
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#loadingModal').modal('hide');
+                console.error('Error deleting payroll:', error);
+                alert('An unexpected error occurred while deleting.');
+            }
+        });
+    });
+      
+  // Handle payslip button
+$(document).on('click', '.print-payslip', function () 
+{
+    id=$(this).data('payroll-id');
+    
+    // Show payslip modal
+    $('#payslipModal').modal('show');
+    
+    // Reset content to loading state
+    $('#payslipContent').html(
+        '<div class="text-center py-5">' +
+        '<div class="spinner-border text-primary" role="status">' +
+        '<span class="visually-hidden">Loading...</span>' +
+        '</div>' +
+        '<p class="mt-2">Loading payslip...</p>' +
+        '</div>'
+    );
+    
+    $.ajax({
+        url: 'index.php?route=payroll/payroll.payslip&user_token={{ user_token }}',
+        type: 'post',
+        dataType: 'json',
+        data: 'id=' + id,
+        contentType: 'application/x-www-form-urlencoded',
+        success: function (response) {
+            if (response.success) {
+                var pdfUrl = response.pdf_url || '';
+                var cacheBuster = '?nocache=' + new Date().getTime();
+                
+                $('#payslipContent').html(
+                    '<iframe type="application/pdf" src="' + pdfUrl + cacheBuster + '" style="width:100%; height:100vh; border:none;"></iframe>'
+                );
+            } else {
+                $('#payslipContent').html(
+                    '<div class="alert alert-danger">' +
+                    '<i class="fa-solid fa-exclamation-triangle"></i> ' +
+                    (response.error || 'Failed to load payslip') +
+                    '</div>'
+                );
+            }
+        },
+        error: function(xhr) {
+            $('#payslipContent').html(
+                '<div class="alert alert-danger">' +
+                '<i class="fa-solid fa-exclamation-triangle"></i> ' +
+                'Error loading payslip: ' + xhr.responseText +
+                '</div>'
+            );
+        }
+    });
+});
+
+// Open Payment Modal from View Modal
+$(document).on('click', '#btnOpenPaymentModal', function() {
+    if (!currentPayrollData || !currentPayrollData.id) {
+        alert('No payroll data available');
+        return;
+    }
+    
+    // Populate payment modal
+    $('#paymentPayrollId').val(currentPayrollData.id);
+    $('#paymentPayrollIdDisplay').text(currentPayrollData.id);
+    $('#paymentEmployeeName').text('Employee #' + currentPayrollData.emp_id);
+    $('#paymentPeriod').text(currentPayrollData.month + '/' + currentPayrollData.year);
+    $('#paymentAmount').text(parseFloat(currentPayrollData.payable_salary || 0).toFixed(2));
+    
+    // Reset form
+    $('#paymentProcessForm')[0].reset();
+    $('#paymentDetailsSection').hide();
+    $('.payment-method-details').hide();
+    
+    // Apply blur effect using inline CSS
+    $('#payrollModal .modal-dialog').css({
+        'filter': 'blur(5px)',
+        'opacity': '0.6',
+        'pointer-events': 'none',
+        'transition': 'all 0.3s ease'
+    });
+    
+    // Set z-index for proper stacking
+    $('#payrollModal').css('z-index', '1050');
+    $('#paymentProcessModal').css('z-index', '1060');
+    
+    // Create dark overlay
+    if (!$('#customBackdrop').length) {
+        $('body').append('<div id="customBackdrop" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); z-index: 1055; backdrop-filter: blur(2px);"></div>');
+    }
+    
+    // Show payment modal
+    $('#paymentProcessModal').modal('show');
+ });
+
+    // Remove blur when payment modal is closed (handles Cancel, X button, and backdrop click)
+    $('#paymentProcessModal').on('hidden.bs.modal', function () {
+        // Remove blur effect
+        $('#payrollModal .modal-dialog').css({
+            'filter': 'none',
+            'opacity': '1',
+            'pointer-events': 'auto'
+        });
+        
+        // Remove custom backdrop
+        $('#customBackdrop').remove();
+        // Make sure payroll modal stays visible and restore Bootstrap backdrop
+        $('#payrollModal').modal('show');
+        
+        // Restore Bootstrap's modal-open class on body
+        $('body').addClass('modal-open');
+        
+        // Ensure Bootstrap backdrop is present
+        if (!$('.modal-backdrop').length) {
+            $('body').append('<div class="modal-backdrop fade show"></div>');
+        }
+    });
+
+// Handle Payment Method Selection
+$('#paymentMethodSelect').on('change', function() {
+    const method = $(this).val();
+
+    // Hide all method detail sections first
+    $('.payment-method-details').hide();
+
+    if (method) {
+        $('#paymentDetailsSection').show();
+
+        switch (method) {
+            case 'cash':
+                $('#cashDetails').show();
+                break;
+
+            case 'Cheque':
+                $('#chequeDetails').show();
+                $('#chequeDate').val(new Date().toISOString().split('T')[0]);
+                break;
+
+            case 'netbanking':
+                $('#netbankingDetails').show();
+                $('#transferDate').val(new Date().toISOString().split('T')[0]);
+                break;
+
+            case 'autopay':
+                $('#autopayDetails').show();
+                break;
+        }
+    } else {
+        $('#paymentDetailsSection').hide();
+    }
+ });
+ 
+// Confirm Payment Submission
+$('#btnConfirmPayment').on('click', function() {
+    const payrollId = $('#paymentPayrollId').val();
+    const paymentMethod = $('#paymentMethodSelect').val();
+
+    if (!payrollId) {
+        alert('Payroll ID is missing');
+        return;
+    }
+
+    if (!paymentMethod) {
+        alert('Please select a payment method');
+        return;
+    }
+
+    let isValid = true;
+    let paymentDetails = {};
+
+    // Validate based on payment method
+    switch (paymentMethod) {
+        case 'cash':
+            paymentDetails = {
+                receipt_no: $('#cashReceiptNo').val().trim(),
+                notes: $('#cashNotes').val().trim()
+            };
+            break;
+
+        case 'Cheque':
+            const chequeNumber = $('#chequeNumber').val().trim();
+            const chequeDate = $('#chequeDate').val();
+            const bankName = $('#chequeBankName').val().trim();
+            if (!chequeNumber || !chequeDate || !bankName) {
+                alert('Please fill all required Cheque details');
+                isValid = false;
+            } else {
+                paymentDetails = {
+                    cheque_number: chequeNumber,
+                    cheque_date: chequeDate,
+                    bank_name: bankName,
+                    branch: $('#chequeBranch').val().trim(),
+                    notes: $('#chequeNotes').val().trim()
+                };
+            }
+            break;
+
+        case 'netbanking':
+            const transactionId = $('#transactionId').val().trim();
+            if (!transactionId) {
+                alert('Please enter transaction ID');
+                isValid = false;
+            } else {
+                paymentDetails = {
+                    transaction_id: transactionId,
+                    transfer_mode: $('#transferMode').val(),
+                    transfer_date: $('#transferDate').val(),
+                    from_account: $('#fromAccount').val().trim(),
+                    notes: $('#netbankingNotes').val().trim()
+                };
+            }
+            break;
+
+        case 'autopay':
+            if (!$('#autopayConfirm').is(':checked')) {
+                alert('Please confirm automatic payment');
+                isValid = false;
+            } else {
+                paymentDetails = {
+                    batch_reference: $('#autopayReference').val().trim(),
+                    notes: $('#autopayNotes').val().trim()
+                };
+            }
+            break;
+    }
+
+    if (!isValid) return;
+
+    // Confirm
+    if (!confirm('Are you sure you want to process this payment?')) return;
+
+    // Disable button
+    $('#btnConfirmPayment').prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Processing...');
+
+    // Prepare data
+    const postData = {
+        payroll_id: payrollId,
+        payment_method: paymentMethod,
+        payment_reference: JSON.stringify(paymentDetails)
+    };
+
+    // Send AJAX request
+    $.ajax({
+        url: 'index.php?route=payroll/payroll.pay&user_token={{ user_token }}',
+        type: 'POST',
+        dataType: 'json',
+        data: postData,
+        success: function(response) {
+            $('#btnConfirmPayment').prop('disabled', false).html('<i class="fa-solid fa-check-circle"></i> Confirm Payment');
+
+            if (response.success) {
+                alert('Success: ' + response.success);
+                
+                // Remove blur effects before closing modals
+                $('#payrollModal .modal-dialog').css({
+                    'filter': 'none',
+                    'opacity': '1',
+                    'pointer-events': 'auto'
+                });
+                $('#customBackdrop').remove();
+                
+                $('#paymentProcessModal').modal('hide');
+                $('#payrollModal').modal('hide');
+                
+                // Refresh filtered data
+                filterEmployees();
+            } else {
+                alert('Error: ' + (response.error || 'Payment processing failed'));
+            }
+        },
+        error: function(xhr) {
+            $('#btnConfirmPayment').prop('disabled', false).html('<i class="fa-solid fa-check-circle"></i> Confirm Payment');
+            alert('Error: ' + xhr.responseText);
+        }
+    });
+ });
+ 
+ $(document).ready(function() {
+    // Generate month options
+    var months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                  'July', 'August', 'September', 'October', 'November', 'December'];
+    months.forEach(function(month, index) {
+        var val = ('0' + (index + 1)).slice(-2);
+        $('#filterMonth').append('<option value="' + val + '">' + month + '</option>');
+    });
+    
+    // Generate year options
+    var currentYear = new Date().getFullYear();
+    for (var i = currentYear; i >= currentYear - 5; i--) {
+        $('#filterYear').append('<option value="' + i + '">' + i + '</option>');
+    }
+    
+    // Set default values
+    var currentMonth = ('0' + (new Date().getMonth() + 1)).slice(-2);
+    $('#filterMonth').val(currentMonth);
+    $('#filterYear').val(currentYear);
+    
+    // Trigger filter on change
+    $('#filterMonth, #filterYear').on('change', filterEmployees);
+    $('#employee-search').on('keyup', filterEmployees);
+    $('#searchBtn').on('click', filterEmployees);
+ });
+ 
+ // Filter employees with AJAX
+function filterEmployees() {
+    var month = $('#filterMonth').val();
+    var year = $('#filterYear').val();
+    var search = $('#employee-search').val().toLowerCase();
+    
+    // Use current date if nothing selected
+    if (!month) month = ('0' + (new Date().getMonth() + 1)).slice(-2);
+    if (!year) year = new Date().getFullYear();
+    
+    console.log('Filtering with:', {month: month, year: year, search: search});
+    
+    // Show loading
+    $('#loading-text').text('Loading payroll records...');
+    $('#loadingModal').modal('show');
+    
+    // Fetch filtered data from server
+    $.ajax({
+        url: 'index.php?route=payroll/payroll.filter&user_token={{ user_token }}',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            year: year,
+            month: month,
+            search: search
+        },
+        success: function(response) {
+            console.log('Response received:', response);
+            $('#loadingModal').modal('hide');
+            
+            if (response.success) {
+                // Clear existing table
+                $('#employee-table tbody').empty();
+                
+                if (response.payrollDetails && response.payrollDetails.length > 0) {
+                    // Populate table with filtered data
+                    var html = '';
+                    $.each(response.payrollDetails, function(index, detail) {
+                        var payroll = detail.payroll;
+                        var statusBadge = '';
+                        
+                        if (payroll.status === 'Pending') {
+                            statusBadge = '<span class="badge bg-warning">Pending</span>';
+                        } else if (payroll.status === 'Paid') {
+                            statusBadge = '<span class="badge bg-success">Paid</span>';
+                        } else if (payroll.status === 'Released') {
+                            statusBadge = '<span class="badge bg-info">Released</span>';
+                        } else {
+                            statusBadge = '<span class="badge bg-secondary">' + payroll.status + '</span>';
+                        }
+                        
+                        html += '<tr>';
+                        html += '<td>';
+                        html += '<strong>' + detail.name + '</strong><br>';
+                        html += '<small class="text-muted">Emp_ID: ' + detail.user_id + '</small><br>';
+                        html += '<small class="text-muted">Payroll_ID: ' + payroll.id + '</small>';
+                        html += '</td>';
+                        html += '<td>';
+                        html += '<strong>' + payroll.year + '/' + payroll.month + '</strong><br>';
+                        html += '<small class="text-muted">' + (payroll.run_date || '') + '</small>';
+                        html += '</td>';
+                        html += '<td>';
+                        html += '<strong>TOTAL: ' + (payroll.total_days || 0) + '</strong><br>';
+                        html += '<small class="text-muted">LAG: ' + (payroll.balance_days || 0) + '</small>';
+                        html += '</td>';
+                        html += '<td>' + (payroll.net_salary || 0) + '</td>';
+                        html += '<td>' + (payroll.payable_salary || 0) + '</td>';
+                        html += '<td>' + statusBadge + '</td>';
+                        html += '<td class="text-center">';
+                        html += '<div class="btn-group btn-group-sm" role="group">';
+                        
+                        // View button - Always show
+                        html += '<button type="button" class="btn btn-outline-primary view-payroll" ';
+                        html += 'data-payroll-id="' + payroll.id + '" ';
+                        html += 'data-bs-toggle="tooltip" title="View Payroll">';
+                        html += '<i class="fa-solid fa-eye"></i></button>';
+                        
+                        // Print button - Show only if NOT pending
+                        if (payroll.status.toLowerCase() !== 'pending') {
+                            html += '<button type="button" class="btn btn-outline-success print-payslip" ';
+                            html += 'data-payroll-id="' + payroll.id + '" ';
+                            html += 'data-bs-toggle="tooltip" title="Print Payslip">';
+                            html += '<i class="fa-solid fa-print"></i></button>';
+                        }
+                        
+                        // Delete button - Show ONLY if status is Pending
+                        if (payroll.status.toLowerCase() === 'pending') {
+                            html += '<button type="button" class="btn btn-outline-danger delete-payroll" ';
+                            html += 'data-payroll-id="' + payroll.id + '" ';
+                            html += 'data-bs-toggle="tooltip" title="Delete Payroll">';
+                            html += '<i class="fa-solid fa-trash"></i></button>';
+                        }
+                        
+                        html += '</div></td>';
+                        html += '</tr>';
+                    });
+                    
+                    $('#employee-table tbody').html(html);
+                    $('#visible-count').text(response.payrollDetails.length);
+                    
+                    // Reinitialize tooltips
+                    $('[data-bs-toggle="tooltip"]').tooltip();
+                } else {
+                    $('#employee-table tbody').html('<tr><td colspan="7" class="text-center">No records found for the selected filters</td></tr>');
+                    $('#visible-count').text('0');
+                }
+                
+                // Update stats if provided
+                if (response.statuses) {
+                    $('.col-lg-3:eq(0) .card-body h4').text(response.statuses.total_employees || 0);
+                    $('.col-lg-3:eq(1) .card-body h4').text(response.statuses.processed_payroll || 0);
+                    $('.col-lg-3:eq(1) .card-body p').html('Processed Payroll: ₹' + (response.statuses.total_paid || '0.00'));
+                    $('.col-lg-3:eq(2) .card-body h4').text(response.statuses.pending_payroll || 0);
+                    $('.col-lg-3:eq(2) .card-body p').html('Unreleased Payrolls: ₹' + (response.statuses.total_pending_amount || '0.00'));
+                    $('.col-lg-3:eq(3) .card-body h3').text('₹' + parseFloat(response.statuses.total_payout || 0).toFixed(2));
+                }
+            } else {
+                alert(response.error || 'Failed to load payroll records');
+            }
+        },
+        error: function(xhr, status, error) {
+            $('#loadingModal').modal('hide');
+            console.error('AJAX Error:', {
+                status: status,
+                error: error,
+                responseText: xhr.responseText,
+                statusCode: xhr.status
+            });
+            
+            var errorMsg = 'Error loading payroll records.';
+            if (xhr.responseText) {
+                errorMsg += '\n\nDetails: ' + xhr.responseText;
+            }
+            alert(errorMsg);
+        }
+    });
+ }
+
+    // Generate Payroll Button Click
+    $('#generatePayrollBtn').on('click', function() {
+        var month = $('#filterMonth').val();
+        var year = $('#filterYear').val();
+        
+        if (!month || !year) {
+            alert('Please select both Month and Year to generate payroll');
+            return;
+        }
+        
+        if (!confirm('Are you sure you want to generate payroll for ' + month + '/' + year + '?')) {
+            return;
+        }
+        
+        // Show loading modal
+        $('#loading-text').text('Generating payroll...');
+        $('#loadingModal').modal('show');
+        
+        // Disable button
+        $('#generatePayrollBtn').prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Generating...');
+        
+        // Send AJAX request
+        $.ajax({
+            url: 'index.php?route=payroll/payroll&user_token={{ user_token }}',
+            type: 'POST',
+            data: {
+                year: year,
+                month: month
+            },
+            success: function() {
+                // After generation, refresh the filter to show new data
+                $('#loadingModal').modal('hide');
+                $('#generatePayrollBtn').prop('disabled', false).html('<i class="fa-solid fa-calculator"></i> Generate Payroll');
+                
+                // Call filter function to reload the data
+                filterEmployees();
+            },
+            error: function() {
+                $('#loadingModal').modal('hide');
+                $('#generatePayrollBtn').prop('disabled', false).html('<i class="fa-solid fa-calculator"></i> Generate Payroll');
+                
+                // Still try to refresh the data
+                filterEmployees();
+            }
+        });
+    });
+</script>
+{{ footer }}

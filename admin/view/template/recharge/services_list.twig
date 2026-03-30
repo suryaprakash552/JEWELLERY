@@ -1,0 +1,212 @@
+{{ header }}{{ column_left }}
+ <style>
+.my-filter-input {
+    display: none;
+}
+.my-filter{
+    display: block;    
+    padding: 10px;
+    margin: 0 0 1px 0;
+    cursor: pointer;
+    border: 1px solid #A7A7A7;
+    background: #6AAB95;
+    border-radius: 3px;
+    color: #FFF;
+    transition: ease .5s;
+
+}
+.my-filter:hover {
+    background: #4E8774;
+}
+
+.my-filter-content {
+    background: #313941;
+    padding: 15px;
+    border: 1px solid #A7A7A7;
+    margin: 0 0 1px 0;
+    border-radius: 3px;
+    display: grid; 
+    
+   
+}
+
+.my-filter-input + .my-filter + .my-filter-content {
+    display: none;
+    padding-right: -2px;
+}
+
+.my-filter-input:checked + .my-filter + .my-filter-content {
+    display: block;
+}
+
+.myfilter-container
+{
+    padding-left: 250px;
+}
+</style>
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid myfilter-container">
+      <div class="float-end">
+        <button type="button" data-toggle="tooltip" title="{{ button_filter }}" onclick="$('#filter-product').toggleClass('hidden-sm hidden-xs');" class="btn btn-default hidden-md hidden-lg"><i class="fa fa-filter"></i></button>
+      </div>
+       <h1>{{ heading_title }}</h1>
+            <ol class="breadcrumb">
+            {% for breadcrumb in breadcrumbs %}
+            <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid myfilter-container">{% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="row">
+      <div id="filter-product" class="col-sm-12 hidden-sm hidden-xs">
+        <div class="panel panel-default">
+          <input class="my-filter-input"type="checkbox" id="title2" />
+        <label class='my-filter panel-heading'for="title2" style="background-color:#313941;color:white;"><i class="fa fa-filter"></i> {{ text_filter }}<span style="float:right;"><i class="fa fas fa-chevron-down fa-1x" ></i></span>
+        </label>
+        <div class="my-filter-content panel-body">
+       <p>
+            <div class="row mb-2" style="row-gap: 20px;">
+            <div class="col-sm-5">
+              <label  style="color:white;" class="control-label" for="input-category">{{ entry_category }}</label>
+              <input style="color:black;"  type="text" name="filter_category" value="{{ filter_category }}" placeholder="{{ entry_category }}" id="input-category" class="form-control" />
+            </div>
+            <div class="col-sm-5">
+              <label style="color:white;"  class="control-label" for="input-status">{{ entry_status }}</label>
+              <select style="color:black;"  name="filter_status" id="input-status" class="form-control">
+                <option value=""></option>
+                  {% if filter_status == '1' %}
+                <option value="1" selected="selected">{{ text_enabled }}</option>
+                  {% else %}
+                <option value="1">{{ text_enabled }}</option>
+                  {% endif %}
+                  {% if filter_status == '0' %}
+                <option value="0" selected="selected">{{ text_disabled }}</option>
+                  {% else %}
+                <option value="0">{{ text_disabled }}</option>
+                  {% endif %}
+              </select>
+            </div> <br>
+            <div class="form-group col-sm-2" style="margin-left:1250px">
+              <button type="button"  style="background-color:white;color:black;" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
+            </div>
+        </div>
+     </p>
+        </div>
+        </div>
+      </div>
+      <div class="col-sm-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-list" style="color:white"></i> </h3>
+          </div>
+          <div class="panel-body">
+            <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-product">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                  <thead style="background-color:#861f41;">
+                    <tr>
+                      <td class="text-center" style="color:white;">{{ column_srno }}</td>
+                      
+                      <td class="text-center" style="color:white;">{{ column_banner }}</td>
+                      <td class="text-center" style="color:white;">{{ column_category }}</td>
+                      <td class="text-center" style="color:white;">{{ column_amount }}</td>
+                      <td class="text-center">{% if sort == 'status' %} <a style="color:white;"  href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a> {% else %} <a style="color:white;"href="{{ sort_status }}">{{ column_status }}</a> {% endif %}</td>
+                      <td class="text-center" style="color:white;">{{ column_action }}</td>
+                    </tr>
+                  </thead>
+			      <tbody>
+                  
+                  {% if products %}
+                  {% for product in products %}
+                  <tr>
+                    <td class="text-left">{{ product.srno }}</td>
+                    <td class="text-center">
+                    {% if product.banner %}
+                    <img src="{{ product.banner }}" alt="{{ product.banner }}" class="img-thumbnail" />
+                    {% else %} 
+                    <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span> {% endif %}</td>
+                    <td class="text-left">{{ product.category }}</td>
+                    <td class="text-left">{{ product.amount }}</td>
+                    <td class="text-left">{{ product.status }}</td>
+                   <td class="text-left"><a href="{{ product.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+
+                </tr>
+                  {% endfor %}
+                  {% else %}
+                  <tr>
+                    <td class="text-center" colspan="11">{{ text_no_results }}</td>
+                  </tr>
+                  {% endif %}
+                    </tbody>
+                  
+                </table>
+              </div>
+            </form>
+            <div class="row">
+              <div class="col-sm-6 text-left">{{ pagination }}</div>
+              <div class="col-sm-6 text-right" style="color:white">{{ results }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript"><!--
+$('#button-filter').on('click', function() {
+	var url = '';
+
+	var filter_category = $('input[name=\'filter_category\']').val();
+
+	if (filter_category) {
+		url += '&filter_category=' + encodeURIComponent(filter_category);
+	}
+	var filter_status = $('select[name=\'filter_status\']').val();
+
+	if (filter_status !== '') {
+		url += '&filter_status=' + encodeURIComponent(filter_status);
+	}
+	
+
+	location = 'index.php?route=recharge/services&user_token={{ user_token }}' + url;
+});
+//--></script> 
+  <script type="text/javascript"><!--
+// IE and Edge fix!
+$('button[form=\'form-product\']').on('click', function(e) {
+	$('#form-product').attr('action', $(this).attr('formaction'));
+});
+  
+$('input[name=\'filter_category\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=recharge/services/autocomplete&user_token={{ user_token }}&filter_category=' +  encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['category'],
+						value: item['category']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_category\']').val(item['label']);
+	}
+});
+
+//--></script>
+</div>
+{{ footer }} 

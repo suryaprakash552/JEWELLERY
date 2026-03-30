@@ -1,0 +1,237 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        <button type="button" data-bs-toggle="tooltip" title="{{ button_filter }}" onclick="$('#filter-customer').toggleClass('d-none');" class="btn btn-light d-lg-none"><i class="fa fa-filter"></i></button>
+		<a href="javascript:void(0)" data-bs-toggle="tooltip" onClick="print_report();" title="{{ button_print}}" class="btn btn-primary"><i class="fa fa-print"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">{% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+    <div class="row">
+      <div class="col-md-9 col-md-pull-3 col-sm-12">
+        <div class="panel panel-default card">
+          <div class="panel-heading">
+            <h3 class="panel-title card-header"><i class="fa fa-list"></i> {{ text_list }}</h3>
+          </div>
+          <div class="panel-body card-body">
+        <div id="print_report" class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+                <td class="text-start">{{ column_date_start }}</td>
+                <td class="text-start">{{ column_date_end }}</td>
+                <td class="text-end">{{ column_no_order }}</td>
+                <td class="text-end">{{ column_no_products }}</td>
+                <td class="text-end">{{ column_tax }}</td>
+                <td class="text-end">{{ column_total }}</td>
+              </tr>
+            </thead>
+            <tbody>
+            
+            {% if orders %}
+            {% for order in orders %}
+            <tr>
+              <td class="text-start">{{ order.date_start }}</td>
+              <td class="text-start">{{ order.date_end }}</td>
+              <td class="text-end">{{ order.orders }}</td>
+              <td class="text-end">{{ order.products }}</td>
+              <td class="text-end">{{ order.tax }}</td>
+              <td class="text-end">{{ order.total }}</td>
+            </tr>
+            {% endfor %}
+			  <tr>
+              <td class="text-end" colspan="5">{{ column_grand_total }}</td>
+              <td class="text-end">{{ grand_total }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td class="text-center" colspan="6">{{ text_no_results }}</td>
+            </tr>
+            {% endif %}
+            </tbody>
+            
+          </table>
+        </div>
+            </form>
+          </div>
+        </div>
+      </div>
+	  
+	   <div id="filter-customer" class="col-md-3 col-md-push-9 col-sm-12 d-none d-lg-block">
+        <div class="panel panel-default card">
+          <div class="panel-heading">
+            <h3 class="panel-title card-header"><i class="fa fa-filter"></i> {{ text_filter }}</h3>
+          </div>
+          <div class="panel-body card-body">
+		  <div class="mb-3">
+              <label class="form-label" for="input-date-added">{{ entry_date_start }}</label>
+              <div class="input-group date">
+			  {% if version4100 %}
+			  	<input type="date" name="filter_date_added" value="" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" id="input-date-added" class="form-control" />
+			  {% else %}
+                <input type="text" name="filter_date_added" value="" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" id="input-date-added" class="form-control" />
+                <span class="input-group-btn">
+                <button type="button" class="btn btn-light"><i class="fa fa-calendar"></i></button>
+                </span>
+				{% endif %}
+              </div>
+            </div>
+			
+			<div class="mb-3">
+              <label class="form-label" for="input-date-added">{{ entry_date_end }}</label>
+              <div class="input-group date">
+			   {% if version4100 %}
+			  	<input type="date" name="filter_date_ended" value="{{ filter_date_ended }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" id="input-date-ended" class="form-control" />
+			  {% else %}
+                <input type="text" name="filter_date_ended" value="{{ filter_date_ended }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" id="input-date-ended" class="form-control" />
+                <span class="input-group-btn">
+                <button type="button" class="btn btn-light"><i class="fa fa-calendar"></i></button>
+                </span>
+				{% endif %}
+              </div>
+            </div>
+			
+            <div class="mb-3">
+              <label class="form-label" for="input-name">{{ entry_agent }}</label>
+              <input type="text" name="filter_name" value="{{ filter_name }}" placeholder="{{ entry_agent }}" id="input-name" class="form-control" />
+              <input type="hidden" name="filter_customer_id" value="{{ filter_customer_id }}"  id="input-customer-id" />
+            </div>
+            <div class="form-group text-end">
+              <button type="button" id="button-filter" class="btn btn-light"style=color:white;background-color:#1872a2;border-color:#0b3349;><i class="fa fa-filter"></i> {{ button_filter }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript"><!--
+  $('.table-responsive').on('shown.bs.dropdown', function (e) {
+    var t = $(this),
+      m = $(e.target).find('.dropdown-menu'),
+      tb = t.offset().top + t.height(),
+      mb = m.offset().top + m.outerHeight(true),
+      d = 20;
+    if (t[0].scrollWidth > t.innerWidth()) {
+      if (mb + d > tb) {
+        t.css('padding-bottom', ((mb + d) - tb));
+      }
+    } else {
+      t.css('overflow', 'visible');
+    }
+  }).on('hidden.bs.dropdown', function () {
+    $(this).css({'padding-bottom': '', 'overflow': ''});
+  });
+  //--></script>
+  <script type="text/javascript"><!--
+  $('#button-filter').on('click', function() {
+    url = 'index.php?route=extension/purpletree_pos/pos/sale_report&user_token={{ user_token }}';
+	
+    var filter_date_added = $('input[name=\'filter_date_added\']').val();
+    if (filter_date_added) {
+      url += '&filter_date_added=' + encodeURIComponent(filter_date_added);
+    }  
+	
+	var filter_date_ended = $('input[name=\'filter_date_ended\']').val();
+    if (filter_date_ended) {
+      url += '&filter_date_ended=' + encodeURIComponent(filter_date_ended);
+    }
+	
+	 var filter_customer_id = $('input[name=\'filter_customer_id\']').val();
+    if (filter_customer_id) {
+      url += '&filter_customer_id=' + encodeURIComponent(filter_customer_id);
+    }
+	
+    location = url;
+  });
+  //--></script>
+  <script type="text/javascript"><!--
+  $('input[name=\'filter_name\']').autocomplete({
+    'source': function(request, response) {
+      $.ajax({
+        url: 'index.php?route=extension/purpletree_pos/sale_report|autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+        dataType: 'json',
+        success: function(json) {
+          response($.map(json, function(item) {
+            return {
+              label: item['name'],
+              value: item['customer_id']
+            }
+          }));
+        }
+      });
+    },
+    'select': function(item) {
+      $('input[name=\'filter_customer_id\']').val(item['value']);
+      $('input[name=\'filter_name\']').val(item['label']);
+    }
+  });
+
+function print_report(){
+	var printContents = '<div class="col-sm-12 text-center"><h1>Sales Report</h1> </div>';
+     printContents += document.getElementById('print_report').innerHTML;
+	 console.log(printContents);
+     var originalContents = document.body.innerHTML;
+     document.body.innerHTML = printContents;
+     window.print();	 	 
+     //document.body.onfocus = doneyet;
+     document.body.innerHTML = originalContents;
+	 
+	   
+}
+
+  //--></script>
+  <script type="text/javascript"><!--
+  $(function() {
+  $('input[name="filter_date_added"]').daterangepicker({
+      autoUpdateInput: false,
+	  singleDatePicker: true,
+	  showDropdowns: true,
+      locale: {
+          cancelLabel: 'Clear'
+      }
+  });
+
+  $('input[name="filter_date_added"]').on('apply.daterangepicker', function(ev, picker) {
+      $(this).val(picker.startDate.format('YYYY-MM-DD'));
+  });
+
+  $('input[name="filter_date_added"]').on('cancel.daterangepicker', function(ev, picker) {
+      $(this).val('');
+  });
+  
+  $('input[name="filter_date_ended"]').daterangepicker({
+      autoUpdateInput: false,
+	  singleDatePicker: true,
+	  showDropdowns: true,
+      locale: {
+          cancelLabel: 'Clear'
+      }
+  });
+
+  $('input[name="filter_date_ended"]').on('apply.daterangepicker', function(ev, picker) {
+      $(this).val(picker.startDate.format('YYYY-MM-DD'));
+  });
+
+  $('input[name="filter_date_ended"]').on('cancel.daterangepicker', function(ev, picker) {
+      $(this).val('');
+  });
+});
+  //--></script>
+</div>
+{{ footer }}

@@ -1,0 +1,293 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+	<div class="page-header">
+		<div class="container-fluid">
+			<h1>{{ heading_title }}</h1>
+			<ol class="breadcrumb">
+			{% for breadcrumb in breadcrumbs %}
+			  <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+			{% endfor %}
+		  </ol>
+			<div class="pull-right  float-end">			
+			<a href="{{ addnewcustomer.href }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
+			<button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-customer').submit() : false;"><i class="fa-regular fa-trash-can"></i></button>
+            </div>	
+		</div>
+	</div>
+	<div class="container-fluid">
+		{% if error_warning %}
+		<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+		</div>
+		{% endif %}
+		{% if success %}
+		<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+		</div>
+		{% endif %}
+	<div class="panel panel-default card">
+    <div class="panel-heading">
+        <h3 class="panel-title card-header">
+            <i class="fa fa-list"></i> {{ text_list }}
+        </h3>
+    </div>
+
+    <div class="panel-body card-body">
+
+        <div class="filter-row">
+
+            <div class="filter-item">
+                <input type="text"
+                       name="filter_name"
+                       value="{{ filter_name }}"
+                       placeholder="{{ column_name }}"
+                       id="input-name"
+                       class="form-control">
+            </div>
+
+            <div class="filter-item">
+                <input type="text"
+                       name="filter_email"
+                       value="{{ filter_email }}"
+                       placeholder="{{ column_email }}"
+                       id="input-email"
+                       class="form-control">
+            </div>
+
+            <div class="filter-item">
+                <select name="filter_status"
+                        id="input-status"
+                        class="form-select"style="width:100%;">
+                    <option value="">{{ text_all }}</option>
+                    <option value="1" {% if filter_status == '1' %}selected{% endif %}>{{ text_enabled }}</option>
+                    <option value="0" {% if filter_status == '0' %}selected{% endif %}>{{ text_disabled }}</option>
+                </select>
+            </div>
+
+            <div class="filter-item">
+                <input type="date"
+                       name="filter_date_added"
+                       value="{{ filter_date_added }}"
+                       class="form-control">
+            </div>
+
+            <div class="filter-item filter-btn">
+                <button type="button"
+                        id="button-filter"
+                        class="btn btn-primary w-100">
+                    <i class="fa fa-filter"></i> {{ button_filter }}
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+        
+        </div>
+			<form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-customer">
+				<div class="table-responsive">
+					<table class="table table-bordered table-hover"style="margin-top:15px;">
+						<thead>
+							<tr>
+								<td class="text-center ptsc-vendorlis-width"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+								
+								<td class="text-start">{% if sort == 'name' %}<a href="{{ sort_name }}" class="{{ order|lower }}">{{ column_name }}</a>{% else %}<a href="{{ sort_name }}">{{ column_name }}</a>{% endif %}</td>
+								
+								<td class="text-start">{% if sort == 'user_type' %}<a href="{{ sort_user_type }}" class="{{ order|lower }}">{{ column_user_type }}</a>{% else %}<a href="{{ sort_user_type }}">{{ column_user_type }}</a>{% endif %}</td>
+								
+                                <td class="text-start">{% if sort == 'c.email' %}<a href="{{ sort_email }}" class="{{ order|lower }}">{{ column_email }}</a>{% else %}<a href="{{ sort_email }}">{{ column_email }}</a>{% endif %}</td>
+								
+								<td class="text-start">{% if sort == 'c.status' %}<a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a>{% else %}<a href="{{ sort_status }}">{{ column_status }}</a>{% endif %}</td>
+								
+								<td class="text-start">{% if sort == 'c.date_added' %}<a href="{{ sort_date_added }}" class="{{ order|lower }}">{{ column_date_added }}</a>{% else %}<a href="{{ sort_date_added }}">{{ column_date_added }}</a>{% endif %}</td>
+								<td class="text-end">{{ column_action }}</td>
+							</tr>
+						</thead>
+						<tbody>
+							{% if posagents %}
+							{% for posagent in posagents %}
+							
+							<tr>
+								<td class="text-center">{% if selected in posagent.customer_id %}
+									<input type="checkbox" name="selected[]" value="{{ posagent.customer_id }}" checked="checked" />
+									{% else %}
+									<input type="checkbox" name="selected[]" value="{{ posagent.customer_id }}" />
+								{% endif %}</td>
+								<td class="text-start">{{ posagent.firstname }} {{ posagent.lastname }}</td>
+								<td class="text-start">{{ posagent.user_type }}</td>
+								<td class="text-start">{{ posagent.email }}</td>
+								<td class="text-start">{% if posagent.status == '1' %} {{ text_enabled }} {% else %} {{ text_disabled }} {% endif %}</td>
+								<td class="text-start">{{ posagent.date_added }}</td>
+								<td class="text-end">
+									<a href="{{ posagent['edit'] }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil fas fa-edit"></i></a>
+									
+								</td>
+							</tr>
+							{% endfor %}
+							{% else %}
+							<tr>
+								<td class="text-center" colspan="8">{{ text_no_results }}</td>
+							</tr>
+							{% endif %}
+						</tbody>
+					</table>
+				</div>
+			</form>
+			<div class="row">
+				<div class="col-sm-6 text-start">{{ pagination }}</div>
+				<div class="col-sm-6 text-end">{{ results }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+<style>
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.filter-item {
+    min-width: 180px;
+    flex: 1;
+}
+
+.filter-item label {
+    font-size: 12px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.filter-btn {
+    min-width: 120px;
+}
+.filter-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+}
+
+.filter-item {
+    flex: 1;
+    min-width: 160px;
+}
+
+.filter-btn {
+    flex: 0 0 auto;
+    min-width: 120px;
+}
+
+/* Responsive safety */
+@media (max-width: 1200px) {
+    .filter-row {
+        flex-wrap: wrap;
+    }
+}
+
+</style>
+	<script type="text/javascript"><!--
+  $('.table-responsive').on('shown.bs.dropdown', function (e) {
+    var t = $(this),
+      m = $(e.target).find('.dropdown-menu'),
+      tb = t.offset().top + t.height(),
+      mb = m.offset().top + m.outerHeight(true),
+      d = 20;
+    if (t[0].scrollWidth > t.innerWidth()) {
+      if (mb + d > tb) {
+        t.css('padding-bottom', ((mb + d) - tb));
+      }
+    } else {
+      t.css('overflow', 'visible');
+    }
+  }).on('hidden.bs.dropdown', function () {
+    $(this).css({'padding-bottom': '', 'overflow': ''});
+  });
+  //--></script>
+  <script type="text/javascript">
+  $('#button-filter').on('click', function() {
+    url = 'index.php?route=extension/purpletree_pos/pos/posagent&user_token={{ user_token }}';
+    var filter_name = $('input[name=\'filter_name\']').val();
+    if (filter_name) {
+      url += '&filter_name=' + encodeURIComponent(filter_name);
+    } 
+     var filter_email = $('input[name=\'filter_email\']').val();
+    if (filter_email) {
+      url += '&filter_email=' + encodeURIComponent(filter_email);
+    }	
+    var filter_status = $('select[name=\'filter_status\']').val();
+    if (filter_status !== '') {
+      url += '&filter_status=' + encodeURIComponent(filter_status); 
+    }    
+    var filter_date_added = $('input[name=\'filter_date_added\']').val();
+    if (filter_date_added) {
+      url += '&filter_date_added=' + encodeURIComponent(filter_date_added);
+    }
+    location = url;
+  });
+  </script>
+  <script type="text/javascript">
+  $('input[name=\'filter_name\']').autocomplete({
+    'source': function(request, response) {
+      $.ajax({
+        url: 'index.php?route=extension/purpletree_pos/posagent|autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+        dataType: 'json',
+        success: function(json) {
+          response($.map(json, function(item) {
+            return {
+              label: item['name'],
+              value: item['customer_id']
+            }
+          }));
+        }
+      });
+    },
+    'select': function(item) {
+      $('input[name=\'filter_name\']').val(item['label']);
+    }
+  });
+  $('input[name=\'filter_email\']').autocomplete({
+    'source': function(request, response) {
+      $.ajax({
+        url: 'index.php?route=extension/purpletree_pos/posagent|autocomplete&user_token={{ user_token }}&filter_email=' +  encodeURIComponent(request),
+        dataType: 'json',
+        success: function(json) {
+          response($.map(json, function(item) {
+            return {
+              label: item['email'],
+              value: item['customer_id']
+            }
+          }));
+        }
+      });
+    },
+    'select': function(item) {
+      $('input[name=\'filter_email\']').val(item['label']);
+    }
+  });
+  </script>
+  <script type="text/javascript"><!--
+   $(function() {
+  $('input[name="filter_date_added"]').daterangepicker({
+      autoUpdateInput: false,
+	  singleDatePicker: true,
+	  showDropdowns: true,
+      locale: {
+          cancelLabel: 'Clear'
+      }
+  });
+
+  $('input[name="filter_date_added"]').on('apply.daterangepicker', function(ev, picker) {
+      $(this).val(picker.startDate.format('YYYY-MM-DD'));
+  });
+
+  $('input[name="filter_date_added"]').on('cancel.daterangepicker', function(ev, picker) {
+      $(this).val('');
+  });
+});
+  //--></script>
+</div>
+{{ footer }}

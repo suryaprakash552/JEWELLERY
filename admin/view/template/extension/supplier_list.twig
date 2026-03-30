@@ -1,0 +1,310 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+      <div>
+        <h1 style="color: #fff;">PO Supplier</h1>
+        <ul class="breadcrumb" style="margin-bottom: 0;">
+          {% for breadcrumb in breadcrumbs %}
+          <li class="breadcrumb-item">
+            <a href="{{ breadcrumb.href }}" style="color: #3b82f6;">{{ breadcrumb.text }}</a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="d-flex gap-2">
+        <a type="button" data-toggle="tooltip" title="{{ button_export }}" id="button-export"
+           class="btn btn-success" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:6px;">
+          <i class="fa fa-download"></i>
+        </a>
+        <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}"
+           class="btn btn-primary" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:6px;">
+          <i class="fa fa-plus"></i>
+        </a>
+        <button type="button"
+                class="btn btn-danger"
+                data-toggle="tooltip"
+                title="{{ button_delete }}"
+                onclick="if (confirm('{{ text_confirm }}')) { $('#form-vendor').submit(); }"
+                style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:6px;">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid mt-3">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <!-- 🔹 Filter Bar -->
+    <div class="filter-bar" style="background:#1e293b;padding:20px;margin-bottom:17px;">
+      <div class="row g-3 align-items-center">
+        <div class="col-md-2 col-sm-6">
+          <input type="text" name="filter_supplier" value="{{ filter_supplier }}" placeholder="{{ entry_supplier }}" id="input-supplier" class="form-control filter-input">
+        </div>
+        <div class="col-md-2 col-sm-6">
+          <input type="text" name="filter_company" value="{{ filter_company }}" placeholder="{{ entry_company }}" id="input-company" class="form-control filter-input">
+        </div>
+        <div class="col-md-2 col-sm-6">
+          <input type="text" name="filter_email" value="{{ filter_email }}" placeholder="{{ entry_email }}" id="input-email" class="form-control filter-input">
+        </div>
+        <div class="col-md-2 col-sm-6">
+          <input type="text" name="filter_telephone" value="{{ filter_telephone }}" placeholder="{{ entry_telephone }}" id="input-telephone" class="form-control filter-input">
+        </div>
+        <div class="col-md-2 col-sm-6">
+          <input type="text" name="filter_product" value="{{ filter_product }}" placeholder="{{ entry_product }}" id="input-product" class="form-control filter-input">
+        </div>
+        <div class="col-md-2 col-sm-12 d-flex gap-2">
+          <button type="button" id="button-filter" class="btn btn-primary flex-fill action-btn" style="background:#3b82f6;border:none;">
+            <i class="fa fa-search"></i> Search
+          </button>
+          <a href="{{ clear }}" class="btn btn-danger flex-fill action-btn" style="background:#ef4444;border:none;">
+            <i class="fa fa-eraser"></i> Clear
+          </a>
+          {#<button type="button" id="button-export" class="btn btn-success flex-fill action-btn" style="background:#10b981;border:none;">#}
+          {#  <i class="fa fa-download"></i> Export#}
+          {#</button>#}
+        </div>
+      </div>
+    </div>
+
+   <!-- 🔹 Table -->
+    <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-vendor">
+    <div class="table-container" style="background: #1e293b; border-radius: 8px; overflow: hidden;">
+     <div class="table-responsive">
+        <table class="table table-dark table-hover m-0" style="color: #fff;" >
+          <thead style="background:#0f172a;">
+            <tr>
+              <th class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);"></th>
+              <th>Supplier</th>
+              <th>Company</th>
+              <th>Email</th>
+              <th>Telephone</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if suppliers %}
+            {% for supplier in suppliers %}
+            <tr>
+              <td class="text-center">
+                {% if supplier['supplier_id'] in selected %}
+                <input type="checkbox" name="selected[]" value="{{ supplier['supplier_id'] }}" checked="checked" />
+                {% else %}
+                <input type="checkbox" name="selected[]" value="{{ supplier['supplier_id'] }}" />
+                {% endif %}
+              </td>
+              <td>{{ supplier['name'] }}</td>
+              <td>{{ supplier['company'] }}</td>
+              <td>{{ supplier['email'] }}</td>
+              <td>{{ supplier['telephone'] }}</td>
+              <td class="text-center">
+                <a href="{{ supplier['edit'] }}" class="btn btn-success btn-sm" style="background:#10b981;border:none;">
+                  <i class="fa fa-edit"></i>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+              <td colspan="6" class="text-center text-muted py-4">No results found</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+        </div>
+       </div>
+     </form>
+    
+
+    <div class="row mt-3" style="color:#9ca3af;">
+      <div class="col-sm-6">{{ pagination }}</div>
+      <div class="col-sm-6 text-middle">{{ results }}</div>
+    </div>
+  </div>
+</div>
+<style>
+body, #content {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+.filter-input {
+  background: #0f172a !important;
+  border: 1px solid #334155 !important;
+  color: #fff !important;
+  border-radius: 30px !important;
+  padding: 10px 15px !important;
+}
+.filter-input::placeholder {
+  color: #fff !important;
+  opacity: 1;
+}
+.filter-bar input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(2);
+  cursor: pointer;
+}
+.table th, .table td {
+  vertical-align: middle !important;
+  border-color: #334155 !important;
+}
+.table tbody tr:hover {
+  background-color: #1f2937 !important;
+}
+.action-btn i {
+  margin-right: 5px;
+}
+</style>
+
+<script type="text/javascript"><!--
+$('#button-filter').on('click', function() {
+	url = '';
+
+	var filter_email = $('input[name=\'filter_email\']').val();
+
+	if (filter_email) {
+		url += '&filter_email=' + encodeURIComponent(filter_email);
+	}
+
+	var filter_supplier = $('input[name=\'filter_supplier\']').val();
+
+	if (filter_supplier) {
+		url += '&filter_supplier=' + encodeURIComponent(filter_supplier);
+	}
+
+	var filter_company = $('input[name=\'filter_company\']').val();
+
+	if (filter_company) {
+		url += '&filter_company=' + encodeURIComponent(filter_company);
+	}
+
+	var filter_product = $('input[name=\'filter_product\']').val();
+
+	if (filter_product) {
+		url += '&filter_product=' + encodeURIComponent(filter_product);
+	}
+
+	var filter_telephone = $('input[name=\'filter_telephone\']').val();
+
+	if (filter_telephone) {
+		url += '&filter_telephone=' + encodeURIComponent(filter_telephone);
+	}
+
+	location = 'index.php?route=extension/me_posupplier&user_token={{ user_token }}' + url;
+});
+
+$('#button-export').on('click', function() {
+	url = '';
+
+	var filter_email = $('input[name=\'filter_email\']').val();
+
+	if (filter_email) {
+		url += '&filter_email=' + encodeURIComponent(filter_email);
+	}
+
+	var filter_supplier = $('input[name=\'filter_supplier\']').val();
+
+	if (filter_supplier) {
+		url += '&filter_supplier=' + encodeURIComponent(filter_supplier);
+	}
+
+	var filter_company = $('input[name=\'filter_company\']').val();
+
+	if (filter_company) {
+		url += '&filter_company=' + encodeURIComponent(filter_company);
+	}
+
+	var filter_product = $('input[name=\'filter_product\']').val();
+
+	if (filter_product) {
+		url += '&filter_product=' + encodeURIComponent(filter_product);
+	}
+
+	var filter_telephone = $('input[name=\'filter_telephone\']').val();
+
+	if (filter_telephone) {
+		url += '&filter_telephone=' + encodeURIComponent(filter_telephone);
+	}
+
+	var $selected = $("input[name='selected[]']:checked");
+	
+	if ($selected.length) {
+		url += '&'+$selected.serialize();
+	}
+
+	location = 'index.php?route=extension/me_posupplier.export&user_token={{ user_token }}' + url;
+});
+
+// Allow Enter key to trigger filter
+$('input[name^="filter_"]').on('keypress', function(e) {
+	if (e.which == 13) {
+		$('#button-filter').trigger('click');
+		return false;
+	}
+});
+//--></script> 
+<script>
+$(document).ready(function() {
+	// Supplier autocomplete
+	$('input[name=\'filter_supplier\']').autocomplete({
+		source: function(request, response) {
+			$.ajax({
+				url: 'index.php?route=extension/me_posupplier.autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request.term),
+				dataType: 'json',
+				success: function(json) {
+					response($.map(json, function(item) {
+						return {
+							label: item['name'],
+							value: item['name']
+						}
+					}));
+				},
+				error: function(xhr, ajaxOptions, thrownError) {
+					console.log('Autocomplete error:', thrownError);
+				}
+			});
+		},
+		minLength: 2,
+		select: function(event, ui) {
+			$(this).val(ui.item.value);
+			return false;
+		}
+	});
+
+	// Product autocomplete
+	$('input[name=\'filter_product\']').autocomplete({
+		source: function(request, response) {
+			$.ajax({
+				url: 'index.php?route=catalog/product.autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request.term),
+				dataType: 'json',
+				success: function(json) {
+					response($.map(json, function(item) {
+						return {
+							label: item['name'],
+							value: item['name']
+						}
+					}));
+				},
+				error: function(xhr, ajaxOptions, thrownError) {
+					console.log('Autocomplete error:', thrownError);
+				}
+			});
+		},
+		minLength: 2,
+		select: function(event, ui) {
+			$(this).val(ui.item.value);
+			return false;
+		}
+	});
+});
+</script>
+{{ footer }}

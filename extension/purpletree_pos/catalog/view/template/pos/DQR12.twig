@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>QR Code Generator</title>
+    <style>
+      #overlayCanvas {
+        display: none; /* Hide after merging */
+      }
+      .btn {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.1/build/qrcode.min.js"></script>
+  </head>
+  <body>
+      <div style="display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding-top: 36px;">
+    <button onclick="connect()" class="btn">Connect to Serial Port</button>
+    <button onclick="reconnect()" class="btn">Re-connect to Serial Port</button>
+    <button onclick="disconnect()" class="btn">Disconnect from Serial Port</button>
+    <button onclick="generateWelcome()" class="btn">Show Welcome</button>
+    </div>
+    <br />
+    <div style="display:none;">
+    Enter UPI Url :
+    <input type="text" id="qrupiurl" placeholder="Enter upi url" />
+    Enter Amount :
+    <input type="text" id="qramount" placeholder="Enter amount" />
+    Enter VPA :
+    <input type="text" id="qrvpa" placeholder="Enter vpa" />
+    <button onclick="generateQr()">Show QR</button>
+    <br />
+    Enter Amount :
+    <input type="text" id="conformamount" placeholder="Enter amount" />
+    <button onclick="generateSuccess()">Show Success</button>
+    <button onclick="generatePending()">Show Pending</button>
+    <br />
+    Enter Reason :
+    <input type="text" id="reason" placeholder="Enter reason" />
+    <button onclick="generateFailReason()">Show Fail</button>
+    <br />
+    <button onclick="generateFail()">Show Fail</button>
+    <button onclick="generateCancel()">Show Cancel</button>
+    </div>
+    <br />
+     <div id="output" style="white-space: pre-wrap;padding: 10px; height: 100%; overflow-y: auto;display: flex;
+    justify-content: center;">
+    <canvas id="overlayCanvas" width="280" height="280"></canvas>
+    <canvas id="canvas" width="320" height="480"></canvas></div>
+    <script>
+      window.onload = function () {
+        connect();
+      };
+      var URL = window.URL;
+      var cvs = document.getElementById("canvas");
+      var ctx = cvs.getContext("2d", { willReadFrequently: true });
+      const overlayCanvas = document.getElementById("overlayCanvas");
+      const ovCtx = overlayCanvas.getContext("2d", {
+        willReadFrequently: true,
+      });
+      var img;
+      let serialPort;
+
+      // === welcome image loop support ===
+      const thankYouImage = "https://images.myparkingsign.com/img/lg/K/thank-you-for-visiting-signature-sign-k2-0716.png";
+      // three welcome graphics: index 0 shows once with sound, then indices 1-2 loop
+      const welcomeImages = [
+        "https://png.pngtree.com/png-clipart/20250530/original/pngtree-stylish-white-sign-with-red-welcome-message-and-line-design-png-image_21092978.png",
+        "https://png.pngtree.com/png-clipart/20210907/ourmid/pngtree-up-to-50-off-png-png-image_3907306.jpg",
+        "https://png.pngtree.com/png-clipart/20220525/ourmid/pngtree-buy-one-get-one-free-promo-tags-png-image_4742818.png",
+      ];
+      let welcomeInterval = null;
+      let currentWelcomeIndex = 0;
+      let qrInterval = null;
+      let isQrMode = false;
+
+      function startWelcomeLoop(withSound = false) {
+        if (welcomeInterval !== null) return; // already running
+        // reset the acc flag to allow sending
+        acc = false;
+        // immediately display first image (with or without sound)
+        if (withSound) {
+          showWelcomeImageAndSend(currentWelcomeIndex);
+        } else {
+          showWelcomeImageSilent(currentWelcomeIndex);
+        }
+        // each image should remain visible for 4 seconds
+        // after first image (index 0), loop only between indices 1 and 2
+        welcomeInterval = setInterval(() => {
+          if (currentWelcomeIndex === 0) {
+            currentWelcomeIndex = 1; // Skip to first loop image after welcome
+          } else if (currentWelcomeIndex === welcomeImages.length - 1) {
+            currentWelcomeIndex = 1; // After last image, go back to index 1 (skip welcome)
+          } else {
+            currentWelcomeIndex++; // Normal increment between images
+          }
+          showWelcomeImageSilent(currentWelcomeIndex);
+        }, 4000);
+      }
+
+      function stopWelcomeLoop() {
+        if (welcomeInterval !== null) {
+          clearInterval(welcomeInterval);
+          welcomeInterval = null;
+        }
+      }
+
+      function stopQrMode() {
+        if (qrInterval !== null) {
+          clearInterval(qrInterval);
+          qrInterval = null;
+        }
+        isQrMode = false;
+      }
+
+      function startQrMode() {
+        stopWelcomeLoop(); // Stop welcome loop when entering QR mode
+        stopQrMode(); // Clear any existing QR interval
+        isQrMode = true;
+        acc = false; // Reset communication flag
+        // Display QR once
+        displayQr();
+      }
+
+      function displayQr() {
+        const text = document.getElementById("qrupiurl").value;
+        const amount = document.getElementById("qramount").value;
+        const qrvpa = document.getElementById("qrvpa").value;
+        
+        ovCtx.fillRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        QRCode.toCanvas(
+          overlayCanvas,
+          text,
+          {
+            width: 280,
+            height: 280,
+            margin: 1,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+          },
+          function (error) {
+            if (error) console.error(error);
+          }
+        );
+        
+        // Load background image and merge QR
+        const imageUrl = "https://download.rechargegrid.in/download/general/image/jpeg/_background.jpg";
+        const cachedImage = localStorage.getItem(imageUrl);
+        
+        const drawQr = (image) => {
+          ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+          const startX = (cvs.width - overlayCanvas.width) / 2;
+          const startY = (cvs.height - overlayCanvas.height) / 2;
+          ctx.drawImage(overlayCanvas, startX, startY);
+          ctx.font = "20px Arial";
+          ctx.fillStyle = "black";
+          var textWidth = ctx.measureText("₹ " + amount).width;
+          var x = (cvs.width - textWidth) / 2;
+          ctx.fillText("₹ " + amount, x, 100);
+          ctx.font = "15px Arial";
+          var textWidth1 = ctx.measureText("UPI ID : " + qrvpa).width;
+          var x1 = (cvs.width - textWidth1) / 2;
+          ctx.fillText("UPI ID : " + qrvpa, x1, 400);
+          sendImage(cvs, "6");
+        };
+        
+        if (!cachedImage) {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.onload = function () {
+            drawQr(image);
+            const base64String = cvs.toDataURL("image/png");
+            localStorage.setItem(imageUrl, base64String);
+          };
+          image.src = imageUrl;
+        } else {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.onload = function () {
+            drawQr(image);
+          };
+          image.src = cachedImage;
+        }
+      }
+
+      function showWelcomeImage(idx) {
+        const imageUrl = welcomeImages[idx];
+        const cachedImage = localStorage.getItem(imageUrl);
+        const drawImage = (image) => {
+          ctx.clearRect(0, 0, cvs.width, cvs.height);
+          ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+        };
+
+        if (!cachedImage) {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.onload = function () {
+            drawImage(image);
+            const base64String = cvs.toDataURL("image/png");
+            localStorage.setItem(imageUrl, base64String);
+          };
+          image.src = imageUrl;
+        } else {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.onload = function () {
+            drawImage(image);
+          };
+          image.src = cachedImage;
+        }
+      }
+
+      function generateFail() {
+        stopQrMode();
+        const reason = document.getElementById("reason").value;
+        const imageUrl =
+          "https://download.rechargegrid.in/download/general/image/jpeg/_fail.jpg"; // Replace with your image URL
+        const cachedImage = localStorage.getItem(imageUrl);
+        if (!cachedImage) {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.onload = async function () {
+            ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+            const base64String = cvs.toDataURL("image/png");
+            localStorage.setItem(imageUrl, base64String);
+
+            sendImage(cvs,"4"); // Merge after the image is loaded
+          };
+          image.src = imageUrl;
+        } else {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.onload = async function () {
+            ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+
+            sendImage(cvs,"4"); // Merge after the image is loaded
+          };
+          image.src = cachedImage;
+        }
+      }
+      function generateFailReason() {
+        stopQrMode();
+        const reason = document.getElementById("reason").value;
+        const imageUrl =
+          "https://download.rechargegrid.in/download/general/image/jpeg/_fail.jpg"; // Replace with your image URL
+        const cachedImage = localStorage.getItem(imageUrl);
+        if (!cachedImage) {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.onload = async function () {
+            ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+            const base64String = cvs.toDataURL("image/png");
+            localStorage.setItem(imageUrl, base64String);
+            ctx.font = "20px Arial"; // Set the font size and style
+            ctx.fillStyle = "black"; // Set the text color
+            var textWidth = ctx.measureText("Reason: " + reason).width;
+            var x = (cvs.width - textWidth) / 2;
+            ctx.fillText("Reason: " + reason, x, cvs.height / 2);
+            sendImage(cvs,"4"); // Merge after the image is loaded
+          };
+          image.src = imageUrl;
+        } else {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.onload = async function () {
+            ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+            ctx.font = "20px Arial"; // Set the font size and style
+            ctx.fillStyle = "black"; // Set the text color
+            var textWidth = ctx.measureText("Reason: " + reason).width;
+            var x = (cvs.width - textWidth) / 2;
+            ctx.fillText("Reason: " + reason, x, cvs.height / 2);
+            sendImage(cvs,"4"); // Merge after the image is loaded
+          };
+          image.src = cachedImage;
+        }
+      }
+      function generatePending() {
+        stopQrMode();
+        const conformamount = document.getElementById("conformamount").value;
+        const imageUrl =
+          "https://download.rechargegrid.in/download/general/image/jpeg/_pending.jpg"; // Replace with your image URL
+        const cachedImage = localStorage.getItem(imageUrl);
+        if (!cachedImage) {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.onload = async function () {
+            ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+            const base64String = cvs.toDataURL("image/png");
+            localStorage.setItem(imageUrl, base64String);
+            ctx.font = "20px Arial"; // Set the font size and style
+            ctx.fillStyle = "black"; // Set the text color
+            var textWidth = ctx.measureText("₹ " + conformamount).width;
+            var x = (cvs.width - textWidth) / 2;
+            ctx.fillText("₹ " + conformamount, x, cvs.height / 2);
+            sendImage(cvs,"2"); // Merge after the image is loaded
+          };
+          image.src = imageUrl;
+        } else {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.onload = async function () {
+            ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+            ctx.font = "20px Arial"; // Set the font size and style
+            ctx.fillStyle = "black"; // Set the text color
+
+            var textWidth = ctx.measureText("₹ " + conformamount).width;
+            var x = (cvs.width - textWidth) / 2;
+            ctx.fillText("₹ " + conformamount, x, cvs.height / 2);
+            sendImage(cvs,"2"); // Merge after the image is loaded
+          };
+          image.src = cachedImage;
+        }
+      }
+      function generateSuccess() {
+        // Stop QR mode and welcome loop
+        stopQrMode();
+        stopWelcomeLoop();
+
+        const conformamount = document.getElementById("conformamount").value;
+        const imageUrl =
+          "https://download.rechargegrid.in/download/general/image/jpeg/_success.jpg"; // Replace with your image URL
+        const cachedImage = localStorage.getItem(imageUrl);
+        const resumeLoop = () => setTimeout(() => {
+            // after showing the success screen, display the thank‑you graphic silently for 4s,
+            // then restart the normal two‑image welcome loop (no sound)
+            showSingleImage(thankYouImage, null).then(() => {
+              setTimeout(() => {
+                currentWelcomeIndex = 0;
+                startWelcomeLoop();
+              }, 4000);
+            });
+        }, 3000);
+
+        if (!cachedImage) {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.onload = async function () {
+            ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+            const base64String = cvs.toDataURL("image/png");
+            localStorage.setItem(imageUrl, base64String);
+            ctx.font = "20px Arial"; // Set the font size and style
+            ctx.fillStyle = "black"; // Set the text color
+            var textWidth = ctx.measureText("₹ " + conformamount).width;
+            var x = (cvs.width - textWidth) / 2;
+            ctx.fillText("₹ " + conformamount, x, cvs.height / 2);
+            ctx.font = "15px Arial";
+            ctx.fillText("Amount received, thank you Bose", (cvs.width - ctx.measureText("Amount received, thank you").width) / 2, cvs.height / 2 + 30);
+            sendImage(cvs,"3"); // Merge after the image is loaded
+            resumeLoop();
+          };
+          image.src = imageUrl;
+        } else {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.onload = async function () {
+            ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+            ctx.font = "20px Arial"; // Set the font size and style
+            ctx.fillStyle = "black"; // Set the text color
+            var textWidth = ctx.measureText("₹ " + conformamount).width;
+            var x = (cvs.width - textWidth) / 2;
+            ctx.fillText("₹ " + conformamount, x, cvs.height / 2);
+            ctx.font = "15px Arial";
+            ctx.fillText("Amount received, thank you", (cvs.width - ctx.measureText("Amount received, thank you").width) / 2, cvs.height / 2 + 30);
+            sendImage(cvs,"3"); // Merge after the image is loaded
+            resumeLoop();
+          };
+          image.src = cachedImage;
+        }
+      }
+      function generateWelcome() {
+        // start cycling through the welcome images every 2 seconds with sound on first image
+        stopWelcomeLoop();
+        currentWelcomeIndex = 0;
+        startWelcomeLoop(true); // true = include sound on first image
+      }
+
+      function showWelcomeImageAndSend(idx) {
+        const imageUrl = welcomeImages[idx];
+        const cachedImage = localStorage.getItem(imageUrl);
+        const drawAndSendImage = (image) => {
+          ctx.clearRect(0, 0, cvs.width, cvs.height);
+          ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+          sendImage(cvs, "0");
+        };
+
+        if (!cachedImage) {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.onload = function () {
+            drawAndSendImage(image);
+            const base64String = cvs.toDataURL("image/png");
+            localStorage.setItem(imageUrl, base64String);
+          };
+          image.src = imageUrl;
+        } else {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.onload = function () {
+            drawAndSendImage(image);
+          };
+          image.src = cachedImage;
+        }
+      }
+
+      function showWelcomeImageSilent(idx) {
+        const imageUrl = welcomeImages[idx];
+        const cachedImage = localStorage.getItem(imageUrl);
+        const drawAndSendImageSilent = (image) => {
+          ctx.clearRect(0, 0, cvs.width, cvs.height);
+          ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+          sendImageSilent(cvs);
+        };
+
+        if (!cachedImage) {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.onload = function () {
+            drawAndSendImageSilent(image);
+            const base64String = cvs.toDataURL("image/png");
+            localStorage.setItem(imageUrl, base64String);
+          };
+          image.src = imageUrl;
+        } else {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.onload = function () {
+            drawAndSendImageSilent(image);
+          };
+          image.src = cachedImage;
+        }
+      }
+
+      // helper that draws a given image URL on the main canvas and sends it serially
+      // returns a promise so callers can wait for the operation to complete
+      function showSingleImage(imageUrl, audioType) {
+        return new Promise((resolve) => {
+          const cached = localStorage.getItem(imageUrl);
+          const draw = (image) => {
+            ctx.clearRect(0, 0, cvs.width, cvs.height);
+            ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+            if (audioType != null) {
+              sendImage(cvs, audioType);
+            } else {
+              sendImageSilent(cvs);
+            }
+            resolve();
+          };
+
+          if (!cached) {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = function () {
+              draw(img);
+              const base64String = cvs.toDataURL("image/png");
+              localStorage.setItem(imageUrl, base64String);
+            };
+            img.src = imageUrl;
+          } else {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = function () {
+              draw(img);
+            };
+            img.src = cached;
+          }
+        });
+      }
+
+      function generateCancel() {
+        stopQrMode();
+        const imageUrl =
+          "https://download.rechargegrid.in/download/general/image/jpeg/_cancelled.jpg"; // Replace with your image URL
+        const cachedImage = localStorage.getItem(imageUrl);
+        if (!cachedImage) {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.onload = async function () {
+            ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+            const base64String = cvs.toDataURL("image/png");
+            localStorage.setItem(imageUrl, base64String);
+            sendImage(cvs,"5"); // Merge after the image is loaded
+          };
+          image.src = imageUrl;
+        } else {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.onload = async function () {
+            ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+            sendImage(cvs,"5"); // Merge after the image is loaded
+          };
+          image.src = cachedImage;
+        }
+      }
+      function generateQr() {
+        // Start continuous QR display mode
+        startQrMode();
+      }
+
+      // Function to merge overlayCanvas onto cvs
+      function qrMergeCanvases() {
+        const amount = document.getElementById("qramount").value;
+        const qrvpa = document.getElementById("qrvpa").value;
+        const startX = (cvs.width - overlayCanvas.width) / 2;
+        const startY = (cvs.height - overlayCanvas.height) / 2;
+        ctx.drawImage(overlayCanvas, startX, startY);
+        ctx.font = "20px Arial"; // Set the font size and style
+        ctx.fillStyle = "black"; // Set the text color
+        var textWidth = ctx.measureText("₹ " + amount).width;
+        var x = (cvs.width - textWidth) / 2;
+        ctx.fillText("₹ " + amount, x, 100);
+
+        ctx.font = "15px Arial"; // Set the font size and style
+        ctx.fillStyle = "black"; // Set the text color
+        var textWidth1 = ctx.measureText("UPI ID : " + qrvpa).width;
+        var x1 = (cvs.width - textWidth1) / 2;
+        ctx.fillText("UPI ID : " + qrvpa, x1, 400);
+        sendImage(cvs,"6");
+      }
+
+      function sendImage(CanvasOrgImage, audioType) {
+        const { width, height } = CanvasOrgImage;
+        const ctx = CanvasOrgImage.getContext("2d", {
+          willReadFrequently: true,
+        });
+        const imageData = ctx.getImageData(0, 0, width, height).data;
+
+        const numArray = new Uint8Array(width * height * 2);
+        let index = 0;
+
+        for (let i = height - 1; i >= 0; i--) {
+          for (let j = 0; j < width; j++) {
+            const pos = (i * width + j) * 4;
+            const r = (imageData[pos] >> 3) & 31;
+            const g = (imageData[pos + 1] >> 2) & 63;
+            const b = (imageData[pos + 2] >> 3) & 31;
+            const rgb565 = (r << 11) | (g << 5) | b;
+
+            numArray[index++] = rgb565 >> 8;
+            numArray[index++] = rgb565 & 255;
+          }
+        }
+        //console.log("Num Array:", numArray);
+        writeToSerialImage(numArray, audioType);
+      }
+
+      function sendImageSilent(CanvasOrgImage) {
+        const { width, height } = CanvasOrgImage;
+        const ctx = CanvasOrgImage.getContext("2d", {
+          willReadFrequently: true,
+        });
+        const imageData = ctx.getImageData(0, 0, width, height).data;
+
+        const numArray = new Uint8Array(width * height * 2);
+        let index = 0;
+
+        for (let i = height - 1; i >= 0; i--) {
+          for (let j = 0; j < width; j++) {
+            const pos = (i * width + j) * 4;
+            const r = (imageData[pos] >> 3) & 31;
+            const g = (imageData[pos + 1] >> 2) & 63;
+            const b = (imageData[pos + 2] >> 3) & 31;
+            const rgb565 = (r << 11) | (g << 5) | b;
+
+            numArray[index++] = rgb565 >> 8;
+            numArray[index++] = rgb565 & 255;
+          }
+        }
+        //console.log("Num Array:", numArray);
+        writeToSerialImageSilent(numArray);
+      }
+
+      async function connect() {
+        try {
+          console.log("Auto Connect Start");
+          const options = {
+            baudRate: 115200,
+            dataBits: 8,
+            stopBits: 1,
+            parity: "none",
+          };
+
+          // Define vendor names
+          const vendorNames = {
+            "0x0483": "STM32",
+            "0x0403": "FTDI",
+            "0x10C4": "Silicon Labs CP210x",
+            "0x067B": "Prolific",
+            "0x1A86": "QinHeng CH340",
+            "0x16C0": "VOTI",
+          };
+
+          function getVendorName(vendorId) {
+            const hexId = "0x" + vendorId?.toString(16);
+            return vendorNames[hexId]
+              ? `${hexId} (${vendorNames[hexId]})`
+              : hexId;
+          }
+
+          // for (const [vid, name] of Object.entries(vendorNames)) {
+          //   log(`${vid} = ${name}`);
+          // }
+
+          const ports = await navigator.serial.getPorts();
+
+          let targetPort;
+
+          if (ports.length > 0) {
+            targetPort = ports[0];
+            const info = targetPort.getInfo();
+          } else {
+            const filters = [
+              { usbVendorId: 0x0483 }, // STM32
+              { usbVendorId: 0x0403 }, // FTDI
+              { usbVendorId: 0x10c4 }, // Silicon Labs CP210x
+              { usbVendorId: 0x067b }, // Prolific
+              { usbVendorId: 0x1a86 }, // QinHeng CH340
+              { usbVendorId: 0x16c0 }, // VOTI
+              { usbVendorId: 0x0483 }, // STM32 Virtual COM Port
+            ];
+
+            try {
+              targetPort = await navigator.serial.requestPort({ filters });
+              const info = targetPort.getInfo();
+            } catch (error) {
+              targetPort = await navigator.serial.requestPort();
+              const info = targetPort.getInfo();
+            }
+          }
+
+          if (targetPort) {
+            serialPort = targetPort;
+            await serialPort.open(options);
+            //readLoop();
+          }
+        } catch (error) {
+          try {
+            console.log(error);
+            const options = {
+              baudRate: 115200,
+              dataBits: 8, // Set the number of data bits (5, 6, 7, or 8)
+              stopBits: 1, // Set the number of stop bits (1 or 2)
+              parity: "none", // Set the parity (none, even, or odd)
+            };
+            serialPort = await navigator.serial.requestPort();
+            await serialPort.open(options);
+          } catch (error) {
+            console.log(error);
+          }
+        }
+      }
+
+      async function reconnect() {
+        await (async () => {
+          // Get all serial ports the user has previously granted the website access to.
+          const ports = await navigator.serial.getPorts();
+          // Check if there is at least one port.
+          if (ports.length > 0) {
+            // console.log("found");
+            // Get the first port.
+            port = ports[0];
+            // Save the port object in the local storage.
+            serialPort = port;
+            const options = {
+              baudRate: 115200,
+              dataBits: 8, // Set the number of data bits (5, 6, 7, or 8)
+              stopBits: 1, // Set the number of stop bits (1 or 2)
+              parity: "none", // Set the parity (none, even, or odd)
+            };
+            if (serialPort.readable && serialPort.writable) {
+            } else {
+              await serialPort.open(options);
+              //readLoop();
+            }
+          } else {
+            const options = {
+              baudRate: 115200,
+              dataBits: 8, // Set the number of data bits (5, 6, 7, or 8)
+              stopBits: 1, // Set the number of stop bits (1 or 2)
+              parity: "none", // Set the parity (none, even, or odd)
+            };
+            serialPort = await navigator.serial.requestPort();
+            await serialPort.open(options);
+            // readLoop();
+          }
+        })();
+      }
+
+      function disconnect() {
+        if (serialPort) {
+          serialPort.close();
+        }
+      }
+
+      async function writeToSerial(data) {
+        if (serialPort) {
+          const writer = serialPort.writable.getWriter();
+          const encoder = new TextEncoder();
+          const dataArrayBuffer = encoder.encode(data);
+          await writer.write(dataArrayBuffer);
+
+          writer.releaseLock();
+        } else {
+          await reconnect();
+          setTimeout(function () {}, 1000);
+          if (serialPort) {
+            const writer = serialPort.writable.getWriter();
+            const encoder = new TextEncoder();
+            const dataArrayBuffer = encoder.encode(data);
+            await writer.write(dataArrayBuffer);
+
+            writer.releaseLock();
+          }
+        }
+      }
+      let acc = false;
+      async function writeToSerialImage(data, audioType) {
+        if (acc) return; // Prevent multiple writes at the same time
+        acc = true;
+
+        // Disable clicks on the entire page
+        document.body.style.pointerEvents = "none";
+        console.log("User clicks disabled while sending data...");
+
+        setTimeout(async () => {
+          try {
+            if (serialPort) {
+              console.log("Writing image to serial port...");
+              const writer = serialPort.writable.getWriter();
+              await writer.write(data);
+              await new Promise((resolve) => setTimeout(resolve, 500));
+			  console.log("AT+CODEC_TEST=" + audioType);
+              const encoder = new TextEncoder();
+			  const dataArrayBuffer = encoder.encode("AT+CODEC_TEST=" + audioType + "\r\n");
+			  await writer.write(dataArrayBuffer);
+              writer.releaseLock();
+              console.log("Image sent successfully.");
+            } else {
+              console.log("Serial port not available, trying to reconnect...");
+              await reconnect();
+              setTimeout(async function () {
+                if (serialPort) {
+                  const writer = serialPort.writable.getWriter();
+                  await writer.write(data);
+                  await new Promise((resolve) => setTimeout(resolve, 500));
+				console.log("AT+CODEC_TEST=" + audioType + "\r\n");
+				const encoder = new TextEncoder();
+				const dataArrayBuffer = encoder.encode("AT+CODEC_TEST=" + audioType);
+				await writer.write(dataArrayBuffer);
+				  writer.releaseLock();
+                } else {
+                  console.error("Failed to reconnect to serial port.");
+                }
+              }, 1000);
+            }
+          } catch (error) {
+            console.error("Error writing to serial:", error);
+          } finally {
+            // Re-enable user clicks after sending is complete
+            document.body.style.pointerEvents = "auto";
+            acc = false;
+            console.log("User clicks enabled again.");
+          }
+        }, 10); // Small delay to free up UI thread
+      }
+      async function writeToSerialImageSilent(data) {
+        if (acc) return; // Prevent multiple writes at the same time
+        acc = true;
+
+        // Disable clicks on the entire page
+        document.body.style.pointerEvents = "none";
+        console.log("User clicks disabled while sending data...");
+
+        setTimeout(async () => {
+          try {
+            if (serialPort) {
+              console.log("Writing image to serial port (silent)...");
+              const writer = serialPort.writable.getWriter();
+              await writer.write(data);
+              writer.releaseLock();
+              console.log("Image sent successfully.");
+            } else {
+              console.log("Serial port not available, trying to reconnect...");
+              await reconnect();
+              setTimeout(async function () {
+                if (serialPort) {
+                  const writer = serialPort.writable.getWriter();
+                  await writer.write(data);
+                  writer.releaseLock();
+                } else {
+                  console.error("Failed to reconnect to serial port.");
+                }
+              }, 1000);
+            }
+          } catch (error) {
+            console.error("Error writing to serial:", error);
+          } finally {
+            // Re-enable user clicks after sending is complete
+            document.body.style.pointerEvents = "auto";
+            acc = false;
+            console.log("User clicks enabled again.");
+          }
+        }, 10); // Small delay to free up UI thread
+      }
+      async function writeToSerialImage1(data) {
+        return new Promise(async (resolve, reject) => {
+          try {
+            if (serialPort) {
+              console.log("write");
+
+              const writer = serialPort.writable.getWriter();
+              await writer.write(data);
+              console.log("release");
+              writer.releaseLock();
+            } else {
+              await reconnect();
+              setTimeout(function () {}, 1000);
+              if (serialPort) {
+                console.log("write");
+                const writer = serialPort.writable.getWriter();
+                await writer.write(data);
+                writer.releaseLock();
+              }
+            }
+            console.log("done");
+            resolve();
+            console.log("done1");
+          } catch (error) {
+            reject(error);
+          }
+        });
+      }
+
+      async function readLoop() {
+        if (serialPort) {
+          const reader = serialPort.readable.getReader();
+          try {
+            while (true) {
+              const { value, done } = await reader.read();
+              if (done) {
+                // console.log("Read loop finished, done is true");
+                reader.releaseLock();
+                break;
+              }
+
+              //console.log(value);
+              const decoder = new TextDecoder();
+              const text = decoder.decode(value);
+              document.getElementById("output").innerText += text + "\n";
+            }
+          } catch (error) {
+            console.error("Serial read error:", error);
+          }
+        }
+      }
+      
+setInterval(checkDeviceQr,500);
+
+
+function checkDeviceQr(){
+
+fetch('index.php?route=extension/purpletree_pos/pos/home|getDeviceQr')
+
+.then(response=>response.json())
+
+.then(function(data){
+
+console.log(data);
+
+
+// ---------- SUCCESS ----------
+
+if(data.status === 'success'){
+
+document.getElementById('conformamount').value = data.amount;
+
+generateSuccess();
+
+return;
+
+}
+
+
+// ---------- QR ----------
+
+if(data.status === 'send'){
+
+document.getElementById('qrupiurl').value = data.upi_url;
+
+document.getElementById('qramount').value = data.amount;
+
+document.getElementById('qrvpa').value = data.vpa;
+
+generateQr();
+
+}
+
+})
+
+.catch(err=>console.log(err));
+
+}
+
+
+    </script>
+  </body>
+</html>

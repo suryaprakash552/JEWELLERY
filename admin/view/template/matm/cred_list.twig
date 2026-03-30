@@ -1,0 +1,79 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+          <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
+        <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-store').submit() : false;"><i class="fa-regular fa-trash-can"></i></button>
+      </div>
+      <h1 style="color:white">{{ heading_title }}</h1>
+            <ol class="breadcrumb">
+            {% for breadcrumb in breadcrumbs %}
+            <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><b><i class="fa fa-list"></i> {{ text_list }}</b></h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-store">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead  style="background-color:#861f41;color:white;">
+                <tr>
+                  <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                  <td class="text-center">{{ column_srno }}</td>
+                  <td class="text-center">{{ column_type }}</td>
+                  <td class="text-center">{{ column_password }}</td>
+                  <td class="text-center">{{ column_developerid }}</td>
+                  <td class="text-center">{{ column_ipaddress }}</td>
+                  <td class="text-center">{{ column_status }}</td>
+                  <td class="text-center">{{ column_action }}</td>
+                </tr>
+              </thead>
+              <tbody>
+                {% if credentials %}
+                {% for credential in credentials %}
+                <tr>
+                  <td class="text-center">{% if credential.recordid in selected %}
+                    <input type="checkbox" name="selected[]" value="{{ credential.recordid }}" checked="checked" />
+                    {% else %}
+                    <input type="checkbox" name="selected[]" value="{{ credential.recordid }}" />
+                    {% endif %}</td>
+                  <td class="text-center">{{ credential.srno }}</td>
+                  <td class="text-center">{{ credential.type }}</td>
+                  <td class="text-center">{{ credential.password }}</td>
+                  <td class="text-center">{{ credential.developerid }}</td>
+                  <td class="text-center">{{ credential.ipaddress }}</td>
+                  <td class="text-center">{{ credential.status }}</td>
+                  <td class="text-center"><a href="{{ credential.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                  <td class="text-center" colspan="7">{{ text_no_results }}</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }} 

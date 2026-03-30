@@ -1,0 +1,435 @@
+{{ header }}
+<link href="view/javascript/me_purchase_order/style.css" rel="stylesheet">
+<script src="view/javascript/bootstrap/js/bootstrap.min.js"></script>
+
+{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li class="breadcrumb-item"><a href="{{ breadcrumb['href'] }}">{{ breadcrumb['text'] }}</a></li>
+		{% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+   {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module" class="form-horizontal">
+    		  <!-- Nav Tabs -->
+              <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item"><a class="nav-link active" id="tab-general1-tab" data-bs-toggle="tab" href="#tab-general1" role="tab">{{ tab_general }}</a></li>
+                <li class="nav-item"><a class="nav-link" id="tab-order_status-tab" data-bs-toggle="tab" href="#tab-order_status" role="tab">{{ tab_order_status }}</a></li>
+                <li class="nav-item"><a class="nav-link" id="tab-payment_method-tab" data-bs-toggle="tab" href="#tab-payment_method" role="tab">{{ tab_payment_method }}</a></li>
+                <li class="nav-item"><a class="nav-link" id="tab-shipping_method-tab" data-bs-toggle="tab" href="#tab-shipping_method" role="tab">{{ tab_shipping_method }}</a></li>
+                <li class="nav-item"><a class="nav-link" id="tab-general-tab" data-bs-toggle="tab" href="#tab-general" role="tab">{{ tab_column }}</a></li>
+                <li class="nav-item"><a class="nav-link" id="tab-print_column-tab" data-bs-toggle="tab" href="#tab-print_column" role="tab">{{ tab_print_column }}</a></li>
+                <li class="nav-item"><a class="nav-link" id="tab-export_column-tab" data-bs-toggle="tab" href="#tab-export_column" role="tab">{{ tab_export_column }}</a></li>
+                <li class="nav-item"><a class="nav-link" id="tab-support-tab" data-bs-toggle="tab" href="#tab-support" role="tab">{{ tab_support }}</a></li>
+              </ul>
+
+			<div class="tab-content">
+				<!-- General Tab begin -->
+				<div class="tab-pane active" id="tab-general1">
+                  <div class="container-fluid" style="max-width:800px;">
+                    <div class="row mb-3 align-items-center">
+                      <label for="input-exportformat" class="col-sm-3 col-form-label fw-bold">{{ entry_exportformat }}</label>
+                      <div class="col-sm-9">
+                        <select name="me_purchase_order_setting_exportformat" id="input-exportformat" class="form-control">
+                          <option value="xls" {% if me_purchase_order_setting_exportformat == 'xls' %}selected{% endif %}>{{ text_xls }}</option>
+                          <option value="csv" {% if me_purchase_order_setting_exportformat == 'csv' %}selected{% endif %}>{{ text_csv }}</option>
+                        </select>
+                      </div>
+                    </div>
+                
+                    <div class="row mb-3 align-items-center">
+                      <label for="input-currency" class="col-sm-3 col-form-label fw-bold">{{ entry_currency }}</label>
+                      <div class="col-sm-9">
+                        <select name="me_purchase_order_setting_currency" id="input-currency" class="form-control">
+                          {% for currency in currencies %}
+                            <option value="{{ currency['code'] }}" {% if currency['code'] == me_purchase_order_setting_currency %}selected{% endif %}>{{ currency['title'] }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                
+                    <div class="row mb-3 align-items-center">
+                      <label for="input-prefix" class="col-sm-3 col-form-label fw-bold">{{ entry_prefix }}</label>
+                      <div class="col-sm-9">
+                        <input type="text" name="me_purchase_order_setting_prefix" value="{{ me_purchase_order_setting_prefix }}" id="input-prefix" class="form-control">
+                      </div>
+                    </div>
+                
+                    <div class="row mb-3 align-items-center">
+                      <label for="input-dorderstatus" class="col-sm-3 col-form-label fw-bold"><span data-toggle="tooltip" title="{{ help_default_order_status }}">{{ entry_default_order_status }}</span></label>
+                      <div class="col-sm-9">
+                        <select name="me_purchase_order_setting_dorderstatus" id="input-dorderstatus" class="form-control">
+                          {% for order_status in order_statuss %}
+                            <option value="{{ order_status['name'] }}" {% if order_status['name'] == me_purchase_order_setting_dorderstatus %}selected{% endif %}>{{ order_status['name'] }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                
+                    <div class="row mb-3 align-items-center">
+                      <label for="input-orderstatus" class="col-sm-3 col-form-label fw-bold"><span data-toggle="tooltip" title="{{ help_update_stock }}">{{ entry_update_stock }}</span></label>
+                      <div class="col-sm-9">
+                        <select name="me_purchase_order_setting_orderstatus" id="input-orderstatus" class="form-control">
+                          {% for order_status in order_statuss %}
+                            <option value="{{ order_status['name'] }}" {% if order_status['name'] == me_purchase_order_setting_orderstatus %}selected{% endif %}>{{ order_status['name'] }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                
+                    <div class="row mb-3 align-items-center">
+                      <label for="input-customfeedis_status" class="col-sm-3 col-form-label fw-bold">{{ entry_customfeedis_status }}</label>
+                      <div class="col-sm-9">
+                        <select name="me_purchase_order_setting_customfeedisstatus" id="input-customfeedis_status" class="form-control">
+                          <option value="1" {% if me_purchase_order_setting_customfeedisstatus %}selected{% endif %}>{{ text_enabled }}</option>
+                          <option value="0" {% if not me_purchase_order_setting_customfeedisstatus %}selected{% endif %}>{{ text_disabled }}</option>
+                        </select>
+                      </div>
+                    </div>
+                
+                    <div class="row mb-3 align-items-center">
+                      <label for="input-tax" class="col-sm-3 col-form-label fw-bold">{{ entry_tax }}</label>
+                      <div class="col-sm-9">
+                        <select name="me_purchase_order_setting_tax" id="input-tax" class="form-control">
+                          <option value="1" {% if me_purchase_order_setting_tax %}selected{% endif %}>{{ text_enabled }}</option>
+                          <option value="0" {% if not me_purchase_order_setting_tax %}selected{% endif %}>{{ text_disabled }}</option>
+                        </select>
+                      </div>
+                    </div>
+                
+                    <div class="row mb-3 align-items-center">
+                      <label for="input-balance" class="col-sm-3 col-form-label fw-bold">{{ entry_balance }}</label>
+                      <div class="col-sm-9">
+                        <select name="me_purchase_order_setting_balance" id="input-balance" class="form-control">
+                          <option value="1" {% if me_purchase_order_setting_balance %}selected{% endif %}>{{ text_enabled }}</option>
+                          <option value="0" {% if not me_purchase_order_setting_balance %}selected{% endif %}>{{ text_disabled }}</option>
+                        </select>
+                      </div>
+                    </div>
+                
+                    <div class="row mb-3 align-items-center">
+                      <label for="input-comment" class="col-sm-3 col-form-label fw-bold">{{ entry_po_comment }}</label>
+                      <div class="col-sm-9">
+                        <select name="me_purchase_order_setting_comment" id="input-comment" class="form-control">
+                          <option value="1" {% if me_purchase_order_setting_comment %}selected{% endif %}>{{ text_enabled }}</option>
+                          <option value="0" {% if not me_purchase_order_setting_comment %}selected{% endif %}>{{ text_disabled }}</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+				<!-- General Tab end -->
+				
+				<!-- Order Status Tab begin -->
+				<div class="tab-pane" id="tab-order_status">
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-order_status">{{ entry_order_status }}</label>
+						<div class="col-sm-10">
+							<table id="order_status" class="table table-striped table-bordered table-hover">
+								<thead>
+								  <tr>
+									<td class="text-left required">{{ entry_name }}</td>
+									<td class="text-left">{{ entry_status }}</td>
+									<td></td>
+								  </tr>
+								</thead>
+								<tbody>
+								{% set order_status_row = 0 %}
+									{% for order_status in order_statuss %}
+								  <tr id="order_status-row{{ order_status_row }}">
+									<td class="text-left" style="width: 70%;">
+										<input type="text" name="me_purchase_order_setting_order_status[{{ order_status_row }}][name]" value="{{ order_status['name'] ? order_status['name'] : ''  }}" placeholder="{{ entry_name }}" class="form-control" />
+									</td>
+									<td class="text-left">
+										<select name="me_purchase_order_setting_order_status[{{ order_status_row }}][status]" class="form-control">
+											<option value="1" {% if order_status['status'] %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+											<option value="0" {% if not order_status['status'] %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+										</select>
+									</td>
+									<td class="text-left"><button type="button" onclick="$('#order_status-row{{ order_status_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>
+								  </tr>
+								  {% set order_status_row = order_status_row + 1 %}
+									{% endfor %}
+								</tbody>
+								<tfoot>
+								  <tr>
+									<td colspan="2"></td>
+									<td class="text-left"><a onclick="addorderstatusRow();" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></a></td>
+								  </tr>
+								</tfoot>
+							</table>
+						</div>
+					</div>
+				</div>
+				<!-- Payment Method Tab begin -->
+				<div class="tab-pane" id="tab-payment_method">
+					<table id="payment_method" class="table table-striped table-bordered table-hover">
+						<thead>
+						  <tr>
+							<td class="text-left required">{{ entry_name }}</td>
+							<td class="text-left">{{ entry_sort_order }}</td>
+							<td class="text-left">{{ entry_status }}</td>
+							<td></td>
+						  </tr>
+						</thead>
+						<tbody>
+						{% set payment_method_row = 0 %}
+						{% for payment_method in payment_methods %}
+						  <tr id="payment_method-row{{ payment_method_row }}">
+							<td class="text-left {% if error_payment_name[payment_method_row] %}has-error{% endif %}">
+								<input type="text" name="me_purchase_order_setting_payment_method[{{ payment_method_row }}][name]" value="{{ payment_method['name'] }}" placeholder="{{ entry_name }}" class="form-control" /><input type="hidden" name="me_purchase_order_setting_payment_method[{{ payment_method_row }}][payment_method_id]" value="{{ payment_method['payment_method_id'] }}">
+							</td>
+							<td class="text-left">
+								<input type="text" name="me_purchase_order_setting_payment_method[{{ payment_method_row }}][sort_order]" value="{{ payment_method['sort_order'] }}" placeholder="{{ entry_sort_order }}" class="form-control" />
+							</td>
+							<td class="text-left">
+								<select name="me_purchase_order_setting_payment_method[{{ payment_method_row }}][status]" class="form-control">
+									<option value="1" {% if payment_method['status'] %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+									<option value="0" {% if not payment_method['status'] %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+								</select>
+							</td>
+							<td class="text-left"><button type="button" onclick="$('#payment_method-row{{ payment_method_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>
+						  </tr>
+						  {% set payment_method_row = payment_method_row + 1 %}
+							{% endfor %}
+						</tbody>
+						<tfoot>
+						  <tr>
+							<td colspan="3"></td>
+							<td class="text-left"><a onclick="addpaymentmethodRow();" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></a></td>
+						  </tr>
+						</tfoot>
+					</table>
+				</div>
+				<!-- Payment Method Tab finish -->
+				
+				<!-- Shipping Method Tab begin -->
+				<div class="tab-pane" id="tab-shipping_method">
+					<table id="shipping_method" class="table table-striped table-bordered table-hover">
+						<thead>
+						  <tr>
+							<td class="text-left required">{{ entry_name }}</td>
+							<td class="text-left">{{ entry_price }}</td>
+							<td class="text-left">{{ entry_sort_order }}</td>
+							<td class="text-left">{{ entry_status }}</td>
+							<td></td>
+						  </tr>
+						</thead>
+						<tbody>
+							{% set shipping_method_row = 0 %}
+							{% for shipping_method in shipping_methods %}
+						  <tr id="shipping_method-row{{ shipping_method_row }}">
+							<td class="text-left {% if error_name[shipping_method_row] %}has-error{% endif %}">
+								<input type="text" name="me_purchase_order_setting_shipping_method[{{ shipping_method_row }}][name]" value="{{ shipping_method['name'] }}" placeholder="{{ entry_name }}" class="form-control" /><input type="hidden" name="me_purchase_order_setting_shipping_method[{{ shipping_method_row }}][shipping_method_id]" value="{{ shipping_method['shipping_method_id'] }}">
+							</td>
+							<td class="text-left">
+								<input type="text" name="me_purchase_order_setting_shipping_method[{{ shipping_method_row }}][price]" value="{{ shipping_method['price'] }}" placeholder="{{ entry_price }}" class="form-control" />
+							</td>
+							<td class="text-left">
+								<input type="text" name="me_purchase_order_setting_shipping_method[{{ shipping_method_row }}][sort_order]" value="{{ shipping_method['sort_order'] }}" placeholder="{{ entry_sort_order }}" class="form-control" />
+							</td>
+							<td class="text-left">
+								<select name="me_purchase_order_setting_shipping_method[{{ shipping_method_row }}][status]" class="form-control">
+									<option value="1" {% if shipping_method['status'] %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+									<option value="0" {% if not shipping_method['status'] %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+								</select>
+							</td>
+							<td class="text-left"><button type="button" onclick="$('#shipping_method-row{{ shipping_method_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>
+						  </tr>
+						  {% set shipping_method_row = shipping_method_row + 1 %}
+							{% endfor %}
+						</tbody>
+						<tfoot>
+						  <tr>
+							<td colspan="4"></td>
+							<td class="text-left"><a onclick="addshippingmethodRow();" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></a></td>
+						  </tr>
+						</tfoot>
+					</table>
+				</div>
+				<!-- Shipping Method Tab finish -->
+				
+				<div class="tab-pane" id="tab-general">
+					<ul class="connected-sortable droppable-area1 list-unstyled">
+					{% if purchase_order_setting %}
+						{% set columns = purchase_order_setting %}
+					{% endif %}
+					{% set i = 0 %}
+					{% for key,column in columns %}
+						<li class="draggable-item"><i class="fa fa-arrows"></i> {% if column['name'] %}{{ column['name'] }}{% else %}{{ column }}{% endif %} <input type="hidden" name="me_purchase_order_setting_column[{{ key }}][sort_order]" class="sort_order" value="{% if column['sort_order'] %}{{ column['sort_order'] }}{% else %}{{ i }}{% endif %}"><label class="switch pull-right"><input type="checkbox" {% if column['status'] and column['status'] == 'on' %}checked{% endif %} name="me_purchase_order_setting_column[{{ key }}][status]"><span class="slider"></span></label></li>
+						{% set i = i + 1 %}
+						{% endfor %}
+					</ul>
+				</div>
+				<!-- General Tab finish -->
+				
+				<!-- Export Columns Tab begin -->
+				<div class="tab-pane" id="tab-print_column">
+					<ul class="connected-sortable1 droppable-area1 list-unstyled">
+					 {% if purchase_order_export_setting %}
+						{% set export_columns = purchase_order_export_setting %}
+					  {% endif %}
+					  {% set i = 0 %}
+						{% for key,column in export_columns %}
+						<li class="draggable-item"><i class="fa fa-arrows"></i> {% if column['name'] %}{{ column['name'] }}{% else %}{{ column }}{% endif %} <input type="hidden" name="me_purchase_order_setting_export_column[{{ key }}][sort_order]" class="sort_order" value="{% if column['sort_order'] %}{{ column['sort_order'] }}{% else %}{{ i }}{% endif %}"><label class="switch pull-right"><input type="checkbox" {% if column['status'] and column['status'] == 'on' %}checked{% endif %} name="me_purchase_order_setting_export_column[{{ key }}][status]"><span class="slider"></span></label></li>
+						{% set i = i + 1 %}
+						{% endfor %}
+					</ul>
+				</div>
+				<!-- Export Columns Tab finish -->
+
+				<!-- Export Columns Tab begin -->
+				<div class="tab-pane" id="tab-export_column">
+					<div class="clearfix" style="padding: 7px 10px;">
+						<div class="pull-right">
+						  <label class="switch pull-right"><input type="checkbox" {% if me_purchase_order_setting_xexport_column_all %}checked{% endif %} name="me_purchase_order_setting_xexport_column_all" onclick="$('.connected-sortable2 input[type=\'checkbox\']').prop('checked', this.checked);"><span class="slider"></span></label>
+						</div>
+						<label class="pull-right" style="margin-right:5px;">Select ALL: </label>
+					</div>
+					<ul class="connected-sortable2 droppable-area2 list-unstyled">
+					 {% if purchase_order_xexport_setting %}
+						{% set xexport_columns = purchase_order_xexport_setting %}
+					  {% endif %}
+					  {% set i = 0 %}
+						{% for key,column in xexport_columns %}
+						<li class="draggable-item"><i class="fa fa-arrows"></i> {% if column['name'] %}{{ column['name'] }}{% else %}{{ column }}{% endif %} <input type="hidden" name="me_purchase_order_setting_xexport_column[{{ key }}][sort_order]" class="sort_order" value="{% if column['sort_order'] %}{{ column['sort_order'] }}{% else %}{{ i }}{% endif %}"><label class="switch pull-right"><input type="checkbox" {% if column['status'] and column['status'] == 'on' %}checked{% endif %} name="me_purchase_order_setting_xexport_column[{{ key }}][status]"><span class="slider"></span></label></li>
+						{% set i = i + 1 %}
+						{% endfor %}
+					</ul>
+				</div>
+				<!-- Export Columns Tab finish -->
+				
+				<!-- Support Tab begin -->
+				<div class="tab-pane" id="tab-support">
+					<h4 class="text-center">For Support Please mail at <a href="mailto:martextensions@gmail.com">martextensions@gmail.com</a></h4>
+				</div>
+				<!-- Support Tab finish -->
+			</div>
+		</form>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="view/javascript/me_purchase_order/jquery-ui.min.js"></script>
+<script>
+$('.connected-sortable').sortable({
+	stop: function(event, ui) {
+		$(".connected-sortable li").each(function(i, el){
+			var index = $(el).index();
+			$(this).find('.sort_order').val(index);
+		});
+	}
+});
+
+$('.connected-sortable1').sortable({
+	stop: function(event, ui) {
+		$(".connected-sortable1 li").each(function(i, el){
+			var index = $(el).index();
+			$(this).find('.sort_order').val(index);
+		});
+	}
+});
+
+$('.connected-sortable2').sortable({
+	stop: function(event, ui) {
+		$(".connected-sortable2 li").each(function(i, el){
+			var index = $(el).index();
+			$(this).find('.sort_order').val(index);
+		});
+	}
+});
+</script>
+<script type="text/javascript"><!--
+var order_status_row = {{ order_status_row }};
+
+function addorderstatusRow() {
+	html  = '<tr id="order_status-row' + order_status_row + '">';	
+    html += '  <td class="text-left" style="width: 70%;">';
+	html += '  <input type="text" name="me_purchase_order_setting_order_status[' + order_status_row + '][name]" value="" placeholder="{{ entry_name }}" class="form-control" />';
+	html += '  </td>';
+	html += '  <td class="text-left">';
+	html += '<select name="me_purchase_order_setting_order_status[' + order_status_row + '][status]" class="form-control">';
+	html += ' <option value="1">{{ text_enabled }}</option>';
+	html += ' <option value="0">{{ text_disabled }}</option>';
+	html += '</select>';
+	html += '  </td>';
+	html += '  <td class="text-left"><button type="button" onclick="$(\'#order_status-row' + order_status_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+	html += '</tr>';	
+	
+	$('#order_status tbody').append(html);
+	
+	order_status_row++;
+}
+//--></script>
+<script type="text/javascript"><!--
+var payment_method_row = {{ payment_method_row }};
+
+function addpaymentmethodRow() {
+	html  = '<tr id="payment_method-row' + payment_method_row + '">';	
+    html += '  <td class="text-left">';
+	html += '  <input type="text" name="me_purchase_order_setting_payment_method[' + payment_method_row + '][name]" value="" placeholder="{{ entry_name }}" class="form-control" /><input type="hidden" name="me_purchase_order_setting_payment_method[' + payment_method_row + '][payment_method_id]" value="' + payment_method_row + '">';
+	html += '  </td>';
+	html += '<td class="text-left">';
+	html += '	<input type="text" name="me_purchase_order_setting_payment_method[' + payment_method_row + '][sort_order]" value="" placeholder="{{ entry_sort_order }}" class="form-control" />';
+	html += '</td>';
+	html += '  <td class="text-left">';
+	html += '<select name="me_purchase_order_setting_payment_method[' + payment_method_row + '][status]" class="form-control">';
+	html += ' <option value="1">{{ text_enabled }}</option>';
+	html += ' <option value="0">{{ text_disabled }}</option>';
+	html += '</select>';
+	html += '  </td>';
+	html += '  <td class="text-left"><button type="button" onclick="$(\'#payment_method-row' + payment_method_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+	html += '</tr>';	
+	
+	$('#payment_method tbody').append(html);
+	
+	payment_method_row++;
+}
+//--></script>
+<script type="text/javascript"><!--
+var shipping_method_row = {{ shipping_method_row }};
+
+function addshippingmethodRow() {
+	html  = '<tr id="shipping_method-row' + shipping_method_row + '">';	
+    html += '  <td class="text-left">';
+	html += '  <input type="text" name="me_purchase_order_setting_shipping_method[' + shipping_method_row + '][name]" value="" placeholder="{{ entry_name }}" class="form-control" /><input type="hidden" name="me_purchase_order_setting_shipping_method[' + shipping_method_row + '][shipping_method_id]" value="' + shipping_method_row + '">';
+	html += '  </td>';
+	html += '<td class="text-left">';
+	html += '	<input type="text" name="me_purchase_order_setting_shipping_method[' + shipping_method_row + '][price]" value="" placeholder="{{ entry_price }}" class="form-control" />';
+	html += '</td>';
+	html += '<td class="text-left">';
+	html += '	<input type="text" name="me_purchase_order_setting_shipping_method[' + shipping_method_row + '][sort_order]" value="" placeholder="{{ entry_sort_order }}" class="form-control" />';
+	html += '</td>';
+	html += '  <td class="text-left">';
+	html += '<select name="me_purchase_order_setting_shipping_method[' + shipping_method_row + '][status]" class="form-control">';
+	html += ' <option value="1">{{ text_enabled }}</option>';
+	html += ' <option value="0">{{ text_disabled }}</option>';
+	html += '</select>';
+	html += '  </td>';
+	html += '  <td class="text-left"><button type="button" onclick="$(\'#shipping_method-row' + shipping_method_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+	html += '</tr>';	
+	
+	$('#shipping_method tbody').append(html);
+	
+	shipping_method_row++;
+}
+//--></script>
+{{ footer }}

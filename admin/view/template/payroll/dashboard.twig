@@ -1,0 +1,564 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        <div class="btn-group">
+          <a href="{{ urls.generate }}" class="btn btn-success" data-bs-toggle="tooltip" title="Generate Payroll">
+            <i class="fa-solid fa-play"></i> Generate
+          </a>
+          <a href="{{ urls.report_monthly }}" class="btn btn-info" data-bs-toggle="tooltip" title="Monthly Reports">
+            <i class="fa-solid fa-chart-bar"></i> Reports
+          </a>
+        </div>
+      </div>
+      <h1>Payroll Dashboard</h1>
+      <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <!-- Welcome Message -->
+    <div class="alert alert-primary alert-dismissible">
+      <i class="fa-solid fa-info-circle"></i>
+      <strong>Welcome to Payroll Dashboard!</strong> 
+      Overview for <strong>{{ month_name }} {{ current_year }}</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+      <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card text-white bg-gradient-primary h-100">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <h6 class="text-primary">Financial Summary</h6>
+                <div class="row g-2">
+                  <div class="col-6">
+                    <div class="border rounded p-2 text-center">
+                      <div class="h5 text-success mb-0">${{ "%.0f"|format(stats.total_payout) }}</div>
+                      <small class="text-muted">Total Payout</small>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="border rounded p-2 text-center">
+                      {% set avg_salary = stats.processed_payroll > 0 ? (stats.total_payout / stats.processed_payroll) : 0 %}
+                      <div class="h5 text-info mb-0">${{ "%.0f"|format(avg_salary) }}</div>
+                      <small class="text-muted">Avg Salary</small>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="border rounded p-2 text-center">
+                      {% set estimated_deductions = stats.total_payout * 0.25 %}
+                      <div class="h5 text-warning mb-0">${{ "%.0f"|format(estimated_deductions) }}</div>
+                      <small class="text-muted">Est. Deductions</small>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="border rounded p-2 text-center">
+                      {% set gross_estimate = stats.total_payout * 1.33 %}
+                      <div class="h5 text-primary mb-0">${{ "%.0f"|format(gross_estimate) }}</div>
+                      <small class="text-muted">Est. Gross</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <h6 class="text-info">Processing Timeline</h6>
+                <div class="timeline">
+                  <div class="d-flex align-items-center mb-2">
+                    <div class="bg-success rounded-circle p-1 me-2" style="width: 20px; height: 20px;">
+                      <i class="fa-solid fa-check text-white" style="font-size: 10px;"></i>
+                    </div>
+                    <small>{{ stats.processed_payroll }} employees processed</small>
+                  </div>
+                  {% if stats.pending_payroll > 0 %}
+                  <div class="d-flex align-items-center mb-2">
+                    <div class="bg-warning rounded-circle p-1 me-2" style="width: 20px; height: 20px;">
+                      <i class="fa-solid fa-clock text-white" style="font-size: 10px;"></i>
+                    </div>
+                    <small>{{ stats.pending_payroll }} employees pending</small>
+                  </div>
+                  {% endif %}
+                  {% if stats.pending_leaves > 0 %}
+                  <div class="d-flex align-items-center mb-2">
+                    <div class="bg-info rounded-circle p-1 me-2" style="width: 20px; height: 20px;">
+                      <i class="fa-solid fa-user-clock text-white" style="font-size: 10px;"></i>
+                    </div>
+                    <small>{{ stats.pending_leaves }} leave applications pending</small>
+                  </div>
+                  {% endif %}
+                  <div class="d-flex align-items-center">
+                    <div class="bg-primary rounded-circle p-1 me-2" style="width: 20px; height: 20px;">
+                      <i class="fa-solid fa-calendar text-white" style="font-size: 10px;"></i>
+                    </div>
+                    <small>Report period: {{ month_name }} {{ current_year }}</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifications and Alerts -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title mb-0">
+              <i class="fa-solid fa-bell"></i> System Notifications
+            </h5>
+          </div>
+          <div class="card-body">
+            {% if stats.pending_payroll > 0 %}
+            <div class="alert alert-warning d-flex align-items-center">
+              <i class="fa-solid fa-exclamation-triangle me-3"></i>
+              <div>
+                <strong>Action Required:</strong> {{ stats.pending_payroll }} employees have pending payroll for {{ month_name }}. 
+                <a href="{{ urls.generate }}" class="alert-link">Generate payroll now</a>
+              </div>
+            </div>
+            {% endif %}
+
+            {% if stats.pending_leaves > 0 %}
+            <div class="alert alert-info d-flex align-items-center">
+              <i class="fa-solid fa-info-circle me-3"></i>
+              <div>
+                <strong>Leave Applications:</strong> {{ stats.pending_leaves }} leave applications are pending approval.
+                <a href="#" class="alert-link">Review leaves</a>
+              </div>
+            </div>
+            {% endif %}
+
+            {% if stats.processed_payroll == stats.total_employees and stats.total_employees > 0 %}
+            <div class="alert alert-success d-flex align-items-center">
+              <i class="fa-solid fa-check-circle me-3"></i>
+              <div>
+                <strong>All Complete:</strong> All payroll processing is complete for {{ month_name }}. 
+                <a href="{{ urls.process_payments }}" class="alert-link">Process payments</a>
+              </div>
+            </div>
+            {% endif %}
+
+            {% if stats.total_employees == 0 %}
+            <div class="alert alert-secondary d-flex align-items-center">
+              <i class="fa-solid fa-users me-3"></i>
+              <div>
+                <strong>No Employees:</strong> No active employees found in the system.
+                <a href="#" class="alert-link">Add employees</a>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Processing Modal -->
+<div class="modal fade" id="processingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Processing Payments</h5>
+      </div>
+      <div class="modal-body text-center">
+        <div class="spinner-border text-primary mb-3" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p>Processing payments for {{ month_name }} {{ current_year }}...</p>
+        <div class="progress">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" 
+               style="width: 0%" id="process-progress"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Auto-refresh dashboard every 30 seconds
+    setInterval(function() {
+        refreshDashboardStats();
+    }, 30000);
+
+    // Welcome animation
+    $('.alert-primary').hide().fadeIn(1000);
+    
+    // Stagger animation for cards
+    $('.card').each(function(index) {
+        $(this).css('opacity', '0').delay(index * 100).animate({'opacity': '1'}, 500);
+    });
+});
+
+function processPayments() {
+    if (!confirm('Process all pending payments for {{ month_name }} {{ current_year }}?')) {
+        return;
+    }
+    
+    $('#processingModal').modal('show');
+    
+    // Simulate progress
+    var progress = 0;
+    var interval = setInterval(function() {
+        progress += Math.random() * 20;
+        if (progress > 100) {
+            progress = 100;
+            clearInterval(interval);
+            
+            // Make actual AJAX call
+            $.ajax({
+                url: '{{ urls.process_payments }}',
+                type: 'POST',
+                data: {
+                    year: {{ current_year }},
+                    month: {{ current_month }}
+                },
+                dataType: 'json',
+                success: function(response) {
+                    $('#processingModal').modal('hide');
+                    if (response.success) {
+                        showAlert('success', response.success);
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        showAlert('danger', response.error || 'Failed to process payments');
+                    }
+                },
+                error: function() {
+                    $('#processingModal').modal('hide');
+                    showAlert('danger', 'Error processing payments');
+                }
+            });
+        }
+        $('#process-progress').css('width', progress + '%');
+    }, 100);
+}
+
+function refreshDashboardStats() {
+    // This would make an AJAX call to refresh statistics
+    // Implementation depends on your backend API
+    console.log('Refreshing dashboard stats...');
+}
+
+function showAlert(type, message) {
+    var alertHtml = `
+    <div class="alert alert-${type} alert-dismissible">
+        <i class="fa-solid fa-circle-${type === 'success' ? 'check' : 'exclamation'}"></i> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    `;
+    
+    $('.container-fluid').prepend(alertHtml);
+    
+    // Auto hide after 5 seconds
+    setTimeout(function() {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+</script>
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(45deg, #007bff, #0056b3) !important;
+}
+.bg-gradient-success {
+    background: linear-gradient(45deg, #28a745, #1e7e34) !important;
+}
+.bg-gradient-warning {
+    background: linear-gradient(45deg, #ffc107, #d39e00) !important;
+}
+.bg-gradient-danger {
+    background: linear-gradient(45deg, #dc3545, #bd2130) !important;
+}
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+}
+.timeline {
+    position: relative;
+}
+</style>
+
+{{ footer }}<div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h2 class="mb-0">{{ stats.total_employees }}</h2>
+                <p class="mb-0">Total Employees</p>
+                <small class="opacity-75">Active users in system</small>
+              </div>
+              <div class="align-self-center">
+                <i class="fa-solid fa-users fa-3x opacity-50"></i>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer bg-white bg-opacity-25">
+            <div class="d-flex justify-content-between">
+              <span>Active</span>
+              <span>{{ stats.total_employees }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card text-white bg-gradient-success h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h2 class="mb-0">{{ stats.processed_payroll }}</h2>
+                <p class="mb-0">Processed Payroll</p>
+                <small class="opacity-75">This month completed</small>
+              </div>
+              <div class="align-self-center">
+                <i class="fa-solid fa-check-circle fa-3x opacity-50"></i>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer bg-white bg-opacity-25">
+            {% set completion_percent = stats.total_employees > 0 ? (stats.processed_payroll / stats.total_employees * 100) : 0 %}
+            <div class="d-flex justify-content-between">
+              <span>Completion</span>
+              <span>{{ "%.1f"|format(completion_percent) }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card text-white bg-gradient-warning h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h2 class="mb-0">{{ stats.pending_payroll }}</h2>
+                <p class="mb-0">Pending Payroll</p>
+                <small class="opacity-75">Awaiting processing</small>
+              </div>
+              <div class="align-self-center">
+                <i class="fa-solid fa-clock fa-3x opacity-50"></i>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer bg-white bg-opacity-25">
+            <div class="d-flex justify-content-between">
+              <span>Remaining</span>
+              <span>{{ stats.pending_payroll }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card text-white bg-gradient-danger h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h2 class="mb-0">${{ "%.0f"|format(stats.total_payout/1000) }}K</h2>
+                <p class="mb-0">Total Payout</p>
+                <small class="opacity-75">Monthly expenditure</small>
+              </div>
+              <div class="align-self-center">
+                <i class="fa-solid fa-dollar-sign fa-3x opacity-50"></i>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer bg-white bg-opacity-25">
+            <div class="d-flex justify-content-between">
+              <span>Amount</span>
+              <span>${{ "%.2f"|format(stats.total_payout) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Quick Actions -->
+      <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+          <div class="card-header bg-primary text-white">
+            <h4 class="card-title mb-0">
+              <i class="fa-solid fa-bolt"></i> Quick Actions
+            </h4>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="d-grid">
+                  <a href="{{ urls.generate }}" class="btn btn-success btn-lg">
+                    <i class="fa-solid fa-play mb-2"></i><br>
+                    Generate Payroll
+                  </a>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-grid">
+                  <button type="button" class="btn btn-info btn-lg" onclick="processPayments()">
+                    <i class="fa-solid fa-credit-card mb-2"></i><br>
+                    Process Payments
+                  </button>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-grid">
+                  <a href="{{ urls.report_monthly }}" class="btn btn-warning btn-lg">
+                    <i class="fa-solid fa-chart-bar mb-2"></i><br>
+                    View Reports
+                  </button>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-grid">
+                  <a href="{{ urls.report_annual }}" class="btn btn-secondary btn-lg">
+                    <i class="fa-solid fa-calendar mb-2"></i><br>
+                    Annual Report
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Process Status -->
+            <div class="mt-4">
+              <h6>Processing Status</h6>
+              <div class="progress mb-2">
+                {% set progress_percent = stats.total_employees > 0 ? (stats.processed_payroll / stats.total_employees * 100) : 0 %}
+                <div class="progress-bar bg-success" style="width: {{ progress_percent }}%">
+                  {{ "%.0f"|format(progress_percent) }}%
+                </div>
+              </div>
+              <small class="text-muted">
+                {{ stats.processed_payroll }} of {{ stats.total_employees }} employees processed for {{ month_name }}
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+          <div class="card-header bg-info text-white">
+            <h4 class="card-title mb-0">
+              <i class="fa-solid fa-history"></i> Recent Payroll Records
+            </h4>
+          </div>
+          <div class="card-body">
+            {% if recent_payrolls %}
+            <div class="table-responsive">
+              <table class="table table-sm table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>Employee</th>
+                    <th class="text-end">Net Salary</th>
+                    <th class="text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for payroll in recent_payrolls %}
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="avatar-sm bg-primary rounded-circle d-flex align-items-center justify-content-center me-2">
+                          <i class="fa-solid fa-user text-white"></i>
+                        </div>
+                        <div>
+                          <div class="fw-bold">{{ payroll.name }}</div>
+                          <small class="text-muted">{{ payroll.emp_code }}</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="text-end">
+                      <strong>${{ "%.2f"|format(payroll.net_salary) }}</strong>
+                    </td>
+                    <td class="text-center">
+                      {% if payroll.status == 'Released' %}
+                        <span class="badge bg-success">{{ payroll.status }}</span>
+                      {% elseif payroll.status == 'Pending' %}
+                        <span class="badge bg-warning">{{ payroll.status }}</span>
+                      {% else %}
+                        <span class="badge bg-secondary">{{ payroll.status }}</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <div class="text-center mt-3">
+              <a href="{{ urls.report_monthly }}" class="btn btn-outline-info">
+                View All Records <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+              <i class="fa-solid fa-inbox fa-3x text-muted mb-3"></i>
+              <h6>No Payroll Records</h6>
+              <p class="text-muted">No payroll records found for this month.</p>
+              <a href="{{ urls.generate }}" class="btn btn-primary">
+                <i class="fa-solid fa-play"></i> Generate Payroll
+              </a>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Information Row -->
+    <div class="row">
+      <!-- System Health -->
+      <div class="col-lg-4 mb-4">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title mb-0">
+              <i class="fa-solid fa-heartbeat"></i> System Health
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span>Database Status</span>
+              <span class="badge bg-success">Online</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span>Pending Leaves</span>
+              <span class="badge bg-warning">{{ stats.pending_leaves }}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span>Payment Status</span>
+              {% if stats.processed_payroll == stats.total_employees %}
+                <span class="badge bg-success">Complete</span>
+              {% else %}
+                <span class="badge bg-warning">Partial</span>
+              {% endif %}
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span>Last Updated</span>
+              <span class="text-muted">{{ "now"|date('H:i') }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly Overview -->
+      <div class="col-lg-8 mb-4">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title mb-0">
+              <i class="fa-solid fa-calendar-alt"></i> {{ month_name }} {{ current_year }} Overview
+            </h5>
+          </div>
+          <div class="card-body">

@@ -1,0 +1,763 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+	<div class="page-header">
+		<div class="container-fluid"><div class="float-end">
+		<button class="btn btn-success radius-0" data-original-title="{{ text_original_title }}" data-bs-toggle="modal" id="massPrintbarcode" data-bs-target="#massprint"><i class="fa fa-print"></i> {{ button_massbarcodeprint }}</button>
+		<a href="{{ add }}" data-bs-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
+        <button type="button" form="form-product" formaction="{{ delete }}" data-bs-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-product').submit() : false;"><i class="fa-regular fa-trash-can"></i></button>
+      </div>
+			<h1>{{ heading_title }}</h1>
+			<ul class="breadcrumb">
+				{% for breadcrumb in breadcrumbs %}
+				<li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+	<div class="container-fluid">
+		{% if error_warning %}
+		<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+		</div>
+		{% endif %}
+		{% if success %}
+		<div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}
+			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+		</div>
+		{% endif %}
+		<div class="panel panel-default card">
+			<div class="panel-heading">
+				<h3 class="panel-title card-header"><i class="fa fa-list"></i> {{ text_list }}</h3>
+			</div>
+			<div class="panel-body card-body">
+				<div class="filter-row">
+        
+            <div class="filter-item">
+                {#<label for="input-name">{{ entry_name }}</label>#}
+                <input type="text" name="filter_name" value="{{ filter_name }}"
+                       placeholder="{{ entry_name }}"
+                       id="input-name"
+                       data-oc-target="autocomplete-name"
+                       class="form-control">
+                <ul id="autocomplete-name" class="dropdown-menu"></ul>
+            </div>
+        
+            <div class="filter-item">
+                {#<label for="input-model">{{ entry_model }}</label>#}
+                <input type="text" name="filter_model" value="{{ filter_model }}"
+                       placeholder="{{ entry_model }}"
+                       id="input-model"
+                       data-oc-target="autocomplete-model"
+                       class="form-control">
+                <ul id="autocomplete-model" class="dropdown-menu"></ul>
+            </div>
+        
+            <div class="filter-item">
+                {#<label for="input-price">{{ entry_price }}</label>#}
+                <input type="text" name="filter_price" value="{{ filter_price }}"
+                       placeholder="{{ entry_price }}"
+                       id="input-price"
+                       class="form-control">
+            </div>
+            <div class="filter-item">
+                {#<label for="input-quantity">{{ entry_quantity }}</label>#}
+                <input type="text"
+                   name="filter_box_id"
+                   value="{{ filter_box_id }}"
+                   placeholder="Box ID"
+                   data-oc-target="autocomplete-box-id"
+                   id="input-box-id"
+                   class="form-control">
+                   <ul id="autocomplete-box-id" class="dropdown-menu"></ul>
+            </div>
+            <div class="filter-item">
+                {#<label>Rack Code</label>#}
+                <input type="text" name="filter_rack_code"
+                       value="{{ filter_rack_code }}"
+                       id="input-rack-code"
+                       placeholder="Rack code"
+                       data-oc-target="autocomplete-rack-code"
+                       class="form-control">
+                <ul id="autocomplete-rack-code" class="dropdown-menu"></ul>
+            </div>
+
+                {#<div class="filter-item">
+                    <label for="input-tag">{{ entry_prodcttag }}</label>
+                    <input type="text" name="filter_tag" value="{{ filter_tag }}"
+                           placeholder="{{ entry_prodcttag }}"
+                           id="input-tag"
+                           class="form-control">
+                </div>#}
+                <div class="filter-item">
+                    <input type="text"
+                           name="filter_barcode"
+                           value="{{ filter_barcode }}"
+                           id="input-barcode"
+                           placeholder="Barcode"
+                           class="form-control">
+                           <ul id="autocomplete-barcode" class="dropdown-menu"></ul>
+                </div>
+
+
+                <div class="filter-btn">
+                    <label>&nbsp;</label>
+                    <button type="button" id="button-filter" class="btn btn-primary">
+                        <i class="fa fa-filter"></i> {{ button_filter }}
+                    </button>
+                </div>
+                 <button type="reset"
+                  data-bs-toggle="tooltip"
+                  title="{{ button_reset }}"
+                  class="btn btn-outline-secondary btn-reset">
+            <i class="fa-solid fa-filter-circle-xmark"></i>
+          </button>
+            
+            </div>
+            			
+				</div>
+				<form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-product">
+					<div class="table-responsive">
+						<table class="table table-bordered table-hover">
+							<thead>
+								<tr>
+									<td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+									<td class="text-center">{{ column_image }}</td>
+									<td class="text-center">Type</td>
+									<td class="text-center"><a href="{{ sort_box_id }}" {% if sort == 'p.box_id' %}class="{{ order|lower }}"{% endif %}>Box ID</td>
+									<td class="text-center">Rack</td>
+									<td class="text-start">{% if sort == 'pd.name' %}
+										<a href="{{ sort_name }}" class="{{ order|lower }}">{{ column_name }}</a>
+										{% else %}
+										<a href="{{ sort_name }}">{{ column_name }}</a>
+									{% endif %}</td>
+									<td class="text-start">{% if sort == 'p.model' %}
+										<a href="{{ sort_model }}" class="{{ order|lower }}">{{ column_model }}</a>
+										{% else %}
+										<a href="{{ sort_model }}">{{ column_model }}</a>
+									{% endif %}</td>
+									<td class="text-end">{% if sort == 'p.price' %}
+										<a href="{{ sort_price }}" class="{{ order|lower }}">{{ column_price }}</a>
+										{% else %}
+										<a href="{{ sort_price }}">{{ column_price }}</a>
+									{% endif %}</td>
+									<td class="text-center">{{ column_barcode }}</td>
+									<td class="text-end">{% if sort == 'p.quantity' %}
+										<a href="{{ sort_quantity }}" class="{{ order|lower }}">{{ column_quantity }}</a>
+										{% else %}
+										<a href="{{ sort_quantity }}">{{ column_quantity }}</a>
+									{% endif %}</td>
+									<th class="text-end">Box Quantity</th>
+									<td class="text-end">{% if sort == 'p.status' %}
+										<a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a>
+										{% else %}
+										<a href="{{ sort_status }}">{{ column_status }}</a>
+									{% endif %}</td>
+									<td class="text-end">{{ column_action }}</td>
+								</tr>
+							</thead>
+							<tbody>
+								{% if products %}
+								{% for product in products %}
+								<tr>
+									<!--start barcode-->
+									<td class="text-center">
+                                        <input type="checkbox"
+                                               name="selected[]"
+                                               value="{{ product.product_id }}"
+                                               data-type="{% if product.upc %}box{% else %}unit{% endif %}"
+                                               data-sku="{{ product.sku }}"
+                                               data-upc="{{ product.upc }}" />
+                                    </td>
+
+									<!--start barcode-->
+									<td class="text-center">{% if product.image %}
+										<img src="{{ product.image }}" alt="{{ product.name }}" class="img-thumbnail" />
+										{% else %}
+										<span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span>
+									{% endif %}</td>
+									<td class="text-center">
+                                        {% if product.upc %}
+                                            <span class="badge bg-primary">BOX</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">UNIT</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if product.upc %}
+                                            {{ product.product_id }}
+                                        {% else %}
+                                            {{ product.box_id ?: 'U'~product.product_id }}
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                    {{ product.rack_code ?: '-' }}
+                                    </td>
+									<td class="barcodename text-start">{{ product.name }}</td>
+									<td class="text-start">{{ product.model }}</td>
+									<td class="text-end">{% if product.special %}
+										<span class="barcodeprice ptsc-sellprod-textdecor" style="color:gold;text-decoration: line-through;">{{ product.wholesale_price }}</span><br/>
+										<div class="barcodespecialprice text-danger">{{ product.special }}</div>
+										{% else %}
+										<span class="barcodeprice ptsc-sellprod-textdecor"style="color:gold;">{{ product.wholesale_price }}</span>
+									{% endif %}</td>
+									<!--start barcode-->
+										<td class="text-center">								
+                                      {% if product.upc %}                                      									
+									     {% set result_barcode = product.upc %}
+									  {% elseif product.ean %}
+										  {% set result_barcode = product.ean %}
+									  {% elseif product.mpn %}
+										  {% set result_barcode = product.mpn %}
+									  {% elseif product.jan %}
+										  {% set result_barcode = product.jan %}
+									  {% elseif product.isbn %}
+										  {% set result_barcode = product.isbn %}
+									  {% elseif product.sku %}
+										  {% set result_barcode = product.sku %}
+									 {% endif %}
+									 
+									  <svg class="barcode"
+                                         data-barcode="{{ result_barcode }}"
+                                         data-box="{{ product.box_code }}"
+                                         data-sku="{{ product.sku }}"
+                                         jsbarcode-format="code39"
+                                         jsbarcode-value="{{ result_barcode }}"
+                                         jsbarcode-displayValue="false"
+                                         jsbarcode-width="1px"
+                                         jsbarcode-height="30px"
+                                         jsbarcode-fontSize="15px">
+                                    </svg>
+
+										 
+									</td>
+									{#<td class="barcode-sku" data-sku="{{ product.sku }}" style="display:none;">{{ product.sku }}</td>#}
+									<!--start barcode-->
+									<td class="text-end">
+										{% if product.quantity <= 0 %}
+										<span class="label label-warning" style="color:yellow;">{{ product.quantity }}</span>
+										{% elseif product.quantity <= 5 %}
+										<span class="label label-danger"style="color:yellow;">{{ product.quantity }}</span>
+										{% else %}
+										<span class="label label-success"style="color:yellow;">{{ product.quantity }}</span>
+									{% endif %}</td>
+									<td class="text-end">
+                                        {% if product.upc %}
+                                            {{ product.max_quantity }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+									<td class="text-start">{{ product.status }}</td>
+									<td class="text-end">
+
+                                    {% if product.box_code %}
+                                       
+                                        <button type="button" class="btn btn-secondary" disabled title="Barcode printing disabled for BOX"><i class="fa fa-print"></i></button>
+                                    {% else %}
+                                        {# UNIT â†’ Allow print #}
+                                        <button type="button"
+                                                class="ptsbarcodeselect btn-success btn"
+                                                data-maxqty="{{ product.max_quantity }}"
+                                                data-price="{{ product.price_raw }}"
+                                                data-wholesale="{{ product.wholesale_price }}"
+                                                data-rtag="{{ product.r_tag }}"
+                                                data-wtag="{{ product.w_tag }}"
+                                                data-rackcode="{{ product.rack_code }}"
+                                                data-boxid="{{ product.box_id }}"
+                                                data-productid="{{ product.product_id }}"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#mymodel"
+                                                {% if product.upc %}
+                                                    disabled
+                                                {% endif %}>
+                                            <i class="fa fa-print"></i>
+                                        </button>
+                                    {% endif %}
+									<a href="{{ product.edit }}" data-bs-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil fas fa-edit"></i></a></td>
+								</tr>
+								{% endfor %}
+								{% else %}
+								<tr>
+									<td class="text-center" colspan="10">{{ text_no_results }}</td>
+								</tr>
+								{% endif %}
+							</tbody>
+						</table>
+					</div>
+				</form>
+				<div class="row">
+					<div class="col-sm-6 text-start">{{ pagination }}</div>
+					<div class="col-sm-6 text-end">{{ results }}</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Start barcode-->
+	<div class="modal" id="mymodel">
+     <div class="modal-dialog">
+		 <div class="modal-content masspopup">
+			 <div class="modal-header">
+			
+				 <h6 class="modal-title" style ="color:black">{{ text_popupheading }}</h6>
+				  <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+			 </div>
+			 <div class="modal-body">
+				 <form method="post" target="_blank" action="{{ action_printbarcode }}">
+					  <div class="form-group">
+						  <label class="masspopuplabel" style ="color:black">{{ text_qty }}</label>
+						  <input type="hidden" class"form-control" id="printbarcode" name="printbarcode">
+						  <input type="hidden" class"form-control" id="printbarcodename" name="printbarcodename">
+						  <input type="hidden" class"form-control" id="printbarcodeprice" name="printbarcodeprice">
+						  <input type="hidden" id="printsku" name="printsku">
+						  <input type="hidden" id="printmaxqty" name="printmaxqty">
+						  <input type="hidden" id="print_r_tag" name="print_r_tag">
+                            <input type="hidden" id="print_w_tag" name="print_w_tag">
+                            <input type="hidden" id="print_price" name="print_price">
+                            <input type="hidden" id="print_product_id" name="print_product_id">
+                            <input type="hidden" id="print_rack_code" name="print_rack_code">
+                            <input type="hidden" id="print_box_id" name="print_box_id">
+                            <input type="hidden" id="print_wholesale" name="print_wholesale">
+						  <!-- <input type="hidden" class"form-control" id="printbarcodespecialprice" name="printbarcodespecialprice"> -->
+						  <input type="number" class"form-control massinputpopup" style ="color:black" name="qty" required>
+						  
+					  </div>
+					  <div class="modal-footer">
+							<button type="button"class="btn btn-secondary"data-bs-dismiss="modal">{{ text_close }}</button>
+							<input type="submit" class="btn btn-success" value="Print">
+						</div>
+				 </form>				 
+			 </div>
+		 </div>
+	 </div>
+ </div>
+ <style>
+ .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.filter-item {
+    min-width: 160px;
+    flex: 1;
+}
+
+.filter-item label {
+    font-size: 12px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.filter-btn {
+    min-width: 120px;
+}
+</style>
+ <link rel="stylesheet" href="{{baseurl}}extension/purpletree_pos/admin/view/stylesheet/posproduct/customproduct.css">    
+<script type="text/javascript" src="{{baseurl}}extension/purpletree_pos/admin/view/javascript/ptsbarcode/JsBarcode.all.min.js"></script> 
+{#<script type="text/javascript" src="{{baseurl}}extension/purpletree_pos/admin/view/javascript/ptsbarcode/jquery.min.js"></script> #}
+	
+	<script type="text/javascript">	    
+		JsBarcode(".barcode").init();	
+	</script>
+	
+	
+	<script>
+			$(document).ready(function () {
+
+    $(document).on('click', '.ptsbarcodeselect', function () {
+
+    var btn = $(this);                 // ALWAYS the button
+    var row = btn.closest("tr");
+
+    var barcodeprint     = row.find(".barcode").data("barcode");
+    var sku              = row.find(".barcode").data("sku");
+    var barcodeprintname = row.find(".barcodename").text().trim();
+
+    var price        = btn.data("price");
+    var wholesale    = btn.data("wholesale");
+    var r_tag        = btn.data("rtag");
+    var w_tag        = btn.data("wtag");
+    var product_id   = btn.data("productid");   // ðŸ”¥ FIX
+    var rack_code    = btn.data("rackcode");
+    var maxqty       = btn.data("maxqty");
+    var box_id = btn.data('boxid'); // or from input where you enter box id
+
+    console.log('PRODUCT ID:', product_id);
+
+    $("#printbarcode").val(barcodeprint);
+    $("#printbarcodename").val(barcodeprintname);
+    $("#printsku").val(sku);
+    $("#printmaxqty").val(maxqty);
+
+    $("#print_price").val(price);
+    $("#print_wholesale").val(wholesale);
+    $("#print_r_tag").val(r_tag);
+    $("#print_w_tag").val(w_tag);
+    $("#print_product_id").val(product_id);   // ðŸ”¥ CRITICAL
+    $("#print_rack_code").val(rack_code);
+    $("#print_box_id").val(box_id);
+});
+
+
+});
+
+
+	</script>
+	<!--<script>
+			$(function () {
+				$(".ptsselect").click(function () {
+					var barcodeprints =
+					$(this).parents("tr").find(".barcode").text();
+					JsBarcode(".barcode", barcodeprints, {
+						format: 'code39',
+						displayValue: 'true',
+						lineColor: "#24292e",
+						width:1,
+						height:30,	
+						fontSize: 15					
+					});	
+				});
+			});
+	
+	</script>-->
+	<!-- end barcode-->
+	
+	<!-- Start mass barcode print-->
+	<div class="modal" id="massprint">
+     <div class="modal-dialog">
+		 <div class="modal-content masspopup">
+			 <div class="modal-header">
+				 <h4 class="modal-title">{{ text_masspopupheading }}</h4>
+				 <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+			 </div>
+			 <div class="modal-body">
+				 <form method="post" target="_blank" action="{{ action_massprintbarcode }}">
+					  <div class="form-group">
+						  <label class="masspopuplabel">{{ text_qty }}</label>
+						  <input type="hidden" class="form-control" id="massprintbarcode" name="massprintbarcode">						 
+						  <input type="number" class="form-control massinputpopup" name="qty" required>
+						  <input type="submit" class="btn btn-success" value="{{ text_printsall }}">
+					  </div>
+					  <div class="modal-footer">
+							<button type="button"
+									class="btn btn-secondary"
+									data-bs-dismiss="modal">
+							{{ text_close }}</button>
+						</div>
+				 </form>				 
+			 </div>
+		 </div>
+	 </div>
+ </div>
+
+
+<script>
+$(document).ready(function () {
+
+    $('#massprint form').on('submit', function (e) {
+
+        let selected = [];
+
+        $('input[name="selected[]"]:checked').each(function () {
+            selected.push({
+                product_id: $(this).val(),
+               upc: $(this).data('upc') || '',
+                sku: $(this).data('sku') || '',
+                type: $(this).data('type') || 'unit'
+            });
+        });
+
+        if (selected.length === 0) {
+            alert('Please select at least one product');
+            e.preventDefault();
+            return false;
+        }
+
+        // âœ… IMPORTANT: stringify ONCE, no HTML escaping
+        const json = JSON.stringify(selected);
+
+        $('#massprintbarcode').val(json);
+
+        console.log('FINAL JSON SENT:', json);
+    });
+
+});
+</script>
+
+
+<script>
+$(document).ready(function () {
+
+    // When print popup opens
+    $('#mymodel').on('show.bs.modal', function () {
+
+        // Reset quantity field
+        $(this).find('input[name="qty"]').val('');
+
+    });
+
+});
+</script>
+
+
+	
+	<!-- end mass barcode print-->
+	<script type="text/javascript"><!--
+		$('#button-approve, #button-unassign').on('click', function(e) {
+			
+			if(confirm('{{ text_confirm }}')) {
+				$('#form-product').attr('action', this.getAttribute('formAction'));   
+			}
+			else { 
+				return false;
+			}
+		});
+		
+	$('#button-filter').on('click', function() {
+    var url = 'index.php?route=extension/purpletree_pos/pos/posproduct&user_token={{ user_token }}';	
+    
+    var filter_name = $('input[name=\'filter_name\']').val();
+    console.log('filter_name:', filter_name);
+    if (filter_name) {
+        url += '&filter_name=' + encodeURIComponent(filter_name);
+    }
+    
+    var filter_model = $('input[name=\'filter_model\']').val();
+    console.log('filter_model:', filter_model);
+    if (filter_model) {
+        url += '&filter_model=' + encodeURIComponent(filter_model);
+    }
+    var filter_box_id = $('input[name="filter_box_id"]').val();
+if (filter_box_id) {
+    url += '&filter_box_id=' + encodeURIComponent(filter_box_id);
+}
+    
+    var filter_rack_code = $('input[name=\'filter_rack_code\']').val();
+    console.log('filter_rack_code:', filter_rack_code);
+    if (filter_rack_code) {
+        url += '&filter_rack_code=' + encodeURIComponent(filter_rack_code);
+    }
+    var filter_barcode = $('input[name="filter_barcode"]').val();
+    console.log('filter_barcode:', filter_barcode);
+    
+    if (filter_barcode) {
+        url += '&filter_barcode=' + encodeURIComponent(filter_barcode);
+    }
+
+    var filter_price = $('input[name=\'filter_price\']').val();
+    console.log('filter_price:', filter_price);
+    if (filter_price) {
+        url += '&filter_price=' + encodeURIComponent(filter_price);
+    }
+    
+    var filter_quantity = $('input[name=\'filter_quantity\']').val();
+    console.log('filter_quantity:', filter_quantity);
+    if (filter_quantity) {
+        url += '&filter_quantity=' + encodeURIComponent(filter_quantity);
+    }
+    
+    var filter_status = $('select[name=\'filter_status\']').val();
+    console.log('filter_status:', filter_status);
+    if (filter_status && filter_status != '*') {
+        url += '&filter_status=' + encodeURIComponent(filter_status);
+    }
+
+    
+    var filter_tag = $('input[name=\'filter_tag\']').val();
+    console.log('filter_tag:', filter_tag);
+    if (filter_tag) {
+        url += '&filter_tag=' + encodeURIComponent(filter_tag);
+    }
+    
+    console.log('Final URL:', url);
+    location = url;
+});
+	//--></script>
+	<script type="text/javascript">
+$(function () {
+
+    function fieldWrapperFor(el) {
+        return $(el).closest('.form-group');
+    }
+
+    // PRODUCT NAME
+    $('#input-name').autocomplete({
+        appendTo: fieldWrapperFor('#input-name'),
+        source: function (request, response) {
+            $.ajax({
+                url: 'index.php?route=catalog/product.autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+                dataType: 'json',
+                success: function (json) {
+                    response($.map(json, function (item) {
+                        return {
+                            label: item.name,
+                            value: item.product_id
+                        };
+                    }));
+                }
+            });
+        },
+        select: function (item) {
+            $('#input-name').val(item.label);
+        }
+    });
+
+    // MODEL
+    $('#input-model').autocomplete({
+        appendTo: fieldWrapperFor('#input-model'),
+        source: function (request, response) {
+            $.ajax({
+                url: 'index.php?route=catalog/product.autocomplete&user_token={{ user_token }}&filter_model=' + encodeURIComponent(request),
+                dataType: 'json',
+                success: function (json) {
+                    response($.map(json, function (item) {
+                        return {
+                            label: item.model,
+                            value: item.product_id
+                        };
+                    }));
+                }
+            });
+        },
+        select: function (item) {
+            $('#input-model').val(item.label);
+        }
+    });
+   $('#input-rack-code').autocomplete({
+    minLength: 1,
+
+    source: function (request, response) {
+        $.ajax({
+            url: 'index.php?route=extension/purpletree_pos/pos/posproduct|autocomplete'
+                + '&user_token={{ user_token }}'
+                + '&filter_rack_code=' + encodeURIComponent(request),
+            dataType: 'json',
+            success: function (json) {
+
+                const seen = {};
+                const unique = [];
+
+                $.each(json, function (i, item) {
+                    if (item.rack_code && !seen[item.rack_code]) {
+                        seen[item.rack_code] = true;
+                        unique.push({
+                            label: item.rack_code,
+                            value: item.rack_code
+                        });
+                    }
+                });
+
+                response(unique);
+            }
+        });
+    },
+
+    select: function (item) {
+        $('#input-rack-code').val(item.label);
+    }
+});
+
+
+$('#input-box-id').autocomplete({
+    minLength: 1,
+
+    source: function (request, response) {
+        $.ajax({
+            url: 'index.php?route=extension/purpletree_pos/pos/posproduct|autocomplete'
+                + '&user_token={{ user_token }}'
+                + '&filter_box_id=' + encodeURIComponent(request),
+            dataType: 'json',
+            success: function (json) {
+
+                const seen = {};
+                const unique = [];
+
+                $.each(json, function (i, item) {
+                    if (item.box_id && !seen[item.box_id]) {
+                        seen[item.box_id] = true;
+                        unique.push({
+                            label: item.box_id,
+                            value: item.box_id
+                        });
+                    }
+                });
+
+                response(unique);
+            }
+        });
+    },
+
+    // 🔥 THIS IS THE KEY FIX
+    select: function (item) {
+        $('#input-box-id').val(item.label);
+    }
+});
+
+
+$('#input-barcode').autocomplete({
+    appendTo: fieldWrapperFor('#input-barcode'),
+    source: function (request, response) {
+        $.ajax({
+            url: 'index.php?route=extension/purpletree_pos/pos/posproduct|autocomplete'
+                + '&user_token={{ user_token }}'
+                + '&filter_barcode=' + encodeURIComponent(request),
+            dataType: 'json',
+            success: function (json) {
+
+                let suggestions = [];
+
+                $.each(json, function (i, item) {
+
+                    if (item.sku) {
+                        suggestions.push({
+                            label: item.sku + ' (SKU)',
+                            value: item.sku
+                        });
+                    }
+
+                    if (item.upc) {
+                        suggestions.push({
+                            label: item.upc + ' (UPC)',
+                            value: item.upc
+                        });
+                    }
+
+                });
+
+                response(suggestions);
+            }
+        });
+    },
+
+    select: function (event, ui) {
+        $('#input-barcode').val(ui.item.value);
+        return false;
+    }
+});
+
+
+});
+</script>
+<script type="text/javascript">
+$(document).on('click', '.btn-reset', function (e) {
+    e.preventDefault();
+
+    // 1️⃣ Clear filter inputs
+    $('#input-name').val('');
+    $('#input-model').val('');
+    $('#input-price').val('');
+    $('#input-box-id').val('');
+    $('#input-rack-code').val('');
+    $('#input-barcode').val('');
+
+    // 2️⃣ Reload ONLY Purpletree POS product page
+    window.location.href =
+        'index.php?route=extension/purpletree_pos/pos/posproduct&user_token={{ user_token }}';
+});
+</script>
+
+</div>
+	{{ footer }}	

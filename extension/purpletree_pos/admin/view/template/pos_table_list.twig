@@ -1,0 +1,74 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+   <div class="container-fluid">
+    <div class="float-end">
+     <a href="{{ add }}" data-bs-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa-solid fa-plus"></i></a>
+     <button type="submit" form="form-pos-table" formaction="{{ delete }}" data-bs-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="return confirm('Are you sure?');"><i class="fa-regular fa-trash-can"></i></button>
+    </div>
+    <h1>{{ heading_title }}</h1>
+    <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+    </ol>
+    {% if success %}
+        <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> {{ success }}</div>
+    {% endif %}
+  </div>
+ </div>
+    <div class="container-fluid">
+     <div class="card">
+      <div class="card-header"><i class="fa-solid fa-chair"></i> {{ text_list }}</div>
+       <div class="card-body">
+        <form id="form-pos-table" method="post">
+         <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th class="text-center" style="width: 1px;"><input type="checkbox" onclick="$('input[name*=\\'selected\\']').prop('checked', $(this).prop('checked'));" class="form-check-input"/></th>
+                <th><a href="{{ sort_table_name }}"{% if sort == 'table_name' %} class="{{ order|lower }}"{% endif %}>{{ column_table_name }}</a></th>
+                <th class="text-end"><a href="{{ sort_members }}"{% if sort == 'members' %} class="{{ order|lower }}"{% endif %}>{{ column_members }}</a></th>
+                <th class="text-center">{{ column_status }}</th>
+                <th class="d-none d-lg-table-cell">{{ column_date_added }}</th>
+                <th class="text-end">{{ column_action }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if pos_tables %}
+            {% for row in pos_tables %}
+                <tr{% if not row.status %} class="table-active opacity-50"{% endif %}>
+                <td class="text-center"><input type="checkbox" name="selected[]" value="{{ row.pos_table_id }}" class="form-check-input"/></td>
+                <td>{{ row.table_name }}</td>
+                <td class="text-end">{{ row.members }}</td>
+                <td class="text-center">
+                    {% if row.status %}
+                        <span class="badge bg-success">Active</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Inactive</span>
+                    {% endif %}
+                </td>
+                <td class="d-none d-lg-table-cell">{{ row.date_added }}</td>
+                <td class="text-end">
+                    <a href="{{ row.edit }}" data-bs-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa-solid fa-pencil"></i></a>
+                </td>
+                </tr>
+            {% endfor %}
+            {% else %}
+                <tr>
+                    <td class="text-center" colspan="6">{{ text_no_results }}</td>
+                </tr>
+            {% endif %}
+            </tbody>
+         </table>
+        </div>
+        <div class="row">
+         <div class="col-sm-6 text-start">{{ pagination }}</div>
+           <div class="col-sm-6 text-end">{{ results }}</div>
+        </div>
+     </form>
+   </div>
+  </div>
+ </div>
+</div>
+{{ footer }}

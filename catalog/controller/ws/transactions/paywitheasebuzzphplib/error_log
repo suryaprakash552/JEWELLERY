@@ -1,0 +1,4 @@
+[06-Sep-2022 14:11:32 UTC] PHP Fatal error:  Uncaught Error: Class 'Controller' not found in /home/nowpay/public_html/api/catalog/controller/transactions/paywitheasebuzzphplib/response.php:2
+Stack trace:
+#0 {main}
+  thrown in /home/nowpay/public_html/api/catalog/controller/transactions/paywitheasebuzzphplib/response.php on line 2

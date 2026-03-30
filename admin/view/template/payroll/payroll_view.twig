@@ -1,0 +1,811 @@
+<!-- admin/view/template/payroll/payroll.twig -->
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        <div class="btn-group">
+          <a href="{{ report_url }}" class="btn btn-info" data-bs-toggle="tooltip" title="View Reports">
+            <i class="fa-solid fa-chart-line"></i> Reports
+          </a>
+          <button type="button" class="btn btn-warning" id="process-payments" data-bs-toggle="tooltip" title="Process Payments">
+            <i class="fa-solid fa-money-check-alt"></i> Process Payments
+          </button>
+        </div>
+      </div>
+      <h1>Payroll Management</h1>
+      <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if success %}
+    <div class="alert alert-success alert-dismissible">
+      <i class="fa-solid fa-circle-check"></i> {{ success }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible">
+      <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+    {% if warning %}
+    <div class="alert alert-warning alert-dismissible">
+      <i class="fa-solid fa-triangle-exclamation"></i> {{ warning }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+      <div class="col-lg-3 col-md-6">
+        <div class="card text-white bg-primary">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <div>
+                <h4>{{ stats.total_employees }}</h4>
+                <p class="mb-0">Total Employees</p>
+              </div>
+              <div class="align-self-center">
+                <i class="fa-solid fa-users fa-2x"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="card text-white bg-success">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <div>
+                <h4>{{ stats.processed_payroll }}</h4>
+                <p class="mb-0">Processed Payroll</p>
+              </div>
+              <div class="align-self-center">
+                <i class="fa-solid fa-check-circle fa-2x"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="card text-white bg-warning">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <div>
+                <h4>{{ stats.pending_payroll }}</h4>
+                <p class="mb-0">Pending Payroll</p>
+              </div>
+              <div class="align-self-center">
+                <i class="fa-solid fa-clock fa-2x"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="card text-white bg-danger">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <div>
+                <h4>${{ "%.2f"|format(stats.total_payout) }}</h4>
+                <p class="mb-0">Total Payout</p>
+              </div>
+              <div class="align-self-center">
+                <i class="fa-solid fa-dollar-sign fa-2x"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generate Payroll Form -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="fa-solid fa-calculator"></i> Generate Monthly Payroll
+        </h3>
+      </div>
+      <div class="card-body">
+        <form id="payroll-form" action="{{ generate_url }}" method="post">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="year" class="form-label">Year</label>
+                <select class="form-select" id="year" name="year" required>
+                  <option value="">Select Year</option>
+                  {% for year in years %}
+                  <option value="{{ year }}" {{ year == current_year ? 'selected' : '' }}>{{ year }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="month" class="form-label">Month</label>
+                <select class="form-select" id="month" name="month" required>
+                  <option value="">Select Month</option>
+                  {% for key, month_name in months %}
+                  <option value="{{ key }}" {{ key == current_month ? 'selected' : '' }}>{{ month_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <div class="form-group w-100">
+                <button type="submit" class="btn btn-primary w-100">
+                  <i class="fa-solid fa-play"></i> Generate Payroll
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Employee List -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="fa-solid fa-users"></i> Employee List
+        </h3>
+        <div class="card-tools">
+          <div class="input-group input-group-sm" style="width: 250px;">
+            <input type="text" id="employee-search" class="form-control" placeholder="Search employees...">
+            <div class="input-group-append">
+              <span class="input-group-text">
+                <i class="fa-solid fa-search"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        {% if employees %}
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover" id="employee-table">
+            <thead class="table-light">
+              <tr>
+                <th style="color:black"><b>Employee ID</b></th>
+                <th style="color:black"><b>Name</b></th>
+                <th style="color:black"><b>Email</b></th>
+                <th style="color:black"><b>Username</b></th>
+                <th style="color:black"><b>Status</b></th>
+                <th class="text-center" style="color:black"><b>Actions</b></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for employee in employees %}
+              <tr data-employee-name="{{ employee.name|lower }}">
+                <td>{{ employee.user_id }}</td>
+                <td>
+                  <strong>{{ employee.name }}</strong>
+                  <br><small class="text-muted">ID: {{ employee.user_id }}</small>
+                </td>
+                <td>{{ employee.email }}</td>
+                <td>{{ employee.username }}</td>
+                <td>
+                  {% if employee.status == '1' %}
+                  <span class="badge bg-success">Active</span>
+                  {% else %}
+                  <span class="badge bg-danger">Inactive</span>
+                  {% endif %}
+                </td>
+                <td class="text-center">
+                  <div class="btn-group btn-group-sm" role="group">
+                    <!-- View Button (Opens Popup) -->
+                    <button type="button" class="btn btn-outline-info view-payroll" 
+                            data-employee-id="{{ employee.user_id }}" 
+                            data-employee-name="{{ employee.name }}"
+                            data-bs-toggle="tooltip" title="View Payroll Details">
+                      <i class="fa-solid fa-eye"></i>
+                    </button>
+                    
+                    <!-- Pay Button -->
+                    <button type="button" class="btn btn-outline-success pay-employee" 
+                            data-employee-id="{{ employee.user_id }}" 
+                            data-employee-name="{{ employee.name }}"
+                            data-bs-toggle="tooltip" title="Process Payment">
+                      <i class="fa-solid fa-dollar-sign"></i>
+                    </button>
+                    
+                    <!-- Payslip Button -->
+                    <a href="{{ payslip_url }}?employee_id={{ employee.user_id }}&year={{ current_year }}&month={{ current_month }}" 
+                       class="btn btn-outline-primary" target="_blank" data-bs-toggle="tooltip" title="Print Payslip">
+                      <i class="fa-solid fa-print"></i>
+                    </a>
+                    
+                    <!-- Delete Button -->
+                    <button type="button" class="btn btn-outline-danger delete-payroll" 
+                            data-employee-id="{{ employee.user_id }}" 
+                            data-employee-name="{{ employee.name }}"
+                            data-bs-toggle="tooltip" title="Delete Payroll Record">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Pagination (if needed) -->
+        <div class="row mt-3">
+          <div class="col-sm-6">
+            <div class="text-muted">
+              Showing {{ employees|length }} employees
+            </div>
+          </div>
+        </div>
+        
+        {% else %}
+        <div class="text-center py-5">
+          <i class="fa-solid fa-users fa-3x text-muted mb-3"></i>
+          <h4>No Employees Found</h4>
+          <p class="text-muted">No active employees found in the system.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- View Payroll Modal -->
+<div class="modal fade" id="viewPayrollModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewPayrollModalTitle">View Payroll Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="viewPayrollModalBody">
+        <!-- Payroll details will be loaded here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Method Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="paymentModalTitle">Process Payment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="payment-form">
+          <input type="hidden" id="payment-employee-id" name="employee_id">
+          <input type="hidden" id="payment-year" name="year">
+          <input type="hidden" id="payment-month" name="month">
+          
+          <div class="mb-3">
+            <label class="form-label">Employee:</label>
+            <p id="payment-employee-name" class="form-control-plaintext fw-bold"></p>
+          </div>
+          
+          <div class="mb-3">
+            <label for="payment-method" class="form-label">Payment Method <span class="text-danger">*</span></label>
+            <select class="form-select" id="payment-method" name="payment_method" required>
+              <option value="">Select Payment Method</option>
+              <option value="cash">
+                <i class="fa-solid fa-money-bills"></i> Cash Payment
+              </option>
+              <option value="transfer">
+                <i class="fa-solid fa-money-check"></i> Bank Transfer
+              </option>
+              <option value="check">
+                <i class="fa-solid fa-file-invoice"></i> Check Payment
+              </option>
+              <option value="autopay">
+                <i class="fa-solid fa-robot"></i> Auto Pay
+              </option>
+            </select>
+          </div>
+          
+          <div class="mb-3" id="reference-field" style="display: none;">
+            <label for="payment-reference" class="form-label">Reference Number</label>
+            <input type="text" class="form-control" id="payment-reference" name="payment_reference" 
+                   placeholder="Enter reference number (optional)">
+            <small class="form-text text-muted">For bank transfers, checks, etc.</small>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" id="process-payment-btn">
+          <i class="fa-solid fa-credit-card"></i> Process Payment
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2" id="loading-text">Processing...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmModalTitle">Confirm Action</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="confirmModalBody">
+        <!-- Modal content will be set dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmAction">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    // Global variables
+    var currentAction = null;
+    var currentData = {};
+    
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Employee search functionality
+    $('#employee-search').on('keyup', function() {
+        var searchTerm = $(this).val().toLowerCase();
+        $('#employee-table tbody tr').each(function() {
+            var employeeName = $(this).data('employee-name');
+            if (employeeName.indexOf(searchTerm) > -1) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
+
+    // Handle payroll form submission
+    $('#payroll-form').on('submit', function(e) {
+        e.preventDefault();
+        
+        var year = $('#year').val();
+        var month = $('#month').val();
+        
+        if (!year || !month) {
+            showAlert('warning', 'Please select both year and month');
+            return;
+        }
+        
+        // Show loading modal
+        showLoading('Generating payroll for all employees...');
+        
+        $.ajax({
+            url: $(this).attr('action'),
+            type: 'POST',
+            data: {
+                year: year,
+                month: month
+            },
+            dataType: 'json',
+            success: function(response) {
+                hideLoading();
+                
+                if (response.success) {
+                    showAlert('success', response.success);
+                    
+                    // Reload page after 3 seconds to show updated data
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 3000);
+                } else if (response.error) {
+                    showAlert('danger', response.error);
+                }
+            },
+            error: function(xhr, status, error) {
+                hideLoading();
+                console.error('AJAX Error:', xhr.responseText);
+                showAlert('danger', 'An error occurred while processing the request: ' + error);
+            }
+        });
+    });
+
+    // Handle view payroll button
+    $('.view-payroll').on('click', function() {
+        var employeeId = $(this).data('employee-id');
+        var employeeName = $(this).data('employee-name');
+        var year = $('#year').val() || {{ current_year }};
+        var month = $('#month').val() || {{ current_month }};
+        
+        showLoading('Loading payroll details...');
+        
+        $.ajax({
+            url: '{{ view_url }}',
+            type: 'GET',
+            data: {
+                employee_id: employeeId,
+                year: year,
+                month: month,
+                popup: true
+            },
+            dataType: 'json',
+            success: function(response) {
+                hideLoading();
+                
+                if (response.success && response.payroll) {
+                    var html = buildPayrollDetailsHTML(response.payroll, response.employee, response.month_name, response.year, response.month, response.attendance_percentage);
+                    $('#viewPayrollModalBody').html(html);
+                    $('#viewPayrollModalTitle').text('Payroll Details - ' + employeeName);
+                    $('#viewPayrollModal').modal('show');
+                } else {
+                    showAlert('warning', response.error || 'Unable to load payroll details for this employee');
+                }
+            },
+            error: function() {
+                hideLoading();
+                showAlert('danger', 'Error loading payroll details');
+            }
+        });
+    });
+
+    // Handle pay employee button
+    $('.pay-employee').on('click', function() {
+        var employeeId = $(this).data('employee-id');
+        var employeeName = $(this).data('employee-name');
+        var year = $('#year').val() || {{ current_year }};
+        var month = $('#month').val() || {{ current_month }};
+        
+        // Set modal data
+        $('#payment-employee-id').val(employeeId);
+        $('#payment-employee-name').text(employeeName);
+        $('#payment-year').val(year);
+        $('#payment-month').val(month);
+        $('#paymentModalTitle').text('Process Payment - ' + employeeName);
+        
+        // Reset form
+        $('#payment-form')[0].reset();
+        $('#payment-employee-id').val(employeeId);
+        $('#payment-year').val(year);
+        $('#payment-month').val(month);
+        $('#reference-field').hide();
+        
+        $('#paymentModal').modal('show');
+    });
+
+    // Handle payment method change
+    $('#payment-method').on('change', function() {
+        var method = $(this).val();
+        if (method === 'transfer' || method === 'check') {
+            $('#reference-field').show();
+            $('#payment-reference').attr('required', true);
+        } else {
+            $('#reference-field').hide();
+            $('#payment-reference').attr('required', false);
+        }
+    });
+
+    // Handle payment processing
+    $('#process-payment-btn').on('click', function() {
+        var paymentMethod = $('#payment-method').val();
+        var paymentReference = $('#payment-reference').val();
+        var employeeId = $('#payment-employee-id').val();
+        var year = $('#payment-year').val();
+        var month = $('#payment-month').val();
+        
+        if (!paymentMethod) {
+            showAlert('warning', 'Please select a payment method');
+            return;
+        }
+        
+        if ((paymentMethod === 'transfer' || paymentMethod === 'check') && !paymentReference) {
+            showAlert('warning', 'Please enter a reference number for this payment method');
+            return;
+        }
+        
+        $('#paymentModal').modal('hide');
+        showLoading('Processing payment...');
+        
+        $.ajax({
+            url: '{{ pay_url }}',
+            type: 'POST',
+            data: {
+                employee_id: employeeId,
+                year: year,
+                month: month,
+                payment_method: paymentMethod,
+                payment_reference: paymentReference
+            },
+            dataType: 'json',
+            success: function(response) {
+                hideLoading();
+                
+                if (response.success) {
+                    showAlert('success', response.success + (response.transaction_id ? ' (Transaction ID: ' + response.transaction_id + ')' : ''));
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 3000);
+                } else {
+                    showAlert('danger', response.error);
+                }
+            },
+            error: function() {
+                hideLoading();
+                showAlert('danger', 'Error processing payment');
+            }
+        });
+    });
+
+    // Handle delete payroll
+    $('.delete-payroll').on('click', function() {
+        var employeeId = $(this).data('employee-id');
+        var employeeName = $(this).data('employee-name');
+        var year = $('#year').val() || {{ current_year }};
+        var month = $('#month').val() || {{ current_month }};
+        
+        currentAction = 'delete';
+        currentData = {
+            employee_id: employeeId,
+            employee_name: employeeName,
+            year: year,
+            month: month
+        };
+        
+        $('#confirmModalTitle').text('Delete Payroll Record');
+        $('#confirmModalBody').html(
+            '<p>Are you sure you want to delete the payroll record for <strong>' + employeeName + '</strong> ' +
+            'for the period <strong>' + getMonthName(month) + ' ' + year + '</strong>?</p>' +
+            '<div class="alert alert-warning">' +
+            '<i class="fa-solid fa-triangle-exclamation"></i> This action cannot be undone!' +
+            '</div>'
+        );
+        $('#confirmAction').removeClass().addClass('btn btn-danger').text('Delete');
+        $('#confirmModal').modal('show');
+    });
+
+    // Handle process payments
+    $('#process-payments').on('click', function() {
+        var year = $('#year').val() || {{ current_year }};
+        var month = $('#month').val() || {{ current_month }};
+        
+        currentAction = 'process';
+        currentData = {
+            year: year,
+            month: month
+        };
+        
+        $('#confirmModalTitle').text('Process Payments');
+        $('#confirmModalBody').html(
+            '<p>Are you sure you want to process all pending payments for <strong>' + 
+            getMonthName(month) + ' ' + year + '</strong>?</p>' +
+            '<div class="alert alert-info">' +
+            '<i class="fa-solid fa-info-circle"></i> This will mark all pending payroll records as "Released".' +
+            '</div>'
+        );
+        $('#confirmAction').removeClass().addClass('btn btn-success').text('Process Payments');
+        $('#confirmModal').modal('show');
+    });
+
+    // Handle confirm action
+    $('#confirmAction').on('click', function() {
+        $('#confirmModal').modal('hide');
+        
+        if (currentAction === 'delete') {
+            deletePayrollRecord();
+        } else if (currentAction === 'process') {
+            processPayments();
+        }
+    });
+
+    // Delete payroll record function
+    function deletePayrollRecord() {
+        showLoading('Deleting payroll record...');
+        
+        $.ajax({
+            url: '{{ delete_url }}',
+            type: 'POST',
+            data: currentData,
+            dataType: 'json',
+            success: function(response) {
+                hideLoading();
+                
+                if (response.success) {
+                    showAlert('success', response.success);
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    showAlert('danger', response.error);
+                }
+            },
+            error: function() {
+                hideLoading();
+                showAlert('danger', 'Error deleting payroll record');
+            }
+        });
+    }
+
+    // Process payments function
+    function processPayments() {
+        showLoading('Processing payments...');
+        
+        $.ajax({
+            url: '{{ process_url }}',
+            type: 'POST',
+            data: currentData,
+            dataType: 'json',
+            success: function(response) {
+                hideLoading();
+                
+                if (response.success) {
+                    showAlert('success', response.success);
+                    if (response.warning) {
+                        showAlert('warning', response.warning);
+                    }
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 3000);
+                } else {
+                    showAlert('danger', response.error);
+                }
+            },
+            error: function() {
+                hideLoading();
+                showAlert('danger', 'Error processing payments');
+            }
+        });
+    }
+
+    // Build payroll details HTML
+    function buildPayrollDetailsHTML(payroll, employee, monthName, year, month, attendancePercentage) {
+        var statusBadge = payroll.status === 'Pending' ? 
+            '<span class="badge bg-warning">Pending</span>' : 
+            payroll.status === 'Paid' ? 
+            '<span class="badge bg-success">Paid</span>' :
+            '<span class="badge bg-info">Calculated</span>';
+        
+        var paymentInfo = '';
+        if (payroll.payment_method) {
+            paymentInfo = `
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <h6 class="text-info">Payment Information</h6>
+                    <table class="table table-sm table-bordered">
+                        <tr><td><strong>Payment Method:</strong></td><td class="text-end">${capitalizeFirst(payroll.payment_method)}</td></tr>
+                        ${payroll.payment_reference ? '<tr><td><strong>Reference:</strong></td><td class="text-end">' + payroll.payment_reference + '</td></tr>' : ''}
+                        ${payroll.transaction_id ? '<tr><td><strong>Transaction ID:</strong></td><td class="text-end">' + payroll.transaction_id + '</td></tr>' : ''}
+                        ${payroll.payment_date ? '<tr><td><strong>Payment Date:</strong></td><td class="text-end">' + formatDate(payroll.payment_date) + '</td></tr>' : ''}
+                    </table>
+                </div>
+            </div>
+            `;
+        }
+        
+        return `
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5>${payroll.name || employee.name} - ${monthName} ${year}</h5>
+                    ${statusBadge}
+                </div>
+            </div>
+        </div>
+        ${paymentInfo}
+        <div class="row">
+            <div class="col-md-6">
+                <h6 class="text-primary">Attendance Details</h6>
+                <table class="table table-sm table-bordered">
+                    <tr><td><strong>Working Days:</strong></td><td class="text-end">${payroll.working_days || payroll.total_days}</td></tr>
+                    <tr><td><strong>Current Month Days:</strong></td><td class="text-end">${payroll.current_month_days || payroll.working_days}</td></tr>
+                    <tr><td><strong>Present Days:</strong></td><td class="text-end">${parseFloat(payroll.present_days || payroll.total_attendees).toFixed(2)}</td></tr>
+                    <tr><td><strong>Paid Leaves:</strong></td><td class="text-end">${payroll.paid_leaves}</td></tr>
+                    <tr><td><strong>Festival Days:</strong></td><td class="text-end">${payroll.festival_holidays || payroll.total_festivals}</td></tr>
+                    <tr class="table-info"><td><strong>Attendance %:</strong></td><td class="text-end"><strong>${attendancePercentage}%</strong></td></tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h6 class="text-success">Salary Breakdown</h6>
+                <table class="table table-sm table-bordered">
+                    <tr><td><strong>Basic Salary:</strong></td><td class="text-end">${formatCurrency(payroll.ctc)}</td></tr>
+                    <tr><td><strong>HRA:</strong></td><td class="text-end">${formatCurrency(payroll.hra)}</td></tr>
+                    <tr><td><strong>Variable Pay:</strong></td><td class="text-end">${formatCurrency(payroll.variable_pay)}</td></tr>
+                    <tr><td><strong>Fixed Allowance:</strong></td><td class="text-end">${formatCurrency(payroll.fixed_allowance)}</td></tr>
+                    ${payroll.festival_bonus ? '<tr><td><strong>Festival Bonus:</strong></td><td class="text-end">' + formatCurrency(payroll.festival_bonus) + '</td></tr>' : ''}
+                    <tr class="table-success"><td><strong>Gross Salary:</strong></td><td class="text-end"><strong>${formatCurrency(payroll.monthly_ctc || payroll.gross_salary)}</strong></td></tr>
+                    <tr><td><strong>PF Deduction:</strong></td><td class="text-end text-danger">-${formatCurrency(payroll.pf)}</td></tr>
+                    <tr><td><strong>Total Deductions:</strong></td><td class="text-end text-danger">-${formatCurrency(payroll.deductions)}</td></tr>
+                    <tr class="table-primary"><td><strong>Net Salary:</strong></td><td class="text-end"><strong>${formatCurrency(payroll.net_salary)}</strong></td></tr>
+                </table>
+            </div>
+        </div>
+        `;
+    }
+
+    // Helper functions
+    function showLoading(text) {
+        $('#loading-text').text(text || 'Loading...');
+        $('#loadingModal').modal('show');
+    }
+
+    function hideLoading() {
+        $('#loadingModal').modal('hide');
+    }
+
+    function showAlert(type, message) {
+        var alertClass = type === 'success' ? 'success' : type === 'danger' ? 'danger' : type === 'warning' ? 'warning' : 'info';
+        var iconClass = type === 'success' ? 'check' : type === 'danger' ? 'exclamation' : type === 'warning' ? 'triangle-exclamation' : 'info';
+        
+        var alertHtml = `
+        <div class="alert alert-${alertClass} alert-dismissible">
+            <i class="fa-solid fa-circle-${iconClass}"></i> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        `;
+        
+        // Remove existing alerts
+        $('.alert').remove();
+        
+        // Add new alert at the top
+        $('.container-fluid').prepend(alertHtml);
+        
+        // Auto hide after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut();
+        }, 5000);
+    }
+
+    function getMonthName(month) {
+        var months = ['', 'January', 'February', 'March', 'April', 'May', 'June', 
+                     'July', 'August', 'September', 'October', 'November', 'December'];
+        return months[month] || 'Unknown';
+    }
+
+    function formatCurrency(amount) {
+        return parseFloat(amount).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function capitalizeFirst(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return '';
+        var date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+});
+</script>
+
+{{ footer }}

@@ -1,0 +1,23 @@
+<div id="tab-logininfo" class="tab-pane fade">
+  <div class="tab-content">
+            <div id="tab-general" class="tab-pane active">
+              <fieldset>
+                <legend>{{ text_user }}</legend>
+                <div class="row mb-3 required">
+                  <label for="input-employeeid" class="col-sm-2 col-form-label">{{ entry_employeeid }}</label>
+                  <div class="col-sm-7">
+                    <input type="text" name="employeeid" value="{{ employeeid }}" placeholder="{{ entry_employeeid }}" id="input-employeeid" class="form-control"/>
+                    <div id="error-employeeid" class="invalid-feedback"></div>
+                  </div>
+                </div>
+                <div class="row mb-3 required">
+                  <label for="input-firstname" class="col-sm-2 col-form-label">{{ entry_firstname }}</label>
+                  <div class="col-sm-7">
+                    <input type="text" name="firstname" value="{{ firstname }}" placeholder="{{ entry_firstname }}" id="input-firstname" class="form-control"/>
+                    <div id="error-firstname" class="invalid-feedback"></div>
+                  </div>
+                </div>
+            </fieldset>
+            </div>
+        </div>
+</div>

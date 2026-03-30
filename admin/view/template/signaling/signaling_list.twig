@@ -1,0 +1,61 @@
+<form id="form-signaling" method="post" data-oc-toggle="ajax" data-oc-load="{{ action }}" data-oc-target="#signaling">
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover">
+      <thead>
+        <tr>
+          <th class="text-center" style="width: 1px;"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', $(this).prop('checked'));" class="form-check-input"/></th>
+          <th><a href="{{ sort_theme}}"{% if sort == 's.theme' %} class="{{ order|lower }}"{% endif %}>{{ column_theme }}</a></th>
+          <th><a href="{{ sort_amc }}"{% if sort == 's.amc' %} class="{{ order|lower }}"{% endif %}>{{ column_amc }}</a></th>
+          <th><a href="{{ sort_fund}}"{% if sort == 's.fund' %} class="{{ order|lower }}"{% endif %}>{{ column_fund}}</a></th>
+           <th><a href="{{ sort_exit_load }}"{% if sort == 's.exit_load' %} class="{{ order|lower }}"{% endif %}>{{ column_exit_load }}</a></th>
+           <th><a href="{{ sort_current_signal_id }}"{% if sort == 'cs.current_signal_id' %} class="{{ order|lower }}"{% endif %}>{{ column_current_signal_id }}</a></th>
+          <th class="d-none d-lg-table-cell"><a href="{{ sort_created_date }}"{% if sort == 's.created_date' %} class="{{ order|lower }}"{% endif %}>{{ column_active_date }}</a></th>
+          <th><a href="{{ sort_t }}"{% if sort == 's.t' %} class="{{ order|lower }}"{% endif %}>{{ column_t }}</a></th>
+          <th class="text-end">{{ column_action }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if signals %}
+          {% for signal in signals %}
+            <tr{% if not signal.status %} class="table-active opacity-50"{% endif %}>
+              <td class="text-center"><input type="checkbox" name="selected[]" value="{{ signal.signaling_id }}" class="form-check-input"/></td>
+              <td>{{ signal.theme }}</td>
+              <td>{{ signal.amc }}</td>
+              <td>{{ signal.fund }}</td>
+              <td>{{ signal.exit_load }}</td>
+              <td>{{ signal.current_signal }}</td>
+              <td class="d-none d-lg-table-cell">{{ signal.created_date }}</td>
+              <td>{{ signal.t_signaling }}</td>
+              <td class="text-end">
+                <div class="btn-group dropdown">
+                  <a href="{{ signal.edit }}" data-bs-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa-solid fa-pencil"></i></a>
+                  <!--<button type="button" data-bs-toggle="dropdown" class="btn btn-primary dropdown-toggle dropdown-toggle-split"><span class="fa-solid fa-caret-down"></span></button>
+                  <!--<ul class="dropdown-menu dropdown-menu-end">
+                    <li><h6 class="dropdown-header">{{ text_option }}</h6></li>
+                    {% if customer.unlock %}
+                      <li><a href="{{ customer.unlock }}" data-oc-toggle="unlock" class="dropdown-item"><i class="fa-solid fa-unlock"></i> {{ text_unlock }}</a></li>
+                    {% else %}
+                      <li><a href="#" class="dropdown-item disabled"><i class="fa-solid fa-unlock"></i> {{ text_unlock }}</a></li>
+                    {% endif %}
+                    <li><hr class="dropdown-divider"></li>
+                    <li><h6 class="dropdown-header">{{ text_login }}</h6></li>
+                    {% for store in customer.store %}
+                      <li><a href="{{ store.href }}" target="_blank" class="dropdown-item"><i class="fa-solid fa-lock"></i> {{ store.name }}</a></li>
+                    {% endfor %}
+                  </ul>-->
+                </div></td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td class="text-center" colspan="9">{{ text_no_results }}</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+  <div class="row">
+    <div class="col-sm-6 text-start">{{ pagination }}</div>
+    <div class="col-sm-6 text-end">{{ results }}</div>
+  </div>
+</form>

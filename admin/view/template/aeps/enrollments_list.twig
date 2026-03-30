@@ -1,0 +1,378 @@
+{{ header }}{{ column_left }}
+ <style>
+.my-filter-input {
+    display: none;
+}
+.my-filter{
+    display: block;    
+    padding: 10px;
+    margin: 0 0 1px 0;
+    cursor: pointer;
+    border: 1px solid #A7A7A7;
+    background: #6AAB95;
+    border-radius: 3px;
+    color: #FFF;
+    transition: ease .5s;
+
+}
+.my-filter:hover {
+    background: #4E8774;
+}
+
+.my-filter-content {
+    background: #313941;
+    padding: 5px 5px;
+    border: 1px solid #A7A7A7;
+    margin: 0 0 1px 0;
+    border-radius: 3px;
+}
+
+.my-filter-input + .my-filter + .my-filter-content {
+    display: none;
+    padding-right: -2px;
+}
+
+.my-filter-input:checked + .my-filter + .my-filter-content {
+    display: block;
+}
+
+.myfilter-container
+{
+    padding-left: 250px;
+}
+</style>
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid myfilter-container">
+      <div class="float-end">
+        <!--<button type="button" data-toggle="tooltip" title="{{ button_export }}" id="button-export"  class="btn btn-info"><i class="fa fa-file-excel-o" aria-hidden="true"></i></button>--->
+     <!-- <button type="button" form="form-filterdata" formaction="{{ export }}" data-toggle="tooltip" title="{{ button_export }}" class="btn btn-info" onclick="confirm('{{ text_confirm }}') ? $('#filter-product').submit() : false;"><i class="fas fa-file-export"></i></button> -->
+     <!--   <button type="button" data-toggle="tooltip" title="{{ button_filter }}" onclick="$('#filter-product').toggleClass('hidden-sm hidden-xs');" class="btn btn-default hidden-md hidden-lg"><i class="fa fa-filter"></i></button>-->
+        <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
+        <!--<button type="submit" form="form-product" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></button>-->
+        <button type="button" form="form-product" formaction="{{ delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-product').submit() : false;"><i class="fa-regular fa-trash-can"></i></button>
+      </div>
+      <h1 style="color:white">{{ heading_title }}</h1>
+     <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid myfilter-container">{% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="row">
+      <div id="filter-product" class="col-sm-12 hidden-sm hidden-xs">
+        <div class="panel panel-default">
+                <input class="my-filter-input"type="checkbox" id="title2" />
+        <label class='my-filter panel-heading'for="title2" style="background-color:#313941;color:white;"><i class="fa fa-filter"></i> {{ text_filter }}<span style="float:right;"><i class="fa fas fa-chevron-down fa-1x" ></i></span>
+        </label>
+        <div class="my-filter-content panel-body">
+      <div class="row mb-12" style="row-gap: 20px;">
+            <div class="col-sm-4">
+              <label class="control-label" class="col-sm-2" style="color:white"  for="input-fdate">{{ entry_fdate }}</label> 
+             <input type="date" name="filter_fdate"  style="color:#black" value="{{ filter_fdate }}"  id="input-fdate" class="form-control" />
+            </div>
+            <div class="col-sm-4">
+              <label class="control-label" class="col-sm-2"style="color:white"  for="input-tdate">{{ entry_tdate}}</label>
+              <input type="date" name="filter_tdate"  style="color:#black" value="{{ filter_tdate }}"  id="input-tdate" class="form-control" />
+            </div>
+            
+            <div class="col-sm-4">
+              <label class="control-label" style="color:white"  for="input-customerid">{{ entry_customerid }}</label>
+              <input type="text" name="filter_customerid"  style="color:#black" value="{{ filter_customerid }}"  id="input-customerid" class="form-control" />
+            </div>
+            
+            <div class="col-sm-4">
+              <label class="control-label" style="color:white"  for="input-mobilenumber">{{ entry_mobilenumber }}</label>
+              <input type="number" style="color:black"  name="filter_mobilenumber" value="{{ filter_mobilenumber }}"  id="input-mobilenumber" class="form-control" />
+            </div>
+            
+            <div class="col-sm-4">
+              <label class="control-label" style="color:white"  for="input-aepsid">{{ entry_aepsid }}</label>
+              <input type="text"  style="color:black" name="filter_aepsidid" value="{{ filter_aepsid }}"  id="input-aepsidid" class="form-control" />
+            </div>
+            <div class="col-sm-4">
+              <label class="control-label" style="color:white"  for="input-status">{{ entry_status }}</label>
+              <select  style="color:black" name="filter_status" value="{{ filter_status }}"  id="input-status" class="form-control" />
+                    {% if filter_status == 1 %}
+
+
+                      <option value="1" selected="selected">{{ text_pending }}</option>
+                      <option value="2">{{ text_rejected }}</option>
+                      <option value="3">{{ text_hold }}</option>
+                      <option value="4">{{ text_approved }}</option>
+
+
+                    {% elseif filter_status == 2 %}
+
+
+                      <option value="1">{{ text_pending }}</option>
+                      <option value="2" selected="selected">{{ text_rejected }}</option>
+                      <option value="3">{{ text_hold }}</option>
+                      <option value="4">{{ text_approved }}</option>
+                    {% elseif filter_status == 3 %}
+
+
+                      <option value="1">{{ text_pending }}</option>
+                      <option value="2">{{ text_rejected }}</option>
+                      <option value="3" selected="selected">{{ text_hold }}</option>
+                      <option value="4">{{ text_approved }}</option>
+                    {% elseif filter_status == 4 %}
+
+
+                      <option value="1">{{ text_pending }}</option>
+                      <option value="2">{{ text_rejected }}</option>
+                      <option value="3">{{ text_hold }}</option>
+                      <option value="4" selected="selected">{{ text_approved }}</option>
+                    {% else %}
+
+                      <option value=""></option>
+                      <option value="1">{{ text_pending }}</option>
+                      <option value="2">{{ text_rejected }}</option>
+                      <option value="3">{{ text_hold }}</option>
+                      <option value="4">{{ text_approved }}</option>
+                    {% endif %}
+
+
+                  </select>
+            </div>
+            <div class="form-group col-sm-2" style="margin-left:1200px">
+              <button  style=" background-color:white;color:black;" type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
+              <!--<h3 class="panel-title" class="col-sm-2" style="float:left;"><a href="{{export}}"><i class="fa fa-file-excel-o" style="font-size:30px;color:green"></i></a> </h3>-->
+            </div>
+           </p>
+        </div>
+        </div>
+      </div>
+      <div class="col-sm-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title" style="color:white"><b><i class="fa fa-list"></i></b></h3>
+            </div>
+          <div>
+              <div class="panel-body">
+                <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-product">
+                  <div class="table-responsive">
+                    <table id="export-filterdata" class="table table-bordered table-hover">
+                      <thead  style="background-color:#313941">
+                        <tr>
+                          <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                          <td class="text-center" style="color:white">{{colum_srno}}</td>
+                         
+                          <td class="text-center" style="color:white">{{colum_customerid}}</td>
+                          <td class="text-center" style="color:white">{{colum_partnername}}</td>
+                          <td class="text-center">{% if sort == 'p.mobilenumber' %} <a style="color:white" href="{{ sort_mobilenumber }}" class="{{ order|lower }}">{{ column_mobilenumber }}</a> {% else %} <a  style="color:white" href="{{ sort_mobilenumber }}">{{ column_mobilenumber }}</a> {% endif %}</td>
+                          <td class="text-center" style="color:white">{{column_name}}</td>
+                          <td class="text-center">{% if sort == 'p.aepsid' %} <a  style="color:white" href="{{ sort_aepsid }}" class="{{ order|lower }}">{{ column_aepsid }}</a> {% else %} <a  style="color:white" href="{{ sort_aepsid }}">{{ column_aepsid }}</a> {% endif %}</td>
+                          <td class="text-center">{% if sort == 'p.created' %} <a  style="color:white" href="{{ sort_created }}" class="{{ order|lower }}">{{ column_created }}</a> {% else %} <a  style="color:white" href="{{ sort_created }}">{{ column_created }}</a> {% endif %}</td>
+                          <td class="text-center" style="color:wite">{{colum_kyc}}</td>
+                          <td class="text-center">{% if sort == 'p.status' %} <a style="color:white" href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a> {% else %} <a  style="color:white" href="{{ sort_status }}">{{ column_status }}</a> {% endif %}</td>
+                          <td class="text-center" style="color:white">{{colum_modifiedby}}</td>
+                          <td class="text-center" style="color:white">{{colum_source}}</td>
+                          <td class="text-center" style="color:white">{{ column_action }}</td>
+                        </tr>
+                      </thead>
+                      <tbody>
+                      
+                      {% if products %}
+                      {% for product in products %}
+                      <tr>
+                        <td class="text-center">{% if product.id in selected %}
+                          <input type="checkbox" name="selected[]" value="{{ product.id }}" checked="checked" />
+                          {% else %}
+                          <input type="checkbox" name="selected[]" value="{{ product.id }}" />
+                          {% endif %}</td>
+                        <td class="text-left">{{ product.srno }}</td>
+                    
+                        <td class="text-left">{{ product.customerid }}</td>
+                        <td class="text-left">{{ product.patnername }}</td>
+                        <td class="text-left">{{ product.mobilenumber }}</td>
+                        <td class="text-left">{{ product.name }}</td>
+                        <td class="text-left">{{ product.aepsid }}</td>
+                        <td class="text-left">{{ product.created }}</td>
+                         <td class="text-left">{{ product.kyc}}</td>
+                        <td class="text-left">{{ product.status }}</td>
+                        <td class="text-left">{{ product.modifiedby }}</td>
+                        <td class="text-left">{{ product.source }}</td>
+                       <td class="text-right"><a href="{{ product.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+                      </tr>
+                      {% endfor %}
+                      {% else %}
+                      <tr>
+                        <td class="text-center" colspan="14">{{ text_no_results }}</td>
+                      </tr>
+                      {% endif %}
+                        </tbody>
+                      
+                    </table>
+                  </div>
+                </form>
+                <div class="row">
+                  <div class="col-sm-6 text-left">{{ pagination }}</div>
+                  <div class="col-sm-6 text-right" style="color:white">{{ results }}</div>
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript"><!--
+$('#button-filter').on('click', function() {
+	var url = '';
+
+	var filter_fdate = $('input[name=\'filter_fdate\']').val();
+
+	if (filter_fdate) {
+		url += '&filter_fdate=' + encodeURIComponent(filter_fdate);
+	}
+	
+	var filter_tdate = $('input[name=\'filter_tdate\']').val();
+
+	if (filter_tdate) {
+		url += '&filter_tdate=' + encodeURIComponent(filter_tdate);
+	}
+
+	var filter_customerid = $('input[name=\'filter_customerid\']').val();
+
+	if (filter_customerid) {
+		url += '&filter_customerid=' + encodeURIComponent(filter_customerid);
+	}
+
+	var filter_mobilenumber = $('input[name=\'filter_mobilenumber\']').val();
+
+	if (filter_mobilenumber) {
+		url += '&filter_mobilenumber=' + encodeURIComponent(filter_mobilenumber);
+	}
+	
+	var filter_aepsid = $('input[name=\'filter_aepsid\']').val();
+
+	if (filter_aepsid) {
+		url += '&filter_aepsid=' + encodeURIComponent(filter_aepsid);
+	}
+	
+	var filter_status = $('select[name=\'filter_status\']').val();
+
+	if (filter_status !== '') {
+		url += '&filter_status=' + encodeURIComponent(filter_status);
+	}
+
+	location = 'index.php?route=aeps/enrollments&user_token={{ user_token }}' + url;
+});
+//--></script> 
+<!--export------->
+<!--<script>
+    function ExportTasks(_this)
+    {
+        
+            $.ajax({
+            url:'index.php?route=aeps/enrollments/exportxls&user_tokenuser_token={{ user_token }}&customer_id={{ customer_id }}',
+            type: 'post',
+            dataType: 'json',
+            data :'filter_fdate=' + encodeURIComponent($('#filter-data select[name=\'filter_fdate\']').val()) + '&filter_tdate=' + encodeURIComponent($('#filter-data select[name=\'filter_tdate\']').val())
+            + '&filter_customerid=' + encodeURIComponent($('#filter-data input[name=\'filter_customerid\']').val()) + '&filter_mobilenumber=' + encodeURIComponent($('#filter-data input[name=\'filter_mobilenumber\']').val())+ '&filter_aepsid=' + encodeURIComponent($('#filter-data input[name=\'filter_aepsid\']').val())
+            + '&filter_status=' + encodeURIComponent($('#filter-data input[name=\'filter_status\']').val()),
+           
+         beforeSend: function() {
+            $('#button-export').button('loading');
+          },
+          complete: function() {
+            $('#button-export').button('reset');
+          },
+          success: function(json) {
+            $('.alert-dismissible').remove();
+    
+            if (json['error']) {
+               $('#filter-data').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+            }
+    
+            if (json['success']) {
+              $('#filter-data').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+    
+              $('#export-filterdata').load('index.php?route=customer/customer/getList&user_token={{ user_token }}&customerid={{ customerid }}');
+    
+              $('#filter-data input[name=\'filter_customerid\']').val('');
+              $('#filter-data input[name=\'filter_status\']').val('');
+            }
+          },
+          error: function(xhr, ajaxOptions, thrownError) {
+            alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+          }
+        });
+      }
+</script>--->
+<script>
+$(document).ready(function() {
+    $( "#button-export" ).on( "click", function()
+        {
+            var filterdata = $("#filter-data").val();
+            //alert(filterdata);
+                $.ajax({
+                    url: 'index.php?route=aeps/enrollments/exportxls&user_token={{ user_token }}&filter_fdate=' +  encodeURIComponent(request),
+                    dataType: 'json',
+                    success: function(json) {
+                        
+                    }
+                });
+                    
+         });
+    });
+</script>
+<!--//---------->
+  <script type="text/javascript"><!--
+// IE and Edge fix!
+$('button[form=\'form-product\']').on('click', function(e) {
+	$('#form-product').attr('action', $(this).attr('formaction'));
+});
+  
+$('input[name=\'filter_name\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/product/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['name'],
+						value: item['product_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_name\']').val(item['label']);
+	}
+});
+
+$('input[name=\'filter_model\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/product/autocomplete&user_token={{ user_token }}&filter_model=' +  encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['model'],
+						value: item['product_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_model\']').val(item['label']);
+	}
+});
+//--></script></div>
+{{ footer }} 

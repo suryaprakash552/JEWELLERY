@@ -1,0 +1,147 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        <button type="submit" form="form-store" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-light"><i class="fa-solid fa-reply"></i></a></div>
+      <h1 style="color:white">{{ heading_title }}</h1>
+            <ol class="breadcrumb">
+            {% for breadcrumb in breadcrumbs %}
+            <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_form }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-store" class="form-horizontal">
+          <ul class="nav nav-tabs">
+            <li class="active"><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a></li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active" id="tab-general">
+               <div class="row mb-12" style="row-gap: 20px;">
+                <div class="col-sm-6 required">
+                <label class="col-sm-2 control-label" for="input-url" style="color:white"><span data-toggle="tooltip" data-html="true">{{ entry_name }}</span></label>
+                
+                  <input type="text" name="type" value="{{ type }}" placeholder="{{ entry_name }}" id="input-url" class="form-control" />
+                  {% if error_type %}
+                  <div class="text-danger">{{ error_type }}</div>
+                  {% endif %}
+                </div>
+              <div class="col-sm-6 required">
+                <label class="col-sm-2 control-label" for="input-ssl" style="color:white"><span data-toggle="tooltip" data-html="true">{{ entry_password }}</span></label>
+                  <input type="text" name="password" value="{{ password }}" placeholder="{{ entry_password }}" id="input-ssl" class="form-control" />
+                  {% if error_password %}
+                  <div class="text-danger">{{ error_password }}</div>
+                  {% endif %}
+                </div>
+              
+              <div class="col-sm-6 required">
+                <label class="col-sm-2 control-label" for="input-ssl" style="color:white"><span data-toggle="tooltip" data-html="true">{{ entry_developerid }}</span></label>
+                
+                  <input type="text" name="developerid" value="{{developerid}}" placeholder="{{ entry_developerid }}" id="input-ssl" class="form-control" />
+                  {% if error_developerid %}
+                  <div class="text-danger">{{ error_developerid }}</div>
+                  {% endif %}
+                </div>
+              <div class="col-sm-6 required">
+                <label class="col-sm-2 control-label" for="input-ipaddress" style="color:white"><span data-toggle="tooltip" data-html="true">{{ entry_ipaddress }}</span></label>
+                  <input type="text" name="ipaddress" value="{{ ipaddress }}" placeholder="{{ entry_ipaddress }}" id="input-ipaddress" class="form-control" />
+                  {% if error_ipaddress %}
+                  <div class="text-danger">{{ error_ipaddress }}</div>
+                  {% endif %}
+                </div>
+              <div class="col-sm-6 required">
+                <label class="col-sm-2 control-label" for="input-layout" style="color:white">{{ entry_status }}</label>
+                  <select name="status" id="input-layout" class="form-control">
+                    {% if status %}
+                    <option value="1" selected="selected">{{ entry_enabled }}</option>
+                    <option value="0">{{ entry_disabled }}</option>
+                    {% else %}
+                    <option value="1">{{ entry_enabled }}</option>
+                    <option value="0" selected="selected">{{ entry_disabled }}</option>
+                    {% endif %}
+                  </select>
+                </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript"><!--
+$('select[name=\'config_theme\']').on('change', function() {
+	$.ajax({
+		url: 'index.php?route=setting/setting/theme&user_token={{ user_token }}&theme=' + this.value,
+		dataType: 'html',
+		beforeSend: function() {
+			$('select[name=\'config_theme\']').prop('disabled', true);
+		},
+		complete: function() {
+			$('select[name=\'config_theme\']').prop('disabled', false);
+		},
+		success: function(html) {
+			$('#theme').attr('src', html);
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$('select[name=\'config_theme\']').trigger('change');
+//--></script>   <script type="text/javascript"><!--
+$('select[name=\'config_country_id\']').on('change', function() {
+	$.ajax({
+		url: 'index.php?route=localisation/country/country&user_token={{ user_token }}&country_id=' + this.value,
+		dataType: 'json',
+		beforeSend: function() {
+			$('select[name=\'config_country_id\']').prop('disabled', true);
+		},
+		complete: function() {
+			$('select[name=\'config_country_id\']').prop('disabled', false);
+		},
+		success: function(json) {
+			html = '<option value="">{{ text_select }}</option>';
+
+			if (json['zone'] && json['zone'] != '') {
+				for (i = 0; i < json['zone'].length; i++) {
+					html += '<option value="' + json['zone'][i]['zone_id'] + '"';
+
+					if (json['zone'][i]['zone_id'] == '{{ config_zone_id }}') {
+						html += ' selected="selected"';
+					}
+
+					html += '>' + json['zone'][i]['name'] + '</option>';
+				}
+			} else {
+				html += '<option value="0" selected="selected">{{ text_none }}</option>';
+			}
+
+			$('select[name=\'config_zone_id\']').html(html);
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$('select[name=\'config_country_id\']').trigger('change');
+//--></script></div>
+{{ footer }} 

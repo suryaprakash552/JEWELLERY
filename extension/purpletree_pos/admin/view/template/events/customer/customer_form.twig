@@ -1,0 +1,75 @@
+		<div class="form-text">{{ help_safe }}</div>
+	</div>
+</div>
+<div class="form-group row">
+ <label class="col-sm-2 col-form-label">{{ text_pos_user }}</label>
+<div class="col-sm-10 p-2">
+<label class="radio-inline">
+<input type="radio" name="agent_status" id="pts_no" value="0" {% if agent_status == 0 %} checked="checked" {% endif %}id="add_document"/>
+{{ text_no }}</label>
+<label class="radio-inline">
+<input type="radio" name="agent_status" id="pts_pos_agent" value="1" {% if agent_status == 1 %} checked="checked" {% endif %} id="remove_document"/>
+{{ text_pos_user_admin }}</label>
+<label class="radio-inline">
+<input type="radio" name="agent_status" id="pts_pos_admin" value="2" {% if agent_status == 2 %} checked="checked" {% endif %} id="remove_document"/>
+{{ text_pos_user_agent }}</label>
+<!-- POS ACTION SECTION -->
+<div id="pos-action-section"class="col-sm-6 p-2"style="margin-left:-106px;">
+    <label class="col-sm-2 col-form-label">POS Action </label>
+<label>
+    <input type="checkbox" name="wallet" value="1"
+    {% if wallet == 1 %}checked="checked"{% endif %}>
+    Wallet
+</label>
+
+<label>
+    <input type="checkbox" name="return_order" value="1"
+    {% if return_order == 1 %}checked="checked"{% endif %}>
+    Return
+</label>
+
+<label>
+    <input type="checkbox" name="cancel_order" value="1"
+    {% if cancel_order == 1 %}checked="checked"{% endif %}>
+    Cancel
+</label>
+
+<label>
+    <input type="checkbox" name="delete_order" value="1"
+    {% if delete_order == 1 %}checked="checked"{% endif %}>
+    Delete
+</label>
+
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const posUserInputs = document.querySelectorAll('[name="agent_status"]');
+    const posActionSection = document.getElementById('pos-action-section');
+
+    function togglePosAction() {
+        let selected = document.querySelector('[name="agent_status"]:checked');
+
+        if (!selected) return;
+
+        if (selected.value === "1" || selected.value === "2") {
+            posActionSection.style.display = "block";
+        } else {
+            posActionSection.style.display = "none";
+        }
+    }
+
+    togglePosAction();
+
+    posUserInputs.forEach(function(input) {
+        input.addEventListener("change", togglePosAction);
+    });
+
+});
+</script>
+
+
+	
+	

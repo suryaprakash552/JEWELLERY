@@ -1,0 +1,572 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        <button id="button-save" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <h1>{{ heading_title }}</h1>
+      <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li class="breadcrumb-item"><a href="{{ breadcrumb['href'] }}">{{ breadcrumb['text'] }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid">
+   {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_form }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-product" class="form-horizontal">
+            <div class="row">
+                <div class="col-sm-9">
+                <div class="row-flex">
+                    {% set pname = product_overview['name'] ? product_overview['name'] : product_name %}
+                    <div class="label-col">{{ entry_name }}</div>
+                    <div class="colon-col">:</div>
+                    <div class="value-col">{{ pname }}</div>
+                </div>
+                
+                <div class="row-flex">
+                    {% set model_no = product_overview['model_no'] ? product_overview['model_no'] : model %}
+                    <div class="label-col">{{ entry_model_no }}</div>
+                    <div class="colon-col">:</div>
+                    <div class="value-col">{{ model_no }}</div>
+                </div>
+                
+                <div class="row-flex">
+                    <div class="label-col">{{ entry_manufacturer }}</div>
+                    <div class="colon-col">:</div>
+                    <div class="value-col">{{ manufacturer }}</div>
+                </div>
+                
+                <div class="row-flex">
+                    <div class="label-col">{{ entry_dimensions }}</div>
+                    <div class="colon-col">:</div>
+                    <div class="value-col">{{ length }} × {{ width }} × {{ height }}</div>
+                </div>
+
+                    <div class="row-flex">
+                        <div class="label-col">{{ entry_size }}</div>
+                        <div class="colon-col">:</div>
+                        <div class="col-sm-10"style="width:34%;"><input type="text" name="product_overview[size]" value="{{ product_overview['size'] ? product_overview['size'] : '' }}" placeholder="{{ entry_size }}" id="input-size" class="form-control" /></div>
+                    </div>
+                    <div class="row-flex">
+                        <div class="label-col">{{ entry_price }}</div>
+                        <div class="colon-col">:</div>
+                        <div class="col-sm-10"style="width:34%;"><input type="text" name="product_overview[price]" value="{{ product_overview['price'] ? product_overview['price'] : price }}" placeholder="{{ entry_price }}" id="input-price" class="form-control" /></div>
+                    </div>
+                    <div class="row-flex">
+                        <div class="label-col">{{ entry_ali_url }}</div>
+                        <div class="colon-col">:</div>
+                        <div class="col-sm-10"style="width:34%;">
+                            <input type="text" name="product_overview[ali_url]" value="{{ product_overview['ali_url'] ? product_overview['ali_url'] : '' }}" placeholder="{{ entry_ali_url }}" id="input-ali_url" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row-flex">
+                        <div class="label-col" for="input-supplier"><span class="text-danger">*</span> {{ entry_supplier }}</div>
+                         <div class="colon-col">:</div>
+                        <div class="col-sm-10"style="width:34%;">
+                            <input type="text" name="supplier" value="" placeholder="{{ entry_supplier }}" id="input-supplier" class="form-control" data-oc-target="supplier-autocomplete-list" autocomplete="off" />
+                            <ul id="supplier-autocomplete-list" class="dropdown-menu"></ul>
+                            <div id="featured-supplier" class="well well-sm" style="min-height: 50px; max-height: 150px; overflow: auto; margin-top: 10px;">
+                                {% if suppliers %}
+                                    {% for supplier in suppliers %}
+                                    <div id="featured-supplier{{ supplier.supplier_id }}" class="supplier-item" style="padding: 5px; border-bottom: 1px solid #ddd; display: flex; align-items: center; gap: 8px;">
+                                        <i class="fa fa-minus-circle text-danger" style="cursor:pointer;"></i> {{ supplier.name }}
+                                        <input type="hidden" name="product_overview[supplier_id][]" value="{{ supplier.supplier_id }}" />
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted" id="no-supplier-text">No suppliers selected</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-3 text-center">
+                    <img src="{{ product_thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" class="img-thumbnail" style="max-width: 100%; height: 375px;"/>
+                </div>
+            </div>
+            {% if options %}
+            <legend>{{ entry_prices }}</legend>
+            <div class="form-group">
+            <div class="col-sm-12">
+            {% for option in options %}
+                {% if option['required'] == 1 and (option['type'] == 'select' or option['type'] == 'checkbox' or option['type'] == 'radio') %}
+                <table class="table table-bordered">
+                        <thead>
+                            <th style="width:12%;">{{ entry_option }}</th>
+                            <th>{{ entry_sku }}</th>
+                            <th>{{ entry_price }}</th>
+                            <th></th>
+                        </thead>
+                        <tbody>
+                                {% for product_option_value in option['product_option_value'] %}
+                                <tr>
+                                <td>
+                                    {{ option_prices[option['product_option_id']]['product_option_value'][product_option_value['product_option_value_id']]['name'] ? option_prices[option['product_option_id']]['product_option_value'][product_option_value['product_option_value_id']]['name'] : product_option_value['name'] }}
+                                    <input type="hidden" name="product_overview[option][{{ option['product_option_id'] }}][product_option_value][{{ product_option_value['product_option_value_id'] }}][name]" value="{{ option_prices[option['product_option_id']]['product_option_value'][product_option_value['product_option_value_id']]['name'] ? option_prices[option['product_option_id']]['product_option_value'][product_option_value['product_option_value_id']]['name'] : product_option_value['name'] }}" class="form-control" /></td>
+                                <td><input type="text" name="product_overview[option][{{ option['product_option_id'] }}][product_option_value][{{ product_option_value['product_option_value_id'] }}][sku]" value="{{ option_prices[option['product_option_id']]['product_option_value'][product_option_value['product_option_value_id']]['sku'] ? option_prices[option['product_option_id']]['product_option_value'][product_option_value['product_option_value_id']]['sku'] : product_option_value['sku'] }}" placeholder="{{ entry_sku }}" class="form-control" /></td>
+                                <td><input type="text" name="product_overview[option][{{ option['product_option_id'] }}][product_option_value][{{ product_option_value['product_option_value_id'] }}][price]" value="{{ option_prices[option['product_option_id']]['product_option_value'][product_option_value['product_option_value_id']]['price'] ? option_prices[option['product_option_id']]['product_option_value'][product_option_value['product_option_value_id']]['price'] : product_option_value['price'] }}" placeholder="{{ entry_price }}" class="form-control" /></td>
+                                <td><a class="btn btn-primary btn-sm" data-toggle="modal" data-target="#exampleModal{{ product_option_value['product_option_value_id'] }}">{{ entry_price_history }}</a>
+                                            <div class="modal fade" id="exampleModal{{ product_option_value['product_option_value_id'] }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel{{ product_option_value['product_option_value_id'] }}" aria-hidden="true">
+                                                  <div class="modal-dialog modal-lg" role="document">
+                                                    <div class="modal-content">
+                                                      <div class="modal-header">
+                                                        <h3 class="modal-title" id="exampleModalLabel{{ product_option_value['product_option_value_id'] }}">Price History - {{ product_option_value['name'] }}</h3>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                          <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                      </div>
+                                                      <div class="modal-body">
+                                                            <div class="row">
+                                                                <div class="col-sm-12">
+                                                                    <table class="table table-bordered table-supplier">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>{{ entry_purchase_date }}</th>
+                                                                                <th>{{ entry_price }}</th>
+                                                                                <th>{{ entry_po_no }}</th>
+                                                                                <th class="hide">{{ entry_comment }}</th>
+                                                                                <th></th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {% if product_option_value['price_histories'] %}
+                                                                            {% for price_history in product_option_value['price_histories'] %}
+                                                                            <tr>
+                                                                                <td {% if price_history['maxprice'] %}class="text-danger"{% endif %}><b>{{ price_history['date'] }}</b></td>
+                                                                                <td {% if price_history['maxprice'] %}class="text-danger"{% endif %}><b>{{ price_history['price'] }}</b></td>
+                                                                                <td {% if price_history['maxprice'] %}class="text-danger"{% endif %}><b>{{ price_history['po_number'] }}</b></td>
+                                                                                <td class="hide"><textarea name="product_comment[{{ price_history['purchase_order_product_id'] }}]" class="form-control">{{ price_history['comment'] }}</textarea></td>
+                                                                                <td><a href="{{ price_history['href'] }}" class="btn btn-primary"><i class="fa fa-eye"></i></a></td>
+                                                                            </tr>
+                                                                            {% endfor %}
+                                                                            {% else %}
+                                                                            <tr>
+                                                                                <td colspan="4" class="text-center">{{ text_no_results }}</td>
+                                                                            </tr>
+                                                                            {% endif %}
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                  </div>
+                                                </div></td>
+                                            </tr>
+                                {% endfor %}
+                        </tbody>
+                </table>
+                {% endif %}
+            {% endfor %}
+            </div>
+            </div>
+            {% else %}
+            <div class="col-sm-12 text-right"><a class="btn btn-primary" data-toggle="modal" data-target="#exampleModal{{ product_id }}">{{ entry_price_history }}</a>
+            </div>
+            <div class="modal fade" id="exampleModal{{ product_id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel{{ product_id }}" aria-hidden="true">
+                  <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h3 class="modal-title" id="exampleModalLabel{{ product_id }}">{{ entry_price_history }}</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>{{ entry_purchase_date }}</th>
+                                                <th>{{ entry_price }}</th>
+                                                <th>{{ entry_po_no }}</th>
+                                                <th class="hide">{{ entry_comment }}</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% if price_histories %}
+                                            {% for price_history in price_histories %}
+                                            <tr>
+                                                <td {% if price_history['maxprice'] %}class="text-danger"{% endif %}><b>{{ price_history['date'] }}</b></td>
+                                                <td {% if price_history['maxprice'] %}class="text-danger"{% endif %}><b>{{ price_history['price'] }}</b></td>
+                                                <td {% if price_history['maxprice'] %}class="text-danger"{% endif %}><b>{{ price_history['po_number'] }}</b></td>
+                                                <td class="hide"><textarea name="product_comment[{{ price_history['purchase_order_product_id'] }}]" class="form-control">{{ price_history['comment'] }}</textarea></td>
+                                                <td><a href="{{ price_history['href'] }}" class="btn btn-primary"><i class="fa fa-eye"></i></a></td>
+                                            </tr>
+                                            {% endfor %}
+                                            {% else %}
+                                            <tr>
+                                                <td colspan="4" class="text-center">{{ text_no_results }}</td>
+                                            </tr>
+                                            {% endif %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+            {% endif %}
+            <legend>{{ entry_comments }}</legend>
+            <div id="product_comments">
+                {% if product_comments %}
+                <table class="table table-bordered table-supplier">
+                {% for product_comment in product_comments %}
+                    <tr id="comment{{ product_comment['comment_id'] }}">
+                        <td class="first-td">{{ product_comment['date_added'] }}</td>
+                        <td>{{ product_comment['comment'] }}</td>
+                        <td class="text-right" style="width:10%;"><a class="btn btn-danger btn-sm" onclick="deletecomment('{{ product_comment['comment_id'] }}');"><i class="fa fa-minus"></i></a></td>
+                    </tr>
+                {% endfor %}
+                </table>
+                {% endif %}
+            </div>
+            <div class="form-group" style="display:flex; align-items:flex-start; gap:10px;">
+    
+    {#<label class="col-sm-2 control-label" for="input-comment" style="padding-top:8px;">#}
+    {#    {{ entry_comment }}#}
+    {#</label>#}
+    <div class="col-sm-8" style="padding:0;">
+        <label class="col-sm-2 control-label" for="input-comment" style="padding-top:8px;font-size:17px;">
+        {{ entry_comment }}
+    </label>
+        <textarea name="comment"
+            placeholder="{{ entry_comment }}"
+            rows="4"
+            id="input-comment"
+            class="form-control"style="width:115%">
+        </textarea>
+    </div>
+
+   <div class="col-sm-2" 
+     style="padding:0; display:flex; justify-content:center; align-items:flex-end;">
+    <a class="btn btn-primary" 
+       id="add_comment" 
+       style="
+          width:50%;
+          transform: translate(100%, 43px);height:62px;font-size:17px;
+       ">
+        Add Comment
+    </a>
+</div>
+
+</div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+<style>
+.form-control-static {
+    padding-top: 7px;
+    padding-bottom: 7px;
+    margin-bottom: 0;
+    min-height: 34px;
+    font-size: 14px;
+}
+#input-supplier.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+.supplier-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.supplier-item i {
+    flex-shrink: 0;
+}
+#supplier-autocomplete-list {
+    position: absolute;
+    z-index: 1000;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+#supplier-autocomplete-list li {
+    padding: 8px 12px;
+    cursor: pointer;
+    list-style: none;
+}
+#supplier-autocomplete-list li:hover {
+    background-color: #f5f5f5;
+}
+.info-row {
+    display: flex;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.info-label {
+    width: 200px; /* fixed same width for perfect alignment */
+    font-weight: bold;
+}
+
+.info-value {
+    flex: 1;
+}
+.label-align {
+    display: inline-block;
+    width: 200px;      /* adjust width until alignment is perfect */
+    font-weight: bold;
+}
+.label-col {
+    display: inline-block;
+    width: 200px;   /* controls alignment of colon */
+    font-weight: bold;
+}
+.value-col {
+    display: inline-block;
+     flex: 1;
+}
+.row-flex {
+    display: flex;
+    margin-bottom: 5px;
+    font-size:17px;
+}
+.colon-col {
+    width: 20px;    /* colon always aligned */
+    font-weight: bold;
+    text-align: left;
+}
+</style>
+<script>
+$(document).ready(function() {
+    var supplierTimer;
+    
+    // Custom autocomplete implementation
+    $('#input-supplier').on('keyup', function() {
+        var keyword = $(this).val();
+        
+        clearTimeout(supplierTimer);
+        
+        // if (keyword.length < 2) {
+        //     $('#supplier-autocomplete-list').hide().empty();
+        //     return;
+        // }
+        
+        supplierTimer = setTimeout(function() {
+            $.ajax({
+                url: 'index.php?route=extension/me_posupplier.autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(keyword),
+                dataType: 'json',
+                success: function(json) {
+                    console.log('Supplier data:', json);
+                    $('#supplier-autocomplete-list').empty();
+                    
+                    if (json && json.length > 0) {
+                        $.each(json, function(index, item) {
+                            var li = $('<li></li>')
+                                .text(item.name)
+                                .attr('data-supplier-id', item.supplier_id)
+                                .attr('data-supplier-name', item.name);
+                            $('#supplier-autocomplete-list').append(li);
+                        });
+                        $('#supplier-autocomplete-list').show();
+                    } else {
+                        $('#supplier-autocomplete-list').append('<li style="color:#999;">No suppliers found</li>');
+                        $('#supplier-autocomplete-list').show();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    console.error('Response:', xhr.responseText);
+                }
+            });
+        }, 300);
+    });
+    
+    // Select supplier from list
+    $(document).on('click', '#supplier-autocomplete-list li', function() {
+        var supplierId = $(this).attr('data-supplier-id');
+        var supplierName = $(this).attr('data-supplier-name');
+        
+        if (!supplierId) {
+            return;
+        }
+        
+        // Check if supplier already exists
+        if ($('#featured-supplier' + supplierId).length > 0) {
+            alert('This supplier is already added!');
+            $('#input-supplier').val('');
+            $('#supplier-autocomplete-list').hide().empty();
+            return;
+        }
+        
+        // Remove "no supplier" text
+        $('#no-supplier-text').remove();
+        
+        // Add supplier
+        var html = '<div id="featured-supplier' + supplierId + '" class="supplier-item" style="padding: 5px; border-bottom: 1px solid #ddd; display: flex; align-items: center; gap: 8px;">';
+        html += '<i class="fa fa-minus-circle text-danger" style="cursor:pointer;"></i> ' + supplierName;
+        html += '<input type="hidden" name="product_overview[supplier_id][]" value="' + supplierId + '" />';
+        html += '</div>';
+        
+        $('#featured-supplier').append(html);
+        
+        // Remove error styling
+        $('#input-supplier').removeClass('is-invalid');
+        
+        // Clear input and hide list
+        $('#input-supplier').val('');
+        $('#supplier-autocomplete-list').hide().empty();
+    });
+    
+    // Hide autocomplete when clicking outside
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#input-supplier, #supplier-autocomplete-list').length) {
+            $('#supplier-autocomplete-list').hide().empty();
+        }
+    });
+    
+    // Remove supplier
+    $(document).on('click', '#featured-supplier .fa-minus-circle', function() {
+        $(this).parent('.supplier-item').remove();
+        
+        if ($('#featured-supplier .supplier-item').length === 0) {
+            $('#featured-supplier').html('<span class="text-muted" id="no-supplier-text">No suppliers selected</span>');
+        }
+    });
+    
+    // Save button
+    $('#button-save').on('click', function() {
+        var supplierCount = $('#featured-supplier input[name="product_overview[supplier_id][]"]').length;
+        
+        if (supplierCount === 0) {
+            $('.alert-dismissible').remove();
+            $('.panel').before('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> Please select supplier.<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+            $('html, body').animate({ scrollTop: 0 }, 'slow');
+            $('#input-supplier').addClass('is-invalid').focus();
+            return false;
+        }
+        
+        $('#input-supplier').removeClass('is-invalid');
+        
+        var formData = $('#form-product').serialize();
+        
+        $.ajax({
+            url: 'index.php?route=extension/me_purchase_order.adddetails&user_token={{ user_token }}&product_id={{ product_id }}',
+            type: 'post',
+            dataType: 'json',
+            data: formData,
+            beforeSend: function() {
+                $('#button-save').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Saving...');
+            },
+            complete: function() {
+                $('#button-save').prop('disabled', false).html('<i class="fa fa-save"></i>');
+            },
+            success: function(json) {
+                $('.alert-dismissible').remove();
+                
+                if (json['error']) {
+                    $('.panel').before('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+                } else {
+                    $('.panel').before('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> Product details saved successfully!<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+                    
+                    if (json['location']) {
+                        setTimeout(function() {
+                            location = json['location'];
+                        }, 1000);
+                    }
+                }
+                
+                $('html, body').animate({ scrollTop: 0 }, 'slow');
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+                console.error('Response:', xhr.responseText);
+                $('.alert-dismissible').remove();
+                $('.panel').before('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> An error occurred. Please try again.<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+                $('html, body').animate({ scrollTop: 0 }, 'slow');
+            }
+        });
+    });
+    
+    // Comment functions
+    $('.savecomment').on('click', function() {
+        var product_option_value_id = $(this).attr('rel');
+        $.ajax({
+            url: 'index.php?route=extension/me_purchase_order.addproductcomment&user_token={{ user_token }}',
+            type: 'post',
+            dataType: 'json',
+            data: $('#exampleModal' + product_option_value_id + ' textarea[name^=\'product_comment\']'),
+            success: function(json) {
+                $('#exampleModal' + product_option_value_id).modal('hide');
+            }
+        });
+    });
+    
+    $('#add_comment').on('click', function() {
+        $('.text-danger').remove();
+        var comment = $('textarea[name="comment"]').val();
+        
+        if (comment == '') {
+            $('textarea[name="comment"]').parent().addClass('has-error');
+            $('textarea[name="comment"]').after('<div class="text-danger">Please add comment</div>');
+        } else {
+            $('textarea[name="comment"]').parent().removeClass('has-error');
+            
+            $.ajax({
+                url: 'index.php?route=extension/me_purchase_order.addcomment&user_token={{ user_token }}&product_id={{ product_id }}',
+                type: 'post',
+                dataType: 'json',
+                data: $('textarea[name=\'comment\']'),
+                success: function(json) {
+                    var html = '';
+                    if (json) {
+                        html += '<table class="table table-bordered table-supplier">';
+                        for (i in json) {
+                            html += '<tr id="comment' + json[i]['comment_id'] + '">';
+                            html += '<td class="first-td">' + json[i]['date_added'] + '</td>';
+                            html += '<td>' + json[i]['comment'] + '</td>';
+                            html += '<td class="text-right" style="width:10%;"><a class="btn btn-danger btn-sm" onclick="deletecomment(' + json[i]['comment_id'] + ');"><i class="fa fa-minus"></i></a></td>';
+                            html += '</tr>';
+                        }
+                        html += '</table>';
+                    }
+                    $('#product_comments').html(html);
+                    $('textarea[name=\'comment\']').val('');
+                }
+            });
+        }
+    });
+    
+});
+
+function deletecomment(comment_id) {
+    $.ajax({
+        url: 'index.php?route=extension/me_purchase_order.deletecomment&user_token={{ user_token }}&product_id={{ product_id }}&comment_id=' + comment_id,
+        type: 'post',
+        dataType: 'json',
+        success: function(json) {
+            var html = '';
+            if (json) {
+                html += '<table class="table table-bordered table-supplier">';
+                for (i in json) {
+                    html += '<tr id="comment' + json[i]['comment_id'] + '">';
+                    html += '<td class="first-td">' + json[i]['date_added'] + '</td>';
+                    html += '<td>' + json[i]['comment'] + '</td>';
+                    html += '<td class="text-right" style="width:10%;"><a class="btn btn-danger btn-sm" onclick="deletecomment(' + json[i]['comment_id'] + ');"><i class="fa fa-minus"></i></a></td>';
+                    html += '</tr>';
+                }
+                html += '</table>';
+            }
+            $('#product_comments').html(html);
+        }
+    });
+}
+</script>
+{{ footer }}

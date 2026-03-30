@@ -1,0 +1,413 @@
+{{ header }}{{ column_left }}
+ <style>
+.my-filter-input {
+    display: none;
+}
+.my-filter{
+    display: block;    
+    padding: 10px;
+    margin: 0 0 1px 0;
+    cursor: pointer;
+    border: 1px solid #A7A7A7;
+    background: #6AAB95;
+    border-radius: 3px;
+    color: #FFF;
+    transition: ease .5s;
+}
+.my-filter:hover {
+    background: #4E8774;
+}
+.my-filter-content {
+    background: #313941;
+    padding: 15px;
+    border: 1px solid #A7A7A7;
+    margin: 0 0 1px 0;
+    border-radius: 3px;
+    display: grid;
+}
+.my-filter-input + .my-filter + .my-filter-content {
+    display: none;
+    padding-right: -2px;
+}
+.my-filter-input:checked + .my-filter + .my-filter-content {
+    display: block;
+}
+.myfilter-container {
+    padding-left: 250px;
+}
+</style>
+
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+      </div>
+      <h1 style="color:white;">{{ heading_title }}</h1>
+      <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    
+    <div id="filter-product" class="col-sm-12 hidden-sm hidden-xs">
+      <div class="panel panel-default">
+        <input class="my-filter-input" type="checkbox" id="title2" />
+        <label class='my-filter panel-heading' for="title2" style="background-color:#313941;color:white;">
+          <i class="fa fa-filter"></i> {{ text_filter }}
+          <span style="float:right;"><i class="fa fas fa-chevron-down fa-1x"></i></span>
+        </label>
+        <div class="my-filter-content panel-body">
+          <div style="display:flex; gap:15px; align-items:end; flex-wrap:nowrap;margin-bottom:18px;">
+
+  <div style="width:350px;">
+    <label class="control-label" style="color:white;" for="input-fdate">{{ entry_fdate }}</label>
+    <input type="date" name="filter_fdate" style="color:black;" value="{{ filter_fdate }}" id="input-fdate" class="form-control" />
+  </div>
+
+  <div style="width:350px;">
+    <label class="control-label" style="color:white;" for="input-tdate">{{ entry_tdate }}</label>
+    <input type="date" name="filter_tdate" style="color:black;" value="{{ filter_tdate }}" id="input-tdate" class="form-control" />
+  </div>
+
+  <div style="width:350px;">
+    <label class="control-label" style="color:white;" for="input-userid">{{ entry_userid }}</label>
+    <input type="text" name="filter_userid" style="color:black;" value="{{ filter_userid }}" id="input-userid" class="form-control" />
+  </div>
+
+  <div style="width:350px;">
+    <label class="control-label" style="color:white;" for="input-status">{{ entry_status }}</label>
+    <select name="filter_status" id="input-status" class="form-control" style="color:black;">
+      <option value=""></option>
+      <option value="0" {% if filter_status=='0' %}selected{% endif %}>SUBMITTED</option>
+      <option value="1" {% if filter_status=='1' %}selected{% endif %}>APPROVED</option>
+      <option value="2" {% if filter_status=='2' %}selected{% endif %}>REJECTED</option>
+      <option value="3" {% if filter_status=='3' %}selected{% endif %}>CANCELLED</option>
+    </select>
+  </div>
+  <div style="display:flex; gap:10px; align-items:center;">
+  <button 
+    type="button" 
+    id="button-filter" 
+    class="btn btn-default"
+    style="
+      background-color:#d0c9c9; 
+      color:#0e0c0c;
+      height:40px; 
+      padding:0 15px; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center;
+      border-radius:12px;
+    ">
+    <i class="fa fa-filter" style="font-size:14px; line-height:1;"></i>
+    <span style="margin-left:5px;">{{ button_filter }}</span>
+  </button>
+  <button 
+    type="button" 
+    id="button-clear" 
+    class="btn btn-danger"
+    style="
+      background-color:#dc3545; 
+      color:white;  
+      height:40px; 
+      padding:0 15px; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center;
+      border-radius:12px;
+    ">
+    <i class="fa fa-times-circle" style="font-size:14px; line-height:1;"></i>
+    <span style="margin-left:5px;">Clear</span>
+  </button>
+</div>
+</div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <!-- <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_form }}</h3> -->
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-product" class="form-horizontal">
+          <div class="tab-content">
+            <div class="tab-pane active" id="tab-discount">
+              <div class="table-responsive">
+                <table id="discount" class="table table-striped table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <td class="text-center">{{ entry_emp }}</td>
+                      <td class="text-center">{{ entry_date }}</td>
+                      <td class="text-center">{{ entry_project }}</td>
+                      <td class="text-center">{{ entry_task }}</td>
+                      <td class="text-center">{{ entry_description }}</td>
+                      <td class="text-center">{{ entry_work_form_home }}</td>
+                      <td class="text-center">{{ entry_approval_document }}</td>
+                      <td class="text-center">{{ entry_hours_spent }}</td>
+                      <td class="text-center">{{ entry_approvedby }}</td>
+                      <td class="text-center">{{ entry_status }}</td>
+                      <td class="text-center">{{ entry_approve }}</td>
+                      <td class="text-center">{{ entry_reject }}</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% set timecard_row = 0 %}
+                    {% for timecard in timecards %}
+                    <tr id="timecard-row{{ timecard_row }}">
+                      <td class="text-left">{{ timecard.emp }}</td>
+                      <td class="text-left">{{ timecard.date }}</td>
+                      <td class="text-left">{{ timecard.projectname }}</td>
+                      <td class="text-left">{{ timecard.taskname }}</td>
+                      <td class="text-left">{{ timecard.description }}</td>
+                      {% if timecard.work_from_home == '1' %}
+                      <td class="text-left" align="center">
+                        <input type="checkbox" disabled checked name="timecard[{{ timecard_row }}][work_from_home]" class="form-check-input" style="width:20px;height:20px">
+                      </td>
+                      <td class="text-left">
+                        <a href="{{ timecard.approval_document }}" data-bs-toggle="tooltip" title="Download" class="btn btn-info">
+                          <i class="fa-solid fa-download"></i>
+                        </a>
+                      </td>
+                      {% else %}
+                      <td class="text-left" align="center">
+                        <input type="checkbox" disabled name="timecard[{{ timecard_row }}][work_from_home]" class="form-check-input" style="width:20px;height:20px">
+                      </td>
+                      <td class="text-left"></td>
+                      {% endif %}
+                      <td class="text-left">{{ timecard.hours }}</td>
+                      <td class="text-left">{{ timecard.approvedby }}</td>
+                      {% if timecard.status == '0' %}
+                      <td class="text-left">SUBMITTED</td>
+                      {% elseif timecard.status == '1' %}
+                      <td class="text-left">APPROVED</td>
+                      {% elseif timecard.status == '2' %}
+                      <td class="text-left">REJECTED</td>
+                      {% elseif timecard.status == '3' %}
+                      <td class="text-left">CANCELLED</td>
+                      {% else %}
+                      <td class="text-left">SUBMITTED</td>
+                      {% endif %}
+                      {% if timecard.status == '0' %}
+                      <td class="text-left">
+                        <a type="button" href="{{ timecard.approve }}" data-toggle="tooltip" title="{{ button_approve }}" class="btn btn-success">
+                          <i class="fa fa-check"></i>
+                        </a>
+                      </td>
+                      <td class="text-left">
+                        <a type="button" href="{{ timecard.reject }}" data-toggle="tooltip" title="Reject" class="btn btn-danger">
+                          <i class="fa fa-times"></i>
+                        </a>
+                      </td>
+                      {% else %}
+                      <td class="text-left"></td>
+                      <td class="text-left"></td>
+                      {% endif %}
+                    </tr>
+                    {% set timecard_row = timecard_row + 1 %}
+                    {% endfor %}
+                    <input type="hidden" id="timecardrowNumber" name="timecardrowNumber" value="{{ timecard_row }}"/>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-sm-6 text-left">{{ pagination }}</div>
+      <div class="col-sm-6 text-right">{{ results }}</div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+// Handle file input change
+$(document).on('change', '.file-input', function() {
+    let row = $(this).attr('id').split('-').pop();
+    let fileName = $(this).val().split('\\').pop();
+    
+    if (fileName) {
+        $('#button-upload-' + row).html('<i class="fa-solid fa-check"></i> ' + fileName);
+    }
+});
+
+// Handle work from home checkbox
+$(document).on('change', '.work-from-home', function() {
+    let row = $(this).data('row');
+    let button = $('#button-upload-' + row);
+
+    if ($(this).is(':checked')) {
+        button.prop('disabled', false);
+    } else {
+        button.prop('disabled', true);
+        $('#file-input-' + row).val('');
+        button.html('<i class="fa-solid fa-upload"></i>');
+    }
+});
+
+// Handle upload button click
+$(document).on('click', '.upload-btn', function(e) {
+    e.preventDefault();
+    let row = $(this).attr('id').split('-').pop();
+    $('#file-input-' + row).click();
+});
+
+// Handle hours input validation
+document.addEventListener("input", function(e) {
+    if (e.target.classList.contains("hours-input")) {
+        let value = parseInt(e.target.value, 10);
+        let msg = e.target.parentElement.querySelector("small");
+
+        if (isNaN(value)) {
+            msg.classList.add("d-none");
+            return;
+        }
+
+        if (value < 4 || value > 12) {
+            msg.classList.remove("d-none");
+        } else {
+            msg.classList.add("d-none");
+        }
+    }
+});
+
+// Add new timecard row
+var timecard_row = {{ timecard_row }};
+
+function addtimecard() {
+    const baseDate = new Date();
+    const offsetDate = new Date(baseDate);
+    offsetDate.setDate(baseDate.getDate() + timecard_row);
+    const formattedDate = offsetDate.toISOString().split('T')[0];
+    
+    timecard_row = document.getElementById('timecardrowNumber').value;
+    
+    html = '<tr id="timecard-row' + timecard_row + '">';
+    html += '  <td class="text-right"><input type="date" name="timecard[' + timecard_row + '][date]" value="' + formattedDate + '" class="form-control"/></td>';
+    html += '  <td class="text-left"><select name="timecard[' + timecard_row + '][projectid]" class="form-control">';
+    {% for project in projects %}
+    html += '<option value="{{ project.projectid }}">{{ project.projectname }}</option>';
+    {% endfor %}
+    html += '  </select></td>';
+    
+    html += '  <td class="text-left"><select name="timecard[' + timecard_row + '][taskid]" class="form-control">';
+    {% for task in tasks %}
+    html += '<option value="{{ task.taskid }}">{{ task.taskname }}</option>';
+    {% endfor %}
+    html += '  </select></td>';
+    
+    html += '  <td class="text-right"><input type="text" name="timecard['+ timecard_row +'][description]" value="" placeholder="{{ entry_description }}" class="form-control"/></td>';
+    
+    html += '  <td class="text-right" align="center">';
+    html += '    <input type="checkbox" name="timecard['+ timecard_row +'][work_from_home]" value="'+ timecard_row +'" class="form-check-input work-from-home" style="width:20px;height:20px" data-row="'+ timecard_row +'">';
+    html += '  </td>';
+    
+    html += '  <td class="text-right">';
+    html += '    <input type="file" name="timecard['+ timecard_row +']" id="file-input-'+ timecard_row +'" class="d-none file-input">';
+    html += '    <button type="button" id="button-upload-'+ timecard_row +'" data-bs-toggle="tooltip" title="{{ button_upload }}" class="btn btn-primary upload-btn" disabled>';
+    html += '      <i class="fa-solid fa-upload"></i>';
+    html += '    </button>';
+    html += '  </td>';
+    
+    html += '  <td class="text-right">';
+    html += '    <div>';
+    html += '      <input type="number" name="timecard['+ timecard_row +'][hours_spent]" id="hours_spent_'+ timecard_row +'" value="9" min="4" max="12" placeholder="Enter hours (4–12)" class="form-control hours-input"/>';
+    html += '      <small class="text-danger d-none">Hours must be between 4 and 12</small>';
+    html += '    </div>';
+    html += '  </td>';
+    
+    html += '  <td class="text-right"><input type="text" disabled name="timecard['+ timecard_row +'][approvedby]" value="" placeholder="{{ entry_approvedby }}" class="form-control"/></td>';
+    html += '  <td class="text-right"><input type="text" name="timecard['+ timecard_row +'][status]" disabled value="OPEN" placeholder="{{ entry_status }}" class="form-control"/></td>';
+    html += '  <td class="text-left"><button type="button" onclick="$(\'#timecard-row'+ timecard_row +'\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+    html += '</tr>';
+
+    $('#discount tbody').append(html);
+    timecard_row++;
+    document.getElementById('timecardrowNumber').value = timecard_row;
+}
+
+// Filter button handler
+$('#button-filter').on('click', function() {
+    var url = '';
+    
+    var filter_fdate = $('input[name=\'filter_fdate\']').val();
+    if (filter_fdate) {
+        url += '&filter_fdate=' + encodeURIComponent(filter_fdate);
+    }
+    
+    var filter_tdate = $('input[name=\'filter_tdate\']').val();
+    if (filter_tdate) {
+        url += '&filter_tdate=' + encodeURIComponent(filter_tdate);
+    }
+    
+    var filter_userid = $('input[name=\'filter_userid\']').val();
+    if (filter_userid) {
+        url += '&filter_userid=' + encodeURIComponent(filter_userid);
+    }
+    
+    var filter_status = $('select[name=\'filter_status\']').val();
+    if (filter_status !== '') {
+        url += '&filter_status=' + encodeURIComponent(filter_status);
+    }
+
+    location = 'index.php?route=timecard/myreporty&user_token={{ user_token }}' + url;
+});
+
+// Clear filter button handler
+$('#button-clear').on('click', function() {
+    location = 'index.php?route=timecard/myreporty&user_token={{ user_token }}';
+});
+
+// Form validation before submit
+$('#form-product').on('submit', function(e) {
+    var hasError = false;
+    
+    // Validate hours for all rows
+    $('.hours-input').each(function() {
+        var value = parseInt($(this).val(), 10);
+        if (isNaN(value) || value < 4 || value > 12) {
+            hasError = true;
+            $(this).closest('td').find('small').removeClass('d-none');
+        }
+    });
+    
+    // Check if work_from_home is checked but no file uploaded
+    $('.work-from-home:checked').each(function() {
+        var row = $(this).data('row');
+        var fileInput = $('#file-input-' + row);
+        
+        if (fileInput.length && !fileInput.val()) {
+            alert('Please upload approval document for work from home entries.');
+            hasError = true;
+            return false;
+        }
+    });
+    
+    if (hasError) {
+        e.preventDefault();
+        alert('Please correct the errors before submitting.');
+        return false;
+    }
+});
+
+// Initialize tooltips
+$(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+
+{{ footer }}

@@ -1,0 +1,721 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        <button type="submit" form="form-product" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+     <h1 style="color:white">{{ heading_title }}</h1>
+            <ol class="breadcrumb">
+            {% for breadcrumb in breadcrumbs %}
+            <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid"> {% if error_warning %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i ></i> </h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-product" class="form-horizontal">
+          <ul class="nav nav-tabs">
+           <h3> <li class="active"><a href="#tab-data" data-toggle="tab" style="color:white"><b>{{ tab_data }}</b></a></li></h3>
+           <h3> <li><a href="#tab-discount" data-toggle="tab" style="color:white"><b>{{ tab_discount }}</b></a></li></h3>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active" id="tab-data">
+                
+             <div class="row mb-2 " style="row-gap: 20px; margin-left:150px">
+                 
+                  <div class="col-sm-5">
+                <label class=" control-label" for="input-operatorname" style="color:white">{{ entry_operatorname }}</label>
+                  <input type="text" name="operatorname" value="{{ operatorname }}" placeholder="{{ entry_operatorname }}" id="input-operatorname" class="form-control"/>
+                  {% if error_operatorname %}
+                    <div class="text-danger">{{ error_operatorname }}</div>
+                  {% endif %}
+                  </div>
+              
+                <div class="col-sm-5">
+                <label class=" control-label" for="input-operatorid" style="color:white">{{ column_operatorid }}</label>
+              
+                  <input type="text" disabled name="operatorid" value="{{ operatorid }}" placeholder="{{ column_operatorid }}" id="input-operatorid" class="form-control"/>
+                </div>
+              
+                <div class="col-sm-5">
+                <label class=" control-label" for="input-servicename" style="color:white">{{ column_service }}</label>
+                
+                  <select name="serviceid" id="input-serviceid-class" class="form-control">
+                      {% for service in serviceinfo %}
+                              {% if service.serviceid == servicetype %}
+                                <option value="{{ service.serviceid }}" selected="selected">{{ service.servicetype }}</option>
+                              {% else %}
+                                <option value="{{ service.serviceid }}">{{ service.servicetype }}</option>
+                              {% endif %}
+                            {% endfor %}
+                  </select>
+                </div>
+              
+                <div class="col-sm-5">
+                <label class="col-sm-2 control-label" for="input-status" style="color:white"><span data-toggle="tooltip" title="{{ column_status }}">{{ column_status }}</span></label>
+               
+                  <select name="status" id="input-status-class" class="form-control">
+                    {% if status %}
+
+
+                      <option value="1" selected="selected">{{ text_enabled }}</option>
+                      <option value="0">{{ text_disabled }}</option>
+
+
+                    {% else %}
+
+
+                      <option value="1">{{ text_enabled }}</option>
+                      <option value="0" selected="selected">{{ text_disabled }}</option>
+
+
+                    {% endif %}
+
+                  </select>
+                </div>
+             
+                {#<div class="col-sm-5">
+                <label class="col-sm-2 control-label" for="input-modifiedby" style="color:white">
+                    <span data-toggle="tooltip" title="{{ help_modifiedby }}">{{ entry_modifiedby }}</span></label>
+                
+                  <input type="text" name="modifiedby" disabled value="{{ modifiedby }}" placeholder="{{ entry_modifiedby }}" id="input-modifiedby" class="form-control"/>
+                </div>
+                
+                 <div class="col-sm-5">
+                <label class="col-sm-2 control-label" for="input-operatorname" style="color:white">{{ entry_operatorname }}</label>
+               
+                  <input type="text" name="operatorname" value="{{ operatorname }}" placeholder="{{ entry_operatorname }}" id="input-operatorname" class="form-control"/>
+                  {% if error_operatorname %}
+                    <div class="text-danger">{{ error_operatorname }}</div>
+                  {% endif %}
+                  </div>
+                 #}
+                <div class="row mb-5" style="margin-left:120px ">
+                   <div class="col-sm-8 ">
+                  <label for="input-logo" class="col-sm-6 col-form-label" style="color:white">IMAGE</label>
+                  
+                    <div class="border rounded p-2 mx-auto" style="max-width: 200px;">
+                     <img src="{{operator_logo}}" alt="operator_logo" title="" id="thumb-logo" data-oc-placeholder="{{operator_logo}}" class="img-fluid" style="width:200px">  
+                     <input type="hidden" name="operatorlogo" value="{{operatorlogo}}" id="input-logo"/>
+                      <div class="d-grid gap-2 mt-2">
+                        <button type="button" data-oc-toggle="image" data-oc-target="#input-logo" data-oc-thumb="#thumb-logo" class="btn btn-primary rounded-0"><i class="fa-solid fa-pencil"></i> Edit</button>
+                        <button type="button" data-oc-toggle="clear" data-oc-target="#input-logo" data-oc-thumb="#thumb-logo" class="btn btn-warning rounded-0"><i class="fa-regular fa-trash-can"></i> Clear</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            
+            
+            <div class="tab-pane" id="tab-discount">
+              <div class="table-responsive">
+                <table id="discount" class="table table-striped table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <td class="text-center">{{ entry_apiid }}</td>
+                      <td class="text-center">{{ entry_operatorcode }}</td>
+                      <td class="text-center">{{ entry_seq }}</td>
+                     <td class="form-group">
+                  <label class="col-sm-2 control-label" for="input-mode"><span data-toggle="tooltip" title="{{ column_mode }}">{{ column_mode }}</span></label>
+                
+              </td>
+               
+                      <td></td>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    {% set commission_row = 0 %}
+                    {% for key,value in operater_code %}
+                      <tr id="commission-row{{ commission_row }}">
+                        <td class="text-left">
+                                <select name="api[{{ commission_row }}][apiid]" class="form-control">
+                                    {% for api in apis %}
+                                      {% if api.apiid == key%}
+                                        <option value="{{ api.apiid }}" selected="selected">{{ api.comurl }}</option>
+                                       {%else%}
+                                       <option value="{{ api.apiid }}">{{ api.comurl }}</option>
+                                      {% endif %}
+                                    {% endfor %}
+                                </select>
+                          </td>
+                          <td class="text-right">
+                                 <input type="text" name="api[{{ commission_row }}][mappedcode]" value="{{ value }}" placeholder="{{ entry_operator_mmapping_code }}" class="form-control"/>
+                          </td>
+                           <td class="text-right">
+                             {% for seqkey,seqvalue in apiseq %}
+                             {% if seqkey == key%}
+                                     <input type="text" name="api[{{ commission_row }}][seq]" value="{{ seqvalue }}" placeholder="{{ entry_operator_seq }}" class="form-control"/>
+                              {% endif %}
+                              {% endfor %}
+                            </td>
+                            <td class="text-right">
+                            <select name="api[{{ commission_row }}][mode]"  id="input-mode-class" class="form-control">
+                            {% if mode %}
+
+
+                        <option  value="1" selected="selected">{{ entry_oponline }}</option>
+                        <option value="0">{{ entry_opoffline }}</option>
+
+
+                        {% else %}
+
+
+                      <option value="1">{{ entry_oponline }}</option>
+                      <option value="0" selected="selected">{{ entry_opoffline }}</option>
+
+
+                    {% endif %}
+
+                  </select>
+            
+            </td>
+                        <td class="text-left"><button type="button" onclick="$('#commission-row{{ commission_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>
+                      </tr>
+                      {% set commission_row = commission_row + 1 %}
+                    {% endfor %}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="4"></td>
+                      <td class="text-left"><button type="button" onclick="addMapping();" data-toggle="tooltip" title="{{ button_discount_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <link href="view/javascript/codemirror/lib/codemirror.css" rel="stylesheet"/>
+  <link href="view/javascript/codemirror/theme/monokai.css" rel="stylesheet"/>
+  <script type="text/javascript" src="view/javascript/codemirror/lib/codemirror.js"></script>
+  <script type="text/javascript" src="view/javascript/codemirror/lib/xml.js"></script>
+  <script type="text/javascript" src="view/javascript/codemirror/lib/formatting.js"></script>
+  <script type="text/javascript" src="view/javascript/summernote/summernote.js"></script>
+  <link href="view/javascript/summernote/summernote.css" rel="stylesheet"/>
+  <script type="text/javascript" src="view/javascript/summernote/summernote-image-attributes.js"></script>
+  <script type="text/javascript" src="view/javascript/summernote/opencart.js"></script>
+  <script type="text/javascript"><!--
+  // Manufacturer
+  $('input[name=\'manufacturer\']').autocomplete({
+	  'source': function(request, response) {
+		  $.ajax({
+			  url: 'index.php?route=catalog/manufacturer/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+			  dataType: 'json',
+			  success: function(json) {
+				  json.unshift({
+					  manufacturer_id: 0,
+					  name: '{{ text_none }}'
+				  });
+
+				  response($.map(json, function(item) {
+					  return {
+						  label: item['name'],
+						  value: item['manufacturer_id']
+					  }
+				  }));
+			  }
+		  });
+	  },
+	  'select': function(item) {
+		  $('input[name=\'manufacturer\']').val(item['label']);
+		  $('input[name=\'manufacturer_id\']').val(item['value']);
+	  }
+  });
+
+  // Category
+  $('input[name=\'category\']').autocomplete({
+	  'source': function(request, response) {
+		  $.ajax({
+			  url: 'index.php?route=catalog/category/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+			  dataType: 'json',
+			  success: function(json) {
+				  response($.map(json, function(item) {
+					  return {
+						  label: item['name'],
+						  value: item['category_id']
+					  }
+				  }));
+			  }
+		  });
+	  },
+	  'select': function(item) {
+		  $('input[name=\'category\']').val('');
+
+		  $('#product-category' + item['value']).remove();
+
+		  $('#product-category').append('<div id="product-category' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="product_category[]" value="' + item['value'] + '" /></div>');
+	  }
+  });
+
+  $('#product-category').delegate('.fa-minus-circle', 'click', function() {
+	  $(this).parent().remove();
+  });
+
+  // Filter
+  $('input[name=\'filter\']').autocomplete({
+	  'source': function(request, response) {
+		  $.ajax({
+			  url: 'index.php?route=catalog/filter/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+			  dataType: 'json',
+			  success: function(json) {
+				  response($.map(json, function(item) {
+					  return {
+						  label: item['name'],
+						  value: item['filter_id']
+					  }
+				  }));
+			  }
+		  });
+	  },
+	  'select': function(item) {
+		  $('input[name=\'filter\']').val('');
+
+		  $('#product-filter' + item['value']).remove();
+
+		  $('#product-filter').append('<div id="product-filter' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="product_filter[]" value="' + item['value'] + '" /></div>');
+	  }
+  });
+
+  $('#product-filter').delegate('.fa-minus-circle', 'click', function() {
+	  $(this).parent().remove();
+  });
+
+  // Downloads
+  $('input[name=\'download\']').autocomplete({
+	  'source': function(request, response) {
+		  $.ajax({
+			  url: 'index.php?route=catalog/download/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+			  dataType: 'json',
+			  success: function(json) {
+				  response($.map(json, function(item) {
+					  return {
+						  label: item['name'],
+						  value: item['download_id']
+					  }
+				  }));
+			  }
+		  });
+	  },
+	  'select': function(item) {
+		  $('input[name=\'download\']').val('');
+
+		  $('#product-download' + item['value']).remove();
+
+		  $('#product-download').append('<div id="product-download' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="product_download[]" value="' + item['value'] + '" /></div>');
+	  }
+  });
+
+  $('#product-download').delegate('.fa-minus-circle', 'click', function() {
+	  $(this).parent().remove();
+  });
+
+  // Related
+  $('input[name=\'related\']').autocomplete({
+	  'source': function(request, response) {
+		  $.ajax({
+			  url: 'index.php?route=catalog/product/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+			  dataType: 'json',
+			  success: function(json) {
+				  response($.map(json, function(item) {
+					  return {
+						  label: item['name'],
+						  value: item['product_id']
+					  }
+				  }));
+			  }
+		  });
+	  },
+	  'select': function(item) {
+		  $('input[name=\'related\']').val('');
+
+		  $('#product-related' + item['value']).remove();
+
+		  $('#product-related').append('<div id="product-related' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="product_related[]" value="' + item['value'] + '" /></div>');
+	  }
+  });
+
+  $('#product-related').delegate('.fa-minus-circle', 'click', function() {
+	  $(this).parent().remove();
+  });
+  //--></script>
+  <script type="text/javascript"><!--
+  var attribute_row = {{ attribute_row }};
+
+  function addAttribute() {
+	  html = '<tr id="attribute-row' + attribute_row + '">';
+	  html += '  <td class="text-left" style="width: 20%;"><input type="text" name="product_attribute[' + attribute_row + '][name]" value="" placeholder="{{ entry_attribute }}" class="form-control" /><input type="hidden" name="product_attribute[' + attribute_row + '][attribute_id]" value="" /></td>';
+	  html += '  <td class="text-left">';
+    {% for language in languages %}
+	  html += '<div class="input-group"><span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span><textarea name="product_attribute[' + attribute_row + '][product_attribute_description][{{ language.language_id }}][text]" rows="5" placeholder="{{ entry_text }}" class="form-control"></textarea></div>';
+    {% endfor %}
+	  html += '  </td>';
+	  html += '  <td class="text-right"><button type="button" onclick="$(\'#attribute-row' + attribute_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+	  html += '</tr>';
+
+	  $('#attribute tbody').append(html);
+
+	  attributeautocomplete(attribute_row);
+
+	  attribute_row++;
+  }
+
+  function attributeautocomplete(attribute_row) {
+	  $('input[name=\'product_attribute[' + attribute_row + '][name]\']').autocomplete({
+		  'source': function(request, response) {
+			  $.ajax({
+				  url: 'index.php?route=catalog/attribute/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+				  dataType: 'json',
+				  success: function(json) {
+					  response($.map(json, function(item) {
+						  return {
+							  category: item.attribute_group,
+							  label: item.name,
+							  value: item.attribute_id
+						  }
+					  }));
+				  }
+			  });
+		  },
+		  'select': function(item) {
+			  $('input[name=\'product_attribute[' + attribute_row + '][name]\']').val(item['label']);
+			  $('input[name=\'product_attribute[' + attribute_row + '][attribute_id]\']').val(item['value']);
+		  }
+	  });
+  }
+
+  $('#attribute tbody tr').each(function(index, element) {
+	  attributeautocomplete(index);
+  });
+  //--></script>
+  <script type="text/javascript"><!--
+  var option_row = {{ option_row }};
+
+  $('input[name=\'option\']').autocomplete({
+	  'source': function(request, response) {
+		  $.ajax({
+			  url: 'index.php?route=catalog/option/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+			  dataType: 'json',
+			  success: function(json) {
+				  response($.map(json, function(item) {
+					  return {
+						  category: item['category'],
+						  label: item['name'],
+						  value: item['option_id'],
+						  type: item['type'],
+						  option_value: item['option_value']
+					  }
+				  }));
+			  }
+		  });
+	  },
+	  'select': function(item) {
+		  html = '<div class="tab-pane" id="tab-option' + option_row + '">';
+		  html += '	<input type="hidden" name="product_option[' + option_row + '][product_option_id]" value="" />';
+		  html += '	<input type="hidden" name="product_option[' + option_row + '][name]" value="' + item['label'] + '" />';
+		  html += '	<input type="hidden" name="product_option[' + option_row + '][option_id]" value="' + item['value'] + '" />';
+		  html += '	<input type="hidden" name="product_option[' + option_row + '][type]" value="' + item['type'] + '" />';
+
+		  html += '	<div class="form-group">';
+		  html += '	  <label class="col-sm-2 control-label" for="input-required' + option_row + '">{{ entry_required }}</label>';
+		  html += '	  <div class="col-sm-10"><select name="product_option[' + option_row + '][required]" id="input-required' + option_row + '" class="form-control">';
+		  html += '	      <option value="1">{{ text_yes }}</option>';
+		  html += '	      <option value="0">{{ text_no }}</option>';
+		  html += '	  </select></div>';
+		  html += '	</div>';
+
+		  if (item['type'] == 'text') {
+			  html += '	<div class="form-group">';
+			  html += '	  <label class="col-sm-2 control-label" for="input-value' + option_row + '">{{ entry_option_value }}</label>';
+			  html += '	  <div class="col-sm-10"><input type="text" name="product_option[' + option_row + '][value]" value="" placeholder="{{ entry_option_value }}" id="input-value' + option_row + '" class="form-control" /></div>';
+			  html += '	</div>';
+		  }
+
+		  if (item['type'] == 'textarea') {
+			  html += '	<div class="form-group">';
+			  html += '	  <label class="col-sm-2 control-label" for="input-value' + option_row + '">{{ entry_option_value }}</label>';
+			  html += '	  <div class="col-sm-10"><textarea name="product_option[' + option_row + '][value]" rows="5" placeholder="{{ entry_option_value }}" id="input-value' + option_row + '" class="form-control"></textarea></div>';
+			  html += '	</div>';
+		  }
+
+		  if (item['type'] == 'file') {
+			  html += '	<div class="form-group" style="display: none;">';
+			  html += '	  <label class="col-sm-2 control-label" for="input-value' + option_row + '">{{ entry_option_value }}</label>';
+			  html += '	  <div class="col-sm-10"><input type="text" name="product_option[' + option_row + '][value]" value="" placeholder="{{ entry_option_value }}" id="input-value' + option_row + '" class="form-control" /></div>';
+			  html += '	</div>';
+		  }
+
+		  if (item['type'] == 'date') {
+			  html += '	<div class="form-group">';
+			  html += '	  <label class="col-sm-2 control-label" for="input-value' + option_row + '">{{ entry_option_value }}</label>';
+			  html += '	  <div class="col-sm-3"><div class="input-group date"><input type="text" name="product_option[' + option_row + '][value]" value="" placeholder="{{ entry_option_value }}" data-date-format="YYYY-MM-DD" id="input-value' + option_row + '" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button></span></div></div>';
+			  html += '	</div>';
+		  }
+
+		  if (item['type'] == 'time') {
+			  html += '	<div class="form-group">';
+			  html += '	  <label class="col-sm-2 control-label" for="input-value' + option_row + '">{{ entry_option_value }}</label>';
+			  html += '	  <div class="col-sm-10"><div class="input-group time"><input type="text" name="product_option[' + option_row + '][value]" value="" placeholder="{{ entry_option_value }}" data-date-format="HH:mm" id="input-value' + option_row + '" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button></span></div></div>';
+			  html += '	</div>';
+		  }
+
+		  if (item['type'] == 'datetime') {
+			  html += '	<div class="form-group">';
+			  html += '	  <label class="col-sm-2 control-label" for="input-value' + option_row + '">{{ entry_option_value }}</label>';
+			  html += '	  <div class="col-sm-10"><div class="input-group datetime"><input type="text" name="product_option[' + option_row + '][value]" value="" placeholder="{{ entry_option_value }}" data-date-format="YYYY-MM-DD HH:mm" id="input-value' + option_row + '" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button></span></div></div>';
+			  html += '	</div>';
+		  }
+
+		  if (item['type'] == 'select' || item['type'] == 'radio' || item['type'] == 'checkbox' || item['type'] == 'image') {
+			  html += '<div class="table-responsive">';
+			  html += '  <table id="option-value' + option_row + '" class="table table-striped table-bordered table-hover">';
+			  html += '  	 <thead>';
+			  html += '      <tr>';
+			  html += '        <td class="text-left">{{ entry_option_value }}</td>';
+			  html += '        <td class="text-right">{{ entry_quantity }}</td>';
+			  html += '        <td class="text-left">{{ entry_subtract }}</td>';
+			  html += '        <td class="text-right">{{ entry_price }}</td>';
+			  html += '        <td class="text-right">{{ entry_option_points }}</td>';
+			  html += '        <td class="text-right">{{ entry_weight }}</td>';
+			  html += '        <td></td>';
+			  html += '      </tr>';
+			  html += '  	 </thead>';
+			  html += '  	 <tbody>';
+			  html += '    </tbody>';
+			  html += '    <tfoot>';
+			  html += '      <tr>';
+			  html += '        <td colspan="6"></td>';
+			  html += '        <td class="text-left"><button type="button" onclick="addOptionValue(' + option_row + ');" data-toggle="tooltip" title="{{ button_option_value_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>';
+			  html += '      </tr>';
+			  html += '    </tfoot>';
+			  html += '  </table>';
+			  html += '</div>';
+
+			  html += '  <select id="option-values' + option_row + '" style="display: none;">';
+
+			  for (i = 0; i < item['option_value'].length; i++) {
+				  html += '  <option value="' + item['option_value'][i]['option_value_id'] + '">' + item['option_value'][i]['name'] + '</option>';
+			  }
+
+			  html += '  </select>';
+			  html += '</div>';
+		  }
+
+		  $('#tab-option .tab-content').append(html);
+
+		  $('#option > li:last-child').before('<li><a href="#tab-option' + option_row + '" data-toggle="tab"><i class="fa fa-minus-circle" onclick=" $(\'#option a:first\').tab(\'show\');$(\'a[href=\\\'#tab-option' + option_row + '\\\']\').parent().remove(); $(\'#tab-option' + option_row + '\').remove();"></i>' + item['label'] + '</li>');
+
+		  $('#option a[href=\'#tab-option' + option_row + '\']').tab('show');
+
+		  $('[data-toggle=\'tooltip\']').tooltip({
+			  container: 'body',
+			  html: true
+		  });
+
+		  $('.date').datetimepicker({
+			  language: '{{ datepicker }}',
+			  pickTime: false
+		  });
+
+		  $('.time').datetimepicker({
+			  language: '{{ datepicker }}',
+			  pickDate: false
+		  });
+
+		  $('.datetime').datetimepicker({
+			  language: '{{ datepicker }}',
+			  pickDate: true,
+			  pickTime: true
+		  });
+
+		  option_row++;
+	  }
+  });
+  //--></script>
+  <script type="text/javascript"><!--
+  var option_value_row = {{ option_value_row }};
+
+  function addOptionValue(option_row) {
+	  html = '<tr id="option-value-row' + option_value_row + '">';
+	  html += '  <td class="text-left"><select name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][option_value_id]" class="form-control">';
+	  html += $('#option-values' + option_row).html();
+	  html += '  </select><input type="hidden" name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][product_option_value_id]" value="" /></td>';
+	  html += '  <td class="text-right"><input type="text" name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][quantity]" value="" placeholder="{{ entry_quantity }}" class="form-control" /></td>';
+	  html += '  <td class="text-left"><select name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][subtract]" class="form-control">';
+	  html += '    <option value="1">{{ text_yes }}</option>';
+	  html += '    <option value="0">{{ text_no }}</option>';
+	  html += '  </select></td>';
+	  html += '  <td class="text-right"><select name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][price_prefix]" class="form-control">';
+	  html += '    <option value="+">+</option>';
+	  html += '    <option value="-">-</option>';
+	  html += '  </select>';
+	  html += '  <input type="text" name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][price]" value="" placeholder="{{ entry_price }}" class="form-control" /></td>';
+	  html += '  <td class="text-right"><select name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][points_prefix]" class="form-control">';
+	  html += '    <option value="+">+</option>';
+	  html += '    <option value="-">-</option>';
+	  html += '  </select>';
+	  html += '  <input type="text" name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][points]" value="" placeholder="{{ entry_points }}" class="form-control" /></td>';
+	  html += '  <td class="text-right"><select name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][weight_prefix]" class="form-control">';
+	  html += '    <option value="+">+</option>';
+	  html += '    <option value="-">-</option>';
+	  html += '  </select>';
+	  html += '  <input type="text" name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][weight]" value="" placeholder="{{ entry_weight }}" class="form-control" /></td>';
+	  html += '  <td class="text-left"><button type="button" onclick="$(this).tooltip(\'destroy\');$(\'#option-value-row' + option_value_row + '\').remove();" data-toggle="tooltip" rel="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+	  html += '</tr>';
+
+	  $('#option-value' + option_row + ' tbody').append(html);
+	  $('[rel=tooltip]').tooltip();
+
+	  option_value_row++;
+  }
+
+  //--></script>
+  <script type="text/javascript"><!--
+  var commission_row = {{ commission_row }};
+
+  function addMapping() {
+	  html = '<tr id="commission-row' + commission_row + '">';
+	  html += '  <td class="text-left"><select name="api[' + commission_row + '][apiid]" class="form-control">';
+    {% for api in apis %}
+	  html += '    <option value="{{ api.apiid }}">{{ api.comurl|escape('js') }}</option>';
+    {% endfor %}
+	   html += '  </select></td>';
+	   html += '  <td class="text-right"><input type="text" name="api['+ commission_row +'][mappedcode]" value="" placeholder="{{ entry_operator_mmapping_code }}" class="form-control"/></td>';
+	    html += '  <td class="text-right"><input type="text" name="api['+ commission_row +'][seq]" value="0" placeholder="{{ entry_operator_seq }}" class="form-control"/></td>';
+	     
+      html += '  <td class="text-left"><select name="api['+ commission_row +'][mode]" class="form-control">';
+    
+	  html += '    <option value="1">{{ entry_oponline }}</option>';
+	  html +='    <option value="0">{{ entry_opoffline }}</option>';
+	  html += '  <td class="text-left"><button type="button" onclick="$(\'#commission-row'+ commission_row +'\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+	  
+	  html += '</tr>';
+
+	  $('#discount tbody').append(html);
+
+	  $('.date').datetimepicker({
+		  pickTime: false
+	  });
+
+	  commission_row++;
+  }
+
+  //--></script>
+  <script>
+      function changelogoButton(value)
+      {
+          alert('SIKI');
+      }
+      
+  </script>
+  <script type="text/javascript"><!--
+  var special_row = {{ special_row }};
+
+  function addSpecial() {
+	  html = '<tr id="special-row' + special_row + '">';
+	  html += '  <td class="text-left"><select name="product_special[' + special_row + '][customer_group_id]" class="form-control">';
+    {% for customer_group in customer_groups %}
+	  html += '      <option value="{{ customer_group.customer_group_id }}">{{ customer_group.name|escape('js') }}</option>';
+    {% endfor %}
+	  html += '  </select></td>';
+	  html += '  <td class="text-right"><input type="text" name="product_special[' + special_row + '][priority]" value="" placeholder="{{ entry_priority }}" class="form-control" /></td>';
+	  html += '  <td class="text-right"><input type="text" name="product_special[' + special_row + '][price]" value="" placeholder="{{ entry_price }}" class="form-control" /></td>';
+	  html += '  <td class="text-left" style="width: 20%;"><div class="input-group date"><input type="text" name="product_special[' + special_row + '][date_start]" value="" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button></span></div></td>';
+	  html += '  <td class="text-left" style="width: 20%;"><div class="input-group date"><input type="text" name="product_special[' + special_row + '][date_end]" value="" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button></span></div></td>';
+	  html += '  <td class="text-left"><button type="button" onclick="$(\'#special-row' + special_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+	  html += '</tr>';
+
+	  $('#special tbody').append(html);
+
+	  $('.date').datetimepicker({
+		  language: '{{ datepicker }}',
+		  pickTime: false
+	  });
+
+	  special_row++;
+  }
+
+  //--></script>
+  <script type="text/javascript"><!--
+  var image_row = {{ image_row }};
+
+  function addImage() {
+	  html = '<tr id="image-row' + image_row + '">';
+	  html += '  <td class="text-left"><a href="" id="thumb-image' + image_row + '"data-toggle="image" class="img-thumbnail"><img src="{{ placeholder }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a><input type="hidden" name="product_image[' + image_row + '][image]" value="" id="input-image' + image_row + '" /></td>';
+	  html += '  <td class="text-right"><input type="text" name="product_image[' + image_row + '][sort_order]" value="" placeholder="{{ entry_sort_order }}" class="form-control" /></td>';
+	  html += '  <td class="text-left"><button type="button" onclick="$(\'#image-row' + image_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+	  html += '</tr>';
+
+	  $('#images tbody').append(html);
+
+	  image_row++;
+  }
+
+  //--></script>
+  <script type="text/javascript"><!--
+  var recurring_row = {{ recurring_row }};
+
+  function addRecurring() {
+	  html = '<tr id="recurring-row' + recurring_row + '">';
+	  html += '  <td class="left">';
+	  html += '    <select name="product_recurring[' + recurring_row + '][recurring_id]" class="form-control">>';
+    {% for recurring in recurrings %}
+	  html += '      <option value="{{ recurring.recurring_id }}">{{ recurring.name }}</option>';
+    {% endfor %}
+	  html += '    </select>';
+	  html += '  </td>';
+	  html += '  <td class="left">';
+	  html += '    <select name="product_recurring[' + recurring_row + '][customer_group_id]" class="form-control">>';
+    {% for customer_group in customer_groups %}
+	  html += '      <option value="{{ customer_group.customer_group_id }}">{{ customer_group.name }}</option>';
+    {% endfor %}
+	  html += '    <select>';
+	  html += '  </td>';
+	  html += '  <td class="left">';
+	  html += '    <a onclick="$(\'#recurring-row' + recurring_row + '\').remove()" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></a>';
+	  html += '  </td>';
+	  html += '</tr>';
+
+	  $('#tab-recurring table tbody').append(html);
+
+	  recurring_row++;
+  }
+
+  //--></script>
+  <script type="text/javascript"><!--
+  $('.date').datetimepicker({
+	  language: '{{ datepicker }}',
+	  pickTime: false
+  });
+
+  $('.time').datetimepicker({
+	  language: '{{ datepicker }}',
+	  pickDate: false
+  });
+
+  $('.datetime').datetimepicker({
+	  language: '{{ datepicker }}',
+	  pickDate: true,
+	  pickTime: true
+  });
+  //--></script>
+  <script type="text/javascript"><!--
+  $('#language a:first').tab('show');
+  $('#option a:first').tab('show');
+  //--></script>
+  
+</div>
+{{ footer }} 

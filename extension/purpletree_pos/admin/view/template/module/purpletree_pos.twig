@@ -1,0 +1,459 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+	<div class="page-header">
+		<div class="container-fluid">
+			<div class="pull-right float-end">
+				<button type="submit" form="form-pos" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+				<a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default btn-light"><i class="fa fa-reply"></i></a>
+			</div>
+			<h1>{{ heading_title }}</h1>
+			 <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+		</div>
+	</div>
+	<div class="container-fluid">
+		{% if error_warning %}
+		<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+		</div>
+		{% endif %}
+		{% if success %}
+		<div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}
+		</div>
+		{% endif%}
+		<div class="panel panel-default card">
+			<div class="panel-heading">
+				<h3 class="panel-title card-header"><i class="fa fa-pencil fas fa-edit"></i> {{ text_edit }}</h3>
+			</div>
+			<div class="panel-body card-body">
+				<form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-pos" class="form-horizontal">					
+					<div class="tab-content">
+							<div class="form-group py-1 row">
+								<label class="col-sm-2 col-form-label control-label" for="input-status">{{ entry_status }}</label>
+								<div class="col-sm-10">
+									<select name="module_purpletree_pos_status" id="input-status" class="form-select">
+										{% if module_purpletree_pos_status %}
+										<option value="1" selected="selected">{{ text_enabled }}</option>
+										<option value="0">{{ text_disabled }}</option>
+										{% else %}
+										<option value="1">{{ text_enabled }}</option>
+										<option value="0" selected="selected">{{ text_disabled }}</option>
+										{% endif %}
+									</select>
+								</div>
+							</div>	
+							<div class="form-group  required">
+							<div class="col-sm-8">
+							  <input type="hidden" name="module_purpletree_pos_process_data" value="{{ module_purpletree_pos_process_data }}" class="form-control" id="setlicensee"/>
+								
+							  <input type="hidden" name="module_purpletree_pos_validate_text" value="{{ module_purpletree_pos_validate_text }}">
+							  <input type="hidden" name="module_purpletree_pos_live_validate_text" value="{{ module_purpletree_pos_live_validate_text }}">
+							  
+							  <input type="hidden" name="module_purpletree_pos_encypt_text" value="{{ module_purpletree_pos_encypt_text }}">
+							</div>
+							<div class="col-sm-10 col-sm-offset-2 offset-sm-2">
+						
+							   <button type="button" class="btn btn-primary" style="padding: 8px 20px;" id="getLicensee">{{ button_get_license }}</button>
+							</div>
+							
+						</div>
+						
+						
+							
+						<div class="form-group py-1 row">
+								<label class="col-sm-2 col-form-label control-label" >{{ entry_return_action }}</label>
+								<div class="col-sm-10">
+									<select name="module_purpletree_pos_return_action" id="input-return-action" class="form-select">
+										{% for actions in return_actions %}
+										<option {% if module_purpletree_pos_return_action == actions.return_action_id %} selected {% endif %} value="{{actions.return_action_id}}">{{ actions.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+							
+						<div class="form-group py-1 row">
+								<label class="col-sm-2 col-form-label control-label" >{{ entry_return_status }}</label>
+								<div class="col-sm-10">
+									<select name="module_purpletree_pos_return_status" id="input-return-status" class="form-select">
+										{% for status in return_status %}
+										<option {% if module_purpletree_pos_return_status == status.return_status_id %} selected {% endif %} value="{{status.return_status_id}}">{{ status.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+							
+				<div class="form-group row py-1">
+                  <label class="col-sm-2 col-form-label control-label">{{ entry_receipt_footer_detail }}</label>
+                  <div class="col-sm-10">
+                    <textarea name="module_purpletree_pos_receipt_detail" rows="8" placeholder="receipt footer details" id="input-receipt" class="form-control">{{ module_purpletree_pos_receipt_detail }}</textarea>
+                  </div>
+                </div>
+				
+				<div class="form-group row py-1">
+                  <label class="col-sm-2 col-form-label control-label">{{ entry_receipt_store_detail }}</label>
+                  <div class="col-sm-10">
+                    <textarea name="module_purpletree_pos_receipt_store_detail" rows="8" placeholder="receipt store details" id="input-receipt" class="form-control">{{ module_purpletree_pos_receipt_store_detail }}</textarea>
+                  </div>
+                </div>
+				
+<!--- Guest user code --->						
+<!--legend>{{ entry_guest_user }}</legend>						
+	<div class="form-group py-1 row">
+		<label class="col-sm-3 col-form-label control-label" for="input-status">{{ entry_first_name }}</label>
+		<div class="col-md-9">
+			<input type="text" name="module_purpletree_pos_guest_first_name" class="form-control" value="{{ module_purpletree_pos_guest_first_name is defined?module_purpletree_pos_guest_first_name:'' }}" id = "guest_first_name"/>
+		</div>
+	</div>
+	<div class="form-group py-1 row">
+		<label class="col-sm-3 col-form-label control-label" for="input-status">{{ entry_last_name }}</label>
+		<div class="col-md-9">
+			<input type="text" name="module_purpletree_pos_guest_last_name" class="form-control" value="{{ module_purpletree_pos_guest_last_name is defined?module_purpletree_pos_guest_last_name:'' }}" id = "guest_last_name"/>
+		</div>
+	</div>
+	<div class="form-group py-1 row">
+		<label class="col-sm-3 col-form-label control-label" for="input-status">{{ entry_email }}</label>
+		<div class="col-md-9">
+			<input type="text" name="module_purpletree_pos_guest_email" class="form-control" value="{{ module_purpletree_pos_guest_email is defined?module_purpletree_pos_guest_email:'' }}" id = "guest_email"/>
+		</div>
+	</div>
+	<div class="form-group py-1 row">
+		<label class="col-sm-3 col-form-label control-label" for="input-status">{{ entry_telephone }}</label>
+		<div class="col-md-9">
+			<input type="text" name="module_purpletree_pos_guest_telephone" class="form-control" value="{{ module_purpletree_pos_guest_telephone is defined?module_purpletree_pos_guest_telephone:'' }}" id = "guest_telephone"/>
+		</div>
+	</div>
+
+	<legend class="pts-legend-text">
+	<label class="radio-inline">
+    {{ entry_default_shipping_address }}</label>
+	 <label class="radio-inline pts_shipping_address">
+     <input type="radio" name="module_purpletree_pos_guest_shipping_address" {% if module_purpletree_pos_guest_shipping_address == 1 %} checked="checked" {% endif %} value="1">{{ entry_shipping_address }}</label>
+	 <label class="radio-inline pts_shipping_address">
+     <input type="radio" name="module_purpletree_pos_guest_shipping_address" {% if module_purpletree_pos_guest_shipping_address == 2 %} checked="checked" {% endif %}  value="2">{{ entry_payment_address }}</label>
+	 </legend>	
+	 
+	<div class="form-group py-1 row shipping_address">
+		<label class="col-sm-3 col-form-label control-label" for="input-status">{{ entry_company }}</label>
+		<div class="col-md-9">
+			<input type="text" name="module_purpletree_pos_guest_s_company" class="form-control" value="{{ module_purpletree_pos_guest_s_company is defined?module_purpletree_pos_guest_s_company:'' }}" id = "guest_s_company"/>
+		</div>
+	</div>
+	<div class="form-group py-1 row shipping_address">
+		<label class="col-sm-3 col-form-label control-label" for="input-status">{{ entry_address_1 }}</label>
+		<div class="col-md-9">
+			<input type="text" name="module_purpletree_pos_guest_s_address_1" class="form-control" value="{{ module_purpletree_pos_guest_s_address_1 is defined?module_purpletree_pos_guest_s_address_1:'' }}" id = "guest_s_address_1"/>
+		</div>
+	</div>
+	<div class="form-group py-1 row shipping_address">
+		<label class="col-sm-3 col-form-label control-label" for="input-status">{{ entry_address_2 }}</label>
+		<div class="col-md-9">
+			<input type="text" name="module_purpletree_pos_guest_s_address_2" class="form-control" value="{{ module_purpletree_pos_guest_s_address_2 is defined?module_purpletree_pos_guest_s_address_2:'' }}" id = "guest_s_address_2"/>
+		</div>
+	</div>
+	<div class="form-group py-1 row shipping_address">
+		<label class="col-sm-3 col-form-label control-label" for="input-status">{{ entry_city }}</label>
+		<div class="col-md-9">
+			<input type="text" name="module_purpletree_pos_guest_s_city" class="form-control" value="{{ module_purpletree_pos_guest_s_city is defined?module_purpletree_pos_guest_s_city:'' }}" id = "guest_s_city"/>
+		</div>
+	</div>
+	<div class="form-group py-1 row shipping_address">
+		<label class="col-sm-3 col-form-label control-label" for="input-status">{{ entry_post_code }}</label>
+		<div class="col-md-9">
+			<input type="text" name="module_purpletree_pos_guest_s_post_code" class="form-control" value="{{ module_purpletree_pos_guest_s_post_code is defined?module_purpletree_pos_guest_s_post_code:'' }}" id = "guest_s_post_code"/>
+		</div>
+	</div>
+	<div class="form-group py-1 row shipping_address">
+		<label class="col-sm-3 col-form-label control-label" for="input-status">{{ entry_country }}</label>
+		<div class="col-md-9">
+			<input type="text" name="module_purpletree_pos_guest_s_country" class="form-control" value="{{ module_purpletree_pos_guest_s_country is defined?module_purpletree_pos_guest_s_country:'' }}" id = "guest_s_country"/>
+		</div>
+	</div>	
+	
+	<div class="form-group py-1 row shipping_address">
+		<label class="col-sm-3 col-form-label control-label" for="input-status">{{ entry_state }}</label>
+		<div class="col-md-9">
+			<input type="text" name="module_purpletree_pos_guest_s_state" class="form-control" value="{{ module_purpletree_pos_guest_s_state is defined?module_purpletree_pos_guest_s_state:'' }}" id = "guest_s_state"/>
+		</div>
+	</div>
+	
+	<legend class="pts-legend-text">
+	<label class="radio-inline">
+	{{ entry_default_payment_address }}</label>
+	 <label class="radio-inline pts_payment_address">
+     <input {% if module_purpletree_pos_guest_payment_address == 1 %} checked="checked" {% endif %} type="radio" name="module_purpletree_pos_guest_payment_address" value="1">{{ entry_payment_address }}</label>
+	 <label class="radio-inline pts_payment_address">
+     <input type="radio" name="module_purpletree_pos_guest_payment_address" {% if module_purpletree_pos_guest_payment_address == 2 %} checked="checked" {% endif %} value="2">{{ entry_store_address }}</label>
+	 </legend>	
+	 
+	<div class="form-group py-1 row payment_address">
+		<label class="col-sm-3 col-form-label control-label" for="input-status">{{ entry_company }}</label>
+		<div class="col-md-9">
+			<input type="text" name="module_purpletree_pos_guest_p_company" class="form-control" value="{{ module_purpletree_pos_guest_p_company is defined?module_purpletree_pos_guest_p_company:'' }}" id = "guest_p_company"/>
+		</div>
+	</div>
+	<div class="form-group py-1 row payment_address">
+		<label class="col-sm-3 col-form-label control-label" for="input-status">{{ entry_address_1 }}</label>
+		<div class="col-md-9">
+			<input type="text" name="module_purpletree_pos_guest_p_address_1" class="form-control" value="{{ module_purpletree_pos_guest_p_address_1 is defined?module_purpletree_pos_guest_p_address_1:'' }}" id = "guest_p_address_1"/>
+		</div>
+	</div>
+	<div class="form-group py-1 row payment_address">
+		<label class="col-sm-3 col-form-label control-label" for="input-status">{{ entry_address_2 }}</label>
+		<div class="col-md-9">
+			<input type="text" name="module_purpletree_pos_guest_p_address_2" class="form-control" value="{{ module_purpletree_pos_guest_p_address_2 is defined?module_purpletree_pos_guest_p_address_2:'' }}" id = "guest_p_address_2"/>
+		</div>
+	</div>
+	<div class="form-group py-1 row payment_address">
+		<label class="col-sm-3 col-form-label control-label" for="input-status">{{ entry_city }}</label>
+		<div class="col-md-9">
+			<input type="text" name="module_purpletree_pos_guest_p_city" class="form-control" value="{{ module_purpletree_pos_guest_p_city is defined?module_purpletree_pos_guest_p_city:'' }}" id = "guest_p_city"/>
+		</div>
+	</div>
+	<div class="form-group py-1 row payment_address">
+		<label class="col-sm-3 col-form-label control-label" for="input-status">{{ entry_post_code }}</label>
+		<div class="col-md-9">
+			<input type="text" name="module_purpletree_pos_guest_p_post_code" class="form-control" value="{{ module_purpletree_pos_guest_p_post_code is defined?module_purpletree_pos_guest_p_post_code:'' }}" id = "guest_p_post_code"/>
+		</div>
+	</div>
+	<div class="form-group py-1 row payment_address">
+		<label class="col-sm-3 col-form-label control-label" for="input-status">{{ entry_country }}</label>
+		<div class="col-md-9">
+			<input type="text" name="module_purpletree_pos_guest_p_country" class="form-control" value="{{ module_purpletree_pos_guest_p_country is defined?module_purpletree_pos_guest_p_country:'' }}" id = "guest_p_country"/>
+		</div>
+	</div>	
+	
+	<div class="form-group py-1 row payment_address">
+		<label class="col-sm-3 col-form-label control-label" for="input-status">{{ entry_state }}</label>
+		<div class="col-md-9">
+			<input type="text" name="module_purpletree_pos_guest_p_state" class="form-control" value="{{ module_purpletree_pos_guest_p_state is defined?module_purpletree_pos_guest_p_state:'' }}" id = "guest_p_state"/>
+		</div>
+	</div-->
+<!--- Guest user code --->		
+					
+			</div>
+			<div id="poslicenseModal" class="modal modall">
+				   <!-- Modal content -->
+		   <div class="modal-content modal-contentt">
+			  <div class="row">
+				 <div class="col-lg-12 liceform">
+				   <span class="close">&times;</span>
+				   
+					   <div style="display:none" class="alert alert-danger" id="modal_lic_error">
+                      </div>
+				   <div class="form-group row" name="Licencekeyval1" style="margin-top: 15px;" >
+				
+					  <div class="col-lg-10" style="padding:0;">
+					  
+                       <label class="control-label" for="input-name">{{ enter_license_key1 }}</label>
+                       <input name="" id="licenskey1" value="" placeholder="{{ enter_license_key1 }}" class="form-control" autocomplete="off" type="text" name="Licencekeyval" /><ul class="dropdown-menu"></ul>
+					   </div>
+					   <div class="col-lg-2">
+					   <label class="control-label" for="input-name" style="color:#fff">.</label>
+				     	<input value="{{ button_ok }}" class="btn btn-primary okbtn" type="button" onclick="savelicc()"/>
+								
+						</div>
+				<div class="col-lg-12 " style="left:-13px; top:10px";>
+				     <input value="{{ dont_have_lisence_key }}" class="btn btn-primary licencekey2" style="margin-top:14px " type="button" onclick="dontlice()"/>	
+				</div>
+                    </div>
+					
+					<div class="orderdiv mt-3" style="display:none;">
+                       <label class="control-label" for="input-name">{{ entry_order_id }}</label>
+                       <input name="order_id" id="order_id" value="" placeholder="{{ entry_order_id }}" id="input-name" class="form-control" autocomplete="off" type="text"><ul class="dropdown-menu" ></ul>
+ 
+				    <div class="form-group">
+                       <label class="control-label" for="input-name">{{ entry_email_id }}</label>
+                       <input name="email_id" id="email_id" value="" placeholder="{{ entry_email_id }}" id="input-name" class="form-control" autocomplete="off" type="text"><ul class="dropdown-menu"></ul>
+                  </div>
+                  <div class="form-group mt-3">
+				  	<input value="{{
+					button_submit }}" class="btn btn-primary getlicbtn" style=" padding: 8px 20px 8px 20px; " type="button" onclick="getlicense()"/>
+								
+				  </div>
+				  </div>
+				  
+				</div>
+			 </div>
+		    </div>
+           			
+		</div>
+		</form>
+		<div class="panel-footer card-footer text-center ptsc-pos-version">{{ version}}</div>
+	</div>
+</div>
+</div>
+</div>
+<style>
+
+<!-- body {font-family: Arial, Helvetica, sans-serif;} -->
+body {font-family: Arial, Helvetica, sans-serif;}
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 15px;
+    border: 1px solid #888;
+	width: 30%;
+}
+.mbutton{
+margin-top: 62px;
+margin-left: 282px;
+}
+
+
+/* The Close Button */
+.close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+.liceform .form-group {
+margin:0;
+}	
+
+.pts-legend-text {
+
+    font-size: 16px;
+    padding-left: 50px;
+
+}	
+</style>
+<script>
+$('.shipping_address').css('display','none');
+$('.payment_address').css('display','none');
+
+var modal = document.getElementById('poslicenseModal');
+var btn = document.getElementById("getLicensee");
+var span = document.getElementsByClassName("close")[0];
+btn.onclick = function() {
+    modal.style.display = "block";
+	// $('#modal_lic_error').html('');
+	 $('#modal_lic_error').css('display','none');
+}
+span.onclick = function() {
+    modal.style.display = "none";
+	$('.orderdiv').css('display','none');
+}
+
+
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+</script>
+
+{% if module_purpletree_pos_guest_shipping_address == 1 %}
+<script> $('.shipping_address').css('display','block');</script>
+{% endif %}
+{% if module_purpletree_pos_guest_payment_address == 1 %}
+<script> $('.payment_address').css('display','block');</script>
+{% endif %}
+
+<script>
+function savelicc(){
+	var licenskey1 = $('#licenskey1').val();
+	if (licenskey1 == "") {
+        $('#modal_lic_error').html("Enter license key");
+		$('#modal_lic_error').css('display','block');
+	    $('.alertseucess').css('display','none');
+    } else {
+	$('.alertseucess').text("License key has been Changed. Click on Save button to save changes");
+		$('.alertseucess').css('display','block');
+	$('#setlicensee').val(licenskey1);
+		$('.orderdiv').css('display','none');
+			   $('.close').click();
+	}
+}
+function dontlice(){
+	$('.orderdiv').css('display','block');
+}
+function getlicense(order_id,Email_id){
+$('.getlicbtn').addClass('disabled');
+$('.getlicbtn').val("{{ please_wait }}");
+var order_id = document.getElementById('order_id').value;
+var email_id = document.getElementById('email_id').value;
+    if (!order_id.match(/^\d+/)) {
+				$('#modal_lic_error').html("{{ error_order_id }}");
+			    $('#modal_lic_error').css('display','block');
+				$('.getlicbtn').removeClass('disabled');
+			    $('.getlicbtn').val("{{ button_submit }}");
+	  return false;
+    } 
+    var atpos = email_id.indexOf("@");
+    var dotpos = email_id.lastIndexOf(".");
+    if (atpos<1 || dotpos<atpos+2 || dotpos+2>=email_id.length) {
+		 $('#modal_lic_error').html("{{ error_email_id }}");
+			    $('#modal_lic_error').css('display','block');
+				$('.getlicbtn').removeClass('disabled');
+			$('.getlicbtn').val("{{ button_submit }}")
+        return false;
+    }
+$.ajax ({
+            url: "https://process.purpletreesoftware.com/processorder.php",
+            data:'order_id='+order_id+'&email_id='+email_id+'&module=opencart_pos',
+			type: 'POST',
+			dataType: "json",
+            success: function( result ) {
+			$('.getlicbtn').removeClass('disabled');
+			$('.getlicbtn').val("{{ button_submit }}")
+			if(result.status == 'success') {
+			$('.alertseucess').text("License key has been Changed. Click on Save button to save changes");
+				$('.alertseucess').css('display','block');
+               $('#setlicensee').val(result.process_data);
+			   $('.orderdiv').css('display','none');
+			   $('.close').click();
+			   } else {
+			    $('#modal_lic_error').html(result.msg);
+			    $('#modal_lic_error').css('display','block');
+			   }
+            }
+        });
+    }
+	
+	$(".pts_payment_address input[type=radio]").on('click',function(e){
+		if(e.target.value == 1){
+			$('.payment_address').css('display','block');
+		}
+		if(e.target.value == 2){
+			$('.payment_address').css('display','none');
+		}
+	});
+	
+		$(".pts_shipping_address input[type=radio]").on('click',function(e){
+		if(e.target.value == 1){
+			$('.shipping_address').css('display','block');
+		}
+		if(e.target.value == 2){
+			$('.shipping_address').css('display','none');
+		}
+	});
+</script>
+{{ footer }}

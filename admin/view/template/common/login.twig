@@ -1,0 +1,68 @@
+{{ header }}
+<div id="content">
+  <div class="container-fluid">
+    <br/>
+    <br/>
+    <div class="row justify-content-sm-center">
+      <div class="col-sm-10 col-md-8 col-lg-5">
+        <div class="card">
+          <div class="card-header" style="color:white"><i class="fa-solid fa-lock"></i> {{ text_login }}</div>
+          <div class="card-body">
+            <form id="form-login" action="{{ login }}" method="post" data-oc-toggle="ajax">
+              {% if error_warning %}
+                <div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> {{ error_warning }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+              {% endif %}
+              {% if success %}
+                <div class="alert alert-success alert-dismissible"><i class="fa-solid fa-check-circle"></i> {{ success }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+              {% endif %}
+              <div class="mb-3">
+                <label for="input-username" class="form-label" style="color:white">{{ entry_username }}</label>
+                <div class="input-group">
+                  <div class="input-group-text"><i class="fa-solid fa-user"></i></div>
+                  <input type="text" name="username" value="" placeholder="{{ entry_username }}" id="input-username" class="form-control"/>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="input-password" class="form-label" style="color:white">{{ entry_password }}</label>
+                <div class="input-group mb-2">
+                  <div class="input-group-text"><i class="fa-solid fa-lock"></i></div>
+                  <input type="password" name="password" value="" placeholder="{{ entry_password }}" id="input-password" class="form-control"/>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="input-token" class="form-label" style="color:white">{{ entry_token }}</label>
+                <div class="input-group mb-2">
+                  <div class="input-group-text"><i class="fa-solid fa-lock"></i></div>
+                  <input type="password" name="token" value="" placeholder="{{ entry_token }}" id="input-token" class="form-control"/>
+                </div>
+                
+             <!-- UPDATED Forgotten Password link -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 7px; padding:7px;">
+              <a href="#" style="color: white; text-decoration: underline;">
+              Forgotten Password
+              </a> 
+            <button style="background-color: #007bff; color: white; border: none; padding:5px 13px; border-radius: 7px; cursor: pointer; position: relative; top: 5px;">
+              Login
+            </button>
+           </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--UPDATED JavaScript to handle click -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const forgotLink = document.getElementById('forgotten-password');
+    if (forgotLink) {
+      forgotLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        alert('Forgot password clicked! Please validate your email before resetting the password.');
+      });
+    }
+  });
+</script>
+{{ footer }}

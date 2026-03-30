@@ -1,0 +1,208 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        <button type="button" id="button-sync" class="btn btn-primary" data-bs-toggle="tooltip" title="Sync Now">
+          <i class="fas fa-sync"></i> Sync Biometric Data
+        </button>
+      </div>
+      <h1>Biometric Attendance Logs</h1>
+      <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  
+  <div class="container-fluid">
+    {% if error_warning %}
+      <div class="alert alert-danger alert-dismissible"><i class="fas fa-exclamation-circle"></i> {{ error_warning }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endif %}
+    {% if success %}
+      <div class="alert alert-success alert-dismissible"><i class="fas fa-check-circle"></i> {{ success }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endif %}
+    {% if error %}
+      <div class="alert alert-danger alert-dismissible"><i class="fas fa-exclamation-circle"></i> {{ error }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endif %}
+    
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-list"></i> Biometric Logs</h3>
+      </div>
+      <div class="card-body">
+        <!-- Filters -->
+        <div class="row mb-3">
+          <div class="col-sm-3">
+            <div class="input-group">
+              <span class="input-group-text">From Date</span>
+              <input type="date" name="filter_from_date" value="{{ filter_from_date }}" class="form-control" id="input-from-date"/>
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="input-group">
+              <span class="input-group-text">To Date</span>
+              <input type="date" name="filter_to_date" value="{{ filter_to_date }}" class="form-control" id="input-to-date"/>
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <input type="text" name="filter_employee_id" value="{{ filter_employee_id }}" placeholder="Employee ID" class="form-control" id="input-employee"/>
+          </div>
+          <div class="col-sm-3">
+            <button type="button" id="button-filter" class="btn btn-primary">
+              <i class="fas fa-filter"></i> Filter
+            </button>
+            <button type="button" id="button-clear" class="btn btn-secondary">
+              <i class="fas fa-times"></i> Clear
+            </button>
+          </div>
+        </div>
+        
+        <!-- Data Table -->
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Employee ID</th>
+                <th>Employee Name</th>
+                <th>Log Time</th>
+                <th>Log Type</th>
+                <th>Verify Mode</th>
+                <th>Device</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if biometric_logs %}
+                {% for log in biometric_logs %}
+                  <tr>
+                    <td>{{ log.biometric_log_id }}</td>
+                    <td>{{ log.employee_id }}</td>
+                    <td>{{ log.employee_name }}</td>
+                    <td>{{ log.log_time }}</td>
+                    <td>
+                      {% if log.log_type == 'CheckIn' %}
+                        <span class="badge bg-success">Check In</span>
+                      {% elseif log.log_type == 'CheckOut' %}
+                        <span class="badge bg-danger">Check Out</span>
+                      {% else %}
+                        <span class="badge bg-info">{{ log.log_type }}</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ log.verify_mode }}</td>
+                    <td>{{ log.device_serial }}</td>
+                    <td>
+                      {% if log.status == 1 %}
+                        <span class="badge bg-success">Active</span>
+                      {% else %}
+                        <span class="badge bg-secondary">Inactive</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="8" class="text-center">No logs found</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="row">
+          <div class="col-sm-6 text-start">{{ pagination }}</div>
+          <div class="col-sm-6 text-end">{{ results }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    // Sync Button Handler
+    $('#button-sync').on('click', function() {
+        var btn = $(this);
+        var fromDate = $('#input-from-date').val();
+        var toDate = $('#input-to-date').val();
+        
+        if (!fromDate || !toDate) {
+            alert('Please select date range');
+            return;
+        }
+        
+        // Confirm sync
+        if (!confirm('Sync biometric data from ' + fromDate + ' to ' + toDate + '?')) {
+            return;
+        }
+        
+        // Disable button and show loading
+        btn.prop('disabled', true);
+        btn.html('<i class="fas fa-spinner fa-spin"></i> Syncing...');
+        
+        $.ajax({
+            url: 'index.php?route=timecard/timecard.syncBiometric&user_token={{ user_token }}',
+            type: 'post',
+            data: {
+                from_date: fromDate,
+                to_date: toDate
+            },
+            dataType: 'json',
+            success: function(json) {
+                btn.prop('disabled', false);
+                btn.html('<i class="fas fa-sync"></i> Sync Biometric Data');
+                
+                if (json.error) {
+                    alert('Error: ' + json.error);
+                } else if (json.success) {
+                    alert('Success!\n' + json.success + '\n\nTotal Records: ' + json.total + '\nNew Records Inserted: ' + json.inserted);
+                    location.reload();
+                }
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                btn.prop('disabled', false);
+                btn.html('<i class="fas fa-sync"></i> Sync Biometric Data');
+                alert('AJAX Error: ' + thrownError);
+            }
+        });
+    });
+    
+    // Filter Button Handler
+    $('#button-filter').on('click', function() {
+        var url = 'index.php?route=timecard/timecard.viewBiometric&user_token={{ user_token }}';
+        
+        var filterFromDate = $('#input-from-date').val();
+        if (filterFromDate) {
+            url += '&filter_from_date=' + encodeURIComponent(filterFromDate);
+        }
+        
+        var filterToDate = $('#input-to-date').val();
+        if (filterToDate) {
+            url += '&filter_to_date=' + encodeURIComponent(filterToDate);
+        }
+        
+        var filterEmployee = $('#input-employee').val();
+        if (filterEmployee) {
+            url += '&filter_employee_id=' + encodeURIComponent(filterEmployee);
+        }
+        
+        location = url;
+    });
+    
+    // Clear Filter Button Handler
+    $('#button-clear').on('click', function() {
+        location = 'index.php?route=timecard/timecard.viewBiometric&user_token={{ user_token }}';
+    });
+});
+</script>
+
+{{ footer }}

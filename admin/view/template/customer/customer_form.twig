@@ -1,0 +1,1055 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        {% if orders %}
+          <a href="{{ orders }}" data-bs-toggle="tooltip" title="{{ button_order }}" class="btn btn-warning"><i class="fa-solid fa-receipt"></i></a>
+        {% endif %}
+        <button type="submit" id="button-save" form="form-customer" data-bs-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i></button>
+        <a href="{{ back }}" data-bs-toggle="tooltip" title="{{ button_back }}" class="btn btn-light"><i class="fa-solid fa-reply"></i></a>
+        </div>
+       <h1 style="color:white">{{ heading_title }}</h1>
+     <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="card">
+      <div class="card-header"><i class="fa-solid fa-pencil"></i> {{ text_form }}</div>
+      <div class="card-body">
+        <form id="form-customer" action="{{ save }}" method="post">
+        <ul class="nav nav-tabs">
+          <li class="nav-item"><a href="#tab-general" data-bs-toggle="tab" class="nav-link active">{{ tab_general }}</a></li>
+          <li class="nav-item"><a href="#tab-address" data-bs-toggle="tab" class="nav-link">{{ tab_address }}</a></li>
+          {#<li class="nav-item"><a href="#tab-payment" data-bs-toggle="tab" class="nav-link">{{ tab_payment_method }}</a></li>#}
+          <li class="nav-item"><a href="#tab-history" data-bs-toggle="tab" class="nav-link">{{ tab_history }}</a></li>
+          <li class="nav-item"><a href="#tab-transaction" data-bs-toggle="tab" class="nav-link">{{ tab_transaction }}</a></li>
+          <li class="nav-item"><a href="#tab-reward" data-bs-toggle="tab" class="nav-link">{{ tab_reward }}</a></li>
+          <li class="nav-item"><a href="#tab-ip" data-bs-toggle="tab" class="nav-link">{{ tab_ip }}</a></li>
+          <li class="nav-item"><a href="#tab-authorize" data-bs-toggle="tab" class="nav-link">{{ tab_authorize }}</a></li>
+          <li class="nav-item"><a href="#tab-kyc" data-bs-toggle="tab" class="nav-link">KYC Details</a></li>
+          <li class="nav-item"><a href="#tab-localbank" data-bs-toggle="tab" class="nav-link">Local Bank Details</a></li>
+          <li class="nav-item"><a href="#tab-nationalbank" data-bs-toggle="tab" class="nav-link">National Bank Details</a></li>
+          <li class="nav-item"><a href="#tab-subsciption" data-bs-toggle="tab" class="nav-link">Subscripyion Details</a></li>
+        </ul>
+        <div class="tab-content">
+          <div id="tab-general" class="tab-pane active">
+            
+              <fieldset>
+                <legend>{{ text_customer }}</legend>
+                 <div class="row mb-12" style="row-gap: 20px;margin-left:100px">
+                
+                    <div class="col-sm-3">
+                  <label for="input-store" class="col-form-label">{{ entry_store }}</label>
+                  
+                    <select name="store_id" id="input-store" class="form-select" style="width:100%">
+                      {% for store in stores %}
+                        <option value="{{ store.store_id }}"{% if store.store_id == store_id %} selected{% endif %}>{{ store.name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                
+
+                
+                    <div class="col-sm-3">
+                  <label for="input-language" class="col-form-label">{{ entry_language }}</label>
+                  
+                    <select name="language_id" id="input-language" class="form-select" style="width:100%">
+                      {% for language in languages %}
+                        <option value="{{ language.language_id }}"{% if language.language_id == language_id %} selected{% endif %}>{{ language.name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                
+
+                
+                     <div class="col-sm-3">
+                  <label for="input-customer-group" class="col-form-label">{{ entry_customer_group }}</label>
+                 
+                    <select name="customer_group_id" id="input-customer-group" class="form-select" style="width:100%">
+                      {% for customer_group in customer_groups %}
+                        <option value="{{ customer_group.customer_group_id }}"{% if customer_group.customer_group_id == customer_group_id %} selected{% endif %}>{{ customer_group.name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                
+                
+                    <div class="col-sm-3 required">
+                  <label for="input-firstname" class="col-form-label">{{ entry_firstname }}</label>
+                  
+                    <input type="text" name="firstname" value="{{ firstname }}" placeholder="{{ entry_firstname }}" id="input-firstname" class="form-control"/>
+                    <div id="error-firstname" class="invalid-feedback"></div>
+                  </div>
+                
+                
+                     <div class="col-sm-3 required">
+                  <label for="input-lastname" class="col-form-label">{{ entry_lastname }}</label>
+                 
+                    <input type="text" name="lastname" value="{{ lastname }}" placeholder="{{ entry_lastname }}" id="input-lastname" class="form-control"/>
+                    <div id="error-lastname" class="invalid-feedback"></div>
+                  </div>
+                
+                
+                     <div class="col-sm-3 required">
+                  <label for="input-email" class="col-form-label">{{ entry_email }}</label>
+                 
+                    <input type="text" name="email" value="{{ email }}" placeholder="{{ entry_email }}" id="input-email" class="form-control"/>
+                    <div id="error-email" class="invalid-feedback"></div>
+                  </div>
+                
+                 {% if config_telephone_required %} required{% endif %}
+                     <div class="col-sm-3">
+                  <label for="input-telephone" class="col-form-label">{{ entry_telephone }}</label>
+                 
+                    <input type="text" name="telephone" value="{{ telephone }}" placeholder="{{ entry_telephone }}" id="input-telephone" class="form-control"/>
+                    <div id="error-telephone" class="invalid-feedback"></div>
+                  </div>
+                  <div class="col-sm-3 required">
+                  <label for="input-gst" class=" col-form-label">GSTIN</label>
+                 
+                    <input type="text" name="gst" value="{{ gst }}" placeholder="GSTIN" id="input-gst" class="form-control"/>
+                    <div id="error-gst" class="invalid-feedback"></div>
+                  </div>
+                </div><br><br>
+                
+                <div class="row"style="margin-left:100px">
+                  {% for custom_field in custom_fields %}
+                    {% if custom_field.location == 'account' %}
+                      <div class="col-sm-3 mb-3 custom-field custom-field-{{ custom_field.custom_field_id }}">
+                        
+                        <!-- Label (always on top) -->
+                        <label for="input-custom-field-{{ custom_field.custom_field_id }}" class="form-label fw-bold">
+                          {{ custom_field.name }}
+                        </label>
+                
+                        {# Select #}
+                        {% if custom_field.type == 'select' %}
+                          <select name="custom_field[{{ custom_field.custom_field_id }}]" id="input-custom-field-{{ custom_field.custom_field_id }}"  class="form-select">
+                            <option value="">{{ text_select }}</option>
+                            {% for custom_field_value in custom_field.custom_field_value %}
+                              <option value="{{ custom_field_value.custom_field_value_id }}"
+                                {% if account_custom_field[custom_field.custom_field_id] and custom_field_value.custom_field_value_id == account_custom_field[custom_field.custom_field_id] %} selected{% endif %}>
+                                {{ custom_field_value.name }}
+                              </option>
+                            {% endfor %}
+                          </select>
+                        {% endif %}
+                
+                        {# Radio #}
+                        {% if custom_field.type == 'radio' %}
+                          <div class="border rounded p-2" style="height: 150px; overflow: auto;">
+                            {% for custom_field_value in custom_field.custom_field_value %}
+                              <div class="form-check">
+                                <input type="radio" name="custom_field[{{ custom_field.custom_field_id }}]"  value="{{ custom_field_value.custom_field_value_id }}"  id="input-custom-value-{{ custom_field_value.custom_field_value_id }}"  class="form-check-input"
+                                       {% if account_custom_field[custom_field.custom_field_id] and custom_field_value.custom_field_value_id == account_custom_field[custom_field.custom_field_id] %} checked{% endif %}/> 
+                                <label for="input-custom-value-{{ custom_field_value.custom_field_value_id }}" class="form-check-label">
+                                  {{ custom_field_value.name }}
+                                </label>
+                              </div>
+                            {% endfor %}
+                          </div>
+                        {% endif %}
+                
+                        {# Checkbox #}
+                        {% if custom_field.type == 'checkbox' %}
+                          <div class="border rounded p-2" style="height: 150px; overflow: auto;">
+                            {% for custom_field_value in custom_field.custom_field_value %}
+                              <div class="form-check">
+                                <input type="checkbox"  name="custom_field[{{ custom_field.custom_field_id }}][]" value="{{ custom_field_value.custom_field_value_id }}" id="input-custom-value-{{ custom_field_value.custom_field_value_id }}"  class="form-check-input"
+                                       {% if account_custom_field[custom_field.custom_field_id] and custom_field_value.custom_field_value_id in account_custom_field[custom_field.custom_field_id] %} checked{% endif %}/> 
+                                <label for="input-custom-value-{{ custom_field_value.custom_field_value_id }}" class="form-check-label">
+                                  {{ custom_field_value.name }}
+                                </label>
+                              </div>
+                            {% endfor %}
+                          </div>
+                        {% endif %}
+                
+                        {# Text #}
+                        {% if custom_field.type == 'text' %}
+                          <input type="text" name="custom_field[{{ custom_field.custom_field_id }}]" value="{{ account_custom_field[custom_field.custom_field_id] ? account_custom_field[custom_field.custom_field_id] : custom_field.value }}"  placeholder="{{ custom_field.name }}"  id="input-custom-field-{{ custom_field.custom_field_id }}"  class="form-control"/>
+                        {% endif %}
+                
+                        {# Textarea #}
+                        {% if custom_field.type == 'textarea' %}
+                          <textarea name="custom_field[{{ custom_field.custom_field_id }}]" rows="3"  placeholder="{{ custom_field.name }}"  id="input-custom-field-{{ custom_field.custom_field_id }}"  class="form-control">
+                              {{ account_custom_field[custom_field.custom_field_id] ? account_custom_field[custom_field.custom_field_id] : custom_field.value }}</textarea>
+                        {% endif %}
+                
+                        {# File #}
+                        {% if custom_field.type == 'file' %}
+                          <div class="input-group">
+                            <button type="button" data-oc-toggle="upload" data-oc-url="{{ upload }}" data-oc-target="#input-custom-field-{{ custom_field.custom_field_id }}" data-oc-size-max="{{ config_file_max_size }}"  data-oc-size-error="{{ error_upload_size }}" class="btn btn-primary">
+                              <i class="fa-solid fa-upload"></i> {{ button_upload }}
+                            </button>
+                            <input type="text" name="custom_field[{{ custom_field.custom_field_id }}]" value="{{ account_custom_field[custom_field.custom_field_id] ? account_custom_field[custom_field.custom_field_id] }}" id="input-custom-field-{{ custom_field.custom_field_id }}" class="form-control" readonly/>
+                            <button type="button" data-oc-toggle="download" 
+                                    data-oc-target="#input-custom-field-{{ custom_field.custom_field_id }}" 
+                                    {% if not account_custom_field[custom_field.custom_field_id] %} disabled{% endif %} 
+                                    class="btn btn-outline-secondary">
+                              <i class="fa-solid fa-download"></i> {{ button_download }}
+                            </button>
+                            <button type="button" data-oc-toggle="clear" data-bs-toggle="tooltip" 
+                                    title="{{ button_clear }}" 
+                                    data-oc-target="#input-custom-field-{{ custom_field.custom_field_id }}" 
+                                    {% if not account_custom_field[custom_field.custom_field_id] %} disabled{% endif %} 
+                                    class="btn btn-outline-danger">
+                              <i class="fa-solid fa-eraser"></i>
+                            </button>
+                          </div>
+                        {% endif %}
+                
+                        {# Date #}
+                        {% if custom_field.type == 'date' %}
+                          <input type="date" 
+                                 name="custom_field[{{ custom_field.custom_field_id }}]" 
+                                 value="{{ account_custom_field[custom_field.custom_field_id] ? account_custom_field[custom_field.custom_field_id] : custom_field.value }}" 
+                                 id="input-custom-field-{{ custom_field.custom_field_id }}" 
+                                 class="form-control"/>
+                        {% endif %}
+                
+                        {# Time #}
+                        {% if custom_field.type == 'time' %}
+                          <input type="time" 
+                                 name="custom_field[{{ custom_field.custom_field_id }}]" 
+                                 value="{{ account_custom_field[custom_field.custom_field_id] ? account_custom_field[custom_field.custom_field_id] : custom_field.value }}" 
+                                 id="input-custom-field-{{ custom_field.custom_field_id }}" 
+                                 class="form-control"/>
+                        {% endif %}
+                
+                        {# DateTime #}
+                        {% if custom_field.type == 'datetime' %}
+                          <input type="datetime-local" 
+                                 name="custom_field[{{ custom_field.custom_field_id }}]" 
+                                 value="{{ account_custom_field[custom_field.custom_field_id] ? account_custom_field[custom_field.custom_field_id] : custom_field.value }}" 
+                                 id="input-custom-field-{{ custom_field.custom_field_id }}" 
+                                 class="form-control"/>
+                        {% endif %}
+                
+                        <div id="error-custom-field-{{ custom_field.custom_field_id }}" class="invalid-feedback"></div>
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+
+              </fieldset>
+              <fieldset>
+                <legend>{{ text_password }}</legend>
+                  <div class="row mb-3" style="row-gap: 20px;margin-left:90px">
+                
+                    <div class="col-sm-4 required">
+                  <label for="input-password" class=" col-form-label">{{ entry_password }}</label>
+                  
+                    <input type="password" name="password" value="{{ password }}" placeholder="{{ entry_password }}" id="input-password" class="form-control" autocomplete="new-password"/>
+                    <div id="error-password" class="invalid-feedback"></div>
+                  </div>
+                
+               
+                    <div class="col-sm-4 required">
+                  <label for="input-confirm" class=" col-form-label">{{ entry_confirm }}</label>
+                  
+                    <input type="password" name="confirm" value="{{ confirm }}" placeholder="{{ entry_confirm }}" id="input-confirm" class="form-control"/>
+                    <div id="error-confirm" class="invalid-feedback"></div>
+                  </div>
+                <div class="col-sm-4 required">
+                  <label for="input-authpin" class=" col-form-label">Authpin</label>
+                  
+                    <input type="password" name="authpin" value="{{ authpin }}" placeholder="Authpin" id="input-authpin" class="form-control" autocomplete="new-authpin"/>
+                    <div id="error-authpin" class="invalid-feedback"></div>
+                  </div>
+                </div>
+                
+              </fieldset>
+              <fieldset>
+                <legend>{{ text_other }}</legend>
+                <div class="row mb-12">
+                    <div class="col-sm-3">
+                  <label class=" col-form-label">{{ entry_newsletter }}</label>
+                    <div class="form-check form-switch form-switch-lg">
+                      <input type="hidden" name="newsletter" value="0"/>
+                      <input type="checkbox" name="newsletter" value="1" id="input-newsletter" class="form-check-input"{% if newsletter %} checked{% endif %}/>
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                  <label class=" col-form-label">{{ entry_status }}</label>
+                    <div class="form-check form-switch form-switch-lg">
+                      <input type="hidden" name="status" value="0"/>
+                      <input type="checkbox" name="status" value="1" id="input-status" class="form-check-input"{% if status %} checked{% endif %}/>
+                    </div>
+                  </div>
+                
+                 <div class="col-sm-3">
+                  <label class=" col-form-label">{{ entry_safe }}</label>
+                    <div class="form-check form-switch form-switch-lg">
+                      <input type="hidden" name="safe" value="0"/>
+                      <input type="checkbox" name="safe" value="1" id="input-safe" class="form-check-input"{% if safe %} checked{% endif %}/>
+                    </div>
+                    <div class="form-text">{{ help_safe }}</div>
+                  </div>
+               
+                    <div class="col-sm-3">
+                  <label class=" col-form-label">{{ entry_commenter }}</label>
+                  
+                    <div class="form-check form-switch form-switch-lg">
+                      <input type="hidden" name="commenter" value="0"/>
+                      <input type="checkbox" name="commenter" value="1" id="input-commenter" class="form-check-input"{% if commenter %} checked{% endif %}/>
+                    </div>
+                    <div class="form-text">{{ help_commenter }}</div>
+                  </div>
+                </div>
+              </fieldset>
+              <input type="hidden" name="customer_id" value="{{ customer_id }}" id="input-customer-id"/>
+            
+          </div>
+          <div id="tab-address" class="tab-pane">
+            <fieldset>
+              <legend>{{ text_address }}</legend>
+              <div id="address">{{ address }}</div>
+            </fieldset>
+          </div>
+          {#<div id="tab-payment" class="tab-pane">
+            <fieldset>
+              <legend>{{ text_payment_method }}</legend>
+              <div id="payment-method">{{ payment_method }}</div>
+            </fieldset>
+          </div>#}
+          <div id="tab-history" class="tab-pane">
+            <fieldset>
+              <legend>{{ text_history }}</legend>
+              <div id="history">{{ history }}</div>
+            </fieldset>
+            <fieldset>
+              <legend>{{ text_history_add }}</legend>
+              <div class="row mb-3">
+                <label for="input-history" class="col-sm-2 col-form-label">{{ entry_comment }}</label>
+                <div class="col-sm-10">
+                  <textarea name="comment" rows="8" placeholder="{{ entry_comment }}" id="input-history" class="form-control"></textarea>
+                </div>
+              </div>
+              <div class="text-end">
+                <button type="button" id="button-history" class="btn btn-primary"><i class="fa-solid fa-plus-circle"></i> {{ button_history_add }}</button>
+              </div>
+            </fieldset>
+          </div>
+          <div id="tab-transaction" class="tab-pane">
+              
+            <fieldset>
+              <legend>{{ text_transaction }}</legend>
+              <div id="transaction"style="width:85%;margin-left:105px">{{ transaction }}</div>
+            </fieldset>
+            
+            <fieldset>
+              <legend>{{ text_transaction_add }}<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+              <td><b style="font-size: 18px;margin-left:400px">Trade Balance : </b></td><td><b style="font-size: 16px">{{ amount }}</b></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+              <td><b style="font-size: 18px">AEPS Balance : </b></td><td><b style="font-size: 16px">{{ aepsbalance }}</b></td>
+        </legend>
+              
+            
+              <label class="col-sm-2 col-form-label" style="margin-left:100px;font-size:18px">Transaction Type</label>
+              
+              <input type="radio" id="input-transactionsubtype-trade" name="input-transactionsubtype" value="TRADE" style="margin-left:40px">
+              <label for="input-transactionsubtype-trade" style="font-size:15px">TRADE</label>
+            
+              <input type="radio" id="input-transactionsubtype-aeps" name="input-transactionsubtype" value="AEPS" style="margin-left:10px">
+              <label for="input-transactionsubtype-aeps" style="font-size:15px">AEPS</label>
+              
+              <br>
+            
+              <label class="col-sm-2 col-form-label" style="margin-left:100px;font-size:18px">Transaction Subtype</label>
+              
+              <input type="radio" id="input-transactiontype-credit" name="input-transactiontype" value="CREDIT" style="margin-left:40px">
+              <label for="input-transactiontype-credit" style="font-size:15px">Credit</label>
+            
+              <input type="radio" id="input-transactiontype-debit" name="input-transactiontype" value="DEBIT" style="margin-left:10px">
+              <label for="input-transactiontype-debit" style="font-size:15px">Debit</label>
+              
+              <br>
+              <div class="row mb-3">
+                <label for="input-amount" class="col-sm-2 col-form-label">{{ entry_amount }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="amount" value="" placeholder="{{ entry_amount }}" id="input-amount" class="form-control"/>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <label for="input-transaction" class="col-sm-2 col-form-label">{{ entry_description }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="description" value="" placeholder="{{ entry_description }}" id="input-transaction" class="form-control"/>
+                </div>
+              </div>
+              <div class="text-end">
+                <button type="button" id="button-transaction" class="btn btn-primary"><i class="fa-solid fa-plus-circle"></i> {{ button_transaction_add }}</button>
+              </div>
+            </fieldset>
+          </div>
+          <div id="tab-reward" class="tab-pane">
+            <fieldset>
+              <legend>{{ text_reward }}</legend>
+              <div id="reward">{{ reward }}</div>
+            </fieldset>
+            <fieldset>
+              <legend>{{ text_reward_add }}</legend>
+              <div class="row mb-3">
+                <label for="input-reward" class="col-sm-2 col-form-label">{{ entry_description }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="description" value="" placeholder="{{ entry_description }}" id="input-reward" class="form-control"/>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <label for="input-points" class="col-sm-2 col-form-label">{{ entry_points }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="points" value="" placeholder="{{ entry_points }}" id="input-points" class="form-control"/>
+                  <div class="form-text">{{ help_points }}</div>
+                </div>
+              </div>
+              <div class="text-end">
+                <button type="button" id="button-reward" class="btn btn-primary"><i class="fa-solid fa-plus-circle"></i> {{ button_reward_add }}</button>
+              </div>
+            </fieldset>
+          </div>
+          <div id="tab-ip" class="tab-pane">
+            <fieldset>
+              <legend>{{ text_ip }}</legend>
+              <div id="ip">{{ ip }}</div>
+            </fieldset>
+          </div>
+          <div id="tab-authorize" class="tab-pane">
+            <fieldset>
+              <legend>{{ text_authorize }}</legend>
+              <div id="authorize">{{ authorize }}</div>
+            </fieldset>
+          </div>
+          <div id="tab-kyc" class="tab-pane">
+              <fieldset>
+                <div id="kyc">{{ tab_kyc }}</div>
+                <div class="row mb-20" style="display:flex; gap:60px;margin-left:100px">
+                <div class="col-sm-2 required">
+                  <label for="input-image" class="col-form-label">PAN</label>
+                  
+                  <input type="text" name="kycpanidno" value="{{ pan }}" placeholder="Enter PAN Number" id="input-pan" class="form-control" oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');" style="width:200px"/><br><br>
+                 <div class="col-sm-10">
+                    <div class="border rounded p-2 mx-auto" style="max-width: 400px;">
+                      <img src="{{ panimage }}" alt="" title="" id="thumb-pan" data-oc-placeholder="{{ panplaceholder }}" class="img-fluid" style="display: block;"/>
+                      <input type="hidden" name="kycpanimage" value="{{ panimageinput }}" id="input-pan-image"/>
+                      <div class="d-grid gap-2 mt-2">
+                        <button type="button" data-oc-toggle="image" data-oc-target="#input-pan-image" data-oc-thumb="#thumb-pan" class="btn btn-primary rounded-0"><i class="fa-solid fa-pencil"></i> {{ button_edit }}</button>
+                        <button type="button" data-oc-toggle="clear" data-oc-target="#input-pan-image" data-oc-thumb="#thumb-pan" class="btn btn-warning rounded-0"><i class="fa-regular fa-trash-can"></i> {{ button_clear }}</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-2 required">
+                  <label for="input-image" class="col-form-label">AADHAR</label>
+                  
+                  <input type="number" name="kycaadharidno" value="{{ aadhar }}" placeholder="Enter Aadhar number" id="input-aadhar" class="form-control" style="width:200px"/><br><br>
+                  <div class="col-sm-10">
+                    <div class="border rounded p-2 mx-auto" style="max-width: 400px;">
+                      <img src="{{ aadharimage }}" alt="" title="" id="thumb-aadhar" data-oc-placeholder="{{ aadharplaceholder }}" class="img-fluid" style="display: block;"/>
+                      <input type="hidden" name="kycaadharimage" value="{{ aadharimageinput }}" id="input-aadhar-image"/>
+                      <div class="d-grid gap-2 mt-2">
+                        <button type="button" data-oc-toggle="image" data-oc-target="#input-aadhar-image" data-oc-thumb="#thumb-aadhar" class="btn btn-primary rounded-0"><i class="fa-solid fa-pencil"></i> {{ button_edit }}</button>
+                        <button type="button" data-oc-toggle="clear" data-oc-target="#input-aadhar-image" data-oc-thumb="#thumb-aadhar" class="btn btn-warning rounded-0"><i class="fa-regular fa-trash-can"></i> {{ button_clear }}</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-sm-2 required">
+                  <label for="input-image" class="col-form-label">PROFILE</label>
+                  
+                  <input type="text" name="kycprofileidno" value="{{ profile }}" placeholder="Enter Profile Number" id="input-profile" class="form-control" oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');" style="width:200px"/><br><br>
+                 <div class="col-sm-10">
+                    <div class="border rounded p-2 mx-auto" style="max-width: 400px;">
+                      <img src="{{ profileimage }}" alt="" title="" id="thumb-profile" data-oc-placeholder="{{ profileplaceholder }}" class="img-fluid" style="display: block;"/>
+                      <input type="hidden" name="kycprofileimage" value="{{ profileimageinput }}" id="input-profile-image"/>
+                      <div class="d-grid gap-2 mt-2">
+                        <button type="button" data-oc-toggle="image" data-oc-target="#input-profile-image" data-oc-thumb="#thumb-profile" class="btn btn-primary rounded-0"><i class="fa-solid fa-pencil"></i> {{ button_edit }}</button>
+                        <button type="button" data-oc-toggle="clear" data-oc-target="#input-profile-image" data-oc-thumb="#thumb-profile" class="btn btn-warning rounded-0"><i class="fa-regular fa-trash-can"></i> {{ button_clear }}</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-2 required">
+                  <label for="input-image" class="col-form-label">SHOP</label>
+                  
+                  <input type="text" name="kycshopidno" value="{{ shop }}" placeholder="Enter Shop number" id="input-shop" class="form-control" style="width:200px" /><br><br>
+                  <div class="col-sm-10">
+                    <div class="border rounded p-2 mx-auto" style="max-width: 400px;">
+                      <img src="{{ shopimage }}" alt="" title="" id="thumb-shop" data-oc-placeholder="{{ shopplaceholder }}" class="img-fluid" style="display: block;"/>
+                      <input type="hidden" name="kycshopimage" value="{{ shopimageinput }}" id="input-shop-image"/>
+                      <div class="d-grid gap-2 mt-2">
+                        <button type="button" data-oc-toggle="image" data-oc-target="#input-shop-image" data-oc-thumb="#thumb-shop" class="btn btn-primary rounded-0"><i class="fa-solid fa-pencil"></i> {{ button_edit }}</button>
+                        <button type="button" data-oc-toggle="clear" data-oc-target="#input-shop-image" data-oc-thumb="#thumb-shop" class="btn btn-warning rounded-0"><i class="fa-regular fa-trash-can"></i> {{ button_clear }}</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                </div>
+              </fieldset>
+            </div>
+            <div id="tab-localbank" class="tab-pane">
+            <fieldset>
+              <legend>Local Bank Details</legend>
+              <div class="row mb-12" style="row-gap: 20px;margin-left:100px">
+              <div class="col-sm-4 required">
+                  <label for="input-date_of_birth" class=" col-form-label">{{ entry_date_of_birth }}</label>
+                  
+                    <input type="date" name="date_of_birth" value="{{ date_of_birth }}" placeholder="{{ entry_date_of_birth }}" id="input-date_of_birth" class="form-control"/>
+                    <div id="error-date_of_birth" class="invalid-feedback"></div>
+                  </div>
+                
+                <div class="col-sm-4 required">
+                  <label for="input-gender" class="col-form-label">{{ entry_gender }}</label>
+                  <select name="customer_gender" id="input-gender" class="form-select" style="width:100%">
+                    <option value="Male" {% if customer_gender == 'Male' %}selected="selected"{% endif %}>{{ text_male }}</option>
+                    <option value="Female" {% if customer_gender == 'Female' %}selected="selected"{% endif %}>{{ text_female }}</option>
+                  </select>
+                </div>
+
+                <div class="col-sm-4 required">
+                  <label for="input-fathername" class="col-form-label">{{ entry_fathername }}</label>
+                 
+                    <input type="text" name="fathername" value="{{ fathername }}" placeholder="{{ entry_fathername }}" id="input-fathername" class="form-control"/>
+                    <div id="error-fathername" class="invalid-feedback"></div>
+                  </div>
+                <div class="col-sm-4 required">
+                  <label for="input-company_name" class=" col-form-label">{{ entry_company }}</label>
+                 
+                    <input type="text" name="company_name" value="{{ company_name }}" placeholder="{{ entry_company }}" id="input-company_name" class="form-control"/>
+                    <div id="error-company_name" class="invalid-feedback"></div>
+                  </div>
+                    <div class="col-sm-4 required">
+                      <label for="input-cif" class="col-form-label">{{ entry_cif }}</label>
+                     
+                        <input type="text" name="cif" value="{{ cif }}" placeholder="{{ entry_cif }}" id="input-cif" class="form-control"/>
+                        <div id="error-cif" class="invalid-feedback"></div>
+                      </div>
+                      
+                 <div class="col-sm-4 required">
+                  <label for="input-userid" class=" col-form-label">{{ entry_userid }}</label>
+                 
+                    <input type="number" name="userid" value="{{ userid }}" placeholder="{{ entry_userid }}" id="input-userid" class="form-control"/>
+                    <div id="error-userid" class="invalid-feedback"></div>
+                  </div>
+                  <div class="col-sm-4 required">
+                  <label for="input-accountno" class=" col-form-label">{{ entry_accountno  }}</label>
+                 
+                    <input type="number" name="accountno" value="{{ accountno  }}" placeholder="{{ entry_accountno }}" id="input-accountno" class="form-control"/>
+                    <div id="error-accountno" class="invalid-feedback"></div>
+                  </div>
+                  <div class="col-sm-4 required">
+                  <label for="input-actype" class=" col-form-label">{{ entry_actype }}</label>
+                 
+                    <input type="text" name="actype" value="{{ actype }}" placeholder="{{ entry_actype }}" id="input-actype" class="form-control"/>
+                    <div id="error-actype" class="invalid-feedback"></div>
+                  </div>
+                  <div class="col-sm-4 required">
+                  <label for="input-branch" class=" col-form-label">{{ entry_branch }}</label>
+                 
+                    <input type="text" name="branch" value="{{ branch }}" placeholder="{{ entry_branch }}" id="input-branch" class="form-control"/>
+                    <div id="error-branch" class="invalid-feedback"></div>
+                  </div>
+                  <div class="col-sm-4 required">
+                  <label for="input-Pennydropamount" class=" col-form-label">PennyDrop Amount</label>
+                 
+                    <input type="number" name="Pennydropamount" value="{{ Pennydropamount }}" placeholder="PennyDrop Amount" id="input-PennyDropamount" class="form-control"/>
+                    <div id="error-Pennydropamount" class="invalid-feedback"></div>
+                  </div>
+                  <div class="col-sm-4 required">
+                  <label for="input-Pennydroptax" class=" col-form-label">PennyDrop Tax</label>
+                 
+                    <input type="number" name="Pennydroptax" value="{{ Pennydroptax }}" placeholder="PennyDrop Tax" id="input-Pennydroptax" class="form-control"/>
+                    <div id="error-Pennydroptax" class="invalid-feedback"></div>
+                  </div>
+                 
+                  </div>
+                  </fieldset>
+                </div>
+                <div id="tab-nationalbank" class="tab-pane">
+                <fieldset>
+                 <legend>National Bank Details</legend>
+                 <div class="row mb-12" style="row-gap: 20px;margin-left:100px">
+                  <div class="col-sm-4 required">
+                  <label for="input-ifsc" class=" col-form-label">{{ entry_ifsc }}</label>
+                 
+                    <input type="text" name="ifsc" value="{{ ifsc }}" placeholder="{{ entry_ifsc }}" id="input-ifsc" class="form-control"/>
+                    <div id="error-ifsc" class="invalid-feedback"></div>
+                  </div>
+                <div class="col-sm-4 required">
+                  <label for="input-acno" class=" col-form-label">{{ entry_acno  }}</label>
+                 
+                    <input type="number" name="acno" value="{{ acno  }}" placeholder="{{ entry_acno }}" id="input-acno" class="form-control"/>
+                    <div id="error-acno" class="invalid-feedback"></div>
+                  </div>
+                  <div class="col-sm-4 required">
+                  <label for="input-bankname" class=" col-form-label">{{ entry_bank  }}</label>
+                 
+                    <input type="text" name="bankname" value="{{ bankname  }}" placeholder="{{ entry_bank }}" id="input-bankname" class="form-control"/>
+                    <div id="error-bankname" class="invalid-feedback"></div>
+                  </div>
+                 
+                  <div class="col-sm-4 required">
+                    <label for="input-acname" class=" col-form-label">{{ entry_acname }}</label>
+                 
+                    <input type="text" name="acname" value="{{ acname }}" placeholder="{{ entry_acname }}" id="input-acname" class="form-control"/>
+                    <div id="error-acname" class="invalid-feedback"></div>
+                  </div>
+                  <div class="col-sm-4 required">
+                    <label for="input-acctype" class=" col-form-label">{{ entry_actype }}</label>
+                 
+                    <input type="text" name="acctype" value="{{ acctype }}" placeholder="{{ entry_actype }}" id="input-acctype" class="form-control"/>
+                    <div id="error-acctype" class="invalid-feedback"></div>
+                  </div>
+                  <div class="col-sm-4 required">
+                  <label for="input-branchname" class=" col-form-label">{{ entry_branch }}</label>
+                 
+                    <input type="text" name="branchname" value="{{ branchname }}" placeholder="{{ entry_branch }}" id="input-branchname" class="form-control"/>
+                    <div id="error-branchname" class="invalid-feedback"></div>
+                  </div>
+              </div>
+            </fieldset>
+          </div>
+          <div id="tab-subsciption" class="tab-pane">
+            <fieldset>  
+                <div class="row mb-12" style="row-gap: 20px;margin-left:100px">
+                    <div class="col-sm-5">
+                    <label for="input-package" class="col-form-label" style="color:white">Package Name</label>
+                    <select name="packagename" id="input-package" class="form-select">
+                    <option value="">Select Package</option>
+                    {% for package in packages %}
+                        <option value="{{ package.packageid }}"
+                            {% if package.packageid == selected_package %} selected{% endif %}>
+                            {{ package.packagename }}
+                        </option>
+
+                    {% endfor %}
+                </select>
+
+                    {% if error_packagename %}
+                        <div class="text-danger">{{ error_packagename }}</div>
+                    {% endif %}
+                </div>
+ 
+                </div>
+            </fieldset>
+          </div>    
+        </div>
+      </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript"><!--
+$('#form-customer').on('submit', function(e) {
+    e.preventDefault();
+
+    var element = this;
+
+    $.ajax({
+        url: $(element).attr('action'),
+        type: 'post',
+        data: $(element).serialize(),
+        dataType: 'json',
+        contentType: 'application/x-www-form-urlencoded',
+        beforeSend: function() {
+            $('#button-save').button('loading');
+        },
+        complete: function() {
+            $('#button-save').button('reset');
+        },
+        success: function(json) {
+            console.log(json);
+
+            $('.alert-dismissible').remove();
+            $(element).find('.is-invalid').removeClass('is-invalid');
+            $(element).find('.invalid-feedback').removeClass('d-block');
+
+            if (typeof json['error'] == 'object') {
+                if (json['error']['warning']) {
+                    $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error']['warning'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                }
+
+                for (key in json['error']) {
+                    $('#input-' + key.replaceAll('_', '-')).addClass('is-invalid').find('.form-control, .form-select, .form-check-input, .form-check-label').addClass('is-invalid');
+                    $('#error-' + key.replaceAll('_', '-')).html(json['error'][key]).addClass('d-block');
+                }
+            }
+
+            if (json['success']) {
+                $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+
+                if (json['customer_id']) {
+                    $('#input-customer-id').val(json['customer_id']);
+
+                    $('#address').load('index.php?route=customer/address&user_token={{ user_token }}&customer_id=' + json['customer_id']);
+                }
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
+});
+
+$('#input-customer-group').on('change', function() {
+    $.ajax({
+        url: 'index.php?route=customer/customer.customfield&user_token={{ user_token }}&customer_group_id=' + this.value,
+        dataType: 'json',
+        success: function(json) {
+            $('.custom-field').hide();
+            $('.custom-field').removeClass('required');
+
+            for (i = 0; i < json.length; i++) {
+                custom_field = json[i];
+
+                $('.custom-field-' + custom_field['custom_field_id']).show();
+
+                if (custom_field['required']) {
+                    $('.custom-field-' + custom_field['custom_field_id']).addClass('required');
+                }
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
+});
+
+$('#input-customer-group').trigger('change');
+
+$('#address').on('click', '.btn-primary', function(e) {
+    e.preventDefault();
+
+    var element = this;
+
+    $('#modal-address').remove();
+
+    $.ajax({
+        url: $(element).val(),
+        dataType: 'html',
+        beforeSend: function() {
+            $(element).button('loading');
+        },
+        complete: function() {
+            $(element).button('reset');
+        },
+        success: function(html) {
+            $('body').append(html);
+
+            var modal = new bootstrap.Modal(document.querySelector('#modal-address'));
+
+            modal.show();
+        }
+    });
+});
+
+$('#payment-method').on('click', '.pagination a', function(e) {
+    e.preventDefault();
+
+    $('#payment-method').load(this.href);
+});
+
+$('#payment-method').on('click', 'button', function(e) {
+    e.preventDefault();
+
+    var element = this;
+
+    $.ajax({
+        url: $(element).val(),
+        dataType: 'json',
+        contentType: 'application/x-www-form-urlencoded',
+        beforeSend: function() {
+            $(element).button('loading');
+        },
+        complete: function() {
+            $(element).button('reset');
+        },
+        success: function(json) {
+            console.log(json);
+
+            $('.alert-dismissible').remove();
+
+            if (json['error']) {
+                $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+            }
+
+            if (json['success']) {
+                $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+
+                $('#payment-method').load('index.php?route=customer/customer.getPayment&user_token={{ user_token }}&customer_id=' + $('#input-customer-id').val());
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
+});
+
+$('#payment-method').on('change', 'input[name=\'status\']', function(e) {
+    e.preventDefault();
+
+    var element = this;
+
+    $.ajax({
+        url: 'index.php?route=customer/customer.disablePayment&user_token={{ user_token }}&customer_id=' + $('#input-customer-id').val(),
+        dataType: 'json',
+        contentType: 'application/x-www-form-urlencoded',
+        beforeSend: function() {
+            $(element).prop('disabled', true);
+        },
+        complete: function() {
+            $(element).prop('disabled', false);
+        },
+        success: function(json) {
+            console.log(json);
+
+            $('.alert-dismissible').remove();
+
+            if (json['error']) {
+                $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+            }
+
+            if (json['success']) {
+                $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+
+                $('#payment-method').load('index.php?route=customer/customer.getPayment&user_token={{ user_token }}&customer_id=' + $('#input-customer-id').val());
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
+});
+
+$('#history').on('click', '.pagination a', function(e) {
+    e.preventDefault();
+
+    $('#history').load(this.href);
+});
+
+$('#button-history').on('click', function(e) {
+    e.preventDefault();
+
+    $.ajax({
+        url: 'index.php?route=customer/customer.addHistory&user_token={{ user_token }}&customer_id=' + $('#input-customer-id').val(),
+        type: 'post',
+        data: 'comment=' + encodeURIComponent($('#input-history').val()),
+        dataType: 'json',
+        contentType: 'application/x-www-form-urlencoded',
+        beforeSend: function() {
+            $('#button-history').button('loading');
+        },
+        complete: function() {
+            $('#button-history').button('reset');
+        },
+        success: function(json) {
+            console.log(json);
+
+            $('.alert-dismissible').remove();
+
+            if (json['error']) {
+                $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+            }
+
+            if (json['success']) {
+                $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+
+                $('#history').load('index.php?route=customer/customer.history&user_token={{ user_token }}&customer_id=' + $('#input-customer-id').val());
+
+                $('#input-history').val('');
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
+});
+
+$('#transaction').on('click', '.pagination a', function(e) {
+    e.preventDefault();
+
+    $('#transaction').load(this.href);
+});
+
+$('#button-transaction').on('click', function(e) {
+    e.preventDefault();
+    
+   description= encodeURIComponent($('#input-transaction').val())
+   let amount = $.trim($('#input-amount').val());
+   
+    let transactionType = null;
+    const typeRadios = document.getElementsByName("input-transactiontype");
+    for (const radio of typeRadios) {
+        if (radio.checked) {
+            transactionType = radio.value;
+            break;
+        }
+    }
+    let transactionSubtype = null;
+    const subtypeRadios = document.getElementsByName("input-transactionsubtype");
+    for (const radio of subtypeRadios) {
+        if (radio.checked) {
+            transactionSubtype = radio.value;
+            break;
+        }
+    }
+    if (transactionType !== null && transactionSubtype !== null) 
+    {
+        if ($.trim($('#input-transaction').val()) !== '')
+        {
+            if (amount !== '' && !isNaN(amount) && parseFloat(amount) > 0)
+            {
+                    $.ajax({
+                        url: 'index.php?route=customer/customer.addTransaction&user_token={{ user_token }}&customer_id=' + $('#input-customer-id').val(),
+                        type: 'post',
+                        data: 'description=' + encodeURIComponent($('#input-transaction').val()) + '&amount=' + $('#input-amount').val() + '&transactiontype=' + transactionType + '&transactionsubtype=' + transactionSubtype,
+                        dataType: 'json',
+                        contentType: 'application/x-www-form-urlencoded',
+                        beforeSend: function() {
+                            $('#button-transaction').button('loading');
+                        },
+                        complete: function() {
+                            $('#button-transaction').button('reset');
+                        },
+                        success: function(json) {
+                            console.log(json);
+                
+                            $('.alert-dismissible').remove();
+                
+                            if (json['error']) {
+                                $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                            }
+                
+                            if (json['success']) {
+                                $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                
+                                $('#transaction').load('index.php?route=customer/customer.transaction&user_token={{ user_token }}&customer_id=' + $('#input-customer-id').val());
+                
+                                $('#input-transaction').val('');
+                                $('#input-amount').val('');
+                                $("input[name='input-transactiontype']").prop("checked", false);
+                                $("input[name='input-transactionsubtype']").prop("checked", false);
+                            }
+                        },
+                        error: function(xhr, ajaxOptions, thrownError) {
+                            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+
+                        }
+                    });
+                }else
+                {
+                   $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> Please enter valid Amount <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>'); 
+                }
+                
+        }else
+        {
+            $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> Please enter the Description <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+        }
+    }
+    else
+    {
+        $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> Transactions must be selected <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+    }
+    
+});
+
+$('#reward').on('click', '.pagination a', function(e) {
+    e.preventDefault();
+
+    $('#reward').load(this.href);
+});
+
+$('#button-reward').on('click', function(e) {
+    e.preventDefault();
+
+    $.ajax({
+        url: 'index.php?route=customer/customer.addReward&user_token={{ user_token }}&customer_id=' + $('#input-customer-id').val(),
+        type: 'post',
+        data: 'description=' + encodeURIComponent($('#input-reward').val()) + '&points=' + $('#input-points').val(),
+        dataType: 'json',
+        contentType: 'application/x-www-form-urlencoded',
+        beforeSend: function() {
+            $('#button-reward').button('loading');
+        },
+        complete: function() {
+            $('#button-reward').button('reset');
+        },
+        success: function(json) {
+            console.log(json);
+
+            $('.alert-dismissible').remove();
+
+            if (json['error']) {
+                $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+            }
+
+            if (json['success']) {
+                $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+
+                $('#reward').load('index.php?route=customer/customer.reward&user_token={{ user_token }}&customer_id=' + $('#input-customer-id').val());
+
+                $('#input-reward').val('');
+                $('#input-points').val('');
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
+});
+
+$('#ip').on('click', '.pagination a', function(e) {
+    e.preventDefault();
+
+    $('#ip').load(this.href);
+});
+
+$('#authorize').on('click', '.pagination a', function(e) {
+    e.preventDefault();
+
+    $('#authorize').load(this.href);
+});
+
+$('#authorize').on('click', 'a', function(e) {
+    e.preventDefault();
+
+    var element = this;
+
+    $.ajax({
+        url: $(element).attr('href'),
+        dataType: 'json',
+        beforeSend: function() {
+            $(element).button('loading');
+        },
+        complete: function() {
+            $(element).button('reset');
+        },
+        success: function(json) {
+            console.log(json);
+
+            $('.alert-dismissible').remove();
+
+            if (json['redirect']) {
+                location = json['redirect'];
+            }
+
+            if (json['error']) {
+                $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+            }
+
+            if (json['success']) {
+                $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+
+                $('#authorize').load('index.php?route=customer/customer.authorize&user_token={{ user_token }}&customer_id=' + $('#input-customer-id').val());
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
+});
+//--></script>
+{{ footer }}

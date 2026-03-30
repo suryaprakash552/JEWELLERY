@@ -1,0 +1,360 @@
+{{ header }}{{ column_left }}
+ <style>
+.my-filter-input {
+    display: none;
+}
+.my-filter{
+    display: block;    
+    padding: 10px;
+    margin: 0 0 1px 0;
+    cursor: pointer;
+    border: 1px solid #A7A7A7;
+    background: #6AAB95;
+    border-radius: 3px;
+    color: #FFF;
+    transition: ease .5s;
+
+}
+.my-filter:hover {
+    background: #4E8774;
+}
+
+.my-filter-content {
+    background: #313941;
+    padding: 5px 5px;
+    border: 1px solid #A7A7A7;
+    margin: 0 0 1px 0;
+    border-radius: 3px;
+}
+
+.my-filter-input + .my-filter + .my-filter-content {
+    display: none;
+    padding-right: -2px;
+}
+
+.my-filter-input:checked + .my-filter + .my-filter-content {
+    display: block;
+}
+
+.myfilter-container
+{
+    padding-left: 250px;
+}
+</style>
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid myfilter-container">
+      <div class="float-end">
+        <button type="button" class="btn btn-default hidden-md hidden-lg" data-toggle="tooltip" title="{{ button_filter }}" onclick="$('#filter-product').toggleClass('hidden-sm hidden-xs');"><i class="fa fa-filter" style="color: white;"></i></button>
+        <!--<a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>-->
+        <button type="submit" form="form-product" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"style="color: white;"></i></button>
+        <!--<button type="button" form="form-product" formaction="{{ delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-product').submit() : false;"><i class="fa fa-trash-o"></i></button>-->
+      </div>
+      <h1 style="color:white">{{ heading_title }}</h1>
+            <ol class="breadcrumb">
+            {% for breadcrumb in breadcrumbs %}
+            <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid myfilter-container">{% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="row">
+      <div id="filter-product" class="col-sm-12 hidden-sm hidden-xs">
+        <div class="panel panel-default">
+          <input class="my-filter-input"type="checkbox" id="title2" />
+        <label class='my-filter panel-heading'for="title2" style="background-color:#313941;color:white;"><i class="fa fa-filter"></i> {{ text_filter }}<span style="float:right;"><i class="fa fas fa-chevron-down fa-1x" ></i></span>
+        </label>
+        <div class="my-filter-content panel-body">
+       <div class="row mb-12" style="row-gap: 20px;">
+            <div class="col-sm-4">
+              <label class="control-label" style="color:white" for="input-fdate">{{ entry_fdate }}</label>
+              <input type="date" style="color:black"  name="filter_fdate" value="{{ filter_fdate }}" placeholder="{{ entry_fdate }}" id="input-fdate" class="form-control" />
+            </div>
+            <div class="col-sm-4">
+              <label class="control-label"  style="color:white" for="input-tdate">{{ entry_tdate }}</label>
+              <input type="date" style="color:black"  name="filter_tdate" value="{{ filter_tdate }}" placeholder="{{ entry_tdate }}" id="input-tdate" class="form-control" />
+            </div>
+            <div class="col-sm-4">
+              <label class="control-label" style="color:white"  for="input-name">{{ entry_name }}</label>
+              <input type="text" style="color:black"  name="filter_customerid" value="{{ filter_customerid }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
+            </div>
+            <div class="col-sm-4">
+              <label class="control-label" style="color:white"  for="input-psaphonenumber">{{ entry_psaphonenumber }}</label>
+              <input type="text" style="color:black"  name="filter_psaphonenumber" value="{{ filter_psaphonenumber }}" placeholder="{{ entry_psaphonenumber }}" id="input-psaphonenumber" class="form-control" />
+            </div>
+            <div class="col-sm-4">
+              <label class="control-label" style="color:white"  for="input-psaid">{{ entry_psaid }}</label>
+              <input type="text" style="color:black"  name="filter_psaid" value="{{ filter_psaid }}" placeholder="{{ entry_psaid }}" id="input-psaid" class="form-control" />
+            </div>
+            <div class="col-sm-4">
+              <label class="control-label"  style="color:white" for="input-psaname">{{ entry_psaname }}</label>
+              <input type="text"  style="color:black" name="filter_psaname" value="{{ filter_psaname }}" placeholder="{{ entry_psaname }}" id="input-psaname" class="form-control" />
+            </div>
+            <div class="col-sm-4">
+              <label class="control-label"  style="color:white" for="input-emailid">{{ entry_emailid }}</label>
+              <input type="text" style="color:black"  name="filter_emailid" value="{{ filter_emailid }}" placeholder="{{ entry_emailid }}" id="input-emailid" class="form-control" />
+            </div>
+            <div class="col-sm-4">
+              <label class="control-label" style="color:white"  for="input-pincode">{{ entry_pincode }}</label>
+              <input type="text" style="color:black"  name="filter_pincode" value="{{ filter_pincode }}" placeholder="{{ entry_pincode }}" id="input-pincode" class="form-control" />
+            </div>
+            <div class="col-sm-4">
+              <label class="control-label" style="color:white"  for="input-ourtxid">{{ entry_ourtxid }}</label>
+              <input type="text"  style="color:black" name="filter_ourtxid" value="{{ filter_ourtxid }}" placeholder="{{ entry_ourtxid }}" id="input-ourtxid" class="form-control" />
+            </div>
+             <div class="col-sm-4">
+              <label class="control-label" style="color:white"  for="input-panno">{{ entry_panno }}</label>
+              <input type="text" style="color:black"  name="filter_panno" value="{{ filter_panno }}" placeholder="{{ entry_panno }}" id="input-panno" class="form-control" />
+            </div>
+            <div class="col-sm-4">
+              <label class="control-label" style="color:white"  for="input-status">{{ entry_status }}</label>
+              <select name="filter_status" style="color:black"  id="input-status" class="form-control">
+                <option value=""></option>
+                    {% if filter_status == '19' %}
+                        <option value="19" selected="selected">{{ recharge_rejected }}</option>
+                        <option value="17">{{ recharge_approved }}</option>
+                        <option value="21">{{ recharge_pending }}</option>
+                        <option value="25">{{ recharge_unknown }}</option>
+                    {% elseif filter_status == '17' %}
+                        <option value="19">{{ recharge_rejected }}</option>
+                        <option value="17" selected="selected">{{ recharge_approved }}</option>
+                        <option value="21">{{ recharge_pending }}</option>
+                        <option value="25">{{ recharge_unknown }}</option>
+                    {% elseif filter_status == '21' %}
+                        <option value="19">{{ recharge_rejected }}</option>
+                        <option value="17">{{ recharge_approved }}</option>
+                        <option value="21" selected="selected">{{ recharge_pending }}</option>
+                        <option value="25">{{ recharge_unknown }}</option>
+                    {% elseif filter_status == '25' %}
+                        <option value="19">{{ recharge_rejected }}</option>
+                        <option value="17">{{ recharge_approved }}</option>
+                        <option value="21">{{ recharge_pending }}</option>
+                        <option value="25" selected="selected">{{ recharge_unknown }}</option>
+                    {% else %}
+                        <option value="19">{{ recharge_rejected }}</option>
+                        <option value="17">{{ recharge_approved }}</option>
+                        <option value="21">{{ recharge_pending }}</option>
+                        <option value="25">{{ recharge_unknown }}</option>
+                    {% endif %}
+                        
+              
+              </select>
+            </div>
+            <div class="form-group col-sm-2" style="float:right;margin-top:20px">
+              <button  style="float:right; background-color:white;color:black;" type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
+              <h3 class="panel-title" class="col-sm-2" style="float:left;"><a href="{{export}}"><i class="fa fa-file-excel-o" style="font-size:30px;color:green"></i></a> </h3>
+            </div>
+          </div>
+     </p>
+        </div>
+        </div>
+      <div class="col-sm-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                  <thead style="background-color:#a86c85">
+                    {#<tr>
+                      <!--<td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>-->
+                      <td class="text-center"><h3 class="panel-title"><b><i class="fa fa-line-chart" style="color:black"></i> {{ total }}</b></h3></td>
+                      <td class="text-center"><h3 class="panel-title"><b><i class="fa fa-thumbs-up" style="color:green"></i> {{ approved }}</b></h3></td>
+                      <td class="text-center"><h3 class="panel-title"><b><i class="fa fa-thumbs-down" style="color:brown"></i> {{ rejected}}</b></h3></td>
+                      <td class="text-center"><h3 class="panel-title"><b><i class="fa fa-hand-rock-o" style="color:orange"></i> {{ pending }}</b></h3></td>
+                    </tr>#}
+                  </thead>
+                </table>
+              </div>
+          </div>
+          <div class="panel-heading">
+            <h3 class="panel-title" style="color:white"><b><i class="fa fa-list"></i></b></h3>
+            </div>
+          <div class="panel-body">
+            <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-product">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                  <thead style="background-color:#861f41">
+                    <tr>
+                      <!--<td style="width: 1px;" style="color:white" class="text-left"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>-->
+                      <td class="text-left"  style="color:white" >{{ column_srno }}</td>
+                      <td class="text-left" style="color:white" >{{ column_ourrequestid }}</td>
+                      <td class="text-left">{% if sort == 'p.customerid' %} <a  style="color:white" href="{{ sort_custmerid }}" class="{{ order|lower }}">{{ column_custmerid }}</a> {% else %} <a  style="color:white" href="{{ sort_custmerid }}">{{ column_custmerid }}</a> {% endif %}</td>
+                      <td class="text-left" >{% if sort == 'p.created' %} <a  style="color:white"  href="{{ sort_created }}" class="{{ order|lower }}">{{ column_date }}</a> {% else %} <a  style="color:white" href="{{ sort_created }}">{{ column_date }}</a> {% endif %}</td>
+                      <td class="text-left"  style="color:white" >{{ column_psaphonenumber }}</td>
+                      <td class="text-left" style="color:white" >{{ column_psaid }}</td>
+                      <td class="text-left" style="color:white" >{{ column_psaname }}</td>
+                      <td class="text-left">{% if sort == 'p.status' %} <a  style="color:white"  href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a> {% else %} <a  style="color:white"  href="{{ sort_status }}">{{ column_status }}</a> {% endif %}</td>
+                      <td class="text-left" style="color:white" >{{ column_source }}</td>
+                      <td class="text-left"  style="color:white" >{{ column_action }}</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  
+                  {% if products %}
+                  {% for product in products %}
+                  <tr>
+                    <!--<td class="text-left">{% if product.enrollmentid in selected %}
+                      <input type="checkbox" name="selected[]" value="{{ product.enrollmentid }}" checked="checked" />
+                      {% else %}
+                      <input type="checkbox" name="selected[]" value="{{ product.enrollmentid }}" />
+                      {% endif %}</td>-->
+                    <td class="text-left">{{ product.srno }}</td>
+                    <td class="text-left">{{ product.ourrequestid }}</td>
+                    <td class="text-left">{{ product.customerid }}</td>
+                    <td class="text-left">{{ product.created }}</td>
+                    <td class="text-left">{{ product.psaphonenumber }}</td>
+                    <td class="text-left">{{ product.psaid }}</td>
+                    <td class="text-left">{{ product.psaname }}</td>
+                    <td class="text-left">{% if product.status == recharge_pending %} <span class="label label-warning">{{ product.status }}</span> {% elseif product.status == recharge_rejected %} <span class="label label-danger">{{ product.status }}</span>{% elseif product.status == recharge_approved %} <span class="label label-success">{{ product.status }}</span> {% else %} <span class="label label-info">{{ product.status }}</span> {% endif %}</td>
+                    <td class="text-left">{{ product.source }}</td>
+                    <td class="text-left"><a href="{{ product.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+                  </tr>
+                  {% endfor %}
+                  {% else %}
+                  <tr>
+                    <td class="text-center" colspan="10">{{ text_no_results }}</td>
+                  </tr>
+                  {% endif %}
+                    </tbody>
+                  
+                </table>
+              </div>
+            </form>
+            <div class="row">
+              <div class="col-sm-6 text-left">{{ pagination }}</div>
+              <div class="col-sm-6 text-right" style="color:white">{{ results }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript"><!--
+$('#button-filter').on('click', function() {
+	var url = '';
+    
+    var filter_fdate = $('input[name=\'filter_fdate\']').val();
+
+	if (filter_fdate) {
+		url += '&filter_fdate=' + encodeURIComponent(filter_fdate);
+	}
+	
+	var filter_tdate = $('input[name=\'filter_tdate\']').val();
+
+	if (filter_tdate) {
+		url += '&filter_tdate=' + encodeURIComponent(filter_tdate);
+	}
+	
+	var filter_customerid = $('input[name=\'filter_customerid\']').val();
+
+	if (filter_customerid) {
+		url += '&filter_customerid=' + encodeURIComponent(filter_customerid);
+	}
+
+	var filter_psaphonenumber = $('input[name=\'filter_psaphonenumber\']').val();
+
+	if (filter_psaphonenumber) {
+		url += '&filter_psaphonenumber=' + encodeURIComponent(filter_psaphonenumber);
+	}
+
+	var filter_psaid = $('input[name=\'filter_psaid\']').val();
+
+	if (filter_psaid) {
+		url += '&filter_psaid=' + encodeURIComponent(filter_psaid);
+	}
+
+	var filter_psaname = $('input[name=\'filter_psaname\']').val();
+
+	if (filter_psaname) {
+		url += '&filter_psaname=' + encodeURIComponent(filter_psaname);
+	}
+	
+	var filter_emailid = $('input[name=\'filter_emailid\']').val();
+
+	if (filter_emailid) {
+		url += '&filter_emailid=' + encodeURIComponent(filter_emailid);
+	}
+	
+	var filter_pincode = $('input[name=\'filter_pincode\']').val();
+
+	if (filter_pincode) {
+		url += '&filter_pincode=' + encodeURIComponent(filter_pincode);
+	}
+	
+	var filter_ourtxid = $('input[name=\'filter_ourtxid\']').val();
+
+	if (filter_ourtxid) {
+		url += '&filter_ourtxid=' + encodeURIComponent(filter_ourtxid);
+	}
+
+    var filter_panno = $('input[name=\'filter_panno\']').val();
+
+	if (filter_panno) {
+		url += '&filter_panno=' + encodeURIComponent(filter_panno);
+	}
+	
+	var filter_status = $('select[name=\'filter_status\']').val();
+
+	if (filter_status !== '') {
+		url += '&filter_status=' + encodeURIComponent(filter_status);
+	}
+
+	location = 'index.php?route=pan/psalist&user_token={{ user_token }}' + url;
+});
+//--></script> 
+  <script type="text/javascript"><!--
+// IE and Edge fix!
+$('button[form=\'form-product\']').on('click', function(e) {
+	$('#form-product').attr('action', $(this).attr('formaction'));
+});
+  
+$('input[name=\'filter_customerid\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/product/autocomplete&user_token={{ user_token }}&filter_customerid=' +  encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['name'],
+						value: item['product_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_customerid\']').val(item['label']);
+	}
+});
+
+$('input[name=\'filter_rechargenumber\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/product/autocomplete&user_token={{ user_token }}&filter_rechargenumber=' +  encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['model'],
+						value: item['product_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_rechargenumber\']').val(item['label']);
+	}
+});
+//--></script></div>
+{{ footer }} 

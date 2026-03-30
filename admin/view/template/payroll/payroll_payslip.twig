@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+    @page {
+        size: A4;
+        margin: 0;
+    }
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        color: #000;
+        margin: 0;
+        padding: 20px;
+        -webkit-print-color-adjust: exact;
+    }
+    /* HEADER SECTION */
+    .header {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    .logo-wrapper {
+        margin-bottom: 5px;
+    }
+    .logo-wrapper img {
+        height: 60px; /* Adjust based on your actual logo file */
+    }
+    .company-name {
+        font-size: 20px;
+        font-weight: bold;
+        color: #2c5282; /* Matches the blue in the logo */
+    }
+    .company-address {
+        font-size: 13px;
+        line-height: 1.4;
+        color: #000;
+        font-weight: 500;
+    }
+
+    .payslip-container {
+        width: 100%;
+        max-width: 210mm;
+        margin: 0 auto;
+        background: #fff;
+    }
+
+    /* GENERAL TABLE STYLES */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        font-size: 12px;
+    }
+
+  .emp-table {
+    width: 100%;
+    border: 2px solid #000;
+    border-collapse: collapse;
+}
+
+.emp-table td {
+    padding: 4px 8px;
+    vertical-align: top;
+    border: none; /* NO horizontal lines */
+}
+
+.main-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.emp-name {
+    font-weight: bold;
+    padding-left: 8px;
+}
+
+.label {
+    font-weight: bold;
+    width: 22%;
+    white-space: nowrap;
+}
+/* horizontal line only for title */
+.title-row td {
+    border-bottom: 2px solid #000;
+}
+
+/* horizontal line only for employee name */
+.name-row td {
+    border-bottom: 2px solid #000;
+}
+
+.mid-border {
+    width: 28%;
+    border-right: 2px solid #000; /* ONLY middle vertical line */
+}
+.salary-table {
+    width: 100%;
+    border: 2px solid #000;
+    border-collapse: collapse;
+}
+
+/* 🔥 THIS IS THE KEY — middle vertical line */
+.salary-table col.salary-mid {
+    border-right: 2px solid #000;
+}
+
+/* header */
+.salary-table th {
+    padding: 6px 8px;
+    font-weight: bold;
+    text-align: left;
+    border-bottom: 2px solid #000;
+}
+
+/* body */
+.salary-table td {
+    padding: 6px 8px;
+}
+
+/* amount alignment (unchanged) */
+.salary-table th:nth-child(2),
+.salary-table th:nth-child(4),
+.salary-table td:nth-child(2),
+.salary-table td:nth-child(4) {
+    text-align: right;
+}
+
+/* totals row */
+.salary-table tr.totals-row td {
+    font-weight: bold;
+    border-top: 2px solid #000;
+}
+
+
+.salary-wrap {
+    position: relative;
+}
+
+.salary-wrap::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    border-left: 2px solid #000;
+    pointer-events: none;
+}
+
+
+    /* --- BOTTOM NET PAY TABLE --- */
+    .net-pay-table {
+        border: 3px solid #000; /* Very thick outer border */
+        margin-top: 20px;
+        width: 137%; /* Adjust width as needed based on preference */
+    }
+    .net-pay-table td {
+        padding: 8px 10px;
+        border: none; /* No inner borders */
+    }
+    .net-pay-label {
+        font-weight: bold;
+        width: 160px;
+    }
+    .net-pay-val {
+        font-weight: bold;
+        font-size: 13px;
+    }
+
+</style>
+</head>
+<body>
+
+<div class="payslip-container">
+    <div class="header">
+        <div class="logo-wrapper">
+             <img src="{{ DIR_IMAGE }}logo.png" alt="My Teknoland Software Pvt. Ltd.">
+        </div>
+        <div class="company-address">
+            1/1, First floor, Bangalore Main Road, Rayachoty, AP – 516269<br>
+            Email: info@myteknoland.net | Phone: +91 7288876715
+        </div>
+    </div>
+
+   <table class="emp-table">
+   <tr class="title-row">
+    <td colspan="4" class="main-title">
+        Payslip For the Month of {{ payroll.month }} - {{ payroll.year }}
+    </td>
+</tr>
+
+
+  <tr class="name-row">
+    <td colspan="4" class="emp-name">
+        Employee Name : {{ users.name }}
+    </td>
+</tr>
+
+    <tr>
+        <td class="label">Employee Id</td>
+        <td class="mid-border">: {{ payroll.emp_id }}</td>
+        <td class="label">Location</td>
+        <td>: {{ users.location }}</td>
+    </tr>
+
+    <tr>
+        <td class="label">Designation</td>
+        <td class="mid-border">: {{ users.user_group }}
+  </td>
+        <td class="label">LOP Days</td>
+        <td>: {{ payroll.paid_leaves|default('0.00') }}</td>
+    </tr>
+
+    <tr>
+        <td class="label">Date Of Joining</td>
+        <td class="mid-border">: {{ users.date_added|date('d-m-Y') }}
+    </td>
+        <td class="label">Worked Days</td>
+        <td>: {{ payroll.current_month_days|default('0.00') }}</td>
+    </tr>
+
+    <tr>
+        <td class="label">PAN</td>
+        <td class="mid-border">: {{ users.pan }}</td>
+        <td class="label">Bank Name</td>
+        <td>: {{ users.bank_name }}</td>
+    </tr>
+
+    <tr>
+        <td class="label">UAN</td>
+        <td class="mid-border">: {{ users.uan }}</td>
+        <td class="label">PF</td>
+        <td>: {{ users.pf_number }}</td>
+    </tr>
+
+    <tr>
+        <td class="label">Department</td>
+        <td class="mid-border">: {{ users.user_group }}
+   </td>
+        <td class="label">A/C No</td>
+        <td>: {{ users.bank_ac }}</td>
+    </tr>
+</table>
+
+    <table class="salary-table">
+        <colgroup>
+            <col>
+            <col class="salary-mid">
+            <col>
+            <col>
+        </colgroup>
+
+        <thead>
+            <tr>
+                <th>Earnings</th>
+                <th>Amount (Rs)</th>
+                <th>Deductions</th>
+                <th>Amount (Rs)</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td>Basic</td>
+                <td>{{ payroll.basic|number_format(2) }}</td>
+                <td>Professional Tax</td>
+                <td>{{ payroll.professional_tax|number_format(2) }}</td>
+            </tr>
+            <tr>
+                <td>HRA</td>
+                <td>{{ payroll.hra|number_format(2) }}</td>
+                <td>PF</td>
+                <td>{{ payroll.pf|number_format(2) }}</td>
+            </tr>
+            <tr>
+                <td>Conveyance Allowance</td>
+                <td>{{ payroll.conveyance|number_format(2) }}</td> 
+                <td>Other Deductions</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Medical Allowance</td>
+                <td>{{ payroll.medical|number_format(2) }}</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>CCA</td>
+                <td>{{ payroll.cca|number_format(2) }}</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Special Allowance</td>
+                <td>{{ payroll.special_allowance|number_format(2) }}</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr class="totals-row">
+                <td>Total Earnings</td>
+                <td>{{ payroll.total_earnings|number_format(2) }}</td>
+                <td>Total Deductions</td>
+                <td>{{ payroll.total_deductions|number_format(2) }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+
+    <table class="net-pay-table">
+        <tr>
+            <td class="net-pay-label">Net Pay</td>
+            <td class="net-pay-val">: INR {{ payroll.payable_salary|number_format(2) }}/-</td>
+        </tr>
+        <tr>
+            <td class="net-pay-label">Mode Of Payment</td>
+            <td>: Bank Transfer</td>
+        </tr>
+        <tr>
+            <td class="net-pay-label">Total Net Payable</td>
+            <td class="net-pay-val">: INR {{ payroll.payable_salary|number_format(2) }}/-</td>
+        </tr>
+    </table>
+
+</div>
+
+</body>
+</html>

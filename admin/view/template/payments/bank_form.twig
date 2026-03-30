@@ -1,0 +1,167 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        <button type="submit" form="form-setting" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-light"><i class="fa-solid fa-reply"></i></a></div>
+      <h1 style="color:white">{{ heading_title }}</h1>
+            <ol class="breadcrumb">
+            {% for breadcrumb in breadcrumbs %}
+            <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid"> {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-setting" class="form-horizontal">
+          <ul class="nav nav-tabs">
+            <li class="active"><a href="#tab-store" data-toggle="tab">{{ tab_store }}</a></li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active" id="tab-store">
+              <div class="row mb-12" style="row-gap: 20px;">
+                <div class="col-sm-4 required">
+                <label class="col-sm-2 control-label" for="input-name"style="color:white">{{ entry_name }}</label>
+                  <input type="text" name="name" value="{{ name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
+                  {% if error_name %}
+                  <div class="text-danger">{{ error_name }}</div>
+                  {% endif %} 
+                  </div>
+             
+              <div class="col-sm-4 required">
+                <label class=" control-label" for="input-owner" style="color:white">{{ entry_accountnumber }}</label>
+                  <input type="text" name="accountnumber" value="{{ accountnumber }}" placeholder="{{ entry_accountnumber }}" id="input-owner" class="form-control" />
+                  {% if error_accountnumber %}
+                  <div class="text-danger">{{ error_accountnumber }}</div>
+                  {% endif %} 
+                  </div>
+              <div class="col-sm-4 required">
+                <label class=" control-label" for="input-ifsc"style="color:white">{{ entry_ifsc }}</label>
+                  <input type="text" name="ifsc" value="{{ ifsc }}" placeholder="{{ entry_ifsc }}" id="input-ifsc" class="form-control" />
+                  {% if error_ifsc %}
+                  <div class="text-danger">{{ error_ifsc }}</div>
+                  {% endif %} 
+                  </div>
+              <div class="col-sm-4 required">
+                <label class=" control-label" for="input-type"style="color:white">{{ entry_type }}</label>
+                   <select name="type" class="form-control">
+                       <option selected="selected" value="CURRENT">CURRENT</option>
+                       <option value="SAVING">SAVING</option>
+                   </select>
+                </div>
+              
+              <div class="col-sm-4 required">
+                <label class=" control-label" for="input-ifsc"style="color:white">{{ entry_url }}</label>
+                  <input type="text" name="url" value="{{ url }}" placeholder="{{ entry_url }}" id="input-ifsc" class="form-control" />
+                 </div>
+              <div class="col-sm-4 required">
+                <label class=" control-label" for="input-ifsc" style="color:white">{{ entry_timing }}</label>
+                  <input type="text" name="timing" value="{{ timing }}" placeholder="{{ entry_timing }}" id="input-ifsc" class="form-control" />
+                 </div>
+              <div class="col-sm-4 required">
+                <label class=" control-label" for="input-comment"style="color:white"><span data-toggle="tooltip" data-container="#tab-general" title="{{ help_comment }}">{{ entry_comment }}</span></label>
+                  <textarea name="comments" rows="5" placeholder="{{ entry_comment }}" id="input-comment" class="form-control">{{ comments }}</textarea>
+                </div>
+              <div class="col-sm-4 required">
+                <label class=" control-label" for="input-type"style="color:white">{{ entry_status }}</label>
+                   <select name="status" class="form-control">
+                       <option selected="selected" value="1">{{text_enabled}}</option>
+                       <option value="0">{{text_disabled}}</option>
+                   </select>
+                </div>
+                <div class="col-sm-4 required">
+                <label class=" control-label" for="input-image"style="color:white">{{ entry_banklogo }}</label>
+                 <div class="border rounded p-2 mx-auto" style="max-width:200px;">
+                   <img src="{{ bankimage }}" alt="" title=""id="thumb-bank" data-oc-placeholder="{{ bankplaceholder }}"class="img-fluid"  style="width:200px">
+                  <input type="hidden" name="bankimage" value="{{ bankimageinput }}" id="input-bank-image" />
+                  <div class="d-grid gap-2 mt-2">
+                        <button type="button" data-oc-toggle="image" data-oc-target="#input-bank-image" data-oc-thumb="#thumb-bank" class="btn btn-primary rounded-0"><i class="fa-solid fa-pencil"></i> Edit</button>
+                        <button type="button" data-oc-toggle="clear" data-oc-target="#input-bank-image" data-oc-thumb="#thumb-bank" class="btn btn-warning rounded-0"><i class="fa-regular fa-trash-can"></i> Clear</button>
+                      </div>
+                       </div>
+                </div>
+              </div>
+             </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript"><!--
+$('select[name=\'config_theme\']').on('change', function() {
+	$.ajax({
+		url: 'index.php?route=setting/setting/theme&user_token={{ user_token }}&theme=' + this.value,
+		dataType: 'html',
+		beforeSend: function() {
+			$('select[name=\'config_theme\']').prop('disabled', true);
+		},
+		complete: function() {
+			$('select[name=\'config_theme\']').prop('disabled', false);
+		},
+		success: function(html) {
+			$('#theme').attr('src', html);
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$('select[name=\'config_theme\']').trigger('change');
+//--></script> 
+  <script type="text/javascript"><!--
+$('select[name=\'config_country_id\']').on('change', function() {
+	$.ajax({
+		url: 'index.php?route=localisation/country/country&user_token={{ user_token }}&country_id=' + this.value,
+		dataType: 'json',
+		beforeSend: function() {
+			$('select[name=\'config_country_id\']').prop('disabled', true);
+		},
+		complete: function() {
+			$('select[name=\'config_country_id\']').prop('disabled', false);
+		},
+		success: function(json) {
+			html = '<option value="">{{ text_select }}</option>';
+
+			if (json['zone'] && json['zone'] != '') {
+				for (i = 0; i < json['zone'].length; i++) {
+          			html += '<option value="' + json['zone'][i]['zone_id'] + '"';
+
+					if (json['zone'][i]['zone_id'] == '{{ config_zone_id }}') {
+            			html += ' selected="selected"';
+					}
+
+					html += '>' + json['zone'][i]['name'] + '</option>';
+				}
+			} else {
+				html += '<option value="0" selected="selected">{{ text_none }}</option>';
+			}
+
+			$('select[name=\'config_zone_id\']').html(html);
+			
+			$('#button-save').prop('disabled', false);
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$('select[name=\'config_country_id\']').trigger('change');
+//--></script></div>
+{{ footer }} 

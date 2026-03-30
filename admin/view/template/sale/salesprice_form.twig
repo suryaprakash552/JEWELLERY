@@ -1,0 +1,153 @@
+{{ header }}{{ column_left }}
+
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+
+            <div class="float-end">
+                <button type="submit" form="form-po" class="btn btn-primary">
+                    <i class="fa fa-save"></i> Save
+                </button>
+
+                <a href="{{ cancel }}" class="btn btn-default">
+                    <i class="fa fa-reply"></i> Cancel
+                </a>
+            </div>
+
+            <ul class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ home }}">Home</a></li>
+
+    <li class="breadcrumb-item">
+        <a href="{{ cancel }}">{{ heading_title }}</a>
+    </li>
+
+    <li class="breadcrumb-item active">
+        {{ order.order_id ? ('Edit #' ~ order.order_id) : 'Add New' }}
+    </li>
+</ul>
+
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <form action="{{ action }}" method="post" id="form-po">
+
+            <div class="card">
+                <div class="card-header">
+                    <strong>Products</strong>
+                </div>
+
+                <div class="card-body">
+                    <table class="table table-bordered" id="product-table">
+                        <thead>
+                            <tr>
+                                <th width="150">Product ID</th>
+                                <th width="150">Price</th>
+                                <th width="150">Quantity</th>
+                                <th width="150">Total</th>
+                                <th width="70"></th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="product-body">
+
+                        {% if products %}
+                            {% for p in products %}
+                                <tr>
+                                    <td>
+                                        <input type="text" name="products[{{ loop.index0 }}][product_id]" value="{{ p.product_id }}" class="form-control">
+                                    </td>
+
+                                    <td>
+                                        <input type="text" name="products[{{ loop.index0 }}][price]" value="{{ p.price }}" class="form-control price">
+                                    </td>
+
+                                    <td>
+                                        <input type="text" name="products[{{ loop.index0 }}][quantity]" value="{{ p.quantity }}" class="form-control qty">
+                                    </td>
+
+                                    <td>
+                                        <input type="text" value="{{ p.total }}" class="form-control line-total" readonly>
+                                    </td>
+
+                                    <td>
+                                        <button type="button" class="btn btn-danger btn-sm remove-row">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+
+                        </tbody>
+                    </table>
+
+                    <button type="button" class="btn btn-success" id="add-row">
+                        <i class="fa fa-plus"></i> Add Product
+                    </button>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="card">
+                <div class="card-header">
+                    <strong>Order Summary</strong>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">Discount</label>
+                        <div class="col-sm-4">
+                            <input type="text" name="discount" value="{{ order.discount }}" class="form-control">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+let row = {{ products ? products|length : 0 }};
+
+// Add Product Row
+document.querySelector('#add-row').addEventListener('click', function () {
+
+    let html = `
+        <tr>
+            <td><input type="text" name="products[${row}][product_id]" class="form-control"></td>
+            <td><input type="text" name="products[${row}][price]" class="form-control price"></td>
+            <td><input type="text" name="products[${row}][quantity]" class="form-control qty"></td>
+            <td><input type="text" class="form-control line-total" readonly></td>
+            <td><button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button></td>
+        </tr>
+    `;
+
+    document.querySelector('#product-body').insertAdjacentHTML('beforeend', html);
+    row++;
+});
+
+// Auto-calc total
+document.addEventListener('input', function (e) {
+    if (e.target.classList.contains('price') || e.target.classList.contains('qty')) {
+        let tr = e.target.closest('tr');
+        let price = parseFloat(tr.querySelector('.price').value) || 0;
+        let qty = parseFloat(tr.querySelector('.qty').value) || 0;
+
+        tr.querySelector('.line-total').value = (price * qty).toFixed(2);
+    }
+});
+
+// Remove row
+document.addEventListener('click', function (e) {
+    if (e.target.closest('.remove-row')) {
+        e.target.closest('tr').remove();
+    }
+});
+</script>
+
+{{ footer }}

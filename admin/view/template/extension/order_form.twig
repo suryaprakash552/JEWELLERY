@@ -1,0 +1,3144 @@
+{{ header }}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
+
+    <script src="view/javascript/jquery/me_magnific/jquery.magnific-popup.min.js"></script>
+  <link href="view/javascript/jquery/me_magnific/magnific-popup.css" rel="stylesheet">
+  <!-- jQuery UI CSS -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+<!-- jQuery UI JS -->
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+
+{{ column_left }}
+
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+      <h1>{{ heading_title }}</h1>
+      <div class="d-flex gap-3 flex-wrap align-items-end">
+        <div class="d-flex align-items-center">
+          <label class="form-label mb-0 me-2 required" style="width: 56px; " for="input-po_number">{{ column_po_number }}</label>
+          <input type="text" name="po_number" value="{{ po_number }}" placeholder="{{ column_po_number }}" id="input-po_number" style="height: 33px;width: 96px;" class="form-control" readonly>
+        </div>
+
+        <div class="d-flex align-items-center">
+          <label class="form-label mb-0 me-2" for="input-date_added">{{ entry_date_added }}</label>
+          <input type="text" name="date_added" value="{{ date_added }}" placeholder="{{ entry_date_added }}" id="input-date_added" style="height: 33px;width: 96px;" class="form-control datepicker">
+        </div>
+
+        <div class="d-flex align-items-center">
+          <label class="form-label mb-0 me-2" style="width: 98px;" for="input-delivery_date">{{ entry_delivery_date }}</label>
+          <input type="text" name="delivery_date" value="{{ delivery_date }}" placeholder="{{ entry_delivery_date }}" id="input-delivery_date" style="height: 33px; width: 110px;" class="form-control datepicker">
+        </div>
+
+        {% if order_id %}
+        <div class="mb-0 d-flex gap-2">
+          <a href="{{ export }}"  style="height: 33px;" class="btn btn-warning mt-4">{{ button_export }}</a>
+          <a href="{{ printorder }}"  style="height: 33px; width: 69px;" class="btn btn-success mt-4">{{ button_print }}</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    <form class="needs-validation" novalidate>
+      <div class="row g-3">
+        <!-- Buyer Panel -->
+        <div class="col-md-6">
+          <div class="card mb-3">
+            <div class="card-header">{{ text_buyer }}</div>
+            <div class="card-body">
+              <div class="mb-3 row">
+                <label class="col-sm-4 col-form-label">{{ entry_store }}</label>
+                <div class="col-sm-8">
+                  <select name="buyer_id" id="input-contact" class="form-select">
+                    {% for store in stores %}
+                      <option value="{{ store.store_id }}" {% if store.store_id == buyer_id %}selected{% endif %}>{{ store.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+
+              <div class="mb-3 row">
+                <label class="col-sm-4 col-form-label">{{ entry_contact }}</label>
+                <div class="col-sm-8">
+                  <input type="text" name="buyer_contact" value="{{ order_id ? buyer_contact : contact_name }}" placeholder="{{ entry_company }}" id="input-company" class="form-control" />
+                  <input type="hidden" name="buyer_company" value="{{ buyer_company ? buyer_company : store_name }}" />
+                </div>
+              </div>
+
+              <div class="mb-3 row">
+                <label class="col-sm-4 col-form-label">{{ entry_address }}</label>
+                <div class="col-sm-8">
+                  <textarea id="input-address" class="form-control" placeholder="{{ entry_address }}" rows="4" name="buyer_address">{{ order_id ? buyer_address : store_address }}</textarea>
+                </div>
+              </div>
+
+              <div class="mb-3 row">
+                <label class="col-sm-4 col-form-label">{{ entry_zip_code }}</label>
+                <div class="col-sm-8">
+                  <input type="text" name="buyer_zip_code" value="{{ buyer_zip_code ? buyer_zip_code : store_geocode }}" placeholder="{{ entry_zip_code }}" class="form-control" />
+                </div>
+              </div>
+
+              <div class="mb-3 row">
+                <label class="col-sm-4 col-form-label">{{ entry_telephone }}</label>
+                <div class="col-sm-8">
+                  <input type="text" name="buyer_tel" value="{{ order_id ? buyer_tel : store_telephone }}" placeholder="{{ entry_telephone }}" class="form-control" />
+                </div>
+              </div>
+
+              <div class="mb-3 row">
+                <label class="col-sm-4 col-form-label">{{ entry_email }}</label>
+                <div class="col-sm-8">
+                  <input type="text" name="buyer_email" value="{{ order_id ? buyer_email : store_email }}" placeholder="{{ entry_email }}" class="form-control" />
+                  <input type="hidden" name="buyer_contact_tel" value="">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Supplier Panel -->
+        <div class="col-md-6">
+          <div class="card mb-3">
+            <div class="card-header">{{ text_supplier }}</div>
+            <div class="card-body">
+              <div class="mb-3 row">
+                <label class="col-sm-4 col-form-label">{{ entry_contact }}</label>
+                <div class="col-sm-8 position-relative">
+                  <input type="text" name="supplier_contact" value="{{ supplier_contact }}" placeholder="{{ entry_contact }}" class="form-control" data-oc-target="autocomplete-supplier_contact" autocomplete="off" />
+                  <ul id="autocomplete-supplier_contact" class="dropdown-menu"></ul>
+                </div>
+              </div>
+
+              <div class="mb-3 row">
+                <label class="col-sm-4 col-form-label">{{ entry_company }}</label>
+                <div class="col-sm-8">
+                  <input type="text" name="supplier_company" value="{{ supplier_company }}" placeholder="{{ entry_company }}" class="form-control" />
+                  <input type="hidden" name="supplier_id" value="{{ supplier_id }}" />
+                </div>
+              </div>
+
+              <div class="mb-3 row">
+                <label class="col-sm-4 col-form-label">{{ entry_address }}</label>
+                <div class="col-sm-8">
+                  <textarea name="supplier_address" placeholder="{{ entry_address }}" class="form-control" rows="4">{{ supplier_address }}</textarea>
+                </div>
+              </div>
+
+              <div class="mb-3 row">
+                <label class="col-sm-4 col-form-label">{{ entry_zip_code }}</label>
+                <div class="col-sm-8">
+                  <input type="text" name="supplier_zip_code" value="{{ supplier_zip_code }}" placeholder="{{ entry_zip_code }}" class="form-control" />
+                </div>
+              </div>
+
+              <div class="mb-3 row">
+                <label class="col-sm-4 col-form-label">{{ entry_telephone }}</label>
+                <div class="col-sm-8">
+                  <input type="text" name="supplier_tel" value="{{ supplier_tel }}" placeholder="{{ entry_telephone }}" class="form-control" />
+                </div>
+              </div>
+
+              <div class="mb-3 row">
+                <label class="col-sm-4 col-form-label">{{ entry_email }}</label>
+                <div class="col-sm-8">
+                  <input type="text" name="supplier_email" value="{{ supplier_email }}" placeholder="{{ entry_email }}" class="form-control" />
+                  <input type="hidden" name="supplier_contact_tel" value="">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+     <!-- Shipping & Payment Section -->
+        <div class="row g-3 mb-3">
+          <!-- Shipping Method -->
+          <div class="col-md-6">
+            <label class="form-label">{{ entry_shipping_method }}</label>
+            <select name="shipping_method" class="form-select">
+              <option value="">{{ text_select }}</option>
+              <option value="free_shipping" {% if shipping_method == 'free_shipping' %}selected{% endif %}>Free Shipping</option>
+              <option value="flat_shipping" {% if shipping_method == 'flat_shipping' %}selected{% endif %}>Flat Shipping</option>
+              {% for shippingmethod in shipping_methods %}
+              <option value="{{ shippingmethod['code'] }}" {% if shippingmethod['code'] == shipping_method %}selected{% endif %}>{{ shippingmethod['title'] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        
+          <!-- Shipping Term -->
+          <div class="col-md-6">
+            <label class="form-label">{{ entry_shipping_term }}</label>
+            <input type="text" name="shipping_term" value="{{ shipping_term }}" class="form-control" placeholder="Enter shipping term">
+          </div>
+        
+          <!-- Payment Method -->
+          <div class="col-md-6">
+            <label class="form-label">{{ entry_payment_method }}</label>
+            <select name="payment_method" class="form-select">
+              <option value="">{{ text_select }}</option>
+              <option value="cod" {% if payment_method == 'cod' %}selected{% endif %}>COD (Cash on Delivery)</option>
+              <option value="card" {% if payment_method == 'card' %}selected{% endif %}>Card Payment</option>
+              {% for paymentmethod in payment_methods %}
+              <option value="{{ paymentmethod['code'] }}" {% if paymentmethod['code'] == payment_method %}selected{% endif %}>{{ paymentmethod['title'] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        
+          <!-- Order Status -->
+          <div class="col-md-6">
+            <label class="form-label">{{ entry_status }}</label>
+            <select name="status" class="form-select">
+              <option value="">{{ text_select }}</option>
+              {% if order_statuses %}
+                {% for order_status in order_statuses %}
+                <option value="{{ order_status['name'] }}" {% if order_status['name'] == status %}selected{% endif %}>{{ order_status['name'] }}</option>
+                {% endfor %}
+              {% endif %}
+            </select>
+          </div>
+        </div>
+
+      <!-- Product Table -->
+      <div class="card mb-3">
+        <div class="card-header">{{ text_product }}</div>
+        <div class="card-body table-responsive">
+          <table class="table table-bordered table-hover table-striped">
+            <thead class="table-light">
+              <tr>
+                {% set colspan = 1 %}
+                {% for key,column in purchase_order_column %}
+                    {% if column['status'] and key != 'option' %}
+                  <th class="text-center">{{ column['name'] }}</th>
+                  {% set colspan = colspan + 1 %}
+                  {% endif %}
+                {% endfor %}
+                <th>{{ column_action }}</th>
+              </tr>
+            </thead>
+            <tbody id="cart">
+              {% if order_products %}
+                {% set product_row = 0 %}
+                {% for order_product in order_products %}
+                  <tr>
+                      <tr>
+                          {% for key, column in purchase_order_column %}
+                            {% if column['status'] %}
+                              {% if key == 'serial_no' %}
+                                <td class="text-center">{{ loop.index }}</td>
+                        
+                              {% elseif key == 'sku' %}
+                                <td>{{ order_product.sku ?? '' }}</td>
+                        
+                              {% elseif key == 'description' %}
+                                <td>{{ order_product.name ?? '' }}</td>
+                        
+                              {% elseif key == 'image' %}
+                              <td class="text-center">
+                                {% if order_product['image'] %}
+                                  <img src="{{ order_product['image'] }}" alt="{{ order_product['name'] }}" style="width:50px; height:50px; object-fit:cover; border-radius:5px;">
+                                {% else %}
+                                  <span style="color:#888;">No Image</span>
+                                {% endif %}
+                              </td>
+
+                        
+                              {% elseif key == 'model' %}
+                                <td>{{ order_product.model ?? '' }}</td>
+                        
+                              {#{% elseif key == 'option' %}#}
+                              {#  <td>{{ order_product.option ?? '' }}</td>#}
+                        
+                              {% elseif key == 'weight' %}
+                                <td>{{ order_product.weight ?? '' }}</td>
+                        
+                              {% elseif key == 'dimension' %}
+                                <td>{{ order_product.dimension ?? '' }}</td>
+                                
+                              {% elseif key == 'stock' %}
+                                <td>{{ order_product.stock ?? '' }}</td>
+                                
+                              {% elseif key == 'sale_price' %}
+                                <td>{{ order_product.sale_price ?? '' }}</td> 
+                                
+                              {% elseif key == 'discount' %}
+                                <td>{{ order_product.discount ?? '' }}</td> 
+                                
+                              {% elseif key == 'price' %}
+                                <td>{{ order_product.price ?? '' }}</td> 
+                                
+                              {% elseif key == 'quantity' %}
+                                <td>{{ order_product.quantity ?? '' }}</td> 
+                                
+                              {% elseif key == 'total' %}
+                                <td>{{ order_product.total ?? '' }}</td> 
+                        
+                              {#{% elseif key in ['stock', 'price', 'discount','saleprice', 'quantity', 'total'] %}#}
+                              {#  <td class="text-end">{{ order_product[key] ?? '' }}</td>#}
+                        
+                              {#{% elseif key == 'size' %}
+                                <td>{{ order_product.size ?? '' }}</td>#}
+                        
+                              {% else %}
+                                <td>{{ order_product[key] ?? '' }}</td>
+                        
+                              {% endif %}
+                            {% endif %}
+                          {% endfor %}
+                        
+                          <!-- Action Button -->
+                          <td class="text-center">
+                            {% if order_product.unbelong %}
+                              <button type="button" class="btn btn-danger btn-sm" onclick="$(this).closest('tr').remove();">
+                                <i class="fa fa-minus-circle"></i>
+                              </button>
+                            {% endif %}
+                          </td>
+                        </tr>
+                          {% set product_row = product_row + 1 %}
+                        {% endfor %}
+                      {% else %}
+                        <tr>
+                          <td class="text-center" colspan="{{ colspan }}">{{ text_no_results }}</td>
+                        </tr>
+                      {% endif %}
+                    </tbody>
+                  </table>
+
+         <div class="mt-3 d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-success btn-refresh">
+                <i class="fa fa-refresh"></i> {{ button_refresh }}
+            </button>
+        
+            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#bulkaddproduct">
+                <i class="fa fa-plus-circle"></i> {{ button_bulk_product_add }}
+            </button>
+        
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#fieldmanager">
+                <i class="fa fa-plus-circle"></i> {{ button_product_add }}
+            </button>
+        </div>
+
+        </div>
+      </div>
+
+      <!-- Order Totals Panel -->
+        <div class="card mb-3">
+            <div class="card-header">{{ entry_custom_fee_dis }}</div>
+            <div class="card-body">
+                <!-- Custom Totals Table -->
+                <div class="table-responsive {% if not me_purchase_order_setting_customfeedisstatus %}d-none{% endif %}">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>{{ entry_title }}</th>
+                                <th>{{ entry_type }}</th>
+                                <th>{{ entry_dtype }}</th>
+                                <th>{{ entry_discount }}</th>
+                                <th class="text-end">{{ entry_action }}</th>
+                            </tr>
+                        </thead>
+                        <tbody id="custom-totals">
+                            {% set po_custom_total_row = 0 %}
+                            {% for po_custom_total in po_custom_totals %}
+                            <tr id="custom-total-{{ po_custom_total_row }}">
+                                <td><input type="text" name="po_custom_total[{{ po_custom_total_row }}][title]" value="{{ po_custom_total['name'] ? po_custom_total['name'] : '' }}" class="form-control" placeholder="{{ text_title }}" /></td>
+                                <td>
+                                    <select name="po_custom_total[{{ po_custom_total_row }}][type]" class="form-select">
+                                        <option value="1" {% if po_custom_total['type'] %}selected{% endif %}>{{ text_discount }}</option>
+                                        <option value="0" {% if not po_custom_total['type'] %}selected{% endif %}>{{ text_fee }}</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select name="po_custom_total[{{ po_custom_total_row }}][dtype]" class="form-select">
+                                        <option value="P" {% if po_custom_total['dtype'] == 'P' %}selected{% endif %}>{{ text_percent }}</option>
+                                        <option value="F" {% if po_custom_total['dtype'] == 'F' %}selected{% endif %}>{{ text_total_amount }}</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" name="po_custom_total[{{ po_custom_total_row }}][amt]" value="{{ po_custom_total['discount'] ? po_custom_total['discount'] : '' }}" class="form-control" placeholder="{{ text_amount }}" /></td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="loadcustomtotal();"><i class="fa fa-plus-circle"></i></button>
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="removecustomototal('{{ po_custom_total_row }}')"><i class="fa fa-minus-circle"></i></button>
+                                </td>
+                            </tr>
+                            {% set po_custom_total_row = po_custom_total_row + 1 %}
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="5" class="text-end">
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="addcustomtotalmore();"><i class="fa fa-plus-circle"></i></button>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+        
+                <!-- Tax and Balance Section -->
+                <div class="row g-3 mb-3 {% if not me_purchase_order_setting_tax and not me_purchase_order_setting_balance %}d-none{% endif %}">
+                    <!-- Tax -->
+                    {% if me_purchase_order_setting_tax %}
+                    <div class="col-md-6">
+                        <label class="form-label">{{ entry_tax }}</label>
+                        <div class="input-group">
+                            <input type="text" name="tax" value="{{ tax }}" placeholder="{{ entry_tax }}" class="form-control" />
+                            <button type="button" id="button-tax" class="btn btn-primary">{{ button_apply }}</button>
+                        </div>
+                    </div>
+                    {% endif %}
+        
+                    <!-- Balance -->
+                    {% if me_purchase_order_setting_balance %}
+                    <div class="col-md-6">
+                        <label class="form-label">{{ entry_balance }}</label>
+                        <div class="input-group">
+                            <input type="text" name="balance" value="{{ balance }}" placeholder="{{ entry_balance }}" class="form-control" />
+                            <button type="button" id="button-balance" class="btn btn-primary">{{ button_apply }}</button>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+        
+                <!-- Order Summary -->
+                <div class="row">
+                    <div class="col-md-8"></div>
+                    <div class="col-md-4">
+                        <table class="table table-borderless">
+                            <tbody id="total">
+                                <!-- Totals will be dynamically updated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+        
+                <!-- Notify Supplier Section (Optional) -->
+                {#<div class="row mt-3 d-none">#}
+                {#    <div class="col-12">#}
+                {#        <div class="form-check">#}
+                {#            <input class="form-check-input" type="checkbox" name="notify_supplier" value="1" id="input-notify-supplier">#}
+                {#            <label class="form-check-label" for="input-notify-supplier">#}
+                {#                {{ entry_notify_supplier }}#}
+                {#                <span class="text-muted"><i class="fa fa-question-circle" data-bs-toggle="tooltip" title="{{ help_notify_supplier }}"></i></span>#}
+                {#            </label>#}
+                {#        </div>#}
+                {#    </div>#}
+                {#</div>#}
+            </div>
+        </div>
+        
+        <!-- Comments Section -->
+        {% if me_purchase_order_setting_comment %}
+        <div class="card mb-3">
+            <div class="card-header">{{ entry_comments }}</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">{{ entry_comment }}</label>
+                    <textarea name="order_comment" rows="4" placeholder="{{ entry_comment }}" class="form-control"></textarea>
+                </div>
+                
+                {% if order_id %}
+                <div class="mb-3">
+                    <label class="form-label">{{ button_upload }}</label>
+                    <div class="input-group">
+                        {#<input type="text" class="form-control" placeholder="Upload attachment" readonly>#}
+                        <button type="button" class="btn btn-secondary btn-attachment"><i class="fa fa-upload"></i> {{ button_upload }}</button>
+                    </div>
+                </div>
+        
+                <div class="attachments mb-3">
+                    <div class="row">
+                        {% for attachment in attachments %}
+                        <div class="col-sm-2" id="{{ attachment.code }}">
+                            <div class="attachment position-relative border rounded p-2">
+                                <i class="fa fa-times position-absolute top-0 end-0 text-danger removeattach" rel="{{ attachment.code }}" style="cursor: pointer;"></i>
+                                {{ attachment.new_msg|raw }}
+                                <input type="hidden" name="attachment[]" value="{{ attachment.code }}">
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+        
+                <button type="button" id="add_comment" class="btn btn-success"><i class="fa fa-plus-circle"></i> {{ button_add_comment }}</button>
+        
+                <div class="mt-3" id="product_comments">
+                    {% if product_comments %}
+                    <table class="table table-bordered">
+                        {% for product_comment in product_comments %}
+                        <tr id="comment{{ product_comment.comment_id }}">
+                            <td class="first-td" style="width: 150px;">{{ product_comment.date_added }}</td>
+                            <td class="ordercomment">{{ product_comment.comment }}</td>
+                            <td class="text-end" style="width: 100px;">
+                                <button type="button" class="btn btn-primary btn-sm" onclick="editcomment({{ product_comment.comment_id }});"><i class="fa fa-pencil"></i></button>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="deletecomment({{ product_comment.comment_id }});"><i class="fa fa-times"></i></button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+      <!-- Save Buttons -->
+      <div class="text-end mb-3">
+        {% if order_id %}
+          <button type="button" id="button-save" class="btn btn-primary"><i class="fa fa-check-circle"></i> {{ button_save }}</button>
+        {% else %}
+          <button type="button" id="button-save1" class="btn btn-primary"><i class="fa fa-check-circle"></i> {{ button_save }}</button>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- Single Product Modal -->
+<div class="modal fade" id="fieldmanager" tabindex="-1" aria-labelledby="fieldname" >
+  <div class="modal-dialog">
+    <div class="modal-content"  style="background-color: black;">
+      <div class="modal-header d-flex align-items-center">
+        <h5 class="modal-title" id="fieldname">{{ text_product }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post" enctype="multipart/form-data" id="form-order_product">
+          <div class="mb-3 row">
+            <label for="input-product" class="col-sm-3 col-form-label">{{ entry_product }}</label>
+            <div class="col-sm-9">
+              <input type="text" name="product" id="input-product" class="form-control" data-oc-target="autocomplete-product" autocomplete="off"/>
+                    <ul id="autocomplete-product" class="dropdown-menu"></ul>
+              <input type="hidden" name="product_id" value="" />
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="input-quantity" class="col-sm-3 col-form-label">{{ entry_quantity }}</label>
+            <div class="col-sm-9">
+              <input type="text" name="quantity" id="input-quantity" value="1" class="form-control" />
+              <input type="hidden" name="stock" id="input-stock" class="form-control" />
+            </div>
+          </div>
+          <div class="mb-3 row d-none">
+            <label for="input-comment" class="col-sm-3 col-form-label">{{ entry_comment }}</label>
+            <div class="col-sm-9">
+              <textarea name="comment" id="input-comment" rows="4" class="form-control" placeholder="{{ entry_comment }}"></textarea>
+            </div>
+          </div>
+          <div id="option"></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="button-product-add" class="btn btn-primary">
+          <i class="fa fa-plus-circle"></i> {{ button_product_add }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk Product Modal -->
+<div class="modal fade" id="bulkaddproduct" tabindex="-1" aria-labelledby="bulkaddproductname" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header d-flex align-items-center">
+        <h5 class="modal-title" id="bulkaddproductname">{{ entry_bulk_product_add }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post" enctype="multipart/form-data" id="form-bulk_order_product">
+          <div class="row mb-3 g-2">
+            <div class="col-sm-3">
+              <input type="text" name="filter_name" id="input-filter_name" class="form-control" placeholder="{{ entry_product }}" />
+            </div>
+            <div class="col-sm-3">
+              <input type="text" name="filter_model" id="input-filter_model" class="form-control" placeholder="{{ entry_model }}" />
+            </div>
+            <div class="col-sm-3">
+              <input type="text" name="filter_quantity" id="input-stock" class="form-control" placeholder="{{ entry_stock_poption }}" />
+            </div>
+            <div class="col-sm-3 d-flex gap-2">
+              <button type="button" class="btn btn-primary btn-product-search"><i class="fa fa-search"></i></button>
+              <button type="button" class="btn btn-danger btn-product-remove"><i class="fa fa-close"></i></button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>{{ column_image }}</th>
+                  <th>{{ column_product }}</th>
+                  <th>{{ column_model }}</th>
+                  <th>{{ column_sale_price }}</th>
+                  <th>{{ column_price }}</th>
+                  <th>{{ column_stock }}</th>
+                  <th>{{ column_qty }}</th>
+                  <th>{{ column_option }}</th>
+                  <th>{{ column_action }}</th>
+                </tr>
+              </thead>
+              <tbody class="sellerproducts">
+                <tr>
+                  <td colspan="9" class="text-center">{{ text_no_products }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+  <style>
+
+.panel-disabled{
+	pointer-events: none;
+    background-color: #eee;
+}
+.page-header label{
+		padding: 5px;
+		padding-bottom: 0;
+	}
+	
+.ui-autocomplete {
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 9999 !important;
+    background: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.ui-menu-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.ui-menu-item:hover,
+.ui-menu-item.ui-state-focus {
+    background-color: #f0f0f0;
+}
+</style>
+<script type="text/javascript">
+<!--
+$(document).ready(function() {
+	// Highlight any found errors
+	$('.panel .text-danger').each(function() {
+		var element = $(this).parent();
+		var element2 = $(this).parent().parent();
+
+		if (element.hasClass('col-sm-4')) {
+			element.addClass('has-error');
+		}
+		
+		if (element2.hasClass('form-group')) {
+			element2.removeClass('has-error');
+		}
+	});
+});
+
+//Buyer
+
+$('select[name="buyer_id"]').on('change', function() {
+	$.ajax({
+		url: 'index.php?route=extension/me_purchase_order.getstore&user_token={{ user_token }}&store_id='+$(this).val(),
+		type: 'post',
+		dataType: 'json',
+		beforeSend: function() {
+			
+		},
+		complete: function() {
+			
+		},
+		success: function(json) {
+			$('input[name=\'buyer_id\']').val(json['store_id']);
+			$('input[name=\'buyer_company\']').val(json['store_name']);
+			$('input[name=\'buyer_contact\']').val(json['store_contact']);
+			$('input[name=\'buyer_email\']').val(json['store_email']);
+			$('input[name=\'buyer_tel\']').val(json['store_telephone']);
+			$('input[name=\'buyer_zip_code\']').val(json['store_geocode']);
+			$('textarea[name=\'buyer_address\']').val(json['store_address']);
+		}
+	});
+});
+
+// Supplier Autocomplete - Fixed Version
+$('input[name="supplier_contact"]').autocomplete({
+    source: function(request, response) {
+        $.ajax({
+            url: 'index.php?route=extension/me_posupplier.autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request.term),
+            dataType: 'json',
+            success: function(json) {
+                console.log('Supplier autocomplete response:', json);
+                response($.map(json, function(item) {
+                    return {
+                        label: item['name'] + ' - ' + item['company'],
+                        value: item['name'],
+                        supplier_id: item['supplier_id'],
+                        company: item['company'],
+                        contact: item['contact'],
+                        email: item['email'],
+                        telephone: item['telephone'],
+                        address: item['address'],
+                        zip_code: item['zip_code']
+                    }
+                }));
+            },
+            error: function(xhr, status, error) {
+                console.error('Autocomplete error:', status, error);
+                response([]);
+            }
+        });
+    },
+    minLength: 2,
+    select: function(event, ui) {
+        console.log('Selected supplier:', ui.item);
+        
+        // Populate supplier fields
+        $('input[name="supplier_id"]').val(ui.item.supplier_id);
+        $('input[name="supplier_company"]').val(ui.item.company);
+        $('input[name="supplier_contact"]').val(ui.item.value);
+        $('input[name="supplier_email"]').val(ui.item.email);
+        $('input[name="supplier_tel"]').val(ui.item.telephone);
+        $('input[name="supplier_zip_code"]').val(ui.item.zip_code);
+        $('textarea[name="supplier_address"]').val(ui.item.address);
+        
+        // Enable product panel if supplier is selected
+        if ($('input[name="supplier_id"]').val() > 0) {
+            $('.panel-product .panel-info').removeClass('panel-disabled');
+        } else {
+            $('.panel-product .panel-info').addClass('panel-disabled');
+        }
+        
+        // Refresh products
+        $('.btn-refresh').trigger('click');
+        
+        return false;
+    }
+});
+//--></script>
+  <script type="text/javascript"><!--
+    // ========================================
+    // PRODUCT AUTOCOMPLETE - SUPPLIER BASED
+    // ========================================
+    $('input[name="product"]').autocomplete({
+    source: function(request, response) {
+        var supplier_id = $('input[name="supplier_id"]').val();
+        
+        console.log('Product search - Supplier ID:', supplier_id);
+        console.log('Search term:', request.term);
+        
+        // Check if supplier is selected
+        if (!supplier_id || supplier_id == '' || supplier_id == '0') {
+            alert('Please select a supplier first');
+            $('input[name="product"]').val('');
+            response([]);
+            return false;
+        }
+        
+        $.ajax({
+            url: 'index.php?route=extension/me_purchase_order.pautocomplete&user_token={{ user_token }}',
+            type: 'get',
+            data: {
+                filter_name: request.term,
+                supplier_id: supplier_id
+            },
+            dataType: 'json',
+            success: function(json) {
+                console.log('Products response:', json);
+                
+                if (json && json['products'] && json['products'].length > 0) {
+                    response($.map(json['products'], function(item) {
+                        return {
+                            label: item.name + (item.model ? ' [' + item.model + ']' : '') + ' - Stock: ' + item.quantity,
+                            value: item.name,
+                            product_id: item.product_id,
+                            name: item.name,
+                            model: item.model,
+                            sku: item.sku,
+                            quantity: item.quantity,
+                            price: item.price,
+                            sale_price: item.sale_price,
+                            image: item.image,
+                            option: item.option || []
+                        };
+                    }));
+                } else {
+                    response([{
+                        label: 'No products found for this supplier',
+                        value: ''
+                    }]);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', status, error);
+                console.error('Response:', xhr.responseText);
+                response([]);
+            }
+        });
+    },
+    minLength: 1,
+    select: function(event, ui) {
+        if (!ui.item.product_id) {
+            return false;
+        }
+        
+        console.log('Selected product:', ui.item);
+
+        // Set basic fields
+        $('input[name="product"]').val(ui.item.name);
+        $('input[name="product_id"]').val(ui.item.product_id);
+        $('input[name="stock"]').val(ui.item.quantity);
+        
+        // Product image
+        if (ui.item.image && $('#pimage').length) {
+            $('#pimage').html('<img src="'+ui.item.image+'" class="img-fluid mb-3" style="max-width: 200px;">');
+        } else if ($('#pimage').length) {
+            $('#pimage').html('');
+        }
+
+        // Product options - COMPLETE VERSION
+        var html = '';
+        if (ui.item.option && ui.item.option.length > 0) {
+            console.log('Processing options:', ui.item.option);
+            
+            for (var j = 0; j < ui.item.option.length; j++) {
+                var opt = ui.item.option[j];
+                console.log('Option type:', opt.type, 'Option data:', opt);
+                
+                // SELECT DROPDOWN
+                if (opt.type === 'select') {
+                    html += '<div class="mb-3 row">';
+                    html += '<label class="col-sm-3 col-form-label' + (opt.required ? ' required' : '') + '">' + opt.name + '</label>';
+                    html += '<div class="col-sm-9">';
+                    html += '<select name="option['+opt.product_option_id+']" id="input-option-'+opt.product_option_id+'" class="form-select">';
+                    html += '<option value="">--- Please Select ---</option>';
+                    
+                    if (opt.product_option_value_id && opt.product_option_value_id.length > 0) {
+                        for (var k = 0; k < opt.product_option_value_id.length; k++) {
+                            var val = opt.product_option_value_id[k];
+                            html += '<option value="'+val.product_option_value_id+'">';
+                            html += val.name;
+                            if(val.price && val.price !== '0.00' && val.price !== '0.0000' && val.price !== false) {
+                                html += ' (' + val.price_prefix + val.price + ')';
+                            }
+                            html += '</option>';
+                        }
+                    }
+                    html += '</select>';
+                    html += '</div>';
+                    html += '</div>';
+                }
+                
+                // RADIO BUTTONS
+                if(opt.type === 'radio') {
+                    html += '<div class="mb-3 row">';
+                    html += '<label class="col-sm-3 col-form-label' + (opt.required ? ' required' : '') + '">'+opt.name+'</label>';
+                    html += '<div class="col-sm-9">';
+                    
+                    if (opt.product_option_value_id && opt.product_option_value_id.length > 0) {
+                        for (var k = 0; k < opt.product_option_value_id.length; k++) {
+                            var val = opt.product_option_value_id[k];
+                            html += '<div class="form-check">';
+                            html += '<input class="form-check-input" type="radio" name="option['+opt.product_option_id+']" ';
+                            html += 'value="'+val.product_option_value_id+'" ';
+                            html += 'id="opt-radio-'+opt.product_option_id+'-'+val.product_option_value_id+'"';
+                            if(k === 0 && !opt.required) html += ''; // Don't auto-select if not required
+                            html += '>';
+                            html += '<label class="form-check-label" for="opt-radio-'+opt.product_option_id+'-'+val.product_option_value_id+'">';
+                            html += val.name;
+                            if(val.price && val.price !== '0.00' && val.price !== '0.0000' && val.price !== false) {
+                                html += ' ('+val.price_prefix+val.price+')';
+                            }
+                            html += '</label>';
+                            html += '</div>';
+                        }
+                    }
+                    html += '</div>';
+                    html += '</div>';
+                }
+                
+                // CHECKBOXES
+                if(opt.type === 'checkbox') {
+                    html += '<div class="mb-3 row">';
+                    html += '<label class="col-sm-3 col-form-label' + (opt.required ? ' required' : '') + '">'+opt.name+'</label>';
+                    html += '<div class="col-sm-9">';
+                    
+                    if (opt.product_option_value_id && opt.product_option_value_id.length > 0) {
+                        for (var k = 0; k < opt.product_option_value_id.length; k++) {
+                            var val = opt.product_option_value_id[k];
+                            html += '<div class="form-check">';
+                            html += '<input class="form-check-input" type="checkbox" name="option['+opt.product_option_id+'][]" ';
+                            html += 'value="'+val.product_option_value_id+'" ';
+                            html += 'id="opt-checkbox-'+opt.product_option_id+'-'+val.product_option_value_id+'">';
+                            html += '<label class="form-check-label" for="opt-checkbox-'+opt.product_option_id+'-'+val.product_option_value_id+'">';
+                            html += val.name;
+                            if(val.price && val.price !== '0.00' && val.price !== '0.0000' && val.price !== false) {
+                                html += ' ('+val.price_prefix+val.price+')';
+                            }
+                            html += '</label>';
+                            html += '</div>';
+                        }
+                    }
+                    html += '</div>';
+                    html += '</div>';
+                }
+                
+                // TEXT INPUT
+                if(opt.type === 'text') {
+                    html += '<div class="mb-3 row">';
+                    html += '<label class="col-sm-3 col-form-label' + (opt.required ? ' required' : '') + '">' + opt.name + '</label>';
+                    html += '<div class="col-sm-9">';
+                    html += '<input type="text" name="option['+opt.product_option_id+']" id="input-option-'+opt.product_option_id+'" class="form-control" placeholder="'+opt.name+'">';
+                    html += '</div>';
+                    html += '</div>';
+                }
+                
+                // TEXTAREA
+                if(opt.type === 'textarea') {
+                    html += '<div class="mb-3 row">';
+                    html += '<label class="col-sm-3 col-form-label' + (opt.required ? ' required' : '') + '">' + opt.name + '</label>';
+                    html += '<div class="col-sm-9">';
+                    html += '<textarea name="option['+opt.product_option_id+']" id="input-option-'+opt.product_option_id+'" class="form-control" rows="3" placeholder="'+opt.name+'"></textarea>';
+                    html += '</div>';
+                    html += '</div>';
+                }
+                
+                // DATE
+                if(opt.type === 'date') {
+                    html += '<div class="mb-3 row">';
+                    html += '<label class="col-sm-3 col-form-label' + (opt.required ? ' required' : '') + '">' + opt.name + '</label>';
+                    html += '<div class="col-sm-9">';
+                    html += '<input type="text" name="option['+opt.product_option_id+']" id="input-option-'+opt.product_option_id+'" class="form-control datepicker-option" placeholder="'+opt.name+'">';
+                    html += '</div>';
+                    html += '</div>';
+                }
+                
+                // DATETIME
+                if(opt.type === 'datetime') {
+                    html += '<div class="mb-3 row">';
+                    html += '<label class="col-sm-3 col-form-label' + (opt.required ? ' required' : '') + '">' + opt.name + '</label>';
+                    html += '<div class="col-sm-9">';
+                    html += '<input type="text" name="option['+opt.product_option_id+']" id="input-option-'+opt.product_option_id+'" class="form-control datetime-option" placeholder="'+opt.name+'">';
+                    html += '</div>';
+                    html += '</div>';
+                }
+                
+                // TIME
+                if(opt.type === 'time') {
+                    html += '<div class="mb-3 row">';
+                    html += '<label class="col-sm-3 col-form-label' + (opt.required ? ' required' : '') + '">' + opt.name + '</label>';
+                    html += '<div class="col-sm-9">';
+                    html += '<input type="text" name="option['+opt.product_option_id+']" id="input-option-'+opt.product_option_id+'" class="form-control time-option" placeholder="'+opt.name+'">';
+                    html += '</div>';
+                    html += '</div>';
+                }
+            }
+        }
+        
+        $('#option').html(html);
+        console.log('Options HTML generated');
+
+        // Initialize datetimepickers for date/time options
+        if ($.fn.datetimepicker) {
+            setTimeout(function() {
+                $('#option .datepicker-option').datetimepicker({
+                    format: 'Y-m-d',
+                    timepicker: false,
+                    scrollMonth: false,
+                    scrollInput: false
+                });
+                $('#option .datetime-option').datetimepicker({
+                    format: 'Y-m-d H:i:s',
+                    timepicker: true,
+                    scrollMonth: false,
+                    scrollInput: false
+                });
+                $('#option .time-option').datetimepicker({
+                    format: 'H:i:s',
+                    datepicker: false,
+                    scrollMonth: false,
+                    scrollInput: false
+                });
+            }, 100);
+        }
+        
+        return false;
+    }
+ });
+    
+    // ========================================
+    // MODAL VALIDATION
+    // ========================================
+    $('#fieldmanager').on('show.bs.modal', function (e) {
+    // Set main page content to inert (not interactive)
+    $('.container-fluid').attr('inert', '');
+
+    var supplier_id = $('input[name="supplier_id"]').val();
+    if (!supplier_id || supplier_id == '' || supplier_id == '0') {
+        e.preventDefault();
+        alert('Please select a supplier first before adding products');
+        // Remove inert again since modal did not show
+        $('.container-fluid').removeAttr('inert');
+        return false;
+    }
+    // Clear form
+    $('input[name="product"]').val('');
+    $('input[name="product_id"]').val('');
+    $('input[name="quantity"]').val('1');
+    $('input[name="stock"]').val('');
+    $('#option').html('');
+    if ($('#pimage').length) {
+        $('#pimage').html('');
+    }
+});
+$('#fieldmanager').on('hidden.bs.modal', function (e) {
+    // Remove inert so main content is interactive again
+    $('.container-fluid').removeAttr('inert');
+});
+
+
+function addbulkproduct(url) {
+	$('.pagination-results').remove();
+	$.ajax({
+		url: url,
+		type: 'post',
+		dataType: 'json',
+		crossDomain: true,
+		beforeSend: function() {
+			
+		},
+		complete: function() {
+			
+		},
+		success: function(json) {
+			html = '';
+			if(json['products'].length > 0){
+				for(i in json['products']){
+					var product = json['products'][i];
+					html += '<tr id="sellerproduct'+ i +'">';
+					html += '<td><a href="' + product['image'] + '" target="_blank"><img src="' + product['image'] + '" alt="' + product['name'] + '" style="width:50px!important"></a><input type="hidden" name="stock" value="' + product['quantity'] + '" /></td>';
+					html += '<td>'+ product['name'] +' <input type="hidden" name="product_id" value="' + product['product_id'] + '" /></td>';
+					html += '<td>'+ product['model'] +'</td>';
+					html += '<td>'+ product['sale_price'] +' <input type="hidden" name="sale_price" value="'+ product['sale_price'] +'" /></td>';
+					html += '<td>'+ product['price'] +' <input type="hidden" name="price" value="'+ product['price'] +'" /></td>';
+					html += '<td>'+ product['quantity'] +'</td>';
+					html += '<td><input type="text" name="quantity" value="1" class="form-control text-right" /></td>';
+					html += '<td>';
+					if (product['option'] != '') {
+						html += '<a onclick="showoption(' + i + ');" class="btn btn-primary">Option</a>';
+						html += '<div class="productoptions hide">';
+						for (j = 0; j < product['option'].length; j++) {
+							option = product['option'][j];
+
+							if (option['type'] == 'select' && option['required'] == 1) {
+								html += '<div class="form-group' + (option['required'] ? ' required' : '') + '">';
+								html += '  <label class="control-label" for="input-bulk-option' + option['product_option_id'] + '">' + option['name'] + '</label>';
+								html += '  <div class="">';
+								html += '    <select name="option[' + option['product_option_id'] + ']" id="input-bulk-option' + option['product_option_id'] + '" class="form-control">';
+								html += '      <option value="">{{ text_select }}</option>';
+
+								for (k = 0; k < option['product_option_value'].length; k++) {
+									option_value = option['product_option_value'][k];
+
+									html += '<option value="' + option_value['product_option_value_id'] + '">' + option_value['name'];
+
+									if (option_value['price']) {
+										html += ' (' + option_value['price_prefix'] + option_value['price'] + ') (' + option_value['quantity'] + ')';
+									} else {
+										html += ' (' + option_value['quantity'] + ')';
+									}
+
+									html += '</option>';
+								}
+
+								html += '    </select>';
+								html += '  </div>';
+								html += '</div>';
+							}
+							
+							if (option['type'] == 'radio' && option['required'] == 1) {
+								html += '<div class="form-group' + (option['required'] ? ' required' : '') + '">';
+								html += '  <label class="control-label" for="input-bulk-option' + option['product_option_id'] + '">' + option['name'] + '</label>';
+								html += '  <div class="">';
+								html += '    <select name="option[' + option['product_option_id'] + ']" id="input-bulk-option' + option['product_option_id'] + '" class="form-control">';
+								html += '      <option value="">{{ text_select }}</option>';
+
+								for (k = 0; k < option['product_option_value'].length; k++) {
+									option_value = option['product_option_value'][k];
+
+									html += '<option value="' + option_value['product_option_value_id'] + '">' + option_value['name'];
+
+									if (option_value['price']) {
+										html += ' (' + option_value['price_prefix'] + option_value['price'] + ') (' + option_value['quantity'] + ')';
+									} else {
+										html += ' (' + option_value['quantity'] + ')';
+									}
+
+									html += '</option>';
+								}
+
+								html += '    </select>';
+								html += '  </div>';
+								html += '</div>';
+							}
+
+							if (option['type'] == 'checkbox' && option['required'] == 1) {
+								html += '<div class="form-group' + (option['required'] ? ' required' : '') + '">';
+								html += '  <label class="control-label">' + option['name'] + '</label>';
+								html += '  <div class="">';
+								html += '    <div id="input-bulk-option' + option['product_option_id'] + '">';
+
+								for (k = 0; k < option['product_option_value'].length; k++) {
+									option_value = option['product_option_value'][k];
+
+									html += '<div class="checkbox">';
+
+									html += '  <label><input type="checkbox" name="option[' + option['product_option_id'] + '][]" value="' + option_value['product_option_value_id'] + '" /> ' + option_value['name'];
+
+									if (option_value['price']) {
+										html += ' (' + option_value['price_prefix'] + option_value['price'] + ')';
+									}
+
+									html += '  </label>';
+									html += '</div>';
+								}
+
+								html += '    </div>';
+								html += '  </div>';
+								html += '</div>';
+							}
+						}
+						html += '</div>';
+					}
+					html += '</td>';
+					html += '<td><a class="btn btn-primary" onclick="addmoreprduct('+ i +');">Add Product</a></td>';
+					html += '</tr>';
+				}
+			} else {
+				html += '<tr>';
+				html += '<td colspan="7" class="text-center">{{ text_no_products }}</td>';
+				html += '</tr>';
+			}
+			
+			$('.sellerproducts').html(html);
+
+			if (json['pagination'] || json['results']) {
+				html = '<div class="row pagination-results">';
+				if (json['pagination']) {
+	            	html += '  <div class="col-sm-6 text-left">'+ json['pagination'] +'</div>';
+	        	} else {
+	        		html += '  <div class="col-sm-6 text-left"></div>';
+	        	}
+	            html += '  <div class="col-sm-6 text-right">'+ json['results'] +'</div>';
+	            html += '</div>';
+
+	            $('#form-bulk_order_product').append(html);
+			}
+		},
+	});
+}
+$('.addbulkproduct,.btn-product-remove').on('click',function(){
+	$('input[name=\'filter_name\']').val('');
+	$('input[name=\'filter_model\']').val('');
+	$('input[name=\'filter_quantity\']').val('');
+	addbulkproduct('index.php?route=extension/me_purchase_order.pautocomplete&user_token={{ user_token }}&filter_name=&limit=10&supplier_id='+$('input[name=\'supplier_id\']').val());
+});
+$('.btn-product-search').on('click',function(){
+	url = '';
+	var filter_name = $('input[name=\'filter_name\']').val();
+
+	if (filter_name) {
+		url += '&filter_name=' + encodeURIComponent(filter_name);
+	} else {
+		 url += '&filter_name=';
+	}
+
+	var filter_model = $('input[name=\'filter_model\']').val();
+
+	if (filter_model) {
+		url += '&filter_model=' + encodeURIComponent(filter_model);
+	}
+
+	var filter_quantity = $('input[name=\'filter_quantity\']').val();
+
+	if (filter_quantity) {
+		url += '&filter_quantity=' + encodeURIComponent(filter_quantity);
+	}
+
+	addbulkproduct('index.php?route=extension/me_purchase_order.pautocomplete&user_token={{ user_token }}'+ url +'&limit=10&supplier_id='+$('input[name=\'supplier_id\']').val());
+	
+});
+$('#form-bulk_order_product').delegate('.pagination a', 'click', function(e) {
+    e.preventDefault();
+    addbulkproduct(this.href);
+});
+function showoption(row){
+	if($('#sellerproduct'+row+' .productoptions').hasClass('hide')){
+		$('#sellerproduct'+row+' .productoptions').removeClass('hide');
+	}else{
+		$('#sellerproduct'+row+' .productoptions').addClass('hide');
+	}
+}
+
+function addmoreprduct(row){
+	$.ajax({
+		url: 'index.php?route=extension/me_purchase_order.addproduct&user_token={{ user_token }}&supplier_id='+$('input[name="supplier_id"]').val(),
+		type: 'post',
+		data: $('#sellerproduct'+ row +' input[name=\'product_id\'], #sellerproduct'+ row +' input[name=\'quantity\'], #sellerproduct'+ row +' input[name=\'price\'], #sellerproduct'+ row +' input[name=\'sale_price\'],#sellerproduct'+ row +' input[name=\'stock\'],#sellerproduct'+ row +' input[name=\'exp_sales\'],#sellerproduct'+ row +' textarea[name=\'comment\'], #sellerproduct'+ row +' input[name^=\'option\'][type=\'text\'], #sellerproduct'+ row +' input[name^=\'option\'][type=\'hidden\'], #sellerproduct'+ row +' input[name^=\'option\'][type=\'radio\']:checked, #sellerproduct'+ row +' input[name^=\'option\'][type=\'checkbox\']:checked, #sellerproduct'+ row +' select[name^=\'option\'], #sellerproduct'+ row +' textarea[name^=\'option\']'),
+		dataType: 'json',
+		crossDomain: true,
+		beforeSend: function() {
+			
+		},
+		complete: function() {
+			
+		},
+		success: function(json) {
+			$('.alert-dismissible, .text-danger, .text-success').remove();
+			$('.form-group,.col-sm-4,.col-sm-8').removeClass('has-error');
+
+			if (json['error']) {
+				if (json['error']['warning']) {
+					$('#form-bulk_order_product').before('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error']['warning'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				}
+
+				if (json['error']['option']) {
+					$('#sellerproduct'+row+' .productoptions').removeClass('hide');
+					for (i in json['error']['option']) {
+						var element = $('#input-bulk-option' + i.replace('_', '-'));
+
+						if (element.parent().hasClass('input-group')) {
+							$(element).parent().after('<div class="text-danger">' + json['error']['option'][i] + '</div>');
+						} else {
+							$(element).after('<div class="text-danger">' + json['error']['option'][i] + '</div>');
+						}
+					}
+				}
+
+				if (json['error']['store']) {
+					$('#form-bulk_order_product').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error']['store'] + '</div>');
+				}
+
+				// Highlight any found errors
+				$('.text-danger').parent('.col-sm-4').addClass('has-error');
+			} else {
+				if (json['success']) {
+					$('#form-bulk_order_product').before('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				}
+				// Refresh products, vouchers and totals
+				refresh_products();
+			}
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+}
+
+$('#button-product-add').off('click').on('click', function() {
+    alert('Sandeep');
+    console.log('=== Add Product Button Clicked ===');
+    
+    var supplier_id = $('input[name="supplier_id"]').val();
+    console.log('Supplier ID:', supplier_id);
+    
+    if (!supplier_id || supplier_id == '' || supplier_id == '0') {
+        alert('Please select a supplier first');
+        return false;
+    }
+    
+    var product_id = $('input[name="product_id"]').val();
+    console.log('Product ID:', product_id);
+    
+    if (!product_id || product_id == '') {
+        alert('Please select a product');
+        $('input[name="product"]').addClass('is-invalid');
+        return false;
+    }
+    
+    var quantity = $('input[name="quantity"]').val();
+    console.log('Quantity:', quantity);
+    
+    if (!quantity || quantity <= 0) {
+        alert('Please enter a valid quantity');
+        $('input[name="quantity"]').addClass('is-invalid');
+        return false;
+    }
+    
+    // Build form data string manually for better control
+    var formDataArray = [];
+    
+    // Basic product data
+    formDataArray.push('product_id=' + encodeURIComponent(product_id));
+    formDataArray.push('quantity=' + encodeURIComponent(quantity));
+    
+    var stock = $('input[name="stock"]').val();
+    if (stock) {
+        formDataArray.push('stock=' + encodeURIComponent(stock));
+    }
+    
+    var comment = $('textarea[name="comment"]').val();
+    if (comment) {
+        formDataArray.push('comment=' + encodeURIComponent(comment));
+    }
+    
+    // console.log('=== Collecting Options ===');
+    
+    // // Collect SELECT options
+    // $('#form-order_product select[name^="option["]').each(function() {
+    //     var name = $(this).attr('name');
+    //     var value = $(this).val();
+    //     if (value && value != '') {
+    //         formDataArray.push(encodeURIComponent(name) + '=' + encodeURIComponent(value));
+    //         console.log('Select option:', name, '=', value);
+    //     }
+    // });
+    
+    // // Collect RADIO options
+    // $('#form-order_product input[name^="option["][type="radio"]:checked').each(function() {
+    //     var name = $(this).attr('name');
+    //     var value = $(this).val();
+    //     formDataArray.push(encodeURIComponent(name) + '=' + encodeURIComponent(value));
+    //     console.log('Radio option:', name, '=', value);
+    // });
+    
+    // // Collect CHECKBOX options
+    // var checkboxGroups = {};
+    // $('#form-order_product input[name^="option["][type="checkbox"]:checked').each(function() {
+    //     var name = $(this).attr('name');
+    //     var value = $(this).val();
+    //     // Handle checkbox arrays: option[123][]
+    //     var baseName = name.replace('[]', '');
+    //     if (!checkboxGroups[baseName]) {
+    //         checkboxGroups[baseName] = [];
+    //     }
+    //     checkboxGroups[baseName].push(value);
+    // });
+    
+    // // Add checkbox groups to form data
+    // for (var checkName in checkboxGroups) {
+    //     for (var i = 0; i < checkboxGroups[checkName].length; i++) {
+    //         formDataArray.push(encodeURIComponent(checkName + '[]') + '=' + encodeURIComponent(checkboxGroups[checkName][i]));
+    //         console.log('Checkbox option:', checkName + '[]', '=', checkboxGroups[checkName][i]);
+    //     }
+    // }
+    
+    // Collect TEXT options
+    $('#form-order_product input[name^="option["][type="text"]').each(function() {
+        var name = $(this).attr('name');
+        var value = $(this).val();
+        if (value && value != '') {
+            formDataArray.push(encodeURIComponent(name) + '=' + encodeURIComponent(value));
+            console.log('Text option:', name, '=', value);
+        }
+    });
+    
+    // Collect TEXTAREA options
+    $('#form-order_product textarea[name^="option["]').each(function() {
+        var name = $(this).attr('name');
+        var value = $(this).val();
+        if (value && value != '') {
+            formDataArray.push(encodeURIComponent(name) + '=' + encodeURIComponent(value));
+            console.log('Textarea option:', name, '=', value);
+        }
+    });
+    
+    var formDataString = formDataArray.join('&');
+    console.log('=== Final Form Data ===');
+    console.log(formDataString);
+    
+    $.ajax({
+        url: 'index.php?route=extension/me_purchase_order.addproduct&user_token={{ user_token }}&supplier_id=' + supplier_id,
+        type: 'post',
+        data: formDataString,
+        dataType: 'json',
+        beforeSend: function() {
+            $('#button-product-add').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Loading...');
+        },
+        complete: function() {
+            $('#button-product-add').prop('disabled', false).html('<i class="fa fa-plus-circle"></i> {{ button_product_add }}');
+        },
+        success: function(json) {
+            console.log('=== Server Response ===');
+            console.log(json);
+            
+            $('.alert-dismissible, .text-danger').remove();
+            $('.is-invalid').removeClass('is-invalid');
+
+            if (json['error']) {
+                console.error('Errors found:', json['error']);
+                
+                if (json['error']['warning']) {
+                    $('#fieldmanager .modal-body').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error']['warning'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                }
+
+                if (json['error']['option']) {
+                    for (var i in json['error']['option']) {
+                        var element = $('#input-option-' + i.replace('_', '-'));
+                        element.addClass('is-invalid');
+                        
+                        if (element.parent().hasClass('col-sm-9')) {
+                            element.parent().append('<div class="text-danger">' + json['error']['option'][i] + '</div>');
+                        } else {
+                            element.after('<div class="text-danger">' + json['error']['option'][i] + '</div>');
+                        }
+                    }
+                }
+                
+                if (json['error']['store']) {
+                    $('#fieldmanager .modal-body').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error']['store'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                }
+                
+                if (json['error']['supplier']) {
+                    $('#fieldmanager .modal-body').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error']['supplier'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                }
+                
+                // Scroll to first error
+                $('#fieldmanager .modal-body').animate({ scrollTop: 0 }, 300);
+                
+            } else {
+                console.log('Product added successfully!');
+                
+                // Close modal
+                var modalElement = document.getElementById('fieldmanager');
+                if (modalElement) {
+                    var modal = bootstrap.Modal.getInstance(modalElement);
+                    if (modal) {
+                        modal.hide();
+                    }
+                }
+                
+                // Clear form
+                $('#form-order_product')[0].reset();
+                $('#option').html('');
+                $('input[name="product"]').val('');
+                $('input[name="product_id"]').val('');
+                $('input[name="quantity"]').val('1');
+                $('input[name="stock"]').val('');
+                if ($('#pimage').length) {
+                    $('#pimage').html('');
+                }
+                
+                // Show success message
+                $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> Product added successfully! <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                
+                // Refresh product list
+                setTimeout(function() {
+                    refresh_products();
+                }, 200);
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.error('=== AJAX Error ===');
+            console.error('Error:', thrownError);
+            console.error('Status:', xhr.statusText);
+            console.error('Response:', xhr.responseText);
+            
+            $('#fieldmanager .modal-body').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> Error: ' + thrownError + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+        }
+    });
+});
+
+// Remove validation errors on change
+$('#form-order_product input, #form-order_product select, #form-order_product textarea').on('change keyup', function() {
+    $(this).removeClass('is-invalid');
+    $(this).closest('.row, .mb-3').find('.text-danger').remove();
+});
+
+$('#cart').delegate('.btn-danger', 'click', function() {
+	var node = this;
+
+	$.ajax({
+		url: 'index.php?route=extension/me_purchase_order.remove&user_token={{ user_token }}&store_id=0',
+		type: 'post',
+		data: 'key=' + encodeURIComponent(this.value),
+		dataType: 'json',
+		crossDomain: true,
+		beforeSend: function() {
+			$(node).button('loading');
+		},
+		complete: function() {
+			$(node).button('reset');
+		},
+		success: function(json) {
+			$('.alert-dismissible, .text-danger, .text-success').remove();
+
+			// Check for errors
+			if (json['error']) {
+				$('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+			} else {
+				// Refresh products, vouchers and totals
+				refresh_products();
+			}
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+function autosave(){
+	$.ajax({
+        url: 'index.php?route=extension/me_purchase_order.addproduct&user_token={{ user_token }}&store_id=0',
+        type: 'post',
+        data: $('#cart input[name^=\'product\'][type=\'text\'], #cart input[name^=\'product\'][type=\'hidden\'], #cart input[name^=\'product\'][type=\'radio\']:checked, #cart input[name^=\'product\'][type=\'checkbox\']:checked, #cart select[name^=\'product\'], #cart textarea[name^=\'product\']'),
+        dataType: 'json',
+        crossDomain: true,
+        beforeSend: function() {
+            
+        },
+        complete: function() {
+           
+        },
+        success: function(json) {
+            $('.alert-dismissible, .text-danger, .text-success').remove();
+            $('.form-group,.col-sm-4,.col-sm-8').removeClass('has-error');
+
+            if (json['error'] && json['error']['warning']) {
+                $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error']['warning'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+            }
+
+            if (json['success']) {
+				
+			}
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    }).done(function() {
+        refresh_products();
+    });
+}
+
+$('.table-product').delegate('input[name^=\'product\'][type=\'text\']', 'change', function() {
+	//autosave();
+});
+
+/* $('.table-product').delegate('textarea', 'change', function() {
+	autosave();
+}); */
+
+$('.btn-refresh').on('click', function(){
+    var node = this;
+
+    // Refresh products, vouchers and totals
+    $.ajax({
+        url: 'index.php?route=extension/me_purchase_order.addproduct&user_token={{ user_token }}&store_id=0&supplier_id='+$('input[name="supplier_id"]').val(),
+        type: 'post',
+        data: $('#cart input[name^=\'product\'][type=\'text\'], #cart input[name^=\'product\'][type=\'hidden\'], #cart input[name^=\'product\'][type=\'radio\']:checked, #cart input[name^=\'product\'][type=\'checkbox\']:checked, #cart select[name^=\'product\'], #cart textarea[name^=\'product\']'),
+        dataType: 'json',
+        crossDomain: true,
+        beforeSend: function() {
+            $(node).button('loading');
+        },
+        complete: function() {
+            $(node).button('reset');
+        },
+        success: function(json) {
+            $('.alert-dismissible, .text-danger, .text-success').remove();
+            $('.form-group,.col-sm-4,.col-sm-8').removeClass('has-error');
+
+            if (json['error'] && json['error']['warning']) {
+                $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error']['warning'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+            }
+			
+			if (json['error'] && json['error']['supplier']) {
+				alert(json['error']['supplier']);
+			}
+
+            if (json['success']) {
+				//$('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+			}
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    }).done(function() {
+        refresh_products();
+        setTimeout(function() {
+            totals();
+        }, 300);
+    });
+});
+
+$('#cart').delegate('.btn-info', 'click', function() {
+	// var node = this;
+	// var cart_id =  encodeURIComponent(this.value);
+	// var comm = $(this).attr('rel');
+	// var row = $(this).attr('data-row');
+	// if (!$('#cart'+ cart_id +' .table-comments').parent().find('textarea').length) {
+	// 	$('#cart'+ cart_id +' .table-comments').after('<textarea class="form-control" value="" name="cartcomment"></textarea> <a class="btn btn-warning btn-addcomment" onclick="addnewcomment('+ cart_id +','+ comm +','+ row +')">Add</a>');
+	// }	
+	var node = this;
+
+    // Refresh products, vouchers and totals
+    $.ajax({
+        url: 'index.php?route=extension/me_purchase_order.addproduct&user_token={{ user_token }}&store_id=0&supplier_id='+$('input[name="supplier_id"]').val(),
+        type: 'post',
+        data: $('#cart input[name^=\'product\'][type=\'text\'], #cart input[name^=\'product\'][type=\'hidden\'], #cart input[name^=\'product\'][type=\'radio\']:checked, #cart input[name^=\'product\'][type=\'checkbox\']:checked, #cart select[name^=\'product\'], #cart textarea[name^=\'product\']'),
+        dataType: 'json',
+        crossDomain: true,
+        beforeSend: function() {
+            $(node).button('loading');
+        },
+        complete: function() {
+            $(node).button('reset');
+        },
+        success: function(json) {
+            $('.alert-dismissible, .text-danger, .text-success').remove();
+            $('.form-group,.col-sm-4,.col-sm-8').removeClass('has-error');
+
+            if (json['error'] && json['error']['warning']) {
+                $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error']['warning'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+            }
+			
+			if (json['error'] && json['error']['supplier']) {
+				alert(json['error']['supplier']);
+			}
+
+            if (json['success']) {
+				//$('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+			}
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    }).done(function() {
+        refresh_products();
+    });
+});
+function addnewcomment(cart_id,comm,row){
+	var comment = $('#cart'+ cart_id +' textarea[name="cartcomment"]').val();
+	html = '<tr id="comment'+ comm +'">';
+	html += '<td style="width:100px;">{{ dateadded }}<br/>{{ username }}<input type="hidden" name="product[' + row + '][comments]['+ comm +'][date_added]" value="{{ dateadded }}" /><input type="hidden" name="product[' + row + '][comments]['+ comm +'][username]" value="{{ username }}" /></td>';
+	html += '<td>'+ comment +' <input type="hidden" name="product[' + row + '][comments]['+ comm +'][comment]" value="'+ comment +'" /></td>';
+	html += '<td style="width:50px;"><a href="javascript:void(0);" class="btn btn-danger" onclick="delcomment('+ comm +','+ cart_id +');"><i class="fa fa-times"></i></a></td>';
+	html += '</tr>';
+	$('#cart'+ cart_id +' .table-comments').append(html);
+	setTimeout(function () {
+	autosave();
+   }, 100);
+}
+function delcomment(comm,cart_id){
+	$('#cart'+ cart_id +' .table-comments #comment'+comm).remove();
+	setTimeout(function () {
+	autosave();
+   }, 100);
+}
+
+
+// Remove validation errors on change
+$('#form-order_product input, #form-order_product select, #form-order_product textarea').on('change keyup', function() {
+    $(this).removeClass('is-invalid');
+    $(this).closest('.row, .mb-3').find('.text-danger').remove();
+});
+
+// Initialize on page load
+$(document).ready(function() {
+    console.log('Page loaded, initializing...');
+    
+    {% if order_id %}
+    // For edit mode, load existing products
+    refresh_products();
+    {% endif %}
+});
+
+$(document).ready(function() {
+	$('.imagepopup').magnificPopup({
+		type:'image',
+		delegate: 'a',
+		gallery: {
+			enabled:true
+		}
+	});
+});
+
+$('select[name=\'store_id\']').on('change', function() {
+	$.ajax({
+		url: 'index.php?route=extension/me_purchase_order.getstore&user_token={{ user_token }}&store_id=' + this.value,
+		dataType: 'json',
+		beforeSend: function() {
+			
+		},
+		complete: function() {
+			
+		},
+		success: function(json) {
+			$('input[name=\'store_name\']').val(json['store_name']);
+			$('input[name=\'store_address_1\']').val(json['store_address_1']);
+			$('select[name=\'store_country_id\']').val(json['store_country_id']);
+			store_zone_id = json['store_zone_id'];
+			
+			$('#newstoreaddress select[name=\'store_country_id\']').trigger('change');
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+function updatediscount(k){
+	var price = $('input[name="product['+ k +'][price]"]').val();
+	var discount = $('input[name="product['+ k +'][discount]"]').val();
+
+	dprice = (price/100) * discount;
+	sale_price = (price - dprice).toFixed(2);
+	$('input[name="product['+ k +'][sale_price]"]').val(sale_price);
+	setTimeout(function () {
+		$.ajax({
+        url: 'index.php?route=extension/me_purchase_order.addproduct&user_token={{ user_token }}&store_id=0&supplier_id='+$('input[name="supplier_id"]').val(),
+        type: 'post',
+        data: $('#cart input[name^=\'product\'][type=\'text\'], #cart input[name^=\'product\'][type=\'hidden\'], #cart input[name^=\'product\'][type=\'radio\']:checked, #cart input[name^=\'product\'][type=\'checkbox\']:checked, #cart select[name^=\'product\'], #cart textarea[name^=\'product\']'),
+        dataType: 'json',
+        crossDomain: true,
+        beforeSend: function() {
+            
+        },
+        complete: function() {
+           
+        },
+        success: function(json) {
+            
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            
+        }
+    }).done(function() {
+        refresh_products();
+    });
+	},100);	
+}
+
+// ========================================
+// COMPLETE FIXED SAVE BUTTON (CREATE NEW ORDER)
+// ========================================
+$('#button-save1').off('click').on('click', function() {
+    console.log('=== Save New Order Clicked ===');
+    
+    // Clear previous errors
+    $('.alert-dismissible, .text-danger').remove();
+    $('.is-invalid').removeClass('is-invalid');
+    
+    // Build complete form data manually
+    var formData = [];
+    
+    // PO Details
+    formData.push('po_number=' + encodeURIComponent($('input[name="po_number"]').val() || ''));
+    formData.push('date_added=' + encodeURIComponent($('input[name="date_added"]').val() || ''));
+    formData.push('delivery_date=' + encodeURIComponent($('input[name="delivery_date"]').val() || ''));
+    
+    // Buyer Information
+    formData.push('buyer_id=' + encodeURIComponent($('select[name="buyer_id"]').val() || ''));
+    formData.push('buyer_company=' + encodeURIComponent($('input[name="buyer_company"]').val() || ''));
+    formData.push('buyer_contact=' + encodeURIComponent($('input[name="buyer_contact"]').val() || ''));
+    formData.push('buyer_address=' + encodeURIComponent($('textarea[name="buyer_address"]').val() || ''));
+    formData.push('buyer_zip_code=' + encodeURIComponent($('input[name="buyer_zip_code"]').val() || ''));
+    formData.push('buyer_tel=' + encodeURIComponent($('input[name="buyer_tel"]').val() || ''));
+    formData.push('buyer_email=' + encodeURIComponent($('input[name="buyer_email"]').val() || ''));
+    formData.push('buyer_contact_tel=' + encodeURIComponent($('input[name="buyer_contact_tel"]').val() || ''));
+    
+    // Supplier Information
+    formData.push('supplier_id=' + encodeURIComponent($('input[name="supplier_id"]').val() || ''));
+    formData.push('supplier_company=' + encodeURIComponent($('input[name="supplier_company"]').val() || ''));
+    formData.push('supplier_contact=' + encodeURIComponent($('input[name="supplier_contact"]').val() || ''));
+    formData.push('supplier_address=' + encodeURIComponent($('textarea[name="supplier_address"]').val() || ''));
+    formData.push('supplier_zip_code=' + encodeURIComponent($('input[name="supplier_zip_code"]').val() || ''));
+    formData.push('supplier_tel=' + encodeURIComponent($('input[name="supplier_tel"]').val() || ''));
+    formData.push('supplier_email=' + encodeURIComponent($('input[name="supplier_email"]').val() || ''));
+    formData.push('supplier_contact_tel=' + encodeURIComponent($('input[name="supplier_contact_tel"]').val() || ''));
+    
+    // Shipping & Payment
+    formData.push('shipping_method=' + encodeURIComponent($('select[name="shipping_method"]').val() || ''));
+    formData.push('shipping_term=' + encodeURIComponent($('input[name="shipping_term"]').val() || ''));
+    formData.push('payment_method=' + encodeURIComponent($('select[name="payment_method"]').val() || ''));
+    formData.push('status=' + encodeURIComponent($('select[name="status"]').val() || ''));
+    formData.push('eta=' + encodeURIComponent($('input[name="eta"]').val() || ''));
+    formData.push('pl_no=' + encodeURIComponent($('input[name="pl_no"]').val() || ''));
+    
+    // Notify supplier checkbox
+    if($('input[name="notify_supplier"]').is(':checked')){
+        formData.push('notify_supplier=1');
+    }
+    
+    // Attachments
+    $('input[name="attachment[]"]').each(function(){
+        if($(this).val()){
+            formData.push('attachment[]=' + encodeURIComponent($(this).val()));
+        }
+    });
+    
+    // Custom totals
+    var customTotalIndex = 0;
+    $('#custom-totals tr[id^="custom-total-"]').each(function() {
+        var title = $(this).find('input[name*="[title]"]').val();
+        var type = $(this).find('select[name*="[type]"]').val();
+        var dtype = $(this).find('select[name*="[dtype]"]').val();
+        var amt = $(this).find('input[name*="[amt]"]').val();
+        
+        if (title && amt) {
+            formData.push('po_custom_total[' + customTotalIndex + '][title]=' + encodeURIComponent(title));
+            formData.push('po_custom_total[' + customTotalIndex + '][type]=' + encodeURIComponent(type));
+            formData.push('po_custom_total[' + customTotalIndex + '][dtype]=' + encodeURIComponent(dtype));
+            formData.push('po_custom_total[' + customTotalIndex + '][amt]=' + encodeURIComponent(amt));
+            customTotalIndex++;
+        }
+    });
+    
+    var formDataString = formData.join('&');
+    
+    console.log('=== Form Data Being Sent ===');
+    console.log(formDataString);
+    
+    var url = 'index.php?route=extension/me_purchase_order.addOrder&user_token={{ user_token }}';
+    
+    $.ajax({
+        url: url,
+        type: 'post',
+        data: formDataString,
+        dataType: 'json',
+        beforeSend: function() {
+            $('#button-save1').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Saving...');
+        },
+        complete: function() {
+            $('#button-save1').prop('disabled', false).html('<i class="fa fa-check-circle"></i> {{ button_save }}');
+        },
+        success: function(json) {
+            console.log('=== Server Response ===');
+            console.log(json);
+            
+            $('.alert-dismissible, .text-danger').remove();
+            $('.is-invalid').removeClass('is-invalid');
+
+            if (json['error']) {
+                console.error('Errors found:', json['error']);
+                
+                var errorMessages = [];
+                
+                if (json['error']['warning']) errorMessages.push(json['error']['warning']);
+                if (json['error']['buyer']) errorMessages.push(json['error']['buyer']);
+                if (json['error']['supplier']) errorMessages.push(json['error']['supplier']);
+                if (json['error']['product']) errorMessages.push(json['error']['product']);
+                if (json['error']['po_number']) {
+                    errorMessages.push(json['error']['po_number']);
+                    $('input[name="po_number"]').addClass('is-invalid');
+                }
+                if (json['error']['delivery_date']) {
+                    errorMessages.push(json['error']['delivery_date']);
+                    $('input[name="delivery_date"]').addClass('is-invalid');
+                }
+                if (json['error']['shipping_method']) {
+                    errorMessages.push(json['error']['shipping_method']);
+                    $('select[name="shipping_method"]').addClass('is-invalid');
+                }
+                if (json['error']['payment_method']) {
+                    errorMessages.push(json['error']['payment_method']);
+                    $('select[name="payment_method"]').addClass('is-invalid');
+                }
+                
+                var errorHtml = '<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ';
+                errorHtml += errorMessages.join('<br>');
+                errorHtml += ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+                
+                $('#content > .container-fluid').prepend(errorHtml);
+                $('html, body').animate({ scrollTop: 0 }, 300);
+                
+            } else if (json['success']) {
+                $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                
+                $('html, body').animate({ scrollTop: 0 }, 300);
+                
+                setTimeout(function() {
+                    window.location.href = 'index.php?route=extension/me_purchase_order&user_token={{ user_token }}';
+                }, 1500);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('=== AJAX Error ===');
+            console.error('Status:', status);
+            console.error('Error:', error);
+            console.error('Response Text:', xhr.responseText);
+            
+            $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> Server error occurred. Check console for details. <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+            
+            $('html, body').animate({ scrollTop: 0 }, 300);
+        }
+    });
+});
+
+// ========================================
+// COMPLETE FIXED SAVE BUTTON (EDIT ORDER)
+// ========================================
+$('#button-save').off('click').on('click', function() {
+    console.log('=== Save Edit Order Clicked ===');
+    
+    // Clear previous errors
+    $('.alert-dismissible, .text-danger').remove();
+    $('.is-invalid').removeClass('is-invalid');
+    
+    // Get order ID
+    var order_id = '{{ order_id }}';
+    if (!order_id || order_id == '' || order_id == '0') {
+        alert('Order ID not found');
+        return false;
+    }
+    
+    // Build complete form data manually
+    var formData = [];
+    
+    // PO Details
+    formData.push('po_number=' + encodeURIComponent($('input[name="po_number"]').val() || ''));
+    formData.push('date_added=' + encodeURIComponent($('input[name="date_added"]').val() || ''));
+    formData.push('delivery_date=' + encodeURIComponent($('input[name="delivery_date"]').val() || ''));
+    
+    // Buyer Information
+    formData.push('buyer_id=' + encodeURIComponent($('select[name="buyer_id"]').val() || ''));
+    formData.push('buyer_company=' + encodeURIComponent($('input[name="buyer_company"]').val() || ''));
+    formData.push('buyer_contact=' + encodeURIComponent($('input[name="buyer_contact"]').val() || ''));
+    formData.push('buyer_address=' + encodeURIComponent($('textarea[name="buyer_address"]').val() || ''));
+    formData.push('buyer_zip_code=' + encodeURIComponent($('input[name="buyer_zip_code"]').val() || ''));
+    formData.push('buyer_tel=' + encodeURIComponent($('input[name="buyer_tel"]').val() || ''));
+    formData.push('buyer_email=' + encodeURIComponent($('input[name="buyer_email"]').val() || ''));
+    formData.push('buyer_contact_tel=' + encodeURIComponent($('input[name="buyer_contact_tel"]').val() || ''));
+    
+    // Supplier Information
+    formData.push('supplier_id=' + encodeURIComponent($('input[name="supplier_id"]').val() || ''));
+    formData.push('supplier_company=' + encodeURIComponent($('input[name="supplier_company"]').val() || ''));
+    formData.push('supplier_contact=' + encodeURIComponent($('input[name="supplier_contact"]').val() || ''));
+    formData.push('supplier_address=' + encodeURIComponent($('textarea[name="supplier_address"]').val() || ''));
+    formData.push('supplier_zip_code=' + encodeURIComponent($('input[name="supplier_zip_code"]').val() || ''));
+    formData.push('supplier_tel=' + encodeURIComponent($('input[name="supplier_tel"]').val() || ''));
+    formData.push('supplier_email=' + encodeURIComponent($('input[name="supplier_email"]').val() || ''));
+    formData.push('supplier_contact_tel=' + encodeURIComponent($('input[name="supplier_contact_tel"]').val() || ''));
+    
+    // Shipping & Payment
+    formData.push('shipping_method=' + encodeURIComponent($('select[name="shipping_method"]').val() || ''));
+    formData.push('shipping_term=' + encodeURIComponent($('input[name="shipping_term"]').val() || ''));
+    formData.push('payment_method=' + encodeURIComponent($('select[name="payment_method"]').val() || ''));
+    formData.push('status=' + encodeURIComponent($('select[name="status"]').val() || ''));
+    formData.push('eta=' + encodeURIComponent($('input[name="eta"]').val() || ''));
+    formData.push('pl_no=' + encodeURIComponent($('input[name="pl_no"]').val() || ''));
+    
+    // Notify supplier checkbox
+    if($('input[name="notify_supplier"]').is(':checked')){
+        formData.push('notify_supplier=1');
+    }
+    
+    // Attachments
+    $('input[name="attachment[]"]').each(function(){
+        if($(this).val()){
+            formData.push('attachment[]=' + encodeURIComponent($(this).val()));
+        }
+    });
+    
+    // Custom totals
+    var customTotalIndex = 0;
+    $('#custom-totals tr[id^="custom-total-"]').each(function() {
+        var title = $(this).find('input[name*="[title]"]').val();
+        var type = $(this).find('select[name*="[type]"]').val();
+        var dtype = $(this).find('select[name*="[dtype]"]').val();
+        var amt = $(this).find('input[name*="[amt]"]').val();
+        
+        if (title && amt) {
+            formData.push('po_custom_total[' + customTotalIndex + '][title]=' + encodeURIComponent(title));
+            formData.push('po_custom_total[' + customTotalIndex + '][type]=' + encodeURIComponent(type));
+            formData.push('po_custom_total[' + customTotalIndex + '][dtype]=' + encodeURIComponent(dtype));
+            formData.push('po_custom_total[' + customTotalIndex + '][amt]=' + encodeURIComponent(amt));
+            customTotalIndex++;
+        }
+    });
+    
+    var formDataString = formData.join('&');
+    
+    console.log('=== Form Data Being Sent ===');
+    console.log(formDataString);
+    
+    var url = 'index.php?route=extension/me_purchase_order.editOrder&user_token={{ user_token }}&order_id=' + order_id;
+    
+    $.ajax({
+        url: url,
+        type: 'post',
+        data: formDataString,
+        dataType: 'json',
+        beforeSend: function() {
+            $('#button-save').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Saving...');
+        },
+        complete: function() {
+            $('#button-save').prop('disabled', false).html('<i class="fa fa-check-circle"></i> {{ button_save }}');
+        },
+        success: function(json) {
+            console.log('=== Server Response ===');
+            console.log(json);
+            
+            $('.alert-dismissible, .text-danger').remove();
+            $('.is-invalid').removeClass('is-invalid');
+
+            if (json['error']) {
+                console.error('Errors found:', json['error']);
+                
+                var errorMessages = [];
+                
+                if (json['error']['warning']) errorMessages.push(json['error']['warning']);
+                if (json['error']['buyer']) errorMessages.push(json['error']['buyer']);
+                if (json['error']['supplier']) errorMessages.push(json['error']['supplier']);
+                if (json['error']['product']) errorMessages.push(json['error']['product']);
+                if (json['error']['po_number']) {
+                    errorMessages.push(json['error']['po_number']);
+                    $('input[name="po_number"]').addClass('is-invalid');
+                }
+                if (json['error']['delivery_date']) {
+                    errorMessages.push(json['error']['delivery_date']);
+                    $('input[name="delivery_date"]').addClass('is-invalid');
+                }
+                if (json['error']['shipping_method']) {
+                    errorMessages.push(json['error']['shipping_method']);
+                    $('select[name="shipping_method"]').addClass('is-invalid');
+                }
+                if (json['error']['payment_method']) {
+                    errorMessages.push(json['error']['payment_method']);
+                    $('select[name="payment_method"]').addClass('is-invalid');
+                }
+                
+                var errorHtml = '<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ';
+                errorHtml += errorMessages.join('<br>');
+                errorHtml += ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+                
+                $('#content > .container-fluid').prepend(errorHtml);
+                $('html, body').animate({ scrollTop: 0 }, 300);
+                
+            } else if (json['success']) {
+                $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                
+                $('html, body').animate({ scrollTop: 0 }, 300);
+                
+                setTimeout(function() {
+                    window.location.href = 'index.php?route=extension/me_purchase_order&user_token={{ user_token }}';
+                }, 1500);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('=== AJAX Error ===');
+            console.error('Status:', status);
+            console.error('Error:', error);
+            console.error('Response Text:', xhr.responseText);
+            
+            $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> Server error occurred. Check console for details. <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+            
+            $('html, body').animate({ scrollTop: 0 }, 300);
+        }
+    });
+});
+
+// Remove validation errors on input
+$('input, select, textarea').on('change keyup', function() {
+    $(this).removeClass('is-invalid');
+    $(this).next('.text-danger').remove();
+});
+// ========================================
+// FIXED REFRESH PRODUCTS WITH PROPER VALUES
+// ========================================
+function refresh_products(sort, order) {
+    sort = sort || '';
+    order = order || '';
+    
+    console.log('=== Refreshing Products ===');
+    
+    $.ajax({
+        url: 'index.php?route=extension/me_purchase_order.products&user_token={{ user_token }}&store_id=0&sort=' + sort + '&order=' + order,
+        type: 'post',
+        data: $('input[name="tax"], select[name="shipping_method"], input[name="balance"]').serialize(),
+        dataType: 'json',
+        beforeSend: function() {
+            $('#cart').html('<tr><td colspan="16" class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading products...</td></tr>');
+        },
+        success: function(json) {
+            console.log('Products loaded:', json);
+            
+            $('.alert-dismissible').remove();
+
+            if (json['error']) {
+                if (json['error']['warning']) {
+                    $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error']['warning'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                }
+            }
+
+            var html = '';
+            var p = 0;
+            
+            if (json['products'] && json['products'].length > 0) {
+                for (var i = 0; i < json['products'].length; i++) {
+                    var product = json['products'][i];
+                    p++;
+                    
+                    html += '<tr id="cart' + product['cart_id'] + '" data-row="' + i + '">';
+                    
+                    // Serial No
+                    {% if purchase_order_column['serial_no']['status'] %}
+                    html += '<td class="text-center">' + p + '</td>';
+                    {% endif %}
+                    
+                    // SKU
+                    {% if purchase_order_column['sku']['status'] %}
+                    html += '<td class="text-start">';
+                    if (product['view']) {
+                        html += '<a href="' + product['view'] + '" target="_blank">' + (product['sku'] || '') + '</a>';
+                    } else {
+                        html += (product['sku'] || '');
+                    }
+                    html += '</td>';
+                    {% endif %}
+                    
+                    // Name
+                    {% if purchase_order_column['description']['status'] %}
+                    html += '<td class="text-start">' + (product['name'] || '') + '<input type="hidden" name="product[' + i + '][product_id]" value="' + product['product_id'] + '" /></td>';
+                    {% endif %}
+                    
+                    // Image
+                    {% if purchase_order_column['image']['status'] %}
+                    html += '<td class="text-center imagepopup">';
+                    if (product['image']) {
+                        html += '<a href="' + product['image'] + '" target="_blank"><img src="' + product['image'] + '" alt="' + (product['name'] || '') + '" style="width:50px; height:50px; object-fit:cover; border-radius:5px;"></a>';
+                    } else {
+                        html += '<span style="color:#888;">No Image</span>';
+                    }
+                    html += '</td>';
+                    {% endif %}
+                    
+                    // Model
+                    {% if purchase_order_column['model']['status'] %}
+                    html += '<td class="text-start">' + (product['model'] || '') + '</td>';
+                    {% endif %}
+                    
+                    // Option
+                    // {% if purchase_order_column['option']['status'] %}
+                    // html += '<td class="text-start">';
+                    // html += '<input type="hidden" name="product[' + i + '][stock]" value="' + (product['po_stock'] || 0) + '" />';
+                    // html += '<input type="hidden" name="product[' + i + '][exp_sales]" value="' + (product['exp_sales'] || 0) + '" />';
+                    
+                    // if (product['option'] && product['option'].length > 0) {
+                    //     for (var j = 0; j < product['option'].length; j++) {
+                    //         var option = product['option'][j];
+                    //         html += '<small>' + option['value'] + '</small><br />';
+                            
+                    //         if (option['type'] == 'select' || option['type'] == 'radio' || option['type'] == 'image' || option['type'] == 'color') {
+                    //             html += '<input type="hidden" name="product[' + i + '][option][' + option['product_option_id'] + ']" value="' + option['product_option_value_id'] + '" />';
+                    //         }
+                            
+                    //         if (option['type'] == 'checkbox') {
+                    //             html += '<input type="hidden" name="product[' + i + '][option][' + option['product_option_id'] + '][]" value="' + option['product_option_value_id'] + '" />';
+                    //         }
+                            
+                    //         if (option['type'] == 'text' || option['type'] == 'textarea' || option['type'] == 'file' || option['type'] == 'date' || option['type'] == 'datetime' || option['type'] == 'time') {
+                    //             html += '<input type="hidden" name="product[' + i + '][option][' + option['product_option_id'] + ']" value="' + option['value'] + '" />';
+                    //         }
+                    //     }
+                    // }
+                    // html += '</td>';
+                    // {% endif %}
+                    
+                    // Weight
+                    {% if purchase_order_column['weight']['status'] %}
+                    html += '<td class="text-center">' + (product['weight'] || '') + '</td>';
+                    {% endif %}
+                    
+                    // Dimension
+                    {% if purchase_order_column['dimension']['status'] %}
+                    html += '<td class="text-center">' + (product['dimension'] || '') + '</td>';
+                    {% endif %}
+                    
+                    // Stock
+                    {% if purchase_order_column['stock']['status'] %}
+                    html += '<td class="text-end"><strong>' + (product['po_stock'] || 0) + '</strong></td>';
+                    {% endif %}
+                    
+                    // Price
+                    {% if purchase_order_column['price']['status'] %}
+                    html += '<td class="text-end">';
+                    html += '<div class="input-group input-group-sm ms-auto" style="max-width:160px;">';
+                    html += '<input type="number" step="0.01" name="product[' + i + '][sale_price]" value="' + parseFloat(product['sale_price'] || 0).toFixed(2) + '" class="form-control form-control-sm text-end price-input" data-row="' + i + '" />';
+                    //html += '<input type="number" step="0.01" name="product[' + i + '][price]" value="' + parseFloat(product['price'] || 0).toFixed(2) + '" class="form-control form-control-sm text-end price-input" data-row="' + i + '" />';
+                    html += '<span class="input-group-text bg-info border-info text-white"><i class="fa fa-refresh"></i></span>';
+                    html += '</div>';
+                    html += '</td>';
+                    {% endif %}
+                    
+                    // Discount
+                    {% if purchase_order_column['discount']['status'] %}
+                    html += '<td class="text-center">';
+                    html += '<div class="input-group input-group-sm" style="max-width:130px; margin: 0 auto;">';
+                    html += '<input type="number" step="0.01" name="product[' + i + '][discount]" value="' + parseFloat(product['discount'] || 0).toFixed(2) + '" class="form-control form-control-sm text-end discount-input" data-row="' + i + '" />';
+                    html += '<span class="input-group-text">%</span>';
+                    html += '</div>';
+                    html += '</td>';
+                    {% endif %}
+                    
+                    // Sale Price
+                    {% if purchase_order_column['sale_price']['status'] %}
+                    /*html += '<td class="text-end">';
+                    html += '<div class="input-group input-group-sm ms-auto" style="max-width:160px;">';
+                    html += '<input type="number" step="0.01" name="product[' + i + '][price]" value="' + parseFloat(product['price'] || 0).toFixed(2) + '" class="form-control form-control-sm text-end price-input" data-row="' + i + '" />';
+                    html += '<button type="button" class="btn btn-info btn-sm btn-refresh-price" data-row="' + i + '" title="Recalculate"><i class="fa fa-refresh"></i></button>';
+                    html += '</div>';
+                    html += '</td>';*/
+                    html += '<td class="text-end">';
+                    html += '<div class="input-group input-group-sm ms-auto" style="max-width:160px;">';
+                    html += '<input type="number" step="0.01" name="product[' + i + '][price]" value="' + parseFloat(product['price'] || 0).toFixed(2) + '" class="form-control form-control-sm text-end sale-price-input" data-row="' + i + '" />';
+                    html += '<span class="input-group-text bg-info border-info text-white"><i class="fa fa-refresh"></i></span>';
+                    html += '</div>';
+                    html += '</td>';
+                    {% endif %}
+                    
+                  
+                    
+                    // Quantity
+                    {% if purchase_order_column['quantity']['status'] %}
+                   /* html += '<td class="text-end">';
+                    html += '<div class="input-group input-group-sm ms-auto" style="max-width:160px;">';
+                    html += '<input type="number" step="0.01" name="product[' + i + '][price]" value="' + parseFloat(product['price'] || 0).toFixed(2) + '" class="form-control form-control-sm text-end price-input" data-row="' + i + '" />';
+                    html += '<button type="button" class="btn btn-info btn-sm btn-refresh-price" data-row="' + i + '" title="Recalculate"><i class="fa fa-refresh"></i></button>';
+                    html += '</div>';
+                    html += '</td>';*/
+                    html += '<td class="text-center">';
+                    html += '<input type="number" min="1" name="product[' + i + '][quantity]" value="' + parseInt(product['quantity'] || 1) + '" class="form-control form-control-sm text-center quantity-input" style="width:80px; margin: 0 auto;" data-row="' + i + '" />';
+                    html += '</td>';
+                    {% endif %}
+                    
+                    
+                    // Total
+                    {% if purchase_order_column['total']['status'] %}
+                    /* html += '<td class="text-center">';
+                    html += '<input type="number" min="1" name="product[' + i + '][quantity]" value="' + parseInt(product['quantity'] || 1) + '" class="form-control form-control-sm text-center quantity-input" style="width:80px; margin: 0 auto;" data-row="' + i + '" />';
+                    html += '</td>';*/
+                    var totalAmount = parseFloat(product['price'] || 0) * parseInt(product['quantity'] || 1);
+                    html += '<td class="text-end"><strong class="text-success product-total" data-row="' + i + '">₹' + totalAmount.toFixed(2) + '</strong></td>';
+                    {% endif %}
+                    
+                    // Action
+                    html += '<td class="text-center">';
+                    html += '<button type="button" value="' + product['cart_id'] + '" class="btn btn-danger btn-sm" title="Remove"><i class="fa fa-minus-circle"></i></button>';
+                    html += '</td>';
+                    
+                    html += '</tr>';
+                }
+            } else {
+                html = '<tr><td colspan="16" class="text-center">No products added yet</td></tr>';
+            }
+            
+            $('#cart').html(html);
+            
+            // Update totals
+            var totalHtml = '';
+            if (json['totals'] && json['totals'].length > 0) {
+                for (var i = 0; i < json['totals'].length; i++) {
+                    var t = json['totals'][i];
+                    totalHtml += '<tr style="border: none !important;">';
+                    totalHtml += '<td colspan="4" class="text-end" style="background-color: unset; border: none !important; padding: 8px;"><b>' + t.title + ':</b></td>';
+                    totalHtml += '<td class="text-end" width="20%" style="background-color: unset; border: none !important; padding: 8px;"><strong>' + t.text + '</strong></td>';
+                    totalHtml += '</tr>';
+                }
+            }
+            $('#total').html(totalHtml);
+            
+            // Reinitialize image popup
+            if ($.fn.magnificPopup) {
+                $('.imagepopup').magnificPopup({
+                    type: 'image',
+                    delegate: 'a',
+                    gallery: {
+                        enabled: true
+                    }
+                });
+            }
+            
+            console.log('Products refreshed successfully');
+            
+            // Update totals after products are loaded
+            setTimeout(function() {
+                totals();
+            }, 200);
+            
+            console.log('Products refreshed successfully');
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.error('Refresh error:', thrownError);
+            $('#cart').html('<tr><td colspan="16" class="text-center text-danger">Error loading products: ' + thrownError + '</td></tr>');
+        }
+    });
+}
+
+// ========================================
+// SINGLE PRICE CALCULATION SYSTEM - COMPLETE
+// ========================================
+
+// Calculate Price from Sale Price and Discount
+function calculatePriceFromDiscount(sale_price, discount) {
+    var salePrice = parseFloat(sale_price) || 0;
+    var discountPercent = parseFloat(discount) || 0;
+    
+    // Formula: Discount Amount = Sale Price × (Discount% ÷ 100)
+    var discountAmount = (salePrice * discountPercent) / 100;
+    
+    // Final Price = Sale Price - Discount Amount
+    var finalPrice = salePrice - discountAmount;
+    
+    console.log('Calculating Price: Sale=' + salePrice + ', Discount=' + discountPercent + '%, Amount=' + discountAmount + ', Final=' + finalPrice);
+    
+    return finalPrice.toFixed(2);
+}
+
+// Calculate Discount from Sale Price and Price
+function calculateDiscountFromPrice(sale_price, price) {
+    var salePrice = parseFloat(sale_price) || 0;
+    var finalPrice = parseFloat(price) || 0;
+    
+    if (salePrice === 0) return '0.00';
+    
+    // Discount Amount = Sale Price - Final Price
+    var discountAmount = salePrice - finalPrice;
+    
+    // Discount % = (Discount Amount ÷ Sale Price) × 100
+    var discountPercent = (discountAmount / salePrice) * 100;
+    
+    console.log('Calculating Discount: Sale=' + salePrice + ', Price=' + finalPrice + ', Discount=' + discountPercent + '%');
+    
+    return discountPercent.toFixed(2);
+}
+
+// Update row total display
+function updateRowTotal(row) {
+    var price = parseFloat($('input[name="product[' + row + '][price]"]').val()) || 0;
+    var quantity = parseInt($('input[name="product[' + row + '][quantity]"]').val()) || 1;
+    var total = (price * quantity).toFixed(2);
+    
+    $('.product-total[data-row="' + row + '"]').text('₹' + total);
+    console.log('Row ' + row + ' Total: ' + total);
+}
+
+// Save and refresh
+function saveAndRefresh() {
+    clearTimeout(window.saveTimer);
+    window.saveTimer = setTimeout(function() {
+        var supplier_id = $('input[name="supplier_id"]').val();
+        if (!supplier_id || supplier_id == '' || supplier_id == '0') {
+            console.log('No supplier, skipping save');
+            return;
+        }
+        
+        console.log('Saving products...');
+        
+        $.ajax({
+            url: 'index.php?route=extension/me_purchase_order.addproduct&user_token={{ user_token }}&store_id=0&supplier_id=' + supplier_id,
+            type: 'post',
+            data: $('#cart input, #cart select, #cart textarea').serialize(),
+            dataType: 'json',
+            success: function(json) {
+                if (!json['error']) {
+                    console.log('Products saved, refreshing...');
+                    refresh_products();
+                    // Add totals update here
+                    setTimeout(function() {
+                        totals();
+                    }, 300);
+                } else {
+                    console.error('Save error:', json['error']);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Save AJAX error:', error);
+            }
+        });
+    }, 1500);
+}
+
+// ========================================
+// EVENT HANDLERS - SINGLE BINDING ONLY
+// ========================================
+
+// Unbind all existing handlers first to prevent duplicates
+$(document).off('change keyup blur', '#cart input[name$="[sale_price]"]');
+$(document).off('change keyup blur', '#cart input[name$="[discount]"]');
+$(document).off('change keyup blur', '#cart input[name$="[price]"]');
+$(document).off('change keyup blur', '#cart input[name$="[quantity]"]');
+$(document).off('click', '#cart .btn-refresh-price');
+$(document).off('click', '#cart .btn-refresh-sale');
+
+// Sale Price Change
+$(document).on('change keyup blur', '#cart input[name$="[sale_price]"]', function() {
+    var name = $(this).attr('name');
+    var match = name ? name.match(/product\[(\d+)\]\[sale_price\]/) : null;
+    if (!match) return;
+    
+    var row = match[1];
+    var sale_price = $(this).val();
+    var discount = $('input[name="product[' + row + '][discount]"]').val();
+    
+    console.log('=== Sale Price Changed ===');
+    var newPrice = calculatePriceFromDiscount(sale_price, discount);
+    
+    $('input[name="product[' + row + '][price]"]').val(newPrice);
+    updateRowTotal(row);
+    saveAndRefresh();
+});
+
+// Discount Change
+$(document).on('change keyup blur', '#cart input[name$="[discount]"]', function() {
+    var name = $(this).attr('name');
+    var match = name ? name.match(/product\[(\d+)\]\[discount\]/) : null;
+    if (!match) return;
+    
+    var row = match[1];
+    var discount = $(this).val();
+    var sale_price = $('input[name="product[' + row + '][sale_price]"]').val();
+    
+    console.log('=== Discount Changed ===');
+    var newPrice = calculatePriceFromDiscount(sale_price, discount);
+    
+    $('input[name="product[' + row + '][price]"]').val(newPrice);
+    updateRowTotal(row);
+    saveAndRefresh();
+});
+
+// Price Change (back-calculate discount)
+$(document).on('change keyup blur', '#cart input[name$="[price]"]', function() {
+    var name = $(this).attr('name');
+    var match = name ? name.match(/product\[(\d+)\]\[price\]/) : null;
+    if (!match) return;
+    
+    var row = match[1];
+    var price = $(this).val();
+    var sale_price = $('input[name="product[' + row + '][sale_price]"]').val();
+    
+    console.log('=== Price Changed ===');
+    var newDiscount = calculateDiscountFromPrice(sale_price, price);
+    
+    $('input[name="product[' + row + '][discount]"]').val(newDiscount);
+    updateRowTotal(row);
+    saveAndRefresh();
+});
+
+// Quantity Change
+$(document).on('change keyup blur', '#cart input[name$="[quantity]"]', function() {
+    var name = $(this).attr('name');
+    var match = name ? name.match(/product\[(\d+)\]\[quantity\]/) : null;
+    if (!match) return;
+    
+    var row = match[1];
+    console.log('=== Quantity Changed ===');
+    updateRowTotal(row);
+    saveAndRefresh();
+});
+
+// Refresh Buttons (local recalculation only)
+$(document).on('click', '#cart .btn-refresh-price, #cart .btn-refresh-sale', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    var row = $(this).data('row');
+    console.log('=== Refresh Button Clicked for Row ' + row + ' ===');
+    
+    if (row !== undefined && row !== null) {
+        // Get existing values
+        var sale_price = parseFloat($('input[name="product[' + row + '][sale_price]"]').val()) || 0;
+        var discount   = parseFloat($('input[name="product[' + row + '][discount]"]').val()) || 0;
+        var current_price = parseFloat($('input[name="product[' + row + '][price]"]').val()) || 0;
+
+        // Optionally recalculate price if discount logic applies
+        var newPrice = calculatePriceFromDiscount(sale_price, discount);
+
+        // If you want to simply refresh same price, keep current_price
+        if (isNaN(newPrice) || newPrice === 0) {
+            newPrice = current_price;
+        }
+
+        // Update price field with new or same value
+        $('input[name="product[' + row + '][price]"]').val(newPrice.toFixed(2));
+
+        // Recalculate total for that row
+        if (typeof updateRowTotal === 'function') {
+            updateRowTotal(row);
+        }
+
+        // Instantly refresh subtotal/total UI if available
+        if (typeof recalcTotalsUI === 'function') {
+            recalcTotalsUI();
+        }
+
+        // Remove this → we don’t want server call
+        // setTimeout(function() { saveAndRefresh(); }, 100);
+
+        console.log('Row ' + row + ' refreshed locally with price: ' + newPrice);
+    }
+});
+
+
+console.log('✅ Price calculation system loaded successfully');
+console.log('Formula: Price = Sale Price - (Sale Price × Discount% ÷ 100)');
+console.log('Example: Sale=₹112, Discount=14% → Price=₹96.32');
+
+$('#button-tax').on('click', function() {
+	$.ajax({
+		url: 'index.php?route=extension/me_purchase_order.addtax&user_token={{ user_token }}',
+		type: 'post',
+		data: 'tax=' + $('input[name=\'tax\']').val(),
+		dataType: 'json',
+		crossDomain: true,
+		beforeSend: function() {
+			$('#button-tax').button('loading');
+		},
+		complete: function() {
+			$('#button-tax').button('reset');
+		},
+		success: function(json) {
+			$('.alert-dismissible, .text-danger, .text-success').remove();
+			$('.form-group,.col-sm-4,.col-sm-8').removeClass('has-error');
+
+			if (json['error']) {
+				$('input[name=\'tax\']').parent().after('<div class="text-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+
+				// Highlight any found errors
+				$('input[name=\'tax\']').closest('.col-sm-4').addClass('has-error');
+			}
+
+			if (json['success']) {
+				// Refresh products, vouchers and totals
+				totals();
+			}
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$('select[name=\'shipping_method\']').on('change', function() {
+	$.ajax({
+		url: 'index.php?route=extension/me_purchase_order.addshipping&user_token={{ user_token }}',
+		type: 'post',
+		data: 'shipping=' + $('select[name=\'shipping_method\']').val(),
+		dataType: 'json',
+		crossDomain: true,
+		beforeSend: function() {
+			
+		},
+		complete: function() {
+			
+		},
+		success: function(json) {
+			$('.alert-dismissible, .text-danger, .text-success').remove();
+			$('.form-group,.col-sm-4,.col-sm-8').removeClass('has-error');
+
+			if (json['error']) {
+				$('select[name=\'shipping_method\']').parent().after('<div class="text-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+
+				// Highlight any found errors
+				$('select[name=\'shipping_method\']').closest('.col-sm-4').addClass('has-error');
+			}
+
+			if (json['success']) {
+				// Refresh products, vouchers and totals
+				totals();
+			}else{
+				totals();
+			}
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$('#button-balance').on('click', function() {
+	$.ajax({
+		url: 'index.php?route=extension/me_purchase_order.addbalance&user_token={{ user_token }}',
+		type: 'post',
+		data: 'balance=' + $('input[name=\'balance\']').val(),
+		dataType: 'json',
+		crossDomain: true,
+		beforeSend: function() {
+			$('#button-balance').button('loading');
+		},
+		complete: function() {
+			$('#button-balance').button('reset');
+		},
+		success: function(json) {
+			$('.alert-dismissible, .text-danger, .text-success').remove();
+			$('.form-group,.col-sm-4,.col-sm-8').removeClass('has-error');
+
+			if (json['error']) {
+				$('input[name=\'balance\']').parent().after('<div class="text-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+
+				// Highlight any found errors
+				$('input[name=\'balance\']').closest('.col-sm-4').addClass('has-error');
+			}
+
+			if (json['success']) {
+				// Refresh products, vouchers and totals
+				totals();
+			}
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+function loadcustomtotal(){
+	$.ajax({
+		url: 'index.php?route=extension/me_purchase_order.addcustomtotal&user_token={{ user_token }}',
+		type: 'post',
+		data: $('#custom-totals select, #custom-totals input'),
+		dataType: 'json',
+		crossDomain: true,
+		beforeSend: function() {
+			
+		},
+		complete: function() {
+			
+		},
+		success: function(json) {
+			$('.alert-dismissible, .text-danger, .text-success').remove();
+			$('.form-group,.col-sm-4,.col-sm-8').removeClass('has-error');
+
+			if(json['error']){
+				for(i in json['error']){
+					if(json['error'][i]['custom_total_amt']){
+						$('#input-po_custom_total_amt'+ i).after('<div class="text-danger">' + json['error'][i]['custom_total_amt'] + '</div>');
+					}
+					
+					if(json['error'][i]['custom_total_title']){
+						$('#input-po_custom_total_title'+ i).after('<div class="text-danger">' + json['error'][i]['custom_total_title'] + '</div>');
+					}
+				}
+			}else{
+				totals();
+			}
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+}
+
+function totals() {
+	$.ajax({
+		url: 'index.php?route=extension/me_purchase_order.totals&user_token={{ user_token }}&store_id=0',
+		type:'post',
+		data: $('input[name=\'tax\'],select[name=\'shipping_method\'],input[name=\'balance\']'),
+		dataType: 'json',
+		crossDomain: true,
+		beforeSend: function() {
+			
+		},
+		complete: function() {
+			
+		},		
+		success: function(json) {
+			$('.alert-dismissible,.text-danger').remove();
+			
+			// Totals
+            html = '';
+            
+            if (json['totals'].length) {
+                for (i in json['totals']) {
+                    total = json['totals'][i];
+            
+                    html += '<tr style="border: none !important;">';
+                    html += '  <td class="text-end" colspan="4" style="background-color: unset; border: none !important; padding: 8px;"><b>' + total['title'] + ':</b></td>';
+                    html += '  <td class="text-end" width="20%" style="background-color: unset; border: none !important; padding: 8px;"><strong>' + total['text'] + '</strong></td>';
+                    html += '</tr>';
+                }
+            }
+
+			if (!json['totals'].length && !json['products'].length) {
+				html += '<tr>';
+				html += '  <td colspan="5" class="text-center">{{ text_no_results }}</td>';
+				html += '</tr>';
+			}
+
+			$('#total').html(html);
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+}
+$("#button-import").click(function(){
+  $("#import_box").toggle();
+});
+
+$('#button-upload').on('click',function() {
+	var node = this;
+
+	$('#form-upload').remove();
+
+	$('body').prepend('<form enctype="multipart/form-data" id="form-upload" style="display: none;"><input type="file" name="file" /></form>');
+
+	$('#form-upload input[name=\'file\']').trigger('click');
+
+	if (typeof timer != 'undefined') {
+    	clearInterval(timer);
+	}
+
+	timer = setInterval(function() {
+		if ($('#form-upload input[name=\'file\']').val() != '') {
+			clearInterval(timer);
+
+			$.ajax({
+				url: 'index.php?route=extension/me_purchase_order.upload&user_token={{ user_token }}',
+				type: 'post',
+				dataType: 'json',
+				data: new FormData($('#form-upload')[0]),
+				cache: false,
+				contentType: false,
+				processData: false,
+				beforeSend: function() {
+					$(node).button('loading');
+				},
+				complete: function() {
+					$(node).button('reset');
+				},
+				success: function(json) {
+					$(node).parent().find('.text-danger').remove();
+
+					if (json['error']) {
+						$(node).parent().find('input[type=\'hidden\']').after('<div class="text-danger">' + json['error'] + '</div>');
+					}
+					
+					if (json['success']) {
+						refresh_products();
+					}
+				},
+				error: function(xhr, ajaxOptions, thrownError) {
+					alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+				}
+			});
+		}
+	}, 500);
+});
+
+$('.sortproduct').on('click',function(){
+	var key = $(this).attr('data-key');
+	var rel = $(this).attr('rel');
+	refresh_products(key,rel);
+});
+
+$('#add_comment').on('click',function(){
+	$('.text-danger').remove();
+	var comment = $('textarea[name="order_comment"]').val();
+	if(comment == ''){
+		$('textarea[name="order_comment"]').parent().addClass('has-error');
+		$('textarea[name="order_comment"]').after('<div class="text-danger">Please add comment</div>');
+	}else{
+		$('textarea[name="order_comment"]').parent().removeClass('has-error');
+	}
+	if(comment != ''){
+		$.ajax({
+			url: 'index.php?route=extension/me_purchase_order.addpocomment&user_token={{ user_token }}&order_id={{ order_id }}',
+			type: 'post',
+			dataType: 'json',
+			data: $('textarea[name=\'order_comment\']'),
+			beforeSend: function() {
+				
+			},
+			complete: function() {
+				
+			},
+			success: function(json) {
+				html = '';
+				if (json) {
+					html += '<table class="table table-bordered">';
+					for(i in json){
+						html += '<tr id="comment'+ json[i]['comment_id'] +'">';
+						html += '<td class="first-td">';
+						html += json[i]['date_added'];
+						html += '</td>';
+						html += '<td class="ordercomment">';
+						html += json[i]['comment'];
+						html += '</td>';
+						html += '<td class="text-right" style="width:10%;"><a href="javascript:void(0);" class="btn btn-primary" onclick="editcomment('+ json[i]['comment_id'] +');"><i class="fa fa-pencil"></i></a>	<a href="javascript:void(0);" class="btn btn-danger" onclick="deletecomment('+ json[i]['comment_id'] +');"><i class="fa fa-times"></i></a></td>';
+						html += '</tr>';
+					}
+					html += '</table>';
+				}
+				$('#product_comments').html(html);
+				$('textarea[name=\'comment\']').val('');
+			}
+		});
+	}
+});
+
+function editcomment(comment_id){
+	$.ajax({
+		url: 'index.php?route=extension/me_purchase_order.editcomment&user_token={{ user_token }}&comment_id='+comment_id,
+		type: 'post',
+		dataType: 'json',
+		beforeSend: function() {
+			
+		},
+		complete: function() {
+			
+		},
+		success: function(json) {
+			html = '';
+			if (json['comment']) {
+				$('#comment'+ comment_id +' .ordercomment').html('<textarea class="form-control chat_msg" rows="3" name="ordercomment">'+ json['comment'] +'</textarea><a class="btn btn-primary" onclick="updatecomment('+ comment_id +');">Update</a>');
+			}
+		}
+	});
+}
+
+function deletecomment(comment_id){
+	$.ajax({
+		url: 'index.php?route=extension/me_purchase_order.deletepocomment&user_token={{ user_token }}&order_id={{ order_id }}&comment_id='+comment_id,
+		type: 'post',
+		dataType: 'json',
+		beforeSend: function() {
+			
+		},
+		complete: function() {
+			
+		},
+		success: function(json) {
+			html = '';
+			if (json) {
+				html += '<table class="table table-bordered">';
+				for(i in json){
+					html += '<tr id="comment'+ json[i]['comment_id'] +'">';
+					html += '<td class="first-td">';
+					html += json[i]['date_added'];
+					html += '</td>';
+					html += '<td class="ordercomment">';
+					html += json[i]['comment'];
+					html += '</td>';
+					html += '<td class="text-right" style="width:10%;"><a href="javascript:void(0);" class="btn btn-primary" onclick="editcomment('+ json[i]['comment_id'] +');"><i class="fa fa-pencil"></i></a>	<a href="javascript:void(0);" class="btn btn-danger" onclick="deletecomment('+ json[i]['comment_id'] +');"><i class="fa fa-times"></i></a></td>';
+					html += '</tr>';
+				}
+				html += '</table>';
+			}
+			$('#product_comments').html(html);
+		}
+	});
+}
+
+function updatecomment(comment_id){
+	$.ajax({
+		url: 'index.php?route=extension/me_purchase_order.updatecomment&user_token={{ user_token }}&order_id={{ order_id }}&comment_id='+comment_id,
+		type: 'post',
+		dataType: 'json',
+		data: $('#comment'+ comment_id +' textarea[name=\'ordercomment\']'),
+		beforeSend: function() {
+			
+		},
+		complete: function() {
+			
+		},
+		success: function(json) {
+			html = '';
+			if (json) {
+				html += '<table class="table table-bordered">';
+				for(i in json){
+					html += '<tr id="comment'+ json[i]['comment_id'] +'">';
+					html += '<td class="first-td">';
+					html += json[i]['date_added'];
+					html += '</td>';
+					html += '<td class="ordercomment">';
+					html += json[i]['comment'];
+					html += '</td>';
+					html += '<td class="text-right" style="width:10%;"><a href="javascript:void(0);" class="btn btn-primary" onclick="editcomment('+ json[i]['comment_id'] +');"><i class="fa fa-pencil"></i></a>	<a href="javascript:void(0);" class="btn btn-danger" onclick="deletecomment('+ json[i]['comment_id'] +');"><i class="fa fa-times"></i></a></td>';
+					html += '</tr>';
+				}
+				html += '</table>';
+			}
+			$('#product_comments').html(html);
+		}
+	});
+}
+
+$('.btn-attachment').click(function(){
+	var node = this;
+
+	$('#form-upload').remove();
+
+	$('body').prepend('<form enctype="multipart/form-data" id="form-upload" style="display: none;"><input type="file" name="file" /></form>');
+
+	$('#form-upload input[name=\'file\']').trigger('click');
+
+	if (typeof timer != 'undefined') {
+    	clearInterval(timer);
+	}
+
+	timer = setInterval(function() {
+		if ($('#form-upload input[name=\'file\']').val() != '') {
+			clearInterval(timer);
+
+			$.ajax({
+				url: 'index.php?route=extension/me_purchase_order.fileupload&user_token={{ user_token }}&order_id={{ order_id }}',
+				type: 'post',
+				dataType: 'json',
+				data: new FormData($('#form-upload')[0]),
+				cache: false,
+				contentType: false,
+				processData: false,
+				beforeSend: function() {
+					$(node).button('loading');
+				},
+				complete: function() {
+					$(node).button('reset');
+				},
+				success: function(json) {
+					$('.text-danger').remove();
+
+					if (json['error']) {
+						$(node).parent().find('input').after('<div class="text-danger">' + json['error'] + '</div>');
+					}
+
+					if (json['success']) {
+						html = '<div class="col-sm-2" id="'+ json['code'] +'">';
+						html += '<div class="attachment">';
+						html += '<i class="fa fa-times removeattach" rel="'+ json['code'] +'"></i>';
+						html += json['new_msg'];
+						html += '<input type="hidden" name="attachment[]" value="'+ json['code'] +'">';
+						html += '</div>';
+						html += '</div>';
+						
+						$('.attachments .row').append(html);
+					}
+				},
+				error: function(xhr, ajaxOptions, thrownError) {
+					alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+				}
+			});
+		}
+	}, 500);
+});	
+
+$(document).delegate('.removeattach', 'click', function() {
+	var code = $(this).attr('rel');
+	$('#'+code).remove();
+});
+function removeattachment(code){
+	$('#'+code).remove();
+}
+
+var po_custom_total_row = '{{ po_custom_total_row }}';
+function addcustomtotalmore(){
+	html = '<tr id="custom-total-'+ po_custom_total_row +'">';
+	html += '<td>';
+	html += '	<input type="text" name="po_custom_total['+ po_custom_total_row +'][title]" value="" id="input-po_custom_total_title'+ po_custom_total_row +'" class="form-control" placeholder="{{ entry_title }}" />';
+	html += '</td>';
+	html += '<td>';
+	html += '	<select name="po_custom_total['+ po_custom_total_row +'][type]" class="form-control">';
+	html += '		<option value="1">{{ text_discount }}</option>';
+	html += '		<option value="0">{{ text_fee }}</option>';
+	html += '	</select>';
+	html += '</td>';
+	html += '<td>';
+	html += '	<select name="po_custom_total['+ po_custom_total_row +'][dtype]" class="form-control">';
+	html += '		<option value="P">{{ text_percent }}</option>';
+	html += '		<option value="F">{{ text_total_amount }}</option>';
+	html += '	</select>';
+	html += '</td>';
+	html += '<td>';
+	html += '	<input type="text" name="po_custom_total['+ po_custom_total_row +'][amt]" value="" id="input-po_custom_total_amt'+ po_custom_total_row +'" class="form-control" placeholder="{{ text_amount }}" />';
+	html += '</td>';
+	html += '<td class="text-right">';
+	html += '	<button type="button" data-toggle="tooltip" title="{{ button_add }}" data-loading-text="{{ text_loading }}" class="btn btn-primary" onclick="loadcustomtotal();"><i class="fa fa-plus-circle"></i></button>';
+	html += '	<button type="button" data-toggle="tooltip" title="{{ button_remove }}" data-loading-text="{{ text_loading }}" class="btn btn-danger" onclick="removecustomototal('+ po_custom_total_row +')"><i class="fa fa-minus-circle"></i></button>';
+	html += '</td>';
+	html += '</tr>';
+	
+	$('#custom-totals').append(html);
+	
+	po_custom_total_row++;
+}
+
+function removecustomototal(row){
+	$.ajax({
+		url: 'index.php?route=extension/me_purchase_order.me_removecustomtotal&user_token={{ user_token }}&row='+row,
+		type: 'post',
+		data: $('#custom-totals select, #custom-totals input'),
+		dataType: 'json',
+		crossDomain: true,
+		beforeSend: function() {
+			
+		},
+		complete: function() {
+			
+		},
+		success: function(json) {
+			$('.alert-dismissible, .text-danger, .text-success').remove();
+			$('#custom-total-'+ row).remove();
+			$('#input-custom_total_amt').val('');
+			$('#input-custom_total_title').val('');
+			if(json['success']){
+				totals();
+			}
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+}
+  //--></script>
+ <script type="text/javascript"><!--
+     $(function(){
+// Destroy any existing instances safely
+    // Destroy any existing datetimepickers (avoid conflicts)
+    if ($.fn.datetimepicker) {
+        $('.datepicker').each(function() {
+            try { $(this).datetimepicker('destroy'); } catch (e) {}
+        });
+    }
+
+    // Initialize date-only pickers
+    $('.datepicker').datetimepicker({
+        format: 'Y-m-d',
+        timepicker: false,
+        scrollMonth: false,
+        scrollInput: false
+    });
+
+    // Initialize date+time pickers
+    $('.datetime').datetimepicker({
+        format: 'Y-m-d H:i:s',
+        timepicker: true,
+        scrollMonth: false,
+        scrollInput: false
+    });
+
+    // Initialize time-only pickers
+    $('.time').datetimepicker({
+        format: 'H:i:s',
+        datepicker: false,
+        scrollMonth: false,
+        scrollInput: false
+    });
+  });
+
+  //--></script>
+  <script type="text/javascript">
+// Initialize totals on page load
+$(document).ready(function() {
+    {% if order_id %}
+    // For edit mode, refresh totals
+    totals();
+    {% else %}
+    // For new order, show initial totals
+    totals();
+    {% endif %}
+});
+</script>
+<script>
+// --- Helpers to read/write the bottom total rows ---------------------------
+function parseMoney(str) {
+  if (!str) return 0;
+  // Remove currency symbol, commas, spaces
+  var n = String(str).replace(/[^\d.-]/g, '');
+  var v = parseFloat(n);
+  return isNaN(v) ? 0 : v;
+}
+
+function findRowByLabel(label) {
+  // finds the <tr> whose first <td> contains "<label>:"
+  var match = null;
+  $('#total tr').each(function () {
+    var txt = ($(this).find('td:first').text() || '').trim();
+    if (txt.toLowerCase().indexOf(label.toLowerCase() + ':') === 0) {
+      match = $(this);
+      return false;
+    }
+  });
+  return match;
+}
+
+function getAmountFromRow(label) {
+  var $row = findRowByLabel(label);
+  if (!$row) return 0;
+  var amtText = $row.find('td:last').text();
+  return parseMoney(amtText);
+}
+
+function setAmountToRow(label, amount) {
+  var $row = findRowByLabel(label);
+  if ($row) {
+    $row.find('td:last').html('₹' + amount.toFixed(2));
+  } else {
+    // If the row doesn't exist yet, append a minimal one
+    $('#total').append(
+      '<tr style="border:none!important;">' +
+      '<td class="text-end" colspan="4" style="background-color:unset;border:none!important;padding:8px;"><b>' + label + ':</b></td>' +
+      '<td class="text-end" width="20%" style="background-color:unset;border:none!important;padding:8px;"><strong>₹' + amount.toFixed(2) + '</strong></td>' +
+      '</tr>'
+    );
+  }
+}
+
+// --- Instant recalc of Sub Total and Total (no server round-trip) ----------
+function recalcTotalsUI() {
+  var subtotal = 0;
+
+  // Sum price * qty from the current inputs on the table
+  $('#cart tr').each(function () {
+    var price = parseFloat($(this).find('input[name$="[price]"]').val());
+    var qty   = parseFloat($(this).find('input[name$="[quantity]"]').val());
+    if (!isNaN(price) && !isNaN(qty)) subtotal += price * qty;
+  });
+
+  // Keep using currently displayed figures for the other rows
+  var tax      = getAmountFromRow('Tax');       // 0.00 if not present
+  var shipping = getAmountFromRow('Shipping');  // 0.00 if not present
+  var balance  = getAmountFromRow('Balance');   // 0.00 if not present
+
+  // Update Sub Total and Total rows instantly
+  setAmountToRow('Sub Total', subtotal);
+  setAmountToRow('Total', subtotal + tax + shipping + balance);
+}
+
+// --- Patch your existing row-total updater to call the UI recalc -----------
+var _origUpdateRowTotal = window.updateRowTotal;
+window.updateRowTotal = function (row) {
+  // Keep your original behavior (updates the green per-row total text)
+  if (typeof _origUpdateRowTotal === 'function') {
+    _origUpdateRowTotal(row); // uses your existing logic
+  } else {
+    // Fallback if function name changed in future
+    var price = parseFloat($('input[name="product[' + row + '][price]"]').val()) || 0;
+    var qty   = parseInt($('input[name="product[' + row + '][quantity]"]').val()) || 1;
+    $('.product-total[data-row="' + row + '"]').text('₹' + (price * qty).toFixed(2));
+  }
+
+  // Instantly recalc bottom totals in the UI
+  recalcTotalsUI();
+};
+
+// --- Also recalc when user types in price/qty (covers all dynamic rows) ---
+$(document).on('input change',
+  '#cart input[name$="[price]"], #cart input[name$="[quantity]"]',
+  function () {
+    var name = $(this).attr('name') || '';
+    var m = name.match(/product\[(\d+)\]\[(?:price|quantity)\]/);
+    if (m) {
+      window.updateRowTotal(m[1]);
+    } else {
+      // If we can't detect the row index, still update the bottom totals
+      recalcTotalsUI();
+    }
+  }
+);
+
+// Optional: after any successful AJAX refresh of products/totals,
+// run one more recalc to sync the displayed numbers immediately.
+document.addEventListener('products:refreshed', function(){ recalcTotalsUI(); });
+</script>
+
+{{ footer }}

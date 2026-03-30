@@ -1,0 +1,269 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+            <a href="{{ invoice }}" target="_blank" data-toggle="tooltip" title="{{ button_invoice_print }}" class="btn btn-info"><i class="fa fa-print"></i></a> 
+            <!--<a href="{{ shipping }}" target="_blank" data-toggle="tooltip" title="{{ button_shipping_print }}" class="btn btn-info"><i class="fa fa-truck"></i></a> -->
+            <!--<a href="{{ edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a> -->
+            <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-shopping-cart"></i> {{ text_order_detail }}</h3>
+          </div>
+          <table class="table">
+            <tbody>
+                <tr>
+                <td><button data-toggle="tooltip" title="{{ text_payment_method }}" class="btn btn-info btn-xs"><i class="fa fa-credit-card fa-fw"></i></button></td>
+                <td>{{ ourrequestid }}</td>
+                <td class="text-left">SYS-ID</td>
+              </tr>
+              <tr>
+                <td style="width: 1%;"><button data-toggle="tooltip" title="{{ text_store }}" class="btn btn-info btn-xs"><i class="fa fa-shopping-cart fa-fw"></i></button></td>
+                <td><strong>{{ customerid }} [{{ telephone }}] [ {{name}} ]</strong></td>
+                <td class="text-left">CUST-ID</td>
+              </tr>
+              <tr>
+                <td><button data-toggle="tooltip" title="{{ text_date_added }}" class="btn btn-info btn-xs"><i class="fa fa-calendar fa-fw"></i></button></td>
+                <td>{{ created }}</td>
+                <td class="text-left">DATE</td>
+              </tr>
+              <tr>
+                <td><button data-toggle="tooltip" title="{{ text_payment_method }}" class="btn btn-info btn-xs"><i class="fa fa-inr fa-fw"></i></button></td>
+                <td>{{ amount }}</td>
+                <td class="text-left">AMOUNT</td>
+              </tr>
+              <tr>
+              <td style="width: 1%;"><button data-toggle="tooltip" title="{{ text_telephone }}" class="btn btn-info btn-xs"><i class="fa fa-inr fa-fw"></i></button></td>
+              <td><i class="fa fa-inr fa-fw"></i>{{ profit }}</td>
+              <td class="text-left">CHARGE</td>
+            </tr>
+              <tr>
+              <td><button data-toggle="tooltip" title="{{ text_email }}" class="btn btn-info btn-xs"><i class="fa fa-envelope-o fa-fw"></i></button></td>
+              {%if Payment_mode%}
+                <td>{{Payment_mode}}</td>
+            {%else%}
+            <td>WALLET</td>
+            <td class="text-left">MODE</td>
+            {%endif%}
+            </tr>
+            </tbody>
+
+          </table>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-user"></i> {{ text_customer_detail }}</h3>
+          </div>
+          <table class="table">
+            <tr>
+              <td><button data-toggle="tooltip" title="{{ text_telephone }}" class="btn btn-info btn-xs"><i class="fa fa-bar-chart fa-fw"></i></button></td>
+              <td>{{ rrn }}</td>
+              <td class="text-left">BANK_REF_ID</td>
+            </tr>
+            <tr>
+              <td><button data-toggle="tooltip" title="{{ text_telephone }}" class="btn btn-info btn-xs"><i class="fa fa-phone fa-fw"></i></button></td>
+              <td>{{ snumber }} [ {{name}} ]</td>
+              <td class="text-left">SENDER</td>
+            </tr>
+            <tr>
+              <td><button data-toggle="tooltip" title="{{ text_telephone }}" class="btn btn-info btn-xs"><i class="fa fa-battery-quarter fa-fw"></i></button></td>
+              <td>{{ type }}</td>
+              <td class="text-left">TYPE</td>
+            </tr>
+            <tr>
+              <td><button data-toggle="tooltip" title="{{ text_telephone }}" class="btn btn-info btn-xs"><i class="fa fa-home fa-fw"></i></button></td>
+              <td>{{ accountnumber }}</td>
+              <td class="text-left">ACCOUNT / VPA / WALLET</td>
+            </tr>
+            <tr>
+              <td style="width: 1%;"><button data-toggle="tooltip" title="{{ text_telephone }}" class="btn btn-info btn-xs"><i class="fa fa-home fa-fw"></i></button></td>
+              <td>{{ ifsc }}</td>
+              <td class="text-left">IFSC</td>
+            </tr>
+            <tr>
+              <td style="width: 1%;"><button data-toggle="tooltip" title="{{ text_telephone }}" class="btn btn-info btn-xs"><i class="fa fa-home fa-fw"></i></button></td>
+              <td>{{ bank }}</td>
+              <td class="text-left">BANK NAME</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-shopping-cart"></i> {{ text_api_detail }}</h3>
+          </div>
+          <table class="table">
+            <tbody>
+                <tr>
+                <td style="width: 1%;"><button data-toggle="tooltip" title="{{ text_payment_method }}" class="btn btn-info btn-xs"><i class="fa fa-gavel fa-fw"></i></button></td>
+                <td>{{ apirequestid }}</td>
+                <td class="text-left">API-REQ</td>
+              </tr>
+              <tr>
+                <td><button data-toggle="tooltip" title="{{ text_payment_method }}" class="btn btn-info btn-xs"><i class="fa fa-gavel fa-fw"></i></button></td>
+                <td>{{ source }}</td>
+                <td class="text-left">SOURCE</td>
+              </tr>
+              <tr>
+                <td><button data-toggle="tooltip" title="{{ text_payment_method }}" class="btn btn-info btn-xs"><i class="fa fa-gavel fa-fw"></i></button></td>
+                <td>{{ yourrequestid }}</td>
+                <td class="text-left">CLIENT ID</td>
+              </tr>
+              <tr>
+                <td><button data-toggle="tooltip" title="{{ text_payment_method }}" class="btn btn-info btn-xs"><i class="fa fa-gavel fa-fw"></i></button></td>
+                <td class="text-left">{% if status == recharge_pending %} <span class="label label-warning">{{ status }}</span> {% elseif status == recharge_failed %} <span class="label label-danger">{{ status }}</span>{% elseif status == recharge_success %} <span class="label label-success">{{ status }}</span> {% else %} <span class="label label-info">{{ status }}</span> {% endif %}</td>
+                <td class="text-left">STATUS</td>
+              </tr>
+              <tr>
+              <td><button data-toggle="tooltip" title="{{ text_customer }}" class="btn btn-info btn-xs"><i class="fa fa-user fa-fw"></i></button></td>
+              <td>{{transfermode}}</td>
+              <td class="text-left">MODE</td>
+            </tr>
+            <tr>
+              <td><button data-toggle="tooltip" title="{{ text_customer }}" class="btn btn-info btn-xs"><i class="fa fa-user fa-fw"></i></button></td>
+              <td>{{beforebal}} / {{afterbal}}</td>
+              <td class="text-left">BEFORE / AFTER (BALANCE)</td>
+            </tr>
+            </tbody>
+
+          </table>
+        </div>
+      </div>
+    </div>
+      <div class="panel panel-default">
+      <div class="panel-heading">
+    <table class="table">
+        <tbody>
+      
+    {%if message %}
+    <tr style="background-color:white;">
+      <td><button data-toggle="tooltip" title="{{ text_message }}" class="btn btn-info btn-xs"><i class="fa fa-user fa-fw"></i></button></td>
+      <td ><b>{{ message }}</b></td>
+      <td class="text-left"><b>MESSAGE</b></td>
+    </tr>
+    {% endif %}
+
+    </tbody>
+     </table>
+     </div></div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-comment-o"></i> {{ text_history }}</h3>
+      </div>
+      <div class="panel-body">
+        <ul class="nav nav-tabs">
+          <li class="active"><a href="#tab-history" data-toggle="tab">{{ tab_history }}</a></li>
+          {% for tab in tabs %}
+            <li><a href="#tab-{{ tab.code }}" data-toggle="tab">{{ tab.title }}</a></li>
+          {% endfor %}
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane active" id="tab-history">
+            <div id="history"></div>
+            <br/>
+            <fieldset>
+              <legend>{{ text_history_add }}</legend>
+              <form class="form-horizontal">
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-order-status">{{ entry_order_status }}</label>
+                  <div class="col-sm-10">
+                    <select name="order_status_id" id="input-order-status" class="form-control">
+                        <option value="0">{{ recharge_failed }}</option>
+                        <option value="1" selected="selected">{{ recharge_success }}</option>
+                        <option value="2">{{ recharge_pending }}</option>
+                        <option value="4">{{ recharge_unknown }}</option>
+
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-comment">{{ entry_opRef }}</label>
+                  <div class="col-sm-10">
+                    <input type="text" name="opref" value="" placeholder="Enter Bank Reference --> In case of success only" rows="1" id="input-opref" class="form-control">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-apiid">{{ entry_apiid }}</label>
+                  <div class="col-sm-10">
+                    <input type="text" name="apirequestid" value="" placeholder="Enter API Request Id" rows="1" id="input-opref" class="form-control">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-notify">{{ entry_notify }}</label>
+                  <div class="col-sm-10">
+                    <div class="checkbox">
+                      <input type="checkbox" name="notify" value="1" id="input-notify"/>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-comment">{{ entry_comment }}</label>
+                  <div class="col-sm-10">
+                    <textarea name="comment" rows="8" placeholder="Enter if you want to say something..." id="input-comment" class="form-control"></textarea>
+                  </div>
+                </div>
+              </form>
+            </fieldset>
+            <div class="text-right">
+              <button id="button-history" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i> {{ button_history_add }}</button>
+            </div>
+          </div>
+          {% for tab in tabs %}
+            <div class="tab-pane" id="tab-{{ tab.code }}">{{ tab.content }}</div>
+          {% endfor %} </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript"><!--
+  $('#history').load('index.php?route=dmt/history/history&user_token={{ user_token }}&transactionid={{ id }}');
+  $('#button-history').on('click', function() {
+      $.ajax({
+		  url: '{{ catalog }}index.php?route=api/bank/manualcallback&api_token={{ api_token }}&order_id={{ id }}',
+		  type: 'post',
+		  dataType: 'json',
+		  data: 'apirequestid=' + encodeURIComponent($('input[name=\'apirequestid\']').val()) + '&opref=' + encodeURIComponent($('input[name=\'opref\']').val()) + '&order_status_id=' + encodeURIComponent($('select[name=\'order_status_id\']').val()) + '&notify=' + ($('input[name=\'notify\']').prop('checked') ? 1 : 0) + '&comment=' + encodeURIComponent($('textarea[name=\'comment\']').val()),
+		  beforeSend: function() {
+			  $('#button-history').button('loading');
+		  },
+		  complete: function() {
+			  $('#button-history').button('reset');
+		  },
+		  success: function(json) {
+			  $('.alert-dismissible').remove();
+
+			  if (!json['success']) {
+				  $('#history').before('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['message'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+			  }
+
+			  if (json['success']) {
+				  $('#history').load('index.php?route=dmt/history/history&user_token={{ user_token }}&transactionid={{ id }}');
+
+				  $('#history').before('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['message'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+
+				  $('textarea[name=\'comment\']').val('');
+			  }
+		  },
+		  error: function(xhr, ajaxOptions, thrownError) {
+			  alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		  }
+	  });
+  });
+  //--></script>
+</div>
+{{ footer }} 

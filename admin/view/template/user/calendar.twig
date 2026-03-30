@@ -1,0 +1,130 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <h1>{{ heading_title }}</h1>
+      <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <!-- Year Dropdown -->
+    <div class="mb-3">
+      <label for="yearSelect">Select Year:</label>
+      <select id="yearSelect" class="form-control" style="width:130px;display:inline-block;">
+        {% set currentYear = "now"|date("Y") %}
+        {% for y in currentYear-5..currentYear+5 %}
+          <option value="{{ y }}" {% if y == currentYear %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="row" id="calendarGrid">
+      {% for m in 1..12 %}
+      <div class="col-md-4 mb-4">
+        <div id="calendar{{ m }}"></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- FullCalendar CSS & JS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+<style>
+/* Reduce header (month title) size */
+.fc-toolbar-title {
+  font-size: 14px !important;
+  font-weight: 600;
+}
+
+/* Sundays background maroon */
+.fc-day-sun {
+  background-color:  #721c24 !important;
+}
+
+/* Today highlight green */
+.fc-day-today {
+  background-color: #d4edda !important;
+  border: 2px solid #28a745 !important;
+  border-radius: 6px;
+  font-weight: bold;
+  color: #155724 !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  let yearSelect = document.getElementById('yearSelect');
+  let currentYear = parseInt(yearSelect.value);
+  let calendars = [];
+
+  function renderCalendars(year) {
+    // Destroy old calendars before re-render
+    calendars.forEach(cal => cal.destroy());
+    calendars = [];
+
+    for (let m = 1; m <= 12; m++) {
+      let calendarEl = document.getElementById('calendar' + m);
+      let calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        initialDate: new Date(year, m - 1, 1),
+        headerToolbar: {
+          left: '',
+          center: 'title',
+          right: ''
+        },
+
+        //  Size & Pattern Fix
+        height: 350,              // sab month same height
+        contentHeight: 220,
+        expandRows: true,
+        fixedWeekCount: true,     // har month 6 rows fix
+
+        events: "index.php?route=user/calendar.events&user_token={{ user_token }}&year=" + currentYear,
+      });
+      calendar.render();
+      calendars.push(calendar);
+    }
+  }
+
+  // First render
+  renderCalendars(currentYear);
+
+  // Year dropdown change
+  yearSelect.addEventListener('change', function() {
+    renderCalendars(this.value);
+  });
+});
+</script>
+
+<style>
+/* Box size chhota & uniform */
+.fc-daygrid-day-frame {
+  min-height: 28px !important;
+  padding: 2px !important;
+}
+
+.fc-daygrid-day-number {
+  font-size: 11px !important;
+  padding: 0 !important;
+}
+
+.fc-event {
+  font-size: 10px !important;
+  padding: 1px 2px !important;
+  border-radius: 3px !important;
+}
+
+.fc-toolbar-title {
+  font-size: 13px !important;
+}
+</style>
+
+{{ footer }}

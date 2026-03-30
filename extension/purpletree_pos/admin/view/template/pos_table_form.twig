@@ -1,0 +1,78 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        <button type="submit" form="form-pos-table" formaction="{{ save }}" data-bs-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary">
+          <i class="fa-solid fa-floppy-disk"></i>
+        </button>
+        <a href="{{ back }}" data-bs-toggle="tooltip" title="{{ button_back }}" class="btn btn-light">
+          <i class="fa-solid fa-reply"></i>
+        </a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+      <div class="alert alert-danger"><i class="fa-solid fa-circle-exclamation"></i> {{ error_warning }}</div>
+    {% endif %}
+    <div class="card">
+      <div class="card-header"><i class="fa-solid fa-chair"></i> {{ text_form }}</div>
+      <div class="card-body">
+        <form id="form-pos-table" action="{{ save }}" method="post">
+          <div class="row mb-3 required">
+            <label for="input-table-name" class="col-sm-2 col-form-label">{{ entry_table_name }}</label>
+            <div class="col-sm-10">
+              <input type="text" name="table_name" value="{{ table_name }}" placeholder="Table 01" id="input-table-name" class="form-control"/>
+              <div id="error-table-name" class="invalid-feedback">{{ error_table_name }}</div>
+            </div>
+          </div>
+
+          {#<div class="row mb-3">
+            <label for="input-order-id" class="col-sm-2 col-form-label">{{ entry_order_id }}</label>
+            <div class="col-sm-10">
+              <input type="number" min="0" step="1" name="order_id" value="{{ order_id }}" placeholder="0" id="input-order-id" class="form-control"/>
+            </div>
+          </div>#}
+
+          <div class="row mb-3 required">
+            <label for="input-members" class="col-sm-2 col-form-label">{{ entry_members }}</label>
+            <div class="col-sm-10">
+              <input type="number" min="1" max="4" step="1" name="members" value="{{ members }}" placeholder="1" id="input-members" class="form-control"/>
+              <div class="form-text">{{ help_members }}</div>
+              <div id="error-members" class="invalid-feedback">{{ error_members }}</div>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label">{{ entry_status }}</label>
+            <div class="col-sm-10">
+              <div class="form-check form-switch form-switch-lg">
+                <input type="hidden" name="status" value="0"/>
+                <input type="checkbox" name="status" value="1" id="input-status" class="form-check-input"{% if status %} checked{% endif %}/>
+              </div>
+            </div>
+          </div>
+
+          <input type="hidden" name="pos_table_id" value="{{ pos_table_id }}" id="input-pos-table-id"/>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript"><!--
+$('#input-members').on('change keyup', function(){
+  let v = parseInt(this.value || '1',10);
+  if (v > 4) this.value = 4;
+  if (v < 1) this.value = 1;
+});
+//--></script>
+{{ footer }}

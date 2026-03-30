@@ -1,0 +1,2 @@
+[18-Mar-2026 20:13:24 Asia/Kolkata] PHP Fatal error:  Namespace declaration statement has to be the very first statement or after any declare call in the script in /home/k5ahkheh1fv2/public_html/JEWELLERY/extension/purpletree_pos/catalog/controller/pos/home.php on line 16
+[18-Mar-2026 20:15:20 Asia/Kolkata] PHP Fatal error:  Namespace declaration statement has to be the very first statement or after any declare call in the script in /home/k5ahkheh1fv2/public_html/JEWELLERY/extension/purpletree_pos/catalog/controller/pos/home.php on line 16

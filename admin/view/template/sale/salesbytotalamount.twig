@@ -1,0 +1,60 @@
+{{ header }}
+{{ column_left }}
+
+<div id="content">
+    <div class="page-header">
+        <h1>{{ heading_title }}</h1>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>SRNO</th>
+                        <th>Date</th>
+                        <th>No. Orders</th>
+                        <th>No. Products</th>
+                        <th>R_Price</th>
+                        <th>R_Tax</th>
+                        <th>R_Total</th>
+                        <th>S_Price</th>
+                        <th>S_Tax</th>
+                        <th>S_Total</th>
+                        <th>Discount</th>
+                        <th>Cash</th>
+                        <th>UPI</th>
+                        <th>AA</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for row in rows %}
+                        <tr>
+                            <td>{{ row.srno }}</td>
+                            <td>{{ row.date }}</td>
+                            <td>{{ row.no_orders }}</td>
+                            <td>{{ row.no_products }}</td>
+                            <td>{{ row.r_price }}</td>
+                            <td>{{ row.r_tax }}</td>
+                            <td>{{ row.r_total }}</td>
+                            <td>{{ row.s_price }}</td>
+                            <td>{{ row.s_tax }}</td>
+                            <td>{{ row.s_total }}</td>
+                            <td>{{ row.discount }}</td>
+                            <td>{{ row.cash }}</td>
+                            <td>{{ row.upi }}</td>
+                            <td>{{ row.aa }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="row">
+                <div class="col-sm-6 text-left">{{ pagination }}</div>
+                <div class="col-sm-6 text-right">{{ results }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ footer }}

@@ -19382,23 +19382,30 @@ if (data.upc && data.upc !== '') {
          
         
          
-         function openQuickAddModal() {
-            $('#quick_add_name').val('SGC Product');
-            $('#quick_add_quantity').val('1');
-            $('#quick_add_price').val('');
-            $('#quick_add_gst').val('3');
-            $('#quick_add_error').hide();
-        
-            const modalEl = document.getElementById('quickAddProductModal');
-            const myModal = new bootstrap.Modal(modalEl);
-        
-            // Focus after modal is visible
-            modalEl.addEventListener('shown.bs.modal', function () {
-                $('#quick_add_price').trigger('focus');
-            }, { once: true });
-        
-            myModal.show();
+          function openQuickAddModal() {
+    // Set default values
+    $('#quick_add_name').val('SGC Product');
+    $('#quick_add_quantity').val('1');
+    $('#quick_add_price').val('');
+    $('#quick_add_gst').val('3');
+    $('#quick_add_error').hide();
+ 
+    const modalEl = document.getElementById('quickAddProductModal');
+    const myModal = new bootstrap.Modal(modalEl);
+ 
+    // Focus on Product Name and select text after modal opens
+    modalEl.addEventListener('shown.bs.modal', function () {
+        const productNameField = document.getElementById('quick_add_name');
+        if (productNameField) {
+            productNameField.focus();
+            productNameField.select();
+            // Ensure autocomplete is hidden when first focused/selected
+            $('#product_autocomplete_list').hide();
         }
+    }, { once: true });
+ 
+    myModal.show();
+}
          
          $('#quickAddProductModal').on('keydown', 'input', function (e) {
              if (e.key === 'Enter') {
@@ -20824,6 +20831,13 @@ if (data.upc && data.upc !== '') {
     list.style.display = 'grid';
     list.style.gridTemplateColumns = 'repeat(4, 1fr)';
 }
+
+document.addEventListener('keydown', function(event) {
+             if (event.ctrlKey && event.key === 'b') {
+                 event.preventDefault();
+                 openQuickAddModal();
+             }
+         });
       </script>
    </body>
 </html>

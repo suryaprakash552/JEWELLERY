@@ -1637,7 +1637,7 @@ if ($customer_id > 0) {
             $this->load->model("account/customer");
 
             $credit = [
-                "customerid" => $agentId,
+                "customerid" => $customer_id,
                 "order_id" => $order_id,
                 "amount" => $subtotal,
                 "description" => $mobile,

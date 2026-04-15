@@ -315,7 +315,7 @@
 
     <tr>
       <th>Total Amount</th>
-      <th style="text-align:right;">₹ {{ invoice.total_received }}</th>
+      <th style="text-align:right;">₹ {{ invoice.sub_total }}</th>
     </tr>
 
     <tr>
@@ -328,9 +328,10 @@
       <td style="text-align:right;">₹ {{ invoice.upi_amount }}</td>
     </tr>
 
+   
     <tr>
-      <td>UPI Ref</td>
-      <td style="text-align:right;">{{ invoice.upi_ref }}</td> 
+      <td>Advance Amount</td>
+      <td style="text-align:right;">₹ {{ invoice.advance_used }}.00</td>
     </tr>
 
     <tr>
@@ -339,14 +340,16 @@
     </tr>
 
     <tr>
-      <td style="font-weight:700; color:{% if invoice.pending_amount > 0 %}red{% else %}green{% endif %};">
-        Due Amount
-      </td>
-      <td style="text-align:right; font-weight:700;
-          color:{% if invoice.pending_amount > 0 %}red{% else %}green{% endif %};">
-        ₹ {{ invoice.pending_amount }}
-      </td>
-    </tr>
+  <td style="font-weight:700;
+      color:{% if invoice.balance > 0 %}red{% else %}green{% endif %};">
+    Due Amount
+  </td>
+
+  <td style="text-align:right; font-weight:700;
+      color:{% if invoice.balance > 0 %}red{% else %}green{% endif %};">
+    ₹ {{ invoice.balance|number_format(2) }}
+  </td>
+</tr>
   </tbody>
 </table>
   </td>

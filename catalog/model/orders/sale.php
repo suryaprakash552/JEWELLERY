@@ -3,125 +3,41 @@ namespace Opencart\Catalog\Model\Orders;
 
 class Sale extends \Opencart\System\Engine\Model {
 
-    public function getOrderReport(int $order_id): array {
-        $sql = "
-            SELECT 
-                inv.order_id,
-                DATE(o.date_added) AS date_added,
-
-                COALESCE(inv.cash_amount,0) AS cash,
-                COALESCE(inv.upi_amount,0) AS upi,
-                COALESCE(inv.returnable_balance,0) AS advance,
-                COALESCE(inv.discount,0) AS discount,
-                COALESCE(inv.upi_ref,'') AS ref,
-
-                COALESCE(inv.sub_total,0) AS s_price,
-                COALESCE(inv.total_tax,0) AS s_tax,
-                COALESCE(inv.total_received,0) AS s_total,
-
-                COALESCE(SUM(op.quantity * p.received_price),0) AS r_price,
-                COALESCE(SUM(op.quantity * p.r_tax),0) AS r_tax,
-                COALESCE(
-                    SUM(op.quantity * p.received_price) +
-                    SUM(op.quantity * p.r_tax),
-                    0
-                ) AS r_total,
-
-                o.sellerid AS seller_id
-
-            FROM `" . DB_PREFIX . "order_invoice` inv
-            LEFT JOIN `" . DB_PREFIX . "order` o 
-                ON o.order_id = inv.order_id
-            LEFT JOIN `" . DB_PREFIX . "order_product` op 
-                ON op.order_id = inv.order_id
-            LEFT JOIN `" . DB_PREFIX . "product` p 
-                ON p.product_id = op.product_id
-
-            WHERE inv.order_id = '" . (int)$order_id . "'
-            GROUP BY inv.order_id
-        ";
-
-        $query = $this->db->query($sql);
-        return $query->num_rows ? $query->row : [];
-    }
-
+    /* ================= ALL ORDERS REPORT ================= */
     public function getAllOrdersReport(array $data = []): array {
-        $sql = "
-            SELECT 
-                inv.order_id,
-                DATE(o.date_added) AS date_added,
+       $sql = "
+        SELECT inv.order_id, DATE(MAX(o.date_added)) AS date_added,
+           GREATEST(MAX(inv.cash_amount) - IFNULL(MAX(inv.returnable_balance),0),0) AS cash,
+GREATEST(MAX(inv.upi_amount) - IFNULL(MAX(inv.returnable_balance),0),0) AS upi,
+           MAX(inv.advance_used)  AS advance,
+            MAX(inv.balance) AS balance, MAX(inv.discount) AS discount,
+          MAX(
+    CASE 
+        WHEN inv.coupon IS NOT NULL AND inv.coupon != ''
+        THEN CAST(SUBSTRING_INDEX(inv.coupon, '-', -1) AS DECIMAL(10,2)) 
+        ELSE 0
+    END
+) AS coupon, 
+            MAX(inv.upi_ref) AS ref, MAX(inv.sub_total) AS s_price,
+            MAX(inv.total_tax) AS s_tax, MAX(inv.total_received) AS s_total,
+            SUM(op.quantity * p.received_price) AS r_price,
+            SUM(op.quantity * p.r_tax) AS r_tax,
+            SUM(op.quantity * p.received_price + op.quantity * p.r_tax) AS r_total,
+            MAX(o.sellerid) AS seller_id
+        FROM `" . DB_PREFIX . "order_invoice` inv
+        LEFT JOIN `" . DB_PREFIX . "order` o ON o.order_id = inv.order_id
+        LEFT JOIN `" . DB_PREFIX . "order_product` op ON op.order_id = inv.order_id
+        LEFT JOIN `" . DB_PREFIX . "product` p ON p.product_id = op.product_id
+        WHERE 1";
 
-                COALESCE(inv.cash_amount,0) AS cash,
-                COALESCE(inv.upi_amount,0) AS upi,
-                COALESCE(inv.returnable_balance,0) AS advance,
-                COALESCE(inv.discount,0) AS discount,
-                COALESCE(inv.upi_ref,'') AS ref,
-
-                COALESCE(inv.sub_total,0) AS s_price,
-                COALESCE(inv.total_tax,0) AS s_tax,
-                COALESCE(inv.total_received,0) AS s_total,
-
-                COALESCE(SUM(op.quantity * p.received_price),0) AS r_price,
-                COALESCE(SUM(op.quantity * p.r_tax),0) AS r_tax,
-                COALESCE(
-                    SUM(op.quantity * p.received_price) +
-                    SUM(op.quantity * p.r_tax),
-                    0
-                ) AS r_total,
-
-                o.sellerid AS seller_id
-
-            FROM `" . DB_PREFIX . "order_invoice` inv
-            LEFT JOIN `" . DB_PREFIX . "order` o 
-                ON o.order_id = inv.order_id
-            LEFT JOIN `" . DB_PREFIX . "order_product` op 
-                ON op.order_id = inv.order_id
-            LEFT JOIN `" . DB_PREFIX . "product` p 
-                ON p.product_id = op.product_id
-
-            GROUP BY inv.order_id
-            ORDER BY inv.order_id DESC
-        ";
-
-        if (isset($data['start']) && isset($data['limit'])) {
-            $sql .= " LIMIT " . (int)$data['start'] . ", " . (int)$data['limit'];
+        if (!empty($data['filter_date_added'])) {
+            $sql .= " AND DATE(o.date_added) >= '" . $this->db->escape($data['filter_date_added']) . "'";
+        }
+        if (!empty($data['filter_date_modified'])) {
+            $sql .= " AND DATE(o.date_added) <= '" . $this->db->escape($data['filter_date_modified']) . "'";
         }
 
-        return $this->db->query($sql)->rows;
-    }
-
-    public function getTotalOrders(): int {
-        $sql = "
-            SELECT COUNT(DISTINCT inv.order_id) AS total
-            FROM `" . DB_PREFIX . "order_invoice` inv
-        ";
-
-        return (int)$this->db->query($sql)->row['total'];
-    }
-
-    public function getSellerSummary(array $data = []): array {
-        $sql = "
-        SELECT seller_id, name AS seller_name, MAX(order_date) AS last_order_date,
-            COUNT(*) AS total_orders, SUM(total_products) AS total_products,
-            SUM(sale_total) AS sale_total, SUM(tax_total) AS tax_total,
-            SUM(grand_total) AS grand_total, SUM(discount_total) AS discount_total,
-            SUM(profit) AS profit
-        FROM (
-            SELECT o.order_id, o.sellerid AS seller_id, DATE(o.date_added) AS order_date,
-                SUM(op.quantity) AS total_products,
-                MAX(inv.sub_total) AS sale_total, MAX(inv.total_tax) AS tax_total,
-                MAX(inv.total_received) AS grand_total, MAX(inv.discount) AS discount_total,
-                (MAX(inv.total_received) - SUM(op.quantity * p.received_price + op.quantity * p.r_tax)) AS profit,
-                CONCAT(MAX(c.firstname), ' ', MAX(c.lastname)) AS name
-            FROM `" . DB_PREFIX . "order` o
-            LEFT JOIN `" . DB_PREFIX . "order_product` op ON op.order_id = o.order_id
-            LEFT JOIN `" . DB_PREFIX . "order_invoice` inv ON inv.order_id = o.order_id
-            LEFT JOIN `" . DB_PREFIX . "customer` c ON c.customer_id = o.sellerid
-            LEFT JOIN `" . DB_PREFIX . "product` p ON p.product_id = op.product_id
-            WHERE o.sellerid IS NOT NULL
-            GROUP BY o.order_id
-        ) t
-        GROUP BY seller_id ORDER BY last_order_date DESC ";
+        $sql .= " GROUP BY inv.order_id ORDER BY inv.order_id DESC ";
 
         if (isset($data['start'], $data['limit'])) {
             $sql .= " LIMIT " . (int)$data['start'] . ", " . (int)$data['limit'];
@@ -130,120 +46,102 @@ class Sale extends \Opencart\System\Engine\Model {
         return $this->db->query($sql)->rows;
     }
 
-    public function getTotalSellerSummary (): int {
-        return (int)$this->db->query(
-            "SELECT COUNT(DISTINCT sellerid) AS total FROM `" . DB_PREFIX . "order` WHERE sellerid IS NOT NULL"
-        )->row['total'];
-    }
 
-    public function getSalesByProduct(array $data = []): array {
-        $sql = "
-            SELECT
-                t.order_date,
+    public function getTotalOrders(array $data = []): int {
+          $sql = "SELECT COUNT(DISTINCT inv.order_id) AS total
+        FROM `" . DB_PREFIX . "order_invoice` inv
+        LEFT JOIN `" . DB_PREFIX . "order` o ON o.order_id = inv.order_id WHERE 1";
 
-                SUM(t.total_products) AS total_products,
-
-                SUM(t.r_price) AS r_price,
-                SUM(t.r_tax) AS r_tax,
-                SUM(t.r_total) AS r_total,
-
-                SUM(t.s_price) AS s_price,
-                SUM(t.s_tax) AS s_tax,
-                SUM(t.s_total) AS s_total,
-
-                SUM(t.discount) AS discount
-
-            FROM (
-                SELECT
-                    o.order_id,
-                    DATE(o.date_added) AS order_date,
-
-                    SUM(op.quantity) AS total_products,
-
-                    SUM(op.quantity * p.received_price) AS r_price,
-                    SUM(op.quantity * p.r_tax) AS r_tax,
-                    SUM(op.quantity * p.received_price + op.quantity * p.r_tax) AS r_total,
-
-                    inv.sub_total      AS s_price,
-                    inv.total_tax      AS s_tax,
-                    inv.total_received AS s_total,
-                    inv.discount       AS discount
-
-                FROM `" . DB_PREFIX . "order` o
-                LEFT JOIN `" . DB_PREFIX . "order_product` op ON op.order_id = o.order_id
-                LEFT JOIN `" . DB_PREFIX . "product` p ON p.product_id = op.product_id
-                LEFT JOIN `" . DB_PREFIX . "order_invoice` inv ON inv.order_id = o.order_id
-
-                GROUP BY o.order_id
-            ) t
-
-            GROUP BY t.order_date
-            ORDER BY t.order_date DESC
-        ";
-
-        if (isset($data['start']) && isset($data['limit'])) {
-            $sql .= " LIMIT " . (int)$data['start'] . ", " . (int)$data['limit'];
+        if (!empty($data['filter_date_added'])) {
+            $sql .= " AND DATE(o.date_added) >= '" . $this->db->escape($data['filter_date_added']) . "'";
         }
-
-        return $this->db->query($sql)->rows;
-    }
-
-    public function getTotalSalesByProductDays(): int {
-        $sql = "
-            SELECT COUNT(DISTINCT DATE(o.date_added)) AS total
-            FROM `" . DB_PREFIX . "order` o
-        ";
+        if (!empty($data['filter_date_modified'])) {
+            $sql .= " AND DATE(o.date_added) <= '" . $this->db->escape($data['filter_date_modified']) . "'";
+        }
 
         return (int)$this->db->query($sql)->row['total'];
     }
 
-    public function getSalesByOrder(array $data = []): array {
+    /* ================= SINGLE ORDER REPORT ================= */
+    public function getOrderReport(int $order_id): array {
         $sql = "
             SELECT
-                t.order_date,
+                inv.order_id,
+                DATE(o.date_added) AS date_added,
 
-                COUNT(*) AS no_orders,
-                SUM(t.no_products) AS no_products,
+                GREATEST(MAX(inv.cash_amount) - IFNULL(MAX(inv.returnable_balance), 0), 0) AS cash,
+                GREATEST(MAX(inv.upi_amount) - IFNULL(MAX(inv.returnable_balance), 0), 0) AS upi,
+                MAX(inv.advance_used) AS advance,
+                MAX(inv.balance) AS balance,
+                MAX(inv.discount) AS discount,
+                MAX(inv.coupon) AS coupon,   -
+                MAX(inv.upi_ref) AS ref,
 
-                SUM(t.r_price) AS r_price,
-                SUM(t.r_tax) AS r_tax,
-                SUM(t.r_total) AS r_total,
+                MAX(inv.sub_total) AS s_price,
+                MAX(inv.total_tax) AS s_tax,
+                MAX(inv.total_received) AS s_total,
 
-                SUM(t.s_price) AS s_price,
-                SUM(t.s_tax) AS s_tax,
-                SUM(t.s_total) AS s_total,
+                SUM(op.quantity * p.received_price) AS r_price,
+                SUM(op.quantity * p.r_tax) AS r_tax,
+                SUM(op.quantity * p.received_price + op.quantity * p.r_tax) AS r_total,
 
-                SUM(t.discount) AS discount
+                MAX(o.sellerid) AS seller_id
 
-            FROM (
-                SELECT
-                    o.order_id,
-                    DATE(o.date_added) AS order_date,
+            FROM `" . DB_PREFIX . "order_invoice` inv
+            LEFT JOIN `" . DB_PREFIX . "order` o ON o.order_id = inv.order_id
+            LEFT JOIN `" . DB_PREFIX . "order_product` op ON op.order_id = inv.order_id
+            LEFT JOIN `" . DB_PREFIX . "product` p ON p.product_id = op.product_id
+            WHERE inv.order_id = " . (int)$order_id . "
+            GROUP BY inv.order_id";
 
-                    SUM(op.quantity) AS no_products,
+        $query = $this->db->query($sql);
+        return $query->num_rows ? $query->row : [];
+    }
 
-                    SUM(op.quantity * p.received_price) AS r_price,
-                    SUM(op.quantity * p.r_tax) AS r_tax,
-                    SUM(op.quantity * p.received_price + op.quantity * p.r_tax) AS r_total,
+    /* ================= DAILY ORDER SUMMARY ================= */
+    public function getSalesByOrder(array $data = []): array {
+        $sql = "
+        SELECT
+            order_date,
+            COUNT(*) AS no_orders,
+            SUM(no_products) AS no_products,
+            SUM(r_price) AS r_price,
+            SUM(r_tax) AS r_tax,
+            SUM(r_total) AS r_total,
+            SUM(s_price) AS s_price,
+            SUM(s_tax) AS s_tax,
+            SUM(s_total) AS s_total,
+            SUM(discount) AS discount
+        FROM (
+            SELECT
+                DATE(o.date_added) AS order_date,
+                o.order_id,
+                o.order_status_id,
+                SUM(op.quantity) AS no_products,
+                SUM(op.quantity * p.received_price) AS r_price,
+                SUM(op.quantity * p.r_tax) AS r_tax,
+                SUM(op.quantity * p.received_price + op.quantity * p.r_tax) AS r_total,
+                MAX(inv.sub_total) AS s_price,
+                CASE
+                    WHEN o.order_status_id = 6 THEN 0
+                    ELSE MAX(inv.total_tax)
+                END AS s_tax,
+                CASE
+                    WHEN o.order_status_id = 6 THEN MAX(inv.sub_total)
+                    ELSE MAX(inv.total_received)
+                END AS s_total,
+                MAX(inv.discount) AS discount
+            FROM `" . DB_PREFIX . "order` o
+            LEFT JOIN `" . DB_PREFIX . "order_product` op ON op.order_id = o.order_id
+            LEFT JOIN `" . DB_PREFIX . "product` p ON p.product_id = op.product_id
+            LEFT JOIN `" . DB_PREFIX . "order_invoice` inv ON inv.order_id = o.order_id
+            WHERE o.order_status_id IN (5, 6,17)
+            GROUP BY o.order_id
+        ) t
+        GROUP BY order_date
+        ORDER BY order_date DESC";
 
-                    inv.sub_total      AS s_price,
-                    inv.total_tax      AS s_tax,
-                    inv.total_received AS s_total,
-                    inv.discount       AS discount
-
-                FROM `" . DB_PREFIX . "order` o
-                LEFT JOIN `" . DB_PREFIX . "order_product` op ON op.order_id = o.order_id
-                LEFT JOIN `" . DB_PREFIX . "product` p ON p.product_id = op.product_id
-                LEFT JOIN `" . DB_PREFIX . "order_invoice` inv ON inv.order_id = o.order_id
-
-                GROUP BY o.order_id
-            ) t
-
-            GROUP BY t.order_date
-            ORDER BY t.order_date DESC
-        ";
-
-        if (isset($data['start']) && isset($data['limit'])) {
+        if (isset($data['start'], $data['limit'])) {
             $sql .= " LIMIT " . (int)$data['start'] . ", " . (int)$data['limit'];
         }
 
@@ -251,262 +149,529 @@ class Sale extends \Opencart\System\Engine\Model {
     }
 
     public function getTotalSalesByOrderDays(): int {
-        $sql = "
-            SELECT COUNT(DISTINCT DATE(o.date_added)) AS total
-            FROM `" . DB_PREFIX . "order` o
-        ";
-
-        return (int)$this->db->query($sql)->row['total'];
+        return (int)$this->db->query(
+            "SELECT COUNT(DISTINCT DATE(date_added)) AS total
+             FROM `" . DB_PREFIX . "order`
+             WHERE order_status_id IN (5, 6,17)"
+        )->row['total'];
     }
 
-    public function getSalesByNumber(array $data = []): array {
+    /* ================= DAILY PRODUCT REPORT ================= */
+    public function getSalesByProduct(array $data = []): array {
+        $inner_where = " WHERE o.order_status_id IN (5, 6,17) ";
+
+        if (!empty($data['filter_date_from'])) {
+            $inner_where .= " AND DATE(o.date_added) >= '" . $this->db->escape($data['filter_date_from']) . "'";
+        }
+        if (!empty($data['filter_date_to'])) {
+            $inner_where .= " AND DATE(o.date_added) <= '" . $this->db->escape($data['filter_date_to']) . "'";
+        }
+
         $sql = "
+        SELECT
+            order_date,
+            SUM(total_products) AS total_products,
+            SUM(r_price) AS r_price,
+            SUM(r_tax) AS r_tax,
+            SUM(r_total) AS r_total,
+            SUM(s_price) AS s_price,
+            SUM(s_tax) AS s_tax,
+            SUM(s_total) AS s_total,
+            SUM(discount) AS discount
+        FROM (
             SELECT
-                t.order_date,
+                DATE(o.date_added) AS order_date,
+                o.order_id,
+                o.order_status_id,
+                SUM(op.quantity) AS total_products,
+                SUM(op.quantity * p.received_price) AS r_price,
+                SUM(op.quantity * p.r_tax) AS r_tax,
+                SUM(op.quantity * p.received_price + op.quantity * p.r_tax) AS r_total,
+                MAX(inv.sub_total) AS s_price,
+                CASE
+                    WHEN o.order_status_id = 6 THEN 0
+                    ELSE MAX(inv.total_tax)
+                END AS s_tax,
+                CASE
+                    WHEN o.order_status_id = 6 THEN MAX(inv.sub_total)
+                    ELSE MAX(inv.total_received)
+                END AS s_total,
+                MAX(inv.discount) AS discount
+            FROM `" . DB_PREFIX . "order` o
+            LEFT JOIN `" . DB_PREFIX . "order_product` op ON op.order_id = o.order_id
+            LEFT JOIN `" . DB_PREFIX . "product` p ON p.product_id = op.product_id
+            LEFT JOIN `" . DB_PREFIX . "order_invoice` inv ON inv.order_id = o.order_id
+            $inner_where
+            GROUP BY o.order_id
+        ) t
+        GROUP BY order_date
+        ORDER BY order_date DESC";
 
-                t.seller_id,
-
-                c.telephone AS number,
-
-                CONCAT(
-                    COALESCE(c.firstname, ''),
-                    ' ',
-                    COALESCE(c.lastname, '')
-                ) AS name,
-
-                COUNT(*) AS no_orders,
-
-                SUM(t.no_products) AS no_products,
-
-                SUM(t.r_price) AS r_price,
-                SUM(t.r_tax) AS r_tax,
-                SUM(t.r_total) AS r_total,
-
-                SUM(t.s_price) AS s_price,
-                SUM(t.s_tax) AS s_tax,
-                SUM(t.s_total) AS s_total
-
-            FROM (
-                SELECT
-                    o.order_id,
-                    o.sellerid AS seller_id,
-                    DATE(o.date_added) AS order_date,
-
-                    SUM(op.quantity) AS no_products,
-
-                    SUM(op.quantity * p.received_price) AS r_price,
-                    SUM(op.quantity * p.r_tax) AS r_tax,
-                    SUM(op.quantity * p.received_price + op.quantity * p.r_tax) AS r_total,
-
-                    inv.sub_total      AS s_price,
-                    inv.total_tax      AS s_tax,
-                    inv.total_received AS s_total
-
-                FROM `" . DB_PREFIX . "order` o
-                LEFT JOIN `" . DB_PREFIX . "order_product` op ON op.order_id = o.order_id
-                LEFT JOIN `" . DB_PREFIX . "product` p ON p.product_id = op.product_id
-                LEFT JOIN `" . DB_PREFIX . "order_invoice` inv ON inv.order_id = o.order_id
-
-                WHERE o.sellerid IS NOT NULL
-                GROUP BY o.order_id
-            ) t
-
-            LEFT JOIN `" . DB_PREFIX . "customer` c
-                ON c.customer_id = t.seller_id
-
-            GROUP BY t.order_date, t.seller_id
-            ORDER BY t.order_date DESC
-        ";
-
-        if (isset($data['start']) && isset($data['limit'])) {
+        if (isset($data['start'], $data['limit'])) {
             $sql .= " LIMIT " . (int)$data['start'] . ", " . (int)$data['limit'];
         }
 
         return $this->db->query($sql)->rows;
     }
 
-    public function getTotalSalesByNumber(): int {
+    public function getTotalSalesByProductDays(): int {
+        return (int)$this->db->query(
+            "SELECT COUNT(DISTINCT DATE(date_added)) AS total
+             FROM `" . DB_PREFIX . "order`
+             WHERE order_status_id IN (5, 6,17)"
+        )->row['total'];
+    }
+
+    /* ================= SALES BY PHONE NUMBER ================= */
+   public function getSalesByNumber(array $data = []): array {
+
+    $where = " WHERE o.telephone IS NOT NULL AND o.telephone <> '' AND o.order_status_id IN (5,6,17) ";
+
+    if (!empty($data['filter_phone'])) {
+        $where .= " AND o.telephone LIKE '%" . $this->db->escape($data['filter_phone']) . "%' ";
+    }
+
+    if (!empty($data['filter_name'])) {
+        $name = $this->db->escape($data['filter_name']);
+        $where .= " AND (o.firstname LIKE '%$name%' OR o.lastname LIKE '%$name%') ";
+    }
+
+    $sql = "
+        SELECT
+            o.telephone AS number,
+
+            (
+                SELECT CONCAT(o2.firstname, ' ', o2.lastname)
+                FROM `" . DB_PREFIX . "order` o2
+                WHERE o2.telephone = o.telephone
+                ORDER BY o2.date_added DESC
+                LIMIT 1
+            ) AS name,
+
+            COUNT(DISTINCT o.order_id) AS no_orders,
+            SUM(prod.no_products) AS no_products,
+
+            /* ✅ PRODUCT */
+            SUM(prod.r_price) AS r_price,
+            SUM(prod.r_tax)   AS r_tax,
+            SUM(prod.r_total) AS r_total,
+
+            /* ✅ SALES */
+            SUM(inv.sub_total) AS s_price,
+
+            SUM(
+                CASE 
+                    WHEN o.order_status_id = 6 THEN 0
+                    ELSE COALESCE(inv.total_tax,0)
+                END
+            ) AS s_tax,
+
+            SUM(
+                CASE
+                    WHEN o.order_status_id = 6 THEN COALESCE(inv.sub_total, 0)
+                    ELSE COALESCE(inv.total_received, 0)
+                END
+            ) AS s_total,
+
+            SUM(inv.discount) AS discount,
+
+            SUM(
+                CASE 
+                    WHEN inv.coupon IS NOT NULL AND inv.coupon != ''
+                    THEN CAST(SUBSTRING_INDEX(inv.coupon, '-', -1) AS DECIMAL(10,2))
+                    ELSE 0
+                END
+            ) AS coupon,
+
+            /* ✅ PAYMENTS */
+            SUM(
+                CASE
+                    WHEN o.order_status_id = 6 THEN COALESCE(inv.sub_total, 0)
+                    ELSE GREATEST(
+                        COALESCE(inv.cash_amount,0) -
+                        IF(COALESCE(inv.cash_amount,0) > 0, COALESCE(inv.returnable_balance,0),0),
+                    0)
+                END
+            ) AS cash,
+
+            SUM(
+                CASE
+                    WHEN o.order_status_id = 6 THEN 0
+                    ELSE GREATEST(
+                        COALESCE(inv.upi_amount,0) -
+                        IF(COALESCE(inv.upi_amount,0) > 0, COALESCE(inv.returnable_balance,0),0),
+                    0)
+                END
+            ) AS upi,
+
+            SUM(
+                CASE
+                    WHEN o.order_status_id = 6 THEN 0
+                    ELSE COALESCE(inv.balance,0)
+                END
+            ) AS due,
+
+            SUM(
+                CASE
+                    WHEN o.order_status_id = 6 THEN 0
+                    ELSE COALESCE(inv.advance_used,0)
+                END
+            ) AS advance
+
+        FROM `" . DB_PREFIX . "order` o
+
+        LEFT JOIN (
+            SELECT
+                op.order_id,
+                SUM(op.quantity) AS no_products,
+                SUM(op.quantity * p.received_price) AS r_price,
+                SUM(op.quantity * p.r_tax) AS r_tax,
+                SUM(op.quantity * (p.received_price + p.r_tax)) AS r_total
+            FROM `" . DB_PREFIX . "order_product` op
+            LEFT JOIN `" . DB_PREFIX . "product` p
+                ON p.product_id = op.product_id
+            GROUP BY op.order_id
+        ) prod ON prod.order_id = o.order_id
+
+        LEFT JOIN `" . DB_PREFIX . "order_invoice` inv
+            ON inv.order_id = o.order_id
+
+        $where
+
+        GROUP BY o.telephone
+        ORDER BY o.telephone ASC
+    ";
+
+    if (isset($data['start']) && isset($data['limit'])) {
+        $sql .= " LIMIT " . (int)$data['start'] . ", " . (int)$data['limit'];
+    }
+
+    return $this->db->query($sql)->rows;
+}
+
+   public function getTotalSalesByNumber(array $data = []): int {
+
+    $where = " WHERE o.telephone IS NOT NULL AND o.telephone <> '' AND o.order_status_id IN (5,6,17) ";
+
+    if (!empty($data['filter_phone'])) {
+        $where .= " AND o.telephone LIKE '%" . $this->db->escape($data['filter_phone']) . "%' ";
+    }
+
+    if (!empty($data['filter_name'])) {
+        $name = $this->db->escape($data['filter_name']);
+        $where .= " AND (o.firstname LIKE '%$name%' OR o.lastname LIKE '%$name%') ";
+    }
+
+    $sql = "
+        SELECT COUNT(DISTINCT o.telephone) AS total
+        FROM `" . DB_PREFIX . "order` o
+        $where
+    ";
+
+    return (int)$this->db->query($sql)->row['total'];
+}
+
+    /* ================= CUSTOMER ORDER HISTORY ================= */
+    public function getCustomerOrderHistory(string $phone): array {
         $sql = "
-            SELECT COUNT(*) AS total
-            FROM (
-                SELECT
-                    DATE(o.date_added),
-                    o.sellerid
-                FROM `" . DB_PREFIX . "order` o
-                WHERE o.sellerid IS NOT NULL
-                GROUP BY DATE(o.date_added), o.sellerid
-            ) x
-        ";
+        SELECT
+            o.order_id,
+            DATE(o.date_added) AS order_date,
+            SUM(op.quantity) AS no_products,
+            COALESCE(inv.total_received, 0) AS s_total,
+            COALESCE(inv.cash_amount, 0) AS cash,
+            COALESCE(inv.upi_amount, 0) AS upi,
+            COALESCE(inv.advance_used, 0) AS advance,
+            COALESCE(inv.balance, 0) AS due
+        FROM `" . DB_PREFIX . "order` o
+        LEFT JOIN `" . DB_PREFIX . "order_product` op ON op.order_id = o.order_id
+        LEFT JOIN `" . DB_PREFIX . "order_invoice` inv ON inv.order_id = o.order_id
+        WHERE o.telephone = '" . $this->db->escape($phone) . "'
+        GROUP BY o.order_id
+        ORDER BY o.date_added ASC";
+
+        return $this->db->query($sql)->rows;
+    }
+
+    /* ================= SALES BY SELLER ================= */
+    public function getSellerSummary(array $data = []): array {
+        $inner_where = " WHERE o.order_status_id IN (5, 6,17) ";
+
+        if (!empty($data['filter_date_from'])) {
+            $inner_where .= " AND DATE(o.date_added) >= '" . $this->db->escape($data['filter_date_from']) . "'";
+        }
+        if (!empty($data['filter_date_to'])) {
+            $inner_where .= " AND DATE(o.date_added) <= '" . $this->db->escape($data['filter_date_to']) . "'";
+        }
+
+        $outer_where = " WHERE 1 ";
+
+        if (!empty($data['seller_id'])) {
+            $outer_where .= " AND seller_id = " . (int)$data['seller_id'];
+        }
+        if (!empty($data['seller_name'])) {
+            $outer_where .= " AND seller_name LIKE '%" . $this->db->escape($data['seller_name']) . "%'";
+        }
+
+        $sql = "
+        SELECT
+            seller_id,
+            seller_name,
+            seller_phone,
+            seller_email,
+            MAX(last_order_date)        AS last_order_date,
+            COUNT(DISTINCT order_id)    AS total_orders,
+            SUM(no_products)            AS total_products,
+            SUM(s_price)                AS sale_total,
+            SUM(s_tax)                  AS tax_total,
+            SUM(s_total)                AS grand_total,
+            SUM(discount)               AS discount_total,
+            SUM(s_total) - SUM(r_total) AS profit
+        FROM (
+            SELECT
+                c.customer_id                               AS seller_id,
+                CONCAT(c.firstname, ' ', c.lastname)        AS seller_name,
+                c.telephone                                 AS seller_phone,
+                c.email                                     AS seller_email,
+                DATE(o.date_added)                          AS last_order_date,
+                o.order_id                                  AS order_id,
+                o.order_status_id                           AS order_status_id,
+                SUM(op.quantity)                            AS no_products,
+                SUM(op.quantity * p.received_price + op.quantity * p.r_tax) AS r_total,
+                MAX(inv.sub_total) AS s_price,
+                CASE
+                    WHEN o.order_status_id = 6 THEN 0
+                    ELSE MAX(inv.total_tax)
+                END AS s_tax,
+                CASE
+                    WHEN o.order_status_id = 6 THEN MAX(inv.sub_total)
+                    ELSE MAX(inv.total_received)
+                END AS s_total,
+                MAX(inv.discount) AS discount
+            FROM `" . DB_PREFIX . "order` o
+            INNER JOIN `" . DB_PREFIX . "customer` c ON c.customer_id = o.customer_group_id
+            LEFT JOIN `" . DB_PREFIX . "order_product` op ON op.order_id = o.order_id
+            LEFT JOIN `" . DB_PREFIX . "product` p ON p.product_id = op.product_id
+            LEFT JOIN `" . DB_PREFIX . "order_invoice` inv ON inv.order_id = o.order_id
+            $inner_where
+            GROUP BY c.customer_id, c.firstname, c.lastname, c.telephone, c.email, o.order_id
+        ) t
+        $outer_where
+        GROUP BY seller_id, seller_name, seller_phone, seller_email
+        ORDER BY last_order_date DESC";
+
+        if (isset($data['start'], $data['limit'])) {
+            $sql .= " LIMIT " . (int)$data['start'] . ", " . (int)$data['limit'];
+        }
+
+        return $this->db->query($sql)->rows;
+    }
+
+    public function getTotalSellerSummary(array $data = []): int {
+        $inner_where = " WHERE o.order_status_id IN (5, 6,17) ";
+
+        if (!empty($data['filter_date_from'])) {
+            $inner_where .= " AND DATE(o.date_added) >= '" . $this->db->escape($data['filter_date_from']) . "'";
+        }
+        if (!empty($data['filter_date_to'])) {
+            $inner_where .= " AND DATE(o.date_added) <= '" . $this->db->escape($data['filter_date_to']) . "'";
+        }
+
+        $outer_where = " WHERE 1 ";
+
+        if (!empty($data['seller_id'])) {
+            $outer_where .= " AND seller_id = " . (int)$data['seller_id'];
+        }
+        if (!empty($data['seller_name'])) {
+            $outer_where .= " AND seller_name LIKE '%" . $this->db->escape($data['seller_name']) . "%'";
+        }
+
+        $sql = "
+        SELECT COUNT(*) AS total FROM (
+            SELECT c.customer_id AS seller_id, CONCAT(c.firstname, ' ', c.lastname) AS seller_name
+            FROM `" . DB_PREFIX . "order` o
+            INNER JOIN `" . DB_PREFIX . "customer` c ON c.customer_id = o.customer_group_id
+            $inner_where
+            GROUP BY c.customer_id
+        ) t
+        $outer_where";
 
         return (int)$this->db->query($sql)->row['total'];
     }
 
+    /* ================= SALES BY COUPON ================= */
     public function getSalesByCoupon(array $data = []): array {
-        $sql = "
-            SELECT
-                t.order_date,
 
-                c.telephone AS number,
-                CONCAT(
-                    COALESCE(c.firstname, ''),
-                    ' ',
-                    COALESCE(c.lastname, '')
-                ) AS name,
+    $where = " WHERE inv.coupon IS NOT NULL AND inv.coupon != '' 
+               AND o.order_status_id IN (5,6,17) ";
 
-                t.coupon,
-
-                COUNT(*) AS no_orders,
-                SUM(t.no_products) AS no_products,
-
-                SUM(t.r_price) AS r_price,
-                SUM(t.r_tax) AS r_tax,
-                SUM(t.r_total) AS r_total,
-
-                SUM(t.s_price) AS s_price,
-                SUM(t.s_tax) AS s_tax,
-                SUM(t.s_total) AS s_total,
-
-                SUM(t.discount) AS discount
-
-            FROM (
-                SELECT
-                    o.order_id,
-                    o.sellerid,
-                    DATE(o.date_added) AS order_date,
-
-                    inv.coupon,
-
-                    SUM(op.quantity) AS no_products,
-
-                    SUM(op.quantity * p.received_price) AS r_price,
-                    SUM(op.quantity * p.r_tax) AS r_tax,
-                    SUM(op.quantity * p.received_price + op.quantity * p.r_tax) AS r_total,
-
-                    inv.sub_total      AS s_price,
-                    inv.total_tax      AS s_tax,
-                    inv.total_received AS s_total,
-                    inv.discount       AS discount
-
-                FROM `" . DB_PREFIX . "order` o
-                LEFT JOIN `" . DB_PREFIX . "order_product` op ON op.order_id = o.order_id
-                LEFT JOIN `" . DB_PREFIX . "product` p ON p.product_id = op.product_id
-                LEFT JOIN `" . DB_PREFIX . "order_invoice` inv ON inv.order_id = o.order_id
-
-                WHERE inv.coupon IS NOT NULL
-                  AND inv.coupon != ''
-        ";
-
-        if (!empty($data['filter_date_from'])) {
-            $sql .= " AND DATE(o.date_added) >= '" . $this->db->escape($data['filter_date_from']) . "'";
-        }
-
-        if (!empty($data['filter_date_to'])) {
-            $sql .= " AND DATE(o.date_added) <= '" . $this->db->escape($data['filter_date_to']) . "'";
-        }
-
-        $sql .= "
-                GROUP BY o.order_id
-            ) t
-
-            LEFT JOIN `" . DB_PREFIX . "customer` c
-                ON c.customer_id = t.sellerid
-
-            GROUP BY t.order_date, t.coupon, t.sellerid
-            ORDER BY t.order_date DESC
-        ";
-
-        if (isset($data['start']) && isset($data['limit'])) {
-            $sql .= " LIMIT " . (int)$data['start'] . ", " . (int)$data['limit'];
-        }
-
-        return $this->db->query($sql)->rows;
+    if (!empty($data['filter_date_from'])) {
+        $where .= " AND DATE(o.date_added) >= '" . $this->db->escape($data['filter_date_from']) . "'";
     }
 
+    if (!empty($data['filter_date_to'])) {
+        $where .= " AND DATE(o.date_added) <= '" . $this->db->escape($data['filter_date_to']) . "'";
+    }
+
+    $sql = "
+    SELECT
+        DATE(o.date_added) AS order_date,
+        o.telephone AS number,
+        CONCAT(o.firstname, ' ', o.lastname) AS name,
+        inv.coupon AS coupon_code,
+
+        COUNT(DISTINCT o.order_id) AS no_orders,
+        SUM(op.quantity) AS no_products,
+
+        SUM(op.quantity * p.received_price) AS r_price,
+        SUM(op.quantity * p.r_tax) AS r_tax,
+        SUM(op.quantity * (p.received_price + p.r_tax)) AS r_total,
+
+        SUM(inv.sub_total) AS s_price,
+        SUM(inv.total_tax) AS s_tax,
+        SUM(inv.total_received) AS s_total,
+        SUM(inv.discount) AS discount
+
+    FROM `" . DB_PREFIX . "order` o
+
+    LEFT JOIN `" . DB_PREFIX . "order_invoice` inv ON inv.order_id = o.order_id
+    LEFT JOIN `" . DB_PREFIX . "order_product` op ON op.order_id = o.order_id
+    LEFT JOIN `" . DB_PREFIX . "product` p ON p.product_id = op.product_id
+
+    $where
+
+    GROUP BY order_date, number, coupon_code
+    ORDER BY order_date DESC
+    ";
+
+    if (isset($data['start'], $data['limit'])) {
+        $sql .= " LIMIT " . (int)$data['start'] . ", " . (int)$data['limit'];
+    }
+
+    return $this->db->query($sql)->rows;
+}
     public function getTotalSalesByCoupon(array $data = []): int {
-        $sql = "
-            SELECT COUNT(DISTINCT CONCAT(DATE(o.date_added), '-', inv.coupon, '-', o.sellerid)) AS total
-            FROM `" . DB_PREFIX . "order` o
-            LEFT JOIN `" . DB_PREFIX . "order_invoice` inv
-                ON inv.order_id = o.order_id
-            WHERE inv.coupon IS NOT NULL
-              AND inv.coupon != ''
-        ";
 
-        if (!empty($data['filter_date_from'])) {
-            $sql .= " AND DATE(o.date_added) >= '" . $this->db->escape($data['filter_date_from']) . "'";
-        }
+    $where = " WHERE inv.coupon IS NOT NULL AND inv.coupon != '' 
+               AND o.order_status_id IN (5,6,17) ";
 
-        if (!empty($data['filter_date_to'])) {
-            $sql .= " AND DATE(o.date_added) <= '" . $this->db->escape($data['filter_date_to']) . "'";
-        }
-
-        return (int)$this->db->query($sql)->row['total'];
+    if (!empty($data['filter_date_from'])) {
+        $where .= " AND DATE(o.date_added) >= '" . $this->db->escape($data['filter_date_from']) . "'";
     }
 
+    if (!empty($data['filter_date_to'])) {
+        $where .= " AND DATE(o.date_added) <= '" . $this->db->escape($data['filter_date_to']) . "'";
+    }
+
+    $sql = "
+    SELECT COUNT(*) AS total FROM (
+        SELECT DATE(o.date_added), o.telephone, inv.coupon
+        FROM `" . DB_PREFIX . "order` o
+        LEFT JOIN `" . DB_PREFIX . "order_invoice` inv ON inv.order_id = o.order_id
+        $where
+        GROUP BY DATE(o.date_added), o.telephone, inv.coupon
+    ) t";
+
+    return (int)$this->db->query($sql)->row['total'];
+}
+    /* ================= SALES BY TOTAL AMOUNT ================= */
     public function getSalesByTotalAmount(array $data = []): array {
-        $sql = "
-            SELECT
-                t.order_date,
-
-                COUNT(*) AS no_orders,
-                SUM(t.no_products) AS no_products,
-
-                SUM(t.r_price) AS r_price,
-                SUM(t.r_tax) AS r_tax,
-                SUM(t.r_total) AS r_total,
-
-                SUM(t.s_price) AS s_price,
-                SUM(t.s_tax) AS s_tax,
-                SUM(t.s_total) AS s_total,
-
-                SUM(t.discount) AS discount,
-                SUM(t.cash) AS cash,
-                SUM(t.upi) AS upi,
-                SUM(t.aa) AS aa
-
-            FROM (
-                SELECT
-                    o.order_id,
-                    DATE(o.date_added) AS order_date,
-
-                    SUM(op.quantity) AS no_products,
-
-                    SUM(op.quantity * p.received_price) AS r_price,
-                    SUM(op.quantity * p.r_tax) AS r_tax,
-                    SUM(op.quantity * p.received_price + op.quantity * p.r_tax) AS r_total,
-
-                    inv.sub_total      AS s_price,
-                    inv.total_tax      AS s_tax,
-                    inv.total_received AS s_total,
-
-                    inv.discount AS discount,
-                    inv.cash_amount AS cash,
-                    inv.upi_amount AS upi,
-                    inv.returnable_balance AS aa
-
-                FROM `" . DB_PREFIX . "order` o
-                LEFT JOIN `" . DB_PREFIX . "order_product` op ON op.order_id = o.order_id
-                LEFT JOIN `" . DB_PREFIX . "product` p ON p.product_id = op.product_id
-                LEFT JOIN `" . DB_PREFIX . "order_invoice` inv ON inv.order_id = o.order_id
-                WHERE 1
-        ";
+        $inner_where = " WHERE o.order_status_id IN (5, 6,17) ";
 
         if (!empty($data['filter_date_from'])) {
-            $sql .= " AND DATE(o.date_added) >= '" . $this->db->escape($data['filter_date_from']) . "'";
+            $inner_where .= " AND DATE(o.date_added) >= '" . $this->db->escape($data['filter_date_from']) . "'";
         }
-
         if (!empty($data['filter_date_to'])) {
-            $sql .= " AND DATE(o.date_added) <= '" . $this->db->escape($data['filter_date_to']) . "'";
+            $inner_where .= " AND DATE(o.date_added) <= '" . $this->db->escape($data['filter_date_to']) . "'";
         }
 
-        $sql .= "
-                GROUP BY o.order_id
-            ) t
-            GROUP BY t.order_date
-            ORDER BY t.order_date DESC
-        ";
+        $sql = "
+        SELECT
+            order_date,
+            COUNT(*) AS no_orders,
+            SUM(no_products) AS no_products,
+            SUM(r_price) AS r_price,
+            SUM(r_tax) AS r_tax,
+            SUM(r_total) AS r_total,
+            SUM(s_price) AS s_price,
+            SUM(s_tax) AS s_tax,
+            SUM(s_total) AS s_total,
+            SUM(discount) AS discount,
+            SUM(coupon)      AS coupon,
+            SUM(cash) AS cash,
+            SUM(upi) AS upi,
+            SUM(due) AS due,
+            SUM(advance) AS advance
+        FROM (
+            SELECT
+                DATE(o.date_added) AS order_date,
+                o.order_id,
+                o.order_status_id,
+                SUM(op.quantity) AS no_products,
+                SUM(op.quantity * p.received_price) AS r_price,
+                SUM(op.quantity * p.r_tax) AS r_tax,
+                SUM(op.quantity * p.received_price + op.quantity * p.r_tax) AS r_total,
 
-        if (isset($data['start']) && isset($data['limit'])) {
+                MAX(inv.sub_total) AS s_price,
+
+                CASE
+                    WHEN o.order_status_id = 6 THEN 0
+                    ELSE MAX(inv.total_tax)
+                END AS s_tax,
+
+                CASE
+                    WHEN o.order_status_id = 6 THEN MAX(inv.sub_total)
+                    ELSE MAX(inv.total_received)
+                END AS s_total,
+
+                MAX(inv.discount) AS discount,
+                  /* coupon amount extraction */
+                MAX(
+                    CASE 
+                        WHEN inv.coupon IS NOT NULL AND inv.coupon != ''
+                        THEN CAST(SUBSTRING_INDEX(inv.coupon, '-', -1) AS DECIMAL(10,2))
+                        ELSE 0
+                    END
+                ) AS coupon,
+
+
+                CASE
+                    WHEN o.order_status_id = 6 THEN MAX(inv.sub_total)
+                    ELSE GREATEST(
+                        MAX(inv.cash_amount) -
+                        IF(MAX(inv.cash_amount) > 0, IFNULL(MAX(inv.returnable_balance), 0), 0),
+                    0)
+                END AS cash,
+
+                CASE
+                    WHEN o.order_status_id = 6 THEN 0
+                    ELSE GREATEST(
+                        MAX(inv.upi_amount) -
+                        IF(MAX(inv.upi_amount) > 0, IFNULL(MAX(inv.returnable_balance), 0), 0),
+                    0)
+                END AS upi,
+
+                CASE
+                    WHEN o.order_status_id = 6 THEN 0
+                    ELSE MAX(inv.advance_used)
+                END AS advance,
+
+                CASE
+                    WHEN o.order_status_id = 6 THEN 0
+                    ELSE MAX(inv.balance)
+                END AS due
+
+            FROM `" . DB_PREFIX . "order` o
+            LEFT JOIN `" . DB_PREFIX . "order_product` op ON op.order_id = o.order_id
+            LEFT JOIN `" . DB_PREFIX . "product` p ON p.product_id = op.product_id
+            LEFT JOIN `" . DB_PREFIX . "order_invoice` inv ON inv.order_id = o.order_id
+            $inner_where
+            GROUP BY o.order_id
+        ) t
+        GROUP BY order_date
+        ORDER BY order_date DESC";
+
+        if (isset($data['start'], $data['limit'])) {
             $sql .= " LIMIT " . (int)$data['start'] . ", " . (int)$data['limit'];
         }
 
@@ -514,20 +679,144 @@ class Sale extends \Opencart\System\Engine\Model {
     }
 
     public function getTotalSalesByTotalAmount(array $data = []): int {
-        $sql = "
-            SELECT COUNT(DISTINCT DATE(o.date_added)) AS total
-            FROM `" . DB_PREFIX . "order` o
-            WHERE 1
-        ";
+        $where = " WHERE o.order_status_id IN (5, 6,17) ";
 
         if (!empty($data['filter_date_from'])) {
-            $sql .= " AND DATE(o.date_added) >= '" . $this->db->escape($data['filter_date_from']) . "'";
+            $where .= " AND DATE(o.date_added) >= '" . $this->db->escape($data['filter_date_from']) . "'";
         }
-
         if (!empty($data['filter_date_to'])) {
-            $sql .= " AND DATE(o.date_added) <= '" . $this->db->escape($data['filter_date_to']) . "'";
+            $where .= " AND DATE(o.date_added) <= '" . $this->db->escape($data['filter_date_to']) . "'";
         }
 
-        return (int)$this->db->query($sql)->row['total'];
+        return (int)$this->db->query(
+            "SELECT COUNT(DISTINCT DATE(o.date_added)) AS total
+             FROM `" . DB_PREFIX . "order` o $where"
+        )->row['total'];
+    }
+    public function getTodaySalesTotal(): array {
+
+    $sql = "
+    SELECT
+        order_date,
+        COUNT(*) AS no_orders,
+        SUM(no_products) AS no_products,
+        SUM(r_price) AS r_price,
+        SUM(r_tax) AS r_tax,
+        SUM(r_total) AS r_total,
+        SUM(s_price) AS s_price,
+        SUM(s_tax) AS s_tax,
+        SUM(s_total) AS s_total,
+        SUM(discount) AS discount,
+        SUM(coupon) AS coupon,
+        SUM(cash) AS cash,
+        SUM(upi) AS upi,
+        SUM(due) AS due,
+        SUM(advance) AS advance
+    FROM (
+        SELECT
+            DATE(o.date_added) AS order_date,
+            o.order_id,
+            o.order_status_id,
+            SUM(op.quantity) AS no_products,
+
+            SUM(op.quantity * p.received_price) AS r_price,
+            SUM(op.quantity * p.r_tax) AS r_tax,
+            SUM(op.quantity * p.received_price + op.quantity * p.r_tax) AS r_total,
+
+            MAX(inv.sub_total) AS s_price,
+
+            CASE
+                WHEN o.order_status_id = 6 THEN 0
+                ELSE MAX(inv.total_tax)
+            END AS s_tax,
+
+            CASE
+                WHEN o.order_status_id = 6 THEN MAX(inv.sub_total)
+                ELSE MAX(inv.total_received)
+            END AS s_total,
+
+            MAX(inv.discount) AS discount,
+
+            MAX(
+                CASE 
+                    WHEN inv.coupon IS NOT NULL AND inv.coupon != ''
+                    THEN CAST(SUBSTRING_INDEX(inv.coupon, '-', -1) AS DECIMAL(10,2))
+                    ELSE 0
+                END
+            ) AS coupon,
+
+            CASE
+                WHEN o.order_status_id = 6 THEN MAX(inv.sub_total)
+                ELSE GREATEST(
+                    MAX(inv.cash_amount) -
+                    IF(MAX(inv.cash_amount) > 0, IFNULL(MAX(inv.returnable_balance), 0), 0),
+                0)
+            END AS cash,
+
+            CASE
+                WHEN o.order_status_id = 6 THEN 0
+                ELSE GREATEST(
+                    MAX(inv.upi_amount) -
+                    IF(MAX(inv.upi_amount) > 0, IFNULL(MAX(inv.returnable_balance), 0), 0),
+                0)
+            END AS upi,
+
+            CASE
+                WHEN o.order_status_id = 6 THEN 0
+                ELSE MAX(inv.advance_used)
+            END AS advance,
+
+            CASE
+                WHEN o.order_status_id = 6 THEN 0
+                ELSE MAX(inv.balance)
+            END AS due
+
+        FROM `" . DB_PREFIX . "order` o
+        LEFT JOIN `" . DB_PREFIX . "order_product` op ON op.order_id = o.order_id
+        LEFT JOIN `" . DB_PREFIX . "product` p ON p.product_id = op.product_id
+        LEFT JOIN `" . DB_PREFIX . "order_invoice` inv ON inv.order_id = o.order_id
+
+        WHERE o.order_status_id IN (5, 6,17)
+        AND DATE(o.date_added) = CURDATE()
+
+        GROUP BY o.order_id
+    ) t
+    GROUP BY order_date";
+
+    return $this->db->query($sql)->row; // single row (today only)
+}
+public function getTotalTodaySalesTotal(): int {
+
+    $sql = "
+    SELECT COUNT(DISTINCT DATE(o.date_added)) AS total
+    FROM `" . DB_PREFIX . "order` o
+    WHERE o.order_status_id IN (5, 6,17)
+    AND DATE(o.date_added) = CURDATE()
+    ";
+
+    return (int)$this->db->query($sql)->row['total']; 
+}
+    /* ================= INVOICE DATA ================= */
+    public function getInvoiceData(int $order_id): array {
+        $result = $this->db->query(
+            "SELECT * FROM `" . DB_PREFIX . "order_invoice` WHERE order_id = " . (int)$order_id
+        )->row;
+        return $result ? $result : [];
+    }
+
+    /* ================= GST SALES BY TOTAL ================= */
+    public function getSalesByTotalForGST(string $from, string $to): array {
+        $sql = "
+        SELECT
+            DATE(o.date_added) AS date,
+            SUM(inv.total_received) AS s_total
+        FROM `" . DB_PREFIX . "order` o
+        LEFT JOIN `" . DB_PREFIX . "order_invoice` inv ON inv.order_id = o.order_id
+        WHERE DATE(o.date_added) BETWEEN '" . $this->db->escape($from) . "'
+          AND '" . $this->db->escape($to) . "'
+        GROUP BY DATE(o.date_added)
+        ORDER BY DATE(o.date_added) ASC";
+
+        return $this->db->query($sql)->rows;
     }
 }

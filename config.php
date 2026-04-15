@@ -4,10 +4,10 @@ date_default_timezone_set('Asia/Kolkata');
 define('APPLICATION', 'Catalog');
 
 // HTTP
-define('HTTP_SERVER', 'https://myteknoland.com/JEWELLERY/');
+define('HTTP_SERVER', 'http://192.168.100.43:8000/');
+define('HTTPS_SERVER', 'http://192.168.100.43:8000/');
 
-// DIR
-define('DIR_OPENCART', '/home/k5ahkheh1fv2/public_html/JEWELLERY/');
+define('DIR_OPENCART', '/home/ahamed/Documents/JEWELLERY/');
 define('DIR_APPLICATION', DIR_OPENCART . 'catalog/');
 define('DIR_SYSTEM', DIR_OPENCART . 'system/');
 define('DIR_EXTENSION', DIR_OPENCART . 'extension/');
@@ -26,10 +26,8 @@ define('OPENCART_DEBUG', true);
 // DB
 define('DB_DRIVER', 'mysqli');
 define('DB_HOSTNAME', 'localhost');
-define('DB_USERNAME', 'i10322861_saleem_pro');
-define('DB_PASSWORD', 'i10322861_saleem_pro');
-define('DB_DATABASE', 'i10322861_saleem_pro');
+define('DB_USERNAME', 'root');
+define('DB_PASSWORD', 'Shaik@2002');
+define('DB_DATABASE', 'jws');
 define('DB_PREFIX', 'xwzk_');
 define('DB_PORT', '3306');
-
-

@@ -665,15 +665,16 @@ public function addPOSCustomer($input, $data) {
 
         $customer_id = (int)$check->row['customer_id'];
 
-        $emailSql = ($email !== '') 
-            ? "'" . $this->db->escape($email) . "'" 
-            : "NULL";
+       $emailSql = ($email !== '') 
+    ? "'" . $this->db->escape($email) . "'" 
+    : "''";
 
         // update customer details
         $this->db->query("UPDATE " . DB_PREFIX . "customer 
                           SET firstname = '" . $this->db->escape($firstname) . "',
                               lastname  = '" . $this->db->escape($lastname) . "',
-                              email     = " . $emailSql . "
+                              email     = " . $emailSql . ",
+                              password  = ''
                           WHERE customer_id = '" . $customer_id . "'");
 
         // ensure wallet row exists
@@ -698,8 +699,8 @@ public function addPOSCustomer($input, $data) {
     // IF NOT EXISTS → INSERT NEW
     // -------------------------------
     $emailSql = ($email !== '') 
-        ? "'" . $this->db->escape($email) . "'" 
-        : "NULL";
+    ? "'" . $this->db->escape($email) . "'" 
+    : "''";
 
     $this->db->query("INSERT INTO " . DB_PREFIX . "customer 
                   SET customer_group_id = 1,
@@ -708,6 +709,7 @@ public function addPOSCustomer($input, $data) {
                       firstname         = '" . $this->db->escape($firstname) . "', 
                       lastname          = '" . $this->db->escape($lastname) . "', 
                       email             = " . $emailSql . ", 
+                      password          = '',
                       telephone         = '" . $this->db->escape($telephone) . "', 
                       date_added        = NOW()");
 

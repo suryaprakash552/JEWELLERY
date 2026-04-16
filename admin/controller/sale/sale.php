@@ -42,13 +42,13 @@ class Sale extends \Opencart\System\Engine\Controller {
             $this->load->model('sale/sale');
             $page = $this->page();
             $limit = $this->limit();
-
-            $filter = [
-                'filter_date_added' => $this->request->get['filter_date_added'] ?? '',
-                'filter_date_modified' => $this->request->get['filter_date_modified'] ?? '',
-                'start' => ($page - 1) * $limit,
-                'limit' => $limit
-            ];
+$filter = [
+    'filter_date_added' => $this->request->get['filter_date_added'] ?? '',
+    'filter_date_modified' => $this->request->get['filter_date_modified'] ?? '',
+    'filter_order_id' => $this->request->get['filter_order_id'] ?? '', // ✅ ADD THIS
+    'start' => ($page - 1) * $limit,
+    'limit' => $limit
+];
 
             $results = $this->model_sale_sale->getOrders($filter);
             $total = $this->model_sale_sale->getTotalOrders($filter);
@@ -74,6 +74,7 @@ $profit = $s_total - $r_total;
                     'upi' => number_format($r['upi'] ?? 0, 2),
                     'advance' => number_format($r['advance'] ?? 0, 2),
                     'balance' => number_format($r['balance'] ?? 0, 2),
+                    'coupon' => number_format($r['coupon'] ?? 0, 2),
                     'discount' => number_format($r['discount'] ?? 0, 2),
                     'seller_id' => $r['seller_id'] ?? '',
                     'profit' => number_format($profit, 2)
@@ -93,8 +94,15 @@ $profit = $s_total - $r_total;
             $page = $this->page();
             $limit = $this->limit();
 
-            $results = $this->model_sale_sale->getDailyOrderSummary(['start' => ($page - 1) * $limit, 'limit' => $limit]);
-            $total = $this->model_sale_sale->getTotalOrderDays();
+            $filter = [
+    'filter_date_added'    => $this->request->get['filter_date_from'] ?? '',
+    'filter_date_modified' => $this->request->get['filter_date_to'] ?? '',
+    'start' => ($page - 1) * $limit,
+    'limit' => $limit
+];
+
+$results = $this->model_sale_sale->getDailyOrderSummary($filter);
+$total   = $this->model_sale_sale->getTotalOrderDays($filter);
             $rows = [];
             $sr = 1 + (($page - 1) * $limit);
 
@@ -144,8 +152,15 @@ $profit = $s_total - $r_total;
             $page = $this->page();
             $limit = $this->limit();
 
-            $results = $this->model_sale_sale->getDailyProductReport(['start' => ($page - 1) * $limit, 'limit' => $limit]);
-            $total = $this->model_sale_sale->getTotalDays();
+         $filter = [
+    'filter_date_added'    => $this->request->get['filter_date_from'] ?? '',
+    'filter_date_modified' => $this->request->get['filter_date_to'] ?? '',
+    'start' => ($page - 1) * $limit,
+    'limit' => $limit
+];
+
+$results = $this->model_sale_sale->getDailyProductReport($filter);
+$total   = $this->model_sale_sale->getTotalDays($filter);
             $rows = [];
             $sr = 1 + (($page - 1) * $limit);
 
@@ -188,93 +203,148 @@ $profit = $s_total - $r_total;
         }
     }
 
-   public function getSalesByNumberData(): void {
+public function getSalesByNumberData(): void {
     try {
         $this->guard();
         $this->load->model('sale/sale');
 
         $page  = isset($this->request->get['page']) ? (int)$this->request->get['page'] : 1;
-        $limit = 20; // ✅ Always 20 per page
+        $limit = 20;
 
         $filter_phone = $this->request->get['filter_phone'] ?? '';
+        $filter_name  = $this->request->get['filter_name'] ?? '';
 
         $filter_data = [
             'start'        => ($page - 1) * $limit,
             'limit'        => $limit,
-            'filter_phone' => $filter_phone
+            'filter_phone' => $filter_phone,
+            'filter_name'  => $filter_name
         ];
 
         $results = $this->model_sale_sale->getSalesByNumber($filter_data);
         $total   = $this->model_sale_sale->getTotalSalesByNumber($filter_data);
-            $rows = [];
-            $sr = 1 + (($page - 1) * $limit);
 
-            foreach ($results as $r) {
-                $profit = ($r['s_total'] ?? 0) - ($r['r_total'] ?? 0);
-                $rows[] = [
-                    'srno' => $sr++,
-                    'date' => $r['order_date'] ?? '',
-                    'number' => $r['number'] ?? '',
-                    'name' => $r['name'] ?? '',
-                    'no_orders' => $r['no_orders'] ?? 0,
-                    'no_products' => $r['no_products'] ?? 0,
-                    'r_price' => number_format($r['r_price'] ?? 0, 2),
-                    'r_tax' => number_format($r['r_tax'] ?? 0, 2),
-                    'r_total' => number_format($r['r_total'] ?? 0, 2),
-                    's_price' => number_format($r['s_price'] ?? 0, 2),
-                    's_tax' => number_format($r['s_tax'] ?? 0, 2),
-                    's_total' => number_format($r['s_total'] ?? 0, 2),
-                    'cash'   => number_format($r['cash'] ?? 0, 2),
-    'upi'    => number_format($r['upi'] ?? 0, 2),
-    'due'    => number_format($r['due'] ?? 0, 2),
-    'advance' => number_format($r['advance'] ?? 0, 2),
-                    'profit' => number_format($profit, 2)
-                ];
-            }
+        $rows = [];
+        $sr = 1 + (($page - 1) * $limit);
 
-            $this->json(['status' => true, 'rows' => $rows, 'total' => $total, 'page' => $page, 'limit' => $limit]);
-        } catch (\Throwable $e) {
-            $this->json(['status' => false, 'error' => $e->getMessage()]);
+        foreach ($results as $r) {
+
+            $s_price = $r['s_price'] ?? 0;
+            $s_tax   = $r['s_tax'] ?? 0;
+            $r_total = $r['r_total'] ?? 0;
+
+            
+            $s_total = $s_price;
+
+            
+            $profit = $s_total - $r_total;
+
+            $rows[] = [
+                'srno' => $sr++,
+                'date' => $r['order_date'] ?? '',
+                'number' => $r['number'] ?? '',
+                'name' => $r['name'] ?? '',
+                'no_orders' => $r['no_orders'] ?? 0,
+                'no_products' => $r['no_products'] ?? 0,
+
+                'r_price' => number_format($r['r_price'] ?? 0, 2),
+                'r_tax'   => number_format($r['r_tax'] ?? 0, 2),
+                'r_total' => number_format($r_total, 2),
+
+                's_price' => number_format($s_price, 2),
+                's_tax'   => number_format($s_tax, 2),
+
+             
+                's_total' => number_format($s_total, 2),
+
+               
+                'discount' => number_format($r['discount'] ?? 0, 2),
+
+                'cash' => number_format($r['cash'] ?? 0, 2),
+                'upi'  => number_format($r['upi'] ?? 0, 2),
+                'due'  => number_format($r['due'] ?? 0, 2),
+                'coupon' => number_format($r['coupon'] ?? 0, 2),
+
+                'advance' => number_format($r['advance'] ?? 0, 2),
+
+                'profit' => number_format($profit, 2)
+            ];
         }
+
+        $this->json([
+            'status' => true,
+            'rows' => $rows,
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit
+        ]);
+
+    } catch (\Throwable $e) {
+        $this->json([
+            'status' => false,
+            'error' => $e->getMessage()
+        ]);
     }
+}
 
 public function getCustomerOrderHistory(): void {
 
-    $this->load->model('sale/sale');
+    try {
+        $this->guard();
+        $this->load->model('sale/sale');
 
-    $phone = $this->request->get['phone'] ?? '';
+        $phone = $this->request->get['phone'] ?? '';
 
-    if (!$phone) {
+        if (!$phone) {
+            $this->response->addHeader('Content-Type: application/json');
+            $this->response->setOutput(json_encode([
+                'status' => false,
+                'rows' => []
+            ]));
+            return;
+        }
+
+        $results = $this->model_sale_sale->getCustomerOrderHistory($phone);
+
+        $rows = [];
+
+        foreach ($results as $index => $r) {
+
+            $s_price = $r['s_price'] ?? 0;
+            $s_tax   = $r['s_tax'] ?? 0;
+
+            
+            $s_total = $s_price;
+
+            $rows[] = [
+                'srno'        => $index + 1,
+                'date'        => $r['order_date'] ?? '',
+                'order_id'    => $r['order_id'] ?? 0,
+                'no_products' => $r['no_products'] ?? 0,
+
+                's_total'     => number_format($s_total, 2),
+
+                'cash'        => number_format($r['cash'] ?? 0, 2),
+                'upi'         => number_format($r['upi'] ?? 0, 2),
+                'advance'     => number_format($r['advance'] ?? 0, 2),
+                'due'         => number_format($r['due'] ?? 0, 2),
+                 'coupon'      => number_format($r['coupon'] ?? 0, 2),
+            ];
+        }
+
+        $this->response->addHeader('Content-Type: application/json');
+        $this->response->setOutput(json_encode([
+            'status' => true,
+            'rows' => $rows
+        ]));
+
+    } catch (\Throwable $e) {
+        $this->response->addHeader('Content-Type: application/json');
         $this->response->setOutput(json_encode([
             'status' => false,
-            'rows' => []
+            'error' => $e->getMessage()
         ]));
-        return;
     }
-
-    $results = $this->model_sale_sale->getCustomerOrderHistory($phone);
-
-    $rows = [];
-
-    foreach ($results as $index => $r) {
-        $rows[] = [
-            'srno'        => $index + 1,
-            'date'        => $r['order_date'],
-            'order_id'    => $r['order_id'],
-            'no_products' => $r['no_products'],
-            's_total'     => number_format($r['s_total'], 2),
-            'cash'        => number_format($r['cash'], 2),
-            'upi'         => number_format($r['upi'], 2),
-            'advance'     => number_format($r['advance'], 2),
-            'due'         => number_format($r['due'], 2),
-        ];
-    }
-
-    $this->response->addHeader('Content-Type: application/json');
-    $this->response->setOutput(json_encode([
-        'status' => true,
-        'rows' => $rows
-    ]));
 }
     public function getSalesBySellerData(): void {
         try {
@@ -283,8 +353,17 @@ public function getCustomerOrderHistory(): void {
             $page = $this->page();
             $limit = $this->limit();
 
-            $results = $this->model_sale_sale->getSellerSummary(['start' => ($page - 1) * $limit, 'limit' => $limit]);
-            $total = $this->model_sale_sale->getTotalSellers();
+           $filter = [
+    'filter_seller_id' => $this->request->get['filter_seller_id'] ?? '',
+    'filter_seller_name' => $this->request->get['filter_seller_name'] ?? '',
+    'filter_date_added' => $this->request->get['filter_date_from_seller'] ?? '',
+    'filter_date_modified' => $this->request->get['filter_date_to_seller'] ?? '',
+    'start' => ($page - 1) * $limit,
+    'limit' => $limit
+];
+
+$results = $this->model_sale_sale->getSellerSummary($filter);
+$total   = $this->model_sale_sale->getTotalSellers($filter);
             $rows = [];
             $sr = 1 + (($page - 1) * $limit);
 
@@ -317,8 +396,17 @@ public function getCustomerOrderHistory(): void {
             $page = $this->page();
             $limit = $this->limit();
 
-            $results = $this->model_sale_sale->getCouponSummary(['start' => ($page - 1) * $limit, 'limit' => $limit]);
-            $total = $this->model_sale_sale->getTotalCoupons();
+            $filter = [
+    'filter_date_from' => $this->request->get['filter_coupon_from'] ?? '',
+    'filter_date_to'   => $this->request->get['filter_coupon_to'] ?? '',
+    'filter_phone'     => $this->request->get['filter_coupon_phone'] ?? '',
+    'filter_name'      => $this->request->get['filter_coupon_name'] ?? '',
+    'start'            => ($page - 1) * $limit,
+    'limit'            => $limit
+]; 
+
+        $results = $this->model_sale_sale->getCouponSummary($filter);
+        $total   = $this->model_sale_sale->getTotalCoupons($filter);
             $rows = [];
             $sr = 1 + (($page - 1) * $limit);
 
@@ -419,6 +507,7 @@ public function getCustomerOrderHistory(): void {
         'cash' => number_format($r['cash'] ?? 0, 2),
         'upi'  => number_format($r['upi'] ?? 0, 2),
 'due'    => number_format($r['due'] ?? 0, 2),
+'coupon' => number_format($r['coupon'] ?? 0, 2),
         // advance used
         'advance'   => number_format($r['advance'] ?? 0, 2),
 
@@ -435,7 +524,7 @@ public function getCustomerOrderHistory(): void {
         $this->load->language('sale/sale');
         $this->document->setTitle('Invoice');
 
-        $order_id = (int)($this->request->get['order_id'] ?? 0);
+        $order_id = (int)($this->request->get['order_id'] ?? 0); 
         if (!$order_id) die('Order ID missing');
 
         $this->load->model('sale/order');
@@ -601,6 +690,133 @@ public function getSalesByTotalForGST(): void {
         'rows'   => $rows
     ]));
 }
+public function updateDueAmount(): void {
+
+    ob_clean();
+    $this->response->addHeader('Content-Type: application/json');
+
+    try {
+        $this->load->model('sale/sale');
+
+        $order_id     = (int)($this->request->post['order_id'] ?? 0);
+        $amount       = (float)($this->request->post['amount'] ?? 0);
+        $payment_type = $this->request->post['payment_type'] ?? 'cash';
+
+       
+        if ($order_id <= 0) {
+            $this->response->setOutput(json_encode([
+                'status' => false,
+                'error'  => 'Invalid Order ID'
+            ]));
+            return;
+        }
+
+        if ($amount <= 0) {
+            $this->response->setOutput(json_encode([
+                'status' => false,
+                'error'  => 'Invalid Amount'
+            ]));
+            return;
+        }
+
+        
+        if (!in_array($payment_type, ['cash', 'upi'])) {
+            $payment_type = 'cash';
+        }
+
+        
+        $query = $this->db->query("
+            SELECT customer_id 
+            FROM `" . DB_PREFIX . "order`
+            WHERE order_id = '" . (int)$order_id . "'
+        ");
+
+        if (!$query->num_rows) {
+            $this->response->setOutput(json_encode([
+                'status' => false,
+                'error'  => 'Order not found'
+            ]));
+            return;
+        }
+
+        $customer_id = (int)$query->row['customer_id'];
+
+        
+        $result = $this->model_sale_sale->updateDueAmount(
+            $order_id,
+            $customer_id,
+            $amount,
+            $payment_type
+        );
+
+        
+        if (!$result || !$result['status']) {
+            $this->response->setOutput(json_encode([
+                'status' => false,
+                'error'  => $result['message'] ?? 'Payment failed'
+            ]));
+            return;
+        }
+
+        //  SUCCESS RESPONSE
+        $this->response->setOutput(json_encode([
+            'status'  => true,
+            'message' => 'Payment Updated Successfully'
+        ]));
+
+    } catch (\Exception $e) {
+        $this->response->setOutput(json_encode([
+            'status' => false,
+            'error'  => $e->getMessage()
+        ]));
+    }
+}
+public function getWalletBalance(): void {
+    ob_clean();
+    $this->response->addHeader('Content-Type: application/json');
+
+    $order_id = (int)($this->request->get['order_id'] ?? 0);
+
+    if (!$order_id) {
+        $this->response->setOutput(json_encode([
+            'status' => false,
+            'error'  => 'Invalid order'
+        ]));
+        return;
+    }
+
+    // Step 1: Get customer_id from order
+    $order = $this->db->query("
+        SELECT customer_id 
+        FROM `" . DB_PREFIX . "order`
+        WHERE order_id = '" . $order_id . "'
+        LIMIT 1
+    ");
+
+    if (!$order->num_rows) {
+        $this->response->setOutput(json_encode([
+            'status' => false,
+            'error'  => 'Order not found'
+        ]));
+        return;
+    }
+
+    $customer_id = (int)$order->row['customer_id'];
+
+    // Step 2: Get aeps_amount from manage_wallet
+    $wallet = $this->db->query("
+        SELECT aeps_amount 
+        FROM `" . DB_PREFIX . "manage_wallet`
+        WHERE customerid = '" . $customer_id . "'
+        LIMIT 1
+    ");
+
+    $this->response->setOutput(json_encode([
+        'status'      => true,
+        'aeps_amount' => $wallet->num_rows ? (float)$wallet->row['aeps_amount'] : 0.00
+    ]));
+}
+
 
 
 

@@ -305,6 +305,75 @@
     margin-top: 0 !important;
     padding-top: 0 !important;
 }
+<style>
+/* Modal look */
+#taxModal .modal-content {
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 20px 40px rgba(0,0,0,.15);
+}
+
+/* Header */
+#taxModal .modal-header {
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+#taxModal .modal-title {
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Section titles */
+.section-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #374151;
+  border-left: 4px solid #0d6efd;
+  padding-left: 10px;
+  margin-bottom: 10px;
+}
+
+/* Inputs */
+#taxModal .form-control {
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+#taxModal .form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 .15rem rgba(13,110,253,.15);
+}
+
+/* Divider */
+.section-divider {
+  border-top: 1px dashed #e5e7eb;
+  margin: 20px 0;
+}
+
+/* Footer button */
+#taxModal .modal-footer {
+  border-top: 1px solid #e5e7eb;
+}
+
+#taxModal .btn-success {
+  font-weight: 600;
+  padding: 12px;
+  font-size: 15px;
+}
+.totals-row td {
+    background: #1a2a1a !important;
+    color: #4ade80 !important;
+    font-weight: 700 !important;
+    border-top: 2px solid #4ade80 !important;
+    font-size: 13px !important;
+}
+.totals-row td:first-child {
+    color: #4ade80 !important;
+    letter-spacing: 0.5px;
+}
+</style>
+
 </style>
 
 <div id="content">
@@ -317,11 +386,8 @@
             <button class="sales-tab-btn" data-tab="salesbyseller">Sales by Seller</button>
             <button class="sales-tab-btn" data-tab="salesbytotal">Sales by Total Amount</button>
             <button class="sales-tab-btn" data-tab="salesbycoupon">Sales by Coupon</button>
-            {#<a type="button" id="button-export" class="btn btn-warning" style="width:38px; height:38px; padding:6px 0; text-align:center; border-radius:4px;">#}
-            {#    <i class="fa fa-download"></i>#}
-            {#</a>#}
         </div>
-        <h1>Retail Reports</h1>
+        <h1>Retail Reports</h1>  
     </div>
 
     <div class="container-fluid">
@@ -342,27 +408,150 @@
                             <input type="date" name="filter_date_modified" class="form-control">
                         </div>
                     </div>
+                    <div class="filter-item">
+    <label class="filter-label">Order ID</label>
+    <div class="input-group input-group-sm date">
+        <input type="text"
+               name="filter_order_id"
+               placeholder="Enter Order ID"
+               class="form-control">
+    </div>
+</div>
+
+<div class="filter-btn d-flex gap-2">
+    <label class="filter-label">&nbsp;</label>
+
+    <button type="button" id="button-search-order" class="btn btn-primary btn-sm" style="height:35px;">
+        <i class="fa fa-search"></i> Search Order
+    </button>
+</div>
 
                     <div class="filter-btn d-flex gap-2">
-                    <label class="filter-label">&nbsp;</label>
-                
-                    <button type="button" id="button-filter-price" class="btn btn-info btn-sm">
-                        <i class="fa fa-filter"></i> Filter
-                    </button>
-                
-                    <!-- 🔴 CLEAR BUTTON -->
-                    <button type="button" id="button-clear-price" class="btn btn-danger btn-sm">
-                        <i class="fa fa-times"></i> Clear
-                    </button>
-                
-                    <button type="button" id="button-download-price" class="btn btn-success btn-sm">
-                        <i class="fa fa-download"></i> Download
-                    </button>
-                </div>
+    <label class="filter-label">&nbsp;</label>
+
+    <button type="button" id="button-filter-price" class="btn btn-info btn-sm">
+        <i class="fa fa-filter"></i> Filter
+    </button>
+
+    <!-- ðŸ”´ CLEAR BUTTON -->
+    <button type="button" id="button-clear-price" class="btn btn-danger btn-sm">
+        <i class="fa fa-times"></i> Clear
+    </button>
+
+    <button type="button" id="button-download-price" class="btn btn-success btn-sm">
+        <i class="fa fa-download"></i> Download
+    </button>
+</div>
+
+<div class="modal fade" id="taxModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Tax Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+     <div class="modal-body">
+
+  <!-- ORDER + TAX (TOP ROW) -->
+  <div class="row g-3">
+    <div class="col-md-4">
+      <label class="form-label">Order ID</label>
+      <input type="text" id="orderId" class="form-control">
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">GST %</label>
+      <input type="number" id="gstPercent" class="form-control" value="3">
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Tax %</label>
+      <input type="number" id="taxPercent" class="form-control" value="0">
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+
+  <!-- RECEIVER & CONSIGNEE SIDE BY SIDE -->
+  <div class="row g-3">
+
+    <!-- RECEIVER -->
+    <div class="col-md-6">
+     <h6 class="section-title">Receiver (Billed To)</h6>
+
+
+      <input class="form-control mb-2" id="r_name" placeholder="Name">
+      <textarea class="form-control mb-2" id="r_address" placeholder="Address"></textarea>
+
+      <div class="row g-2">
+        <div class="col-md-6">
+          <input class="form-control" id="r_state" placeholder="State">
+        </div>
+        <div class="col-md-6">
+          <input class="form-control" id="r_mobile" placeholder="Mobile">
+        </div>
+      </div>
+
+      <div class="row g-2 mt-2">
+        <div class="col-md-6">
+          <input class="form-control" id="r_gstin" placeholder="GSTIN">
+        </div>
+        <div class="col-md-6">
+          <input class="form-control" id="r_pan" placeholder="PAN">
+        </div>
+      </div>
+    </div>
+
+    <!-- CONSIGNEE -->
+    <div class="col-md-6">
+     <h6 class="section-title">Consignee (Shipped To)</h6>
+
+
+      <input class="form-control mb-2" id="c_name" placeholder="Name">
+      <textarea class="form-control mb-2" id="c_address" placeholder="Address"></textarea>
+
+      <div class="row g-2">
+        <div class="col-md-6">
+          <input class="form-control" id="c_state" placeholder="State">
+        </div>
+        <div class="col-md-6">
+          <input class="form-control" id="c_mobile" placeholder="Mobile">
+        </div>
+      </div>
+
+      <div class="row g-2 mt-2">
+        <div class="col-md-6">
+          <input class="form-control" id="c_gstin" placeholder="GSTIN">
+        </div>
+        <div class="col-md-6">
+          <input class="form-control" id="c_pan" placeholder="PAN">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+      <div class="modal-footer">
+  <button class="btn btn-success w-100" onclick="openGstInvoice()">
+    <i class="fa fa-search"></i> Search
+  </button>
+</div>
+
+    </div>
+  </div>
+</div>
+
+
+
                 </div>
             </div>
 
-             <div class="excel-dark-table">
+            <div class="excel-dark-table">
                 <div class="table-responsive">
                     <table class="table m-0">
                         <thead>
@@ -380,7 +569,8 @@
                                 <th>CASH</th>
                                 <th>UPI</th>
                                 <th>Advance</th>
-                               <th>Balance</th>
+                               <th>Due</th>
+                               <th>Coupon</th>
                                 <th>Discount</th>
                                 {#<th>SellerId</th>#}
                                 <th>Action</th>
@@ -397,8 +587,43 @@
                 <div class="col-sm-6 text-right" id="results-price"></div>
             </div>
         </div>
+
         <!-- TAB 2: Sales by Order -->
+        
         <div id="tab-salesbyorder" class="tab-content-wrapper" style="margin-top:10px;">
+
+    <div class="filter-bar">
+        <div class="filter-row-nowrap">
+
+            <div class="filter-item">
+                <label class="filter-label">From Date</label>
+                <div class="input-group input-group-sm date">
+                    <input type="date" name="filter_date_from" class="form-control">
+                </div>
+            </div>
+
+            <div class="filter-item">
+                <label class="filter-label">To Date</label>
+                <div class="input-group input-group-sm date">
+                    <input type="date" name="filter_date_to" class="form-control">
+                </div>
+            </div>
+
+            <div class="filter-btn d-flex gap-2">
+                <label class="filter-label">&nbsp;</label>
+
+                <button type="button" id="btn-filter-order" class="btn btn-info btn-sm">
+                    <i class="fa fa-filter"></i> Filter
+                </button>
+
+                <button type="button" id="btn-clear-order" class="btn btn-danger btn-sm">
+                    <i class="fa fa-times"></i> Clear
+                </button>
+            </div>
+
+        </div>
+    </div>
+
             <div class="excel-dark-table">
                 <div class="table-responsive">
                     <table class="table m-0">
@@ -431,7 +656,39 @@
         </div>
 
         <!-- TAB 3: Sales by Product -->
-        <div id="tab-salesbyproduct" class="tab-content-wrapper" style="margin-top:10px;">
+       <div id="tab-salesbyproduct" class="tab-content-wrapper" style="margin-top:10px;">
+
+    <div class="filter-bar">
+        <div class="filter-row-nowrap">
+
+            <div class="filter-item">
+                <label class="filter-label">From Date</label>
+                <div class="input-group input-group-sm date">
+                    <input type="date" name="filter_date_from" class="form-control">
+                </div>
+            </div>
+
+            <div class="filter-item">
+                <label class="filter-label">To Date</label>
+                <div class="input-group input-group-sm date">
+                    <input type="date" name="filter_date_to" class="form-control">
+                </div>
+            </div>
+
+            <div class="filter-btn d-flex gap-2">
+                <label class="filter-label">&nbsp;</label>
+
+                <button type="button" id="btn-filter-product" class="btn btn-info btn-sm">
+                    <i class="fa fa-filter"></i> Filter
+                </button>
+
+                <button type="button" id="btn-clear-product" class="btn btn-danger btn-sm">
+                    <i class="fa fa-times"></i> Clear
+                </button>
+            </div>
+
+        </div>
+    </div>
             <div class="excel-dark-table">
                 <div class="table-responsive">
                     <table class="table m-0">
@@ -462,7 +719,7 @@
             </div>
         </div>
 
-         <!-- TAB 4: Sales by Number -->
+        <!-- TAB 4: Sales by Number -->
         <div id="tab-salesbynumber" class="tab-content-wrapper" style="margin-top:10px;">
             <div class="filter-bar">
     <div class="filter-row-nowrap">
@@ -475,6 +732,15 @@
                name="filter_phone"
                value="{{ filter_phone }}"
                placeholder="Enter phone number"
+               class="form-control">
+    </div>
+</div>
+<div class="filter-item">
+    <label class="filter-label">Customer Name</label>
+    <div class="input-group input-group-sm date">
+        <input type="text"
+               name="filter_name"
+               placeholder="Enter customer name"
                class="form-control">
     </div>
 </div>
@@ -514,6 +780,7 @@
                                 <th>UPI</th>
                                  <th>Advance</th>
                                 <th>Due</th>
+                                 <th>Coupon</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -529,9 +796,57 @@
             </div>
         </div>
 
-
         <!-- TAB 5: Sales by Seller -->
-        <div id="tab-salesbyseller" class="tab-content-wrapper" style="margin-top:10px;">
+       <div id="tab-salesbyseller" class="tab-content-wrapper" style="margin-top:10px;">
+
+    <
+    <div class="filter-bar">
+        <div class="filter-row-nowrap">
+
+            <div class="filter-item">
+                <label class="filter-label">Seller ID</label>
+                <div class="input-group input-group-sm date">
+                    <input type="text" name="filter_seller_id" class="form-control" placeholder="Enter Seller ID">
+                </div>
+            </div>
+
+            <div class="filter-item">
+                <label class="filter-label">Seller Name</label>
+                <div class="input-group input-group-sm date">
+                    <input type="text" name="filter_seller_name" class="form-control" placeholder="Enter Seller Name">
+                </div>
+            </div>
+
+            <div class="filter-item">
+                <label class="filter-label">From Date</label>
+                <div class="input-group input-group-sm date">
+                    <input type="date" name="filter_date_from_seller" class="form-control">
+                </div>
+            </div>
+
+            <div class="filter-item">
+                <label class="filter-label">To Date</label>
+                <div class="input-group input-group-sm date">
+                    <input type="date" name="filter_date_to_seller" class="form-control">
+                </div>
+            </div>
+
+            <!-- ✅ BUTTONS SAME STYLE -->
+            <div class="filter-btn d-flex gap-2">
+                <label class="filter-label">&nbsp;</label>
+
+                <button type="button" id="button-filter-seller" class="btn btn-info btn-sm">
+                    <i class="fa fa-filter"></i> Filter
+                </button>
+
+                <button type="button" id="button-clear-seller" class="btn btn-danger btn-sm">
+                    <i class="fa fa-times"></i> Clear
+                </button>
+            </div>
+
+        </div>
+    </div>
+        
             <div class="excel-dark-table">
                 <div class="table-responsive">
                     <table class="table m-0">
@@ -545,12 +860,12 @@
                                 <th>Total Products</th>
                                 <th>Sale Total</th>
                                 <th>Tax Total</th>
-                                <th>Grand Total</th>
+                               
                                 <th>Discount Total</th>
                                 <th>Profit</th>
                             </tr>
                         </thead>
-                        <tbody id="salesbyseller-data">
+                         <tbody id="salesbyseller-data">
                             <tr><td colspan="11" class="text-center">Loading...</td></tr>
                         </tbody>
                     </table>
@@ -563,7 +878,8 @@
         </div>
 
         <!-- TAB 6: Sales by Total Amount -->
-        <div id="tab-salesbytotal" class="tab-content-wrapper" style="margin-top:10px;"><div class="filter-bar">
+        <div id="tab-salesbytotal" class="tab-content-wrapper" style="margin-top:10px;">
+            <div class="filter-bar">
                 <div class="filter-row-nowrap">
                     <div class="filter-item">
                         <label class="filter-label">From Date</label>
@@ -579,25 +895,102 @@
                         </div>
                     </div>
             
-                    <div class="filter-btn d-flex gap-2">
-                        <label class="filter-label">&nbsp;</label>
+                     <div class="filter-btn d-flex gap-2">
+                    <label class="filter-label">&nbsp;</label>
+                
+                    <button type="button" id="button-filter-total" class="btn btn-info btn-sm">
+                        <i class="fa fa-filter"></i> Filter
+                    </button>
+                    <button type="button" id="button-clear-total" class="btn btn-danger btn-sm">
+                    <i class="fa fa-times"></i> Clear
+                </button>
+                    <button type="button" id="button-download-total" class="btn btn-success btn-sm">
+                        <i class="fa fa-download"></i> Download
+                    </button>
+            {#        <button type="button" id="button-gst-total" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#gstModal">#}
+            {#    <i class="fa fa-percent"></i> GST#}
+            {#</button>#}
             
-                        <button type="button" id="button-filter-total" class="btn btn-info btn-sm">
-                            <i class="fa fa-filter"></i> Filter
-                        </button>
-            
-                        <button type="button" id="button-clear-total" class="btn btn-danger btn-sm">
-                            <i class="fa fa-times"></i> Clear
-                        </button>
+<!-- ================= GST MODAL ================= -->
+{#<div class="modal fade" id="gstModal" tabindex="-1" aria-hidden="true">#}
+{#  <div class="modal-dialog modal-lg modal-dialog-centered">#}
+{#    <div class="modal-content" style="background:#0f172a; color:#fff; border-radius:10px;">#}
 
-                        <button type="button" id="button-download-total" class="btn btn-success btn-sm">
-                            <i class="fa fa-download"></i> Download
-                        </button>
-                    </div>
+{#      <!-- Header -->#}
+{#      <div class="modal-header" style="border-bottom:1px solid #334155;">#}
+{#        <h5 class="modal-title">#}
+{#          <i class="fa fa-percent text-warning"></i> GST Calculation#}
+{#        </h5>#}
+{#        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>#}
+{#      </div>#}
+
+{#      <!-- Body -->#}
+{#      <div class="modal-body">#}
+{#        <div class="row g-3">#}
+
+{#          <!-- From Date -->#}
+{#          <div class="col-md-4">#}
+{#            <label class="filter-label">From Date</label>#}
+{#            <div class="input-group date">#}
+{#              <input type="date" id="gst_from_date" class="form-control">#}
+{#            </div>#}
+{#          </div>#}
+
+{#          <!-- To Date -->#}
+{#          <div class="col-md-4">#}
+{#            <label class="filter-label">To Date</label>#}
+{#            <div class="input-group date">#}
+{#              <input type="date" id="gst_to_date" class="form-control">#}
+{#            </div>#}
+{#          </div>#}
+
+{#          <!-- GST % -->#}
+{#          <div class="col-md-4">#}
+{#            <label class="filter-label">GST Percentage (%)</label>#}
+{#            <input type="number" id="gst_percentage"#}
+{#                   class="form-control"#}
+{#                   placeholder="Eg: 3, 5, 18"#}
+{#                   style="background:#0f172a;color:#fff;border:1px solid #334155;">#}
+{#          </div>#}
+
+{#          <!-- Tax Percentage -->#}
+{#<div class="col-md-6">#}
+{#  <label class="filter-label">Tax Percentage (%)</label>#}
+{#  <input type="number" id="gst_tax_percentage"#}
+{#         class="form-control"#}
+{#         placeholder="Eg: 1, 2.5, 3"#}
+{#         style="background:#0f172a;color:#fff;border:1px solid #334155;">#}
+{#</div>#}
+
+
+{#          <!-- Search -->#}
+{#          <div class="col-md-6 d-flex align-items-end">#}
+{#            <button type="button" id="button-gst-search"#}
+{#                    class="btn btn-success w-100">#}
+{#              <i class="fa fa-search"></i> Search#}
+{#            </button>#}
+{#          </div>#}
+
+{#        </div>#}
+{#      </div>#}
+
+{#      <!-- Footer -->#}
+{#      <div class="modal-footer" style="border-top:1px solid #334155;">#}
+{#        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">#}
+{#          Close#}
+{#        </button>#}
+{#      </div>#}
+
+{#    </div>#}
+{#  </div>#}
+{#</div>#}
+<!-- ================= END GST MODAL ================= -->
+
+                </div>
                 </div>
             </div>
+
             <div class="excel-dark-table">
-                
                 <div class="table-responsive">
                     <table class="table m-0">
                         <thead>
@@ -616,7 +1009,8 @@
                                 <th>Discount</th>
                                 <th>Cash</th>
                                 <th>UPI</th>
-                                <th>Due</th>
+                                 <th>Due</th>
+                                 <th>Coupon</th>
                                 <th>Advance</th>
                             </tr>
                         </thead>
@@ -634,6 +1028,56 @@
 
         <!-- TAB 7: Sales by Coupon -->
         <div id="tab-salesbycoupon" class="tab-content-wrapper" style="margin-top:10px;">
+        <div class="filter-bar">
+    <div class="filter-row-nowrap">
+
+        <!-- 📅 From Date -->
+        <div class="filter-item">
+            <label class="filter-label">From Date</label>
+            <div class="input-group input-group-sm date">
+                <input type="date" name="filter_coupon_from" class="form-control">
+            </div>
+        </div>
+
+        <!-- 📅 To Date -->
+        <div class="filter-item">
+            <label class="filter-label">To Date</label>
+            <div class="input-group input-group-sm date">
+                <input type="date" name="filter_coupon_to" class="form-control">
+            </div>
+        </div>
+
+        <!-- 📞 Phone -->
+        <div class="filter-item">
+            <label class="filter-label">Phone</label>
+            <div class="input-group input-group-sm date">
+                <input type="text" name="filter_coupon_phone" placeholder="Enter phone" class="form-control">
+            </div>
+        </div>
+
+        <!-- 👤 Name -->
+        <div class="filter-item">
+            <label class="filter-label">Customer Name</label>
+            <div class="input-group input-group-sm date">
+                <input type="text" name="filter_coupon_name" placeholder="Enter name" class="form-control">
+            </div>
+        </div>
+
+        <!-- 🔘 Buttons -->
+        <div class="filter-btn d-flex gap-2">
+            <label class="filter-label">&nbsp;</label>
+
+            <button type="button" id="button-filter-coupon" class="btn btn-info btn-sm">
+                <i class="fa fa-filter"></i> Filter
+            </button>
+
+            <button type="button" id="button-clear-coupon" class="btn btn-danger btn-sm">
+                <i class="fa fa-times"></i> Clear
+            </button>
+        </div>
+
+    </div>
+</div>
             <div class="excel-dark-table">
                 <div class="table-responsive">
                     <table class="table m-0">
@@ -682,6 +1126,86 @@ let currentPage = {
     salesbytotal: 1,
     salesbycoupon: 1
 };
+window.SALES_BY_TOTAL_DATA = [];
+window.SALES_BY_TOTAL_LOADED = false;
+//  Replace your existing #updateDue click handler
+$(document).on('click', '#updateDue', function () {
+
+    const order_id     = $('#edit_order_id').val();
+    const customer_id  = $('#edit_customer_id').val();
+    const amount       = parseFloat($('#edit_amount').val()) || 0;
+    const payment_type = $('input[name="edit_payment_type"]:checked').val();
+
+    function showMsg(text, type) {
+        const colors = {
+            error:   { bg: '#450a0a', color: '#fca5a5', border: '#dc2626' },
+            success: { bg: '#052e16', color: '#86efac', border: '#16a34a' },
+            info:    { bg: '#0c1a2e', color: '#facc15', border: '#ca8a04' }
+        };
+        const c = colors[type] || colors.error;
+        $('#balance-modal-msg')
+            .css({ background: c.bg, color: c.color, border: '1px solid ' + c.border })
+            .html(text)
+            .show();
+    }
+
+    if (!order_id) { showMsg('Order ID missing.', 'error'); return; }
+    if (amount <= 0) { showMsg('Please enter a valid amount greater than 0.', 'error'); return; }
+
+    $('#updateDue').prop('disabled', true).text('Saving...');
+    $('#balance-modal-msg').hide();
+
+    $.ajax({
+        url: 'index.php?route=sale/retail.updateDueAmount&user_token={{ user_token }}',
+        type: 'POST',
+        dataType: 'json',
+        data: { order_id, customer_id, amount, payment_type },
+        success: function (json) {
+            if (json.status) {
+                showMsg('<i class="fa fa-check-circle"></i> Payment updated successfully!', 'success');
+                setTimeout(function () {
+                    bootstrap.Modal.getInstance(
+                        document.getElementById('balanceModal')
+                    ).hide();
+                    loadTabData('salesprice');
+                }, 1200);
+                $('#updateDue').prop('disabled', false).html('<i class="fa fa-check"></i> OK');
+            } else {
+                // ✅ Fetch AEPS balance and show in error message
+                fetch('index.php?route=sale/retail.getWalletBalance&user_token={{ user_token }}&order_id=' + order_id)
+                    .then(res => res.json())
+                    .then(data => {
+                        const aeps = data.status ? parseFloat(data.aeps_amount).toFixed(2) : '0.00';
+                        const aepsFloat = parseFloat(aeps);
+
+                        if (aepsFloat <= 0) {
+                            // ✅ AEPS is 0 — due is cleared
+                            showMsg(
+                                '<i class="fa fa-info-circle"></i> Your due is already cleared.' +
+                                '<br><small>AEPS Wallet Balance: <strong>₹' + aeps + '</strong></small>',
+                                'info'
+                            );
+                        } else {
+                            // ✅ AEPS has value — show error with balance
+                            showMsg(
+                                '<i class="fa fa-times-circle"></i> ' + (json.error || 'Update failed') +
+                                '<br><small>Available AEPS Wallet Balance: <strong>₹' + aeps + '</strong></small>',
+                                'error'
+                            );
+                        }
+                    })
+                    .catch(() => {
+                        showMsg('<i class="fa fa-times-circle"></i> ' + (json.error || 'Update failed'), 'error');
+                    });
+                $('#updateDue').prop('disabled', false).html('<i class="fa fa-check"></i> OK');
+            }
+        },
+        error: function (xhr) {
+            showMsg('<i class="fa fa-times-circle"></i> Server error: ' + xhr.status + ' ' + xhr.statusText, 'error');
+            $('#updateDue').prop('disabled', false).html('<i class="fa fa-check"></i> OK');
+        }
+    });
+});
 
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.sales-tab-btn').forEach(btn => {
@@ -699,27 +1223,91 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     loadTabData('salesprice');
+    document.getElementById('btn-filter-order')?.addEventListener('click', function () {
+    currentPage.salesbyorder = 1;
+    loadTabData('salesbyorder');
+});
 
-   const filterBtn = document.getElementById('button-filter-price');
+ const filterBtn = document.getElementById('button-filter-price');
 
 if (filterBtn) {
     filterBtn.addEventListener('click', function () {
 
-        // 1️⃣ Show loading text immediately
-        const tbody = document.getElementById('salesprice-data');
+        const tbody = document.getElementById(currentTab + '-data');
         if (tbody) {
-            tbody.innerHTML = '<tr><td colspan="17" class="text-center">Loading...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="20" class="text-center">Loading...</td></tr>';
         }
 
-        // Reset page
-        currentPage.salesprice = 1;
-        setTimeout(() => {
-            loadTabData('salesprice');
-        }, 300); // 
+        currentPage[currentTab] = 1;
+
+        loadTabData(currentTab);
     });
 }
 
-    
+    document.getElementById('button-search-order')?.addEventListener('click', function () {
+
+    const orderId = document.querySelector('[name="filter_order_id"]')?.value;
+
+    if (!orderId) {
+        alert('Enter Order ID');
+        return;
+    }
+
+    const tbody = document.getElementById('salesprice-data');
+    tbody.innerHTML = '<tr><td colspan="17" class="text-center">Searching...</td></tr>';
+
+    fetch('index.php?route=sale/retail.getSalesPriceData&user_token=' + USER_TOKEN + '&filter_order_id=' + orderId)
+    .then(res => res.json())
+    .then(res => {
+
+        if (!res.rows || res.rows.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="17" class="text-center">No Order Found</td></tr>';
+            return;
+        }
+
+        let html = '';
+
+        res.rows.forEach(r => {
+            html += `
+            <tr>
+                <td>${r.srno}</td>
+                <td>${r.order_id}</td>
+                <td>${r.date_added}</td>
+                <td>${r.r_price}</td>
+                <td>${r.r_tax}</td>
+                <td>${r.r_total}</td>
+                <td>${r.s_price}</td>
+                <td>${r.s_tax}</td>
+                <td>${r.s_total}</td>
+                <td>${r.profit}</td>
+                <td>${r.cash}</td>
+                <td>${r.upi}</td>
+                <td>${r.advance}</td>
+                <td>${r.balance}</td>
+                 <td>${r.coupon}</td>
+                <td>${r.discount}</td>
+
+               <td>
+            <a href="index.php?route=sale/retail.invoice&user_token=${USER_TOKEN}&order_id=${r.order_id}" 
+               class="btn btn-xs btn-info" target="_blank">
+                <i class="fa fa-print"></i>
+            </a>
+            ${parseFloat(r.balance) > 0 ? 
+                `<button class="btn btn-xs btn-warning edit-due-btn" 
+                    data-order="${r.order_id}" 
+                    data-balance="${r.balance}" 
+                    data-customer="${r.customer_id}">
+                    <i class="fa fa-edit"></i>
+                </button>` 
+            : ''}
+        </td>
+            </tr>`;
+        });
+
+        tbody.innerHTML = html;
+    });
+});
+
 const downloadBtn = document.getElementById('button-download-price');
 
 if (downloadBtn) {
@@ -732,7 +1320,7 @@ if (downloadBtn) {
             + '&user_token=' + USER_TOKEN
             + '&tab=salesprice';
 
-        // ✅ If filter applied → export filtered data
+        // âœ… If filter applied â†’ export filtered data
         if (dateAdded) {
             url += '&filter_date_added=' + encodeURIComponent(dateAdded);
         }
@@ -744,7 +1332,7 @@ if (downloadBtn) {
         // Trigger download
         window.location.href = url;
     });
- // ✅ FILTER – Sales by Number
+    // ✅ FILTER – Sales by Number
 document.getElementById('button-filter-number')?.addEventListener('click', function () {
 
     const tbody = document.getElementById('salesbynumber-data');
@@ -756,46 +1344,143 @@ document.getElementById('button-filter-number')?.addEventListener('click', funct
     loadTabData('salesbynumber');
 });
 
+document.getElementById('btn-filter-order')?.addEventListener('click', function () {
+
+    currentPage.salesbyorder = 1;
+
+    loadTabData('salesbyorder'); // 🔥 USE MAIN FUNCTION
+});
+document.getElementById('btn-clear-order')?.addEventListener('click', function () {
+
+    document.querySelector('[name="filter_date_from"]').value = '';
+    document.querySelector('[name="filter_date_to"]').value = '';
+
+    currentPage.salesbyorder = 1;
+
+    loadTabData('salesbyorder');
+});
+// ✅ FILTER
+// ================= SALES BY PRODUCT =================
+
+// FILTER
+document.getElementById('btn-filter-product')?.addEventListener('click', function () {
+    currentPage.salesbyproduct = 1;
+    loadTabData('salesbyproduct');
+});
+
+// CLEAR
+document.getElementById('btn-clear-product')?.addEventListener('click', function () {
+
+    document.querySelector('#tab-salesbyproduct [name="filter_date_from"]').value = '';
+    document.querySelector('#tab-salesbyproduct [name="filter_date_to"]').value = '';
+
+    currentPage.salesbyproduct = 1;
+    loadTabData('salesbyproduct');
+});
 // ✅ CLEAR – Sales by Number
-document.getElementById('button-clear-number')?.addEventListener('click', function () {
+document.getElementById('button-clear-number').addEventListener('click', function () {
 
-    const phoneInput = document.querySelector('#tab-salesbynumber input[name="filter_phone"]');
-    if (phoneInput) phoneInput.value = '';
+    // clear phone
+    let phone = document.querySelector('[name="filter_phone"]');
+    if (phone) phone.value = '';
 
-    const tbody = document.getElementById('salesbynumber-data');
-    if (tbody) {
-        tbody.innerHTML = '<tr><td colspan="10" class="text-center">Loading...</td></tr>';
-    }
+    // clear name
+    let name = document.querySelector('[name="filter_name"]');
+    if (name) name.value = '';
 
+    // reset page
     currentPage.salesbynumber = 1;
+
+    // reload data
     loadTabData('salesbynumber');
 });
 }
 
-
-
 document.getElementById('button-clear-price')?.addEventListener('click', function () {
 
-    // Clear filters
-    const fromDate = document.querySelector('[name="filter_date_added"]');
-    const toDate   = document.querySelector('[name="filter_date_modified"]');
+    if (currentTab === 'salesprice') {
+        const fromDate = document.querySelector('[name="filter_date_added"]');
+        const toDate   = document.querySelector('[name="filter_date_modified"]');
+        document.querySelector('[name="filter_order_id"]').value = '';
 
-    if (fromDate) fromDate.value = '';
-    if (toDate) toDate.value = '';
-
-    // Show loading text immediately
-    const tbody = document.getElementById('salesprice-data');
-    if (tbody) {
-        tbody.innerHTML = '<tr><td colspan="17" class="text-center">Loading...</td></tr>';
+        if (fromDate) fromDate.value = '';
+        if (toDate) toDate.value = '';
     }
 
-    currentPage.salesprice = 1;
-    setTimeout(() => {
-        loadTabData('salesprice');
-    }, 300);
+    if (currentTab === 'salesbynumber') {
+
+    const phoneInput = document.querySelector('#tab-salesbynumber input[name="filter_phone"]');
+    const nameInput  = document.querySelector('#tab-salesbynumber input[name="filter_name"]');
+
+    if (phoneInput) phoneInput.value = '';
+    if (nameInput)  nameInput.value  = ''; 
+}
+
+    currentPage[currentTab] = 1;
+
+    const tbody = document.getElementById(currentTab + '-data');
+    if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="20" class="text-center">Loading...</td></tr>';
+    }
+
+    loadTabData(currentTab);
 });
 
-// FILTER – Sales by Total
+document.getElementById('button-filter-coupon')?.addEventListener('click', function () {
+    currentPage.salesbycoupon = 1;
+    loadTabData('salesbycoupon');
+});
+document.getElementById('button-clear-seller')?.addEventListener('click', function () {
+
+    // 🔹 Clear all inputs
+    document.querySelector('[name="filter_seller_id"]').value = '';
+    document.querySelector('[name="filter_seller_name"]').value = '';
+    document.querySelector('[name="filter_date_from_seller"]').value = '';
+    document.querySelector('[name="filter_date_to_seller"]').value = '';
+
+    // 🔹 Reset page
+    currentPage.salesbyseller = 1;
+
+    // 🔹 Reload data
+    loadTabData('salesbyseller');
+});
+// FILTER
+document.getElementById('button-filter-coupon')?.addEventListener('click', function () {
+    currentPage.salesbycoupon = 1;
+    loadTabData('salesbycoupon');
+});
+
+// CLEAR
+document.getElementById('button-clear-coupon')?.addEventListener('click', function () {
+
+    document.querySelector('[name="filter_coupon_from"]').value = '';
+    document.querySelector('[name="filter_coupon_to"]').value = '';
+    document.querySelector('[name="filter_coupon_phone"]').value = '';
+    document.querySelector('[name="filter_coupon_name"]').value = '';
+
+    currentPage.salesbycoupon = 1;
+    loadTabData('salesbycoupon');
+});
+document.getElementById('button-filter-seller')?.addEventListener('click', function () {
+
+    currentPage.salesbyseller = 1;
+    loadTabData('salesbyseller');
+
+});
+document.getElementById('button-clear-seller')?.addEventListener('click', function () {
+
+    document.querySelector('[name="filter_seller_id"]').value = '';
+    document.querySelector('[name="filter_seller_name"]').value = '';
+    document.querySelector('[name="filter_date_from_seller"]').value = '';
+    document.querySelector('[name="filter_date_to_seller"]').value = '';
+
+    currentPage.salesbyseller = 1;
+    loadTabData('salesbyseller');
+
+});
+
+
+// FILTER â€“ Sales by Total
 document.getElementById('button-filter-total')?.addEventListener('click', function () {
 
     const tbody = document.getElementById('salesbytotal-data');
@@ -811,7 +1496,7 @@ document.getElementById('button-filter-total')?.addEventListener('click', functi
 });
 
 
-// DOWNLOAD – Sales by Total
+// DOWNLOAD â€“ Sales by Total
 document.getElementById('button-download-total')?.addEventListener('click', function () {
 
     const from = document.getElementById('total_from_date')?.value || '';
@@ -863,11 +1548,68 @@ document.getElementById('button-clear-total')?.addEventListener('click', functio
     }
 
     currentPage.salesbytotal = 1;
+
     setTimeout(() => {
         loadTabData('salesbytotal');
     }, 300);
 });
 
+//  Open modal on edit-due click
+//  Replace your existing edit-due-btn click handler
+$(document).on('click', '.edit-due-btn', function () {
+
+    const order_id    = $(this).data('order');
+    const balance     = $(this).data('balance');
+    const customer_id = $(this).data('customer');
+
+    $('#edit_order_id').val(order_id);
+    $('#edit_customer_id').val(customer_id);
+    $('#edit_balance').val(balance);
+    $('#edit_amount').val('');
+    $('#pay_cash').prop('checked', true);
+
+    // ✅ Just hide message, no fetch
+    $('#balance-modal-msg').hide().html('').css({background:'', color:'', border:''});
+
+    new bootstrap.Modal(document.getElementById('balanceModal')).show();
+});
+function openCustomerHistory(phone) {
+
+    const tbody = document.getElementById('customer-history-data');
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center">Loading...</td></tr>';
+
+    fetch('index.php?route=sale/retail.getCustomerOrderHistory'
+        + '&user_token=' + USER_TOKEN
+        + '&phone=' + phone)
+    .then(res => res.json())
+    .then(data => {
+
+        if (!data.status || !data.rows.length) {
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center">No orders found</td></tr>';
+            return;
+        }
+
+        let html = '';
+        data.rows.forEach((row, index) => {
+            html += '<tr>' +
+                '<td>' + (index + 1) + '</td>' +
+                '<td>' + row.date + '</td>' +
+                '<td>' + row.order_id + '</td>' +
+                '<td>' + row.no_products + '</td>' +
+                '<td>' + row.s_total + '</td>' +
+                '<td>' + row.cash + '</td>' +
+                '<td>' + row.upi + '</td>' +
+                '<td>' + (row.advance ?? '0.00') + '</td>' +
+                '<td>' + row.due + '</td>' +
+                '<td>' + row.coupon + '</td>' +
+            '</tr>';
+        });
+
+        tbody.innerHTML = html;
+    });
+
+    new bootstrap.Modal(document.getElementById('customerHistoryModal')).show();
+}
 
 
 function loadTabData(tabName, page) {
@@ -901,21 +1643,69 @@ if (tabName === 'salesbytotal') {
     if (from) url += '&filter_date_added=' + encodeURIComponent(from);
     if (to)   url += '&filter_date_modified=' + encodeURIComponent(to);
 }
-// 🔥 FILTER – Sales by Number
+if (tabName === 'salesbyorder') {
+    const from = document.querySelector('#tab-salesbyorder [name="filter_date_from"]')?.value || '';
+    const to   = document.querySelector('#tab-salesbyorder [name="filter_date_to"]')?.value || '';
+
+    if (from) url += '&filter_date_from=' + encodeURIComponent(from);
+    if (to)   url += '&filter_date_to=' + encodeURIComponent(to);
+}
+if (tabName === 'salesbyseller') {
+
+    const seller_id   = document.querySelector('[name="filter_seller_id"]').value;
+    const seller_name = document.querySelector('[name="filter_seller_name"]').value;
+    const from        = document.querySelector('[name="filter_date_from_seller"]').value;
+    const to          = document.querySelector('[name="filter_date_to_seller"]').value;
+
+    if (seller_id)   url += '&filter_seller_id=' + encodeURIComponent(seller_id);
+    if (seller_name) url += '&filter_seller_name=' + encodeURIComponent(seller_name);
+    if (from)        url += '&filter_date_from_seller=' + encodeURIComponent(from);
+    if (to)          url += '&filter_date_to_seller=' + encodeURIComponent(to);
+}
+if (tabName === 'salesbycoupon') {
+
+    const from  = document.querySelector('[name="filter_coupon_from"]').value;
+    const to    = document.querySelector('[name="filter_coupon_to"]').value;
+    const phone = document.querySelector('[name="filter_coupon_phone"]').value;
+    const name  = document.querySelector('[name="filter_coupon_name"]').value;
+
+    if (from)  url += '&filter_coupon_from=' + encodeURIComponent(from);
+    if (to)    url += '&filter_coupon_to=' + encodeURIComponent(to);
+    if (phone) url += '&filter_coupon_phone=' + encodeURIComponent(phone);
+    if (name)  url += '&filter_coupon_name=' + encodeURIComponent(name);
+}
+
+if (tabName === 'salesbyproduct') {
+    const from = document.querySelector('#tab-salesbyproduct [name="filter_date_from"]')?.value || '';
+    const to   = document.querySelector('#tab-salesbyproduct [name="filter_date_to"]')?.value || '';
+
+    if (from) url += '&filter_date_from=' + from;
+    if (to)   url += '&filter_date_to=' + to;
+}
+
+// ðŸ”¥ FILTER â€“ Sales by Number
 if (tabName === 'salesbynumber') {
     const phoneInput = document.querySelector('#tab-salesbynumber input[name="filter_phone"]');
+    const nameInput  = document.querySelector('#tab-salesbynumber input[name="filter_name"]');
 
     if (phoneInput && phoneInput.value.trim() !== '') {
         url += '&filter_phone=' + encodeURIComponent(phoneInput.value.trim());
     }
-}
 
+    if (nameInput && nameInput.value.trim() !== '') {
+        url += '&filter_name=' + encodeURIComponent(nameInput.value.trim());
+    }
+}
     fetch(url)
         .then(response => response.json())
         .then(data => {
             if (data.status) {
                 renderTableData(tabName, data.rows);
                 renderPagination(tabName, data.total, data.page || page, data.limit || 20);
+                if (tabName === 'salesbytotal') {
+                window.SALES_BY_TOTAL_DATA = data.rows || [];
+                window.SALES_BY_TOTAL_LOADED = true;
+            }
             } else {
                 const tbody = document.getElementById(tabName + '-data');
                 if (tbody) {
@@ -933,7 +1723,6 @@ if (tabName === 'salesbynumber') {
 
 function renderTableData(tabName, rows) {
     const tbody = document.getElementById(tabName + '-data');
-    
     if (!tbody) return;
 
     if (!rows || rows.length === 0) {
@@ -942,10 +1731,28 @@ function renderTableData(tabName, rows) {
     }
 
     let html = '';
+    let totals = {};
+
+    // Helper: parse formatted number like "1,234.56" → float
+    function p(v) { return parseFloat(String(v).replace(/,/g, '')) || 0; }
 
     rows.forEach(function(row) {
         switch (tabName) {
-             case 'salesprice':
+            case 'salesprice':
+                totals.r_price    = (totals.r_price    || 0) + p(row.r_price);
+                totals.r_tax      = (totals.r_tax      || 0) + p(row.r_tax);
+                totals.r_total    = (totals.r_total    || 0) + p(row.r_total);
+                totals.s_price    = (totals.s_price    || 0) + p(row.s_price);
+                totals.s_tax      = (totals.s_tax      || 0) + p(row.s_tax);
+                totals.s_total    = (totals.s_total    || 0) + p(row.s_total);
+                totals.profit     = (totals.profit     || 0) + p(row.profit);
+                totals.cash       = (totals.cash       || 0) + p(row.cash);
+                totals.upi        = (totals.upi        || 0) + p(row.upi);
+                totals.advance    = (totals.advance    || 0) + p(row.advance);
+                totals.balance    = (totals.balance    || 0) + p(row.balance);
+                totals.coupon     = (totals.coupon     || 0) + p(row.coupon);
+                totals.discount   = (totals.discount   || 0) + p(row.discount);
+
                 html += '<tr>' +
                     '<td>' + row.srno + '</td>' +
                     '<td>' + row.order_id + '</td>' +
@@ -961,17 +1768,37 @@ function renderTableData(tabName, rows) {
                     '<td>' + row.upi + '</td>' +
                     '<td>' + row.advance + '</td>' +
                     '<td>' + row.balance + '</td>' +
+                    '<td>' + row.coupon + '</td>' +
                     '<td>' + row.discount + '</td>' +
-                    // '<td>' + row.seller_id + '</td>' +
                     '<td>' +
-                        '<a href="index.php?route=sale/sale.invoice&user_token=' + USER_TOKEN + '&order_id=' + row.order_id + '" class="btn btn-xs btn-info" target="_blank">' +
+                        '<a href="index.php?route=sale/retail.invoice&user_token=' + USER_TOKEN + '&order_id=' + row.order_id + '" class="btn btn-xs btn-info" target="_blank">' +
                             '<i class="fa fa-print"></i>' +
                         '</a>' +
+                       (parseFloat(row.balance) > 0 ? 
+    '<button class="btn btn-xs btn-warning edit-due-btn" ' +
+    'data-order="' + row.order_id + '" ' +
+    'data-balance="' + row.balance + '" ' +
+    'data-customer="' + row.customer_id + '">' +
+    '<i class="fa fa-edit"></i>' +
+    '</button>' 
+: '')
                     '</td>' +
+                    
                 '</tr>';
                 break;
-                
+
             case 'salesbyorder':
+                totals.no_orders  = (totals.no_orders  || 0) + p(row.no_orders);
+                totals.no_products= (totals.no_products|| 0) + p(row.no_products);
+                totals.r_price    = (totals.r_price    || 0) + p(row.r_price);
+                totals.r_tax      = (totals.r_tax      || 0) + p(row.r_tax);
+                totals.r_total    = (totals.r_total    || 0) + p(row.r_total);
+                totals.s_price    = (totals.s_price    || 0) + p(row.s_price);
+                totals.s_tax      = (totals.s_tax      || 0) + p(row.s_tax);
+                totals.s_total    = (totals.s_total    || 0) + p(row.s_total);
+                totals.profit     = (totals.profit     || 0) + p(row.profit);
+                totals.discount   = (totals.discount   || 0) + p(row.discount);
+
                 html += '<tr>' +
                     '<td>' + row.srno + '</td>' +
                     '<td>' + row.date + '</td>' +
@@ -989,6 +1816,16 @@ function renderTableData(tabName, rows) {
                 break;
 
             case 'salesbyproduct':
+                totals.total_products = (totals.total_products || 0) + p(row.total_products);
+                totals.r_price    = (totals.r_price    || 0) + p(row.r_price);
+                totals.r_tax      = (totals.r_tax      || 0) + p(row.r_tax);
+                totals.r_total    = (totals.r_total    || 0) + p(row.r_total);
+                totals.s_price    = (totals.s_price    || 0) + p(row.s_price);
+                totals.s_tax      = (totals.s_tax      || 0) + p(row.s_tax);
+                totals.s_total    = (totals.s_total    || 0) + p(row.s_total);
+                totals.profit     = (totals.profit     || 0) + p(row.profit);
+                totals.discount   = (totals.discount   || 0) + p(row.discount);
+
                 html += '<tr>' +
                     '<td>' + row.srno + '</td>' +
                     '<td>' + row.date + '</td>' +
@@ -1004,32 +1841,44 @@ function renderTableData(tabName, rows) {
                 '</tr>';
                 break;
 
-           case 'salesbynumber':
+            case 'salesbynumber':
+                totals.no_orders  = (totals.no_orders  || 0) + p(row.no_orders);
+                totals.no_products= (totals.no_products|| 0) + p(row.no_products);
+                totals.s_total    = (totals.s_total    || 0) + p(row.s_total);
+              totals.cash       = (totals.cash       || 0) + p(row.cash);
+                totals.upi        = (totals.upi        || 0) + p(row.upi);
+                totals.advance        = (totals.advance        || 0) + p(row.advance);
+                totals.due     = (totals.due     || 0) + p(row.due);
+                totals.coupon    = (totals.coupon    || 0) + p(row.coupon);
+
                 html += '<tr>' +
                     '<td>' + row.srno + '</td>' +
-                    // '<td>' + row.date + '</td>' +
                     '<td>' + row.number + '</td>' +
                     '<td>' + row.name + '</td>' +
                     '<td>' + row.no_orders + '</td>' +
                     '<td>' + row.no_products + '</td>' +
-                    // '<td>' + row.r_price + '</td>' +
-                    // '<td>' + row.r_tax + '</td>' +
-                    // '<td>' + row.r_total + '</td>' +
-                    // '<td>' + row.s_price + '</td>' +
-                    // '<td>' + row.s_tax + '</td>' +
-                     '<td>' + row.s_total + '</td>' +
-                    '<td>' + row.cash + '</td>' +
-                     '<td>' + row.upi + '</td>' +
-                       '<td>' + row.advance + '</td>' +
-                       '<td>' + row.due + '</td>' +
-                     '<td>' +
-            '<button class="btn btn-sm btn-info" onclick="openCustomerHistory(\'' + row.number + '\')">' +
-                '<i class="fa fa-history"></i>' +
-            '</button>' +
-        '</td>' +
+                    '<td>' + row.s_total + '</td>' +
+                     '<td>' + row.cash + '</td>' +
+                    '<td>' + row.upi + '</td>' +
+                    '<td>' + row.advance + '</td>' +
+                    '<td>' + row.due + '</td>' +
+                    '<td>' + row.coupon + '</td>' +
+                    '<td>' +
+                        '<button class="btn btn-sm btn-info" onclick="openCustomerHistory(\'' + row.number + '\')">' +
+                            '<i class="fa fa-history"></i>' +
+                        '</button>' +
+                    '</td>' +
                 '</tr>';
                 break;
+
             case 'salesbyseller':
+                totals.total_orders  = (totals.total_orders  || 0) + p(row.total_orders);
+                totals.total_products= (totals.total_products|| 0) + p(row.total_products);
+                totals.sale_total    = (totals.sale_total    || 0) + p(row.sale_total);
+                totals.tax_total     = (totals.tax_total     || 0) + p(row.tax_total);
+                totals.discount_total= (totals.discount_total|| 0) + p(row.discount_total);
+                totals.profit        = (totals.profit        || 0) + p(row.profit);
+
                 html += '<tr>' +
                     '<td>' + row.srno + '</td>' +
                     '<td>' + row.seller_id + '</td>' +
@@ -1039,13 +1888,23 @@ function renderTableData(tabName, rows) {
                     '<td>' + row.total_products + '</td>' +
                     '<td>' + row.sale_total + '</td>' +
                     '<td>' + row.tax_total + '</td>' +
-                    '<td>' + row.grand_total + '</td>' +
                     '<td>' + row.discount_total + '</td>' +
                     '<td>' + row.profit + '</td>' +
                 '</tr>';
                 break;
 
             case 'salesbycoupon':
+                totals.no_orders  = (totals.no_orders  || 0) + p(row.no_orders);
+                totals.no_products= (totals.no_products|| 0) + p(row.no_products);
+                totals.r_price    = (totals.r_price    || 0) + p(row.r_price);
+                totals.r_tax      = (totals.r_tax      || 0) + p(row.r_tax);
+                totals.r_total    = (totals.r_total    || 0) + p(row.r_total);
+                totals.s_price    = (totals.s_price    || 0) + p(row.s_price);
+                totals.s_tax      = (totals.s_tax      || 0) + p(row.s_tax);
+                totals.s_total    = (totals.s_total    || 0) + p(row.s_total);
+                totals.profit     = (totals.profit     || 0) + p(row.profit);
+                totals.discount   = (totals.discount   || 0) + p(row.discount);
+
                 html += '<tr>' +
                     '<td>' + row.srno + '</td>' +
                     '<td>' + row.date + '</td>' +
@@ -1065,7 +1924,23 @@ function renderTableData(tabName, rows) {
                 '</tr>';
                 break;
 
-           case 'salesbytotal':
+            case 'salesbytotal':
+                totals.no_orders  = (totals.no_orders  || 0) + p(row.no_orders);
+                totals.no_products= (totals.no_products|| 0) + p(row.no_products);
+                totals.r_price    = (totals.r_price    || 0) + p(row.r_price);
+                totals.r_tax      = (totals.r_tax      || 0) + p(row.r_tax);
+                totals.r_total    = (totals.r_total    || 0) + p(row.r_total);
+                totals.s_price    = (totals.s_price    || 0) + p(row.s_price);
+                totals.s_tax      = (totals.s_tax      || 0) + p(row.s_tax);
+                totals.s_total    = (totals.s_total    || 0) + p(row.s_total);
+                totals.profit     = (totals.profit     || 0) + p(row.profit);
+                totals.discount   = (totals.discount   || 0) + p(row.discount);
+                totals.cash       = (totals.cash       || 0) + p(row.cash);
+                totals.upi        = (totals.upi        || 0) + p(row.upi);
+                totals.due        = (totals.due        || 0) + p(row.due);
+                totals.coupon     = (totals.coupon     || 0) + p(row.coupon);
+                totals.advance    = (totals.advance    || 0) + p(row.advance);
+
                 html += '<tr>' +
                     '<td>' + row.srno + '</td>' +
                     '<td>' + row.date + '</td>' +
@@ -1081,12 +1956,135 @@ function renderTableData(tabName, rows) {
                     '<td>' + row.discount + '</td>' +
                     '<td>' + row.cash + '</td>' +
                     '<td>' + row.upi + '</td>' +
-                     '<td>' + row.due + '</td>' +
+                    '<td>' + row.due + '</td>' +
+                    '<td>' + row.coupon + '</td>' +
                     '<td>' + row.advance + '</td>' +
+                    
                 '</tr>';
                 break;
         }
     });
+
+    // Helper: format total
+    function fmt(v) { return v.toFixed(2); }
+
+    // Append totals row per tab
+    switch (tabName) {
+        case 'salesprice':
+            html += '<tr class="totals-row">' +
+                '<td>TOTAL</td><td>—</td><td>—</td>' +
+                '<td>' + fmt(totals.r_price) + '</td>' +
+                '<td>' + fmt(totals.r_tax) + '</td>' +
+                '<td>' + fmt(totals.r_total) + '</td>' +
+                '<td>' + fmt(totals.s_price) + '</td>' +
+                '<td>' + fmt(totals.s_tax) + '</td>' +
+                '<td>' + fmt(totals.s_total) + '</td>' +
+                '<td>' + fmt(totals.profit) + '</td>' +
+                '<td>' + fmt(totals.cash) + '</td>' +
+                '<td>' + fmt(totals.upi) + '</td>' +
+                '<td>' + fmt(totals.advance) + '</td>' +
+                '<td>' + fmt(totals.balance) + '</td>' +
+                '<td>' + fmt(totals.coupon) + '</td>' +
+                '<td>' + fmt(totals.discount) + '</td>' +
+                '<td>—</td>' +
+            '</tr>';
+            break;
+
+        case 'salesbyorder':
+            html += '<tr class="totals-row">' +
+                '<td>TOTAL</td><td>—</td>' +
+                '<td>' + totals.no_orders + '</td>' +
+                '<td>' + totals.no_products + '</td>' +
+                '<td>' + fmt(totals.r_price) + '</td>' +
+                '<td>' + fmt(totals.r_tax) + '</td>' +
+                '<td>' + fmt(totals.r_total) + '</td>' +
+                '<td>' + fmt(totals.s_price) + '</td>' +
+                '<td>' + fmt(totals.s_tax) + '</td>' +
+                '<td>' + fmt(totals.s_total) + '</td>' +
+                '<td>' + fmt(totals.profit) + '</td>' +
+                '<td>' + fmt(totals.discount) + '</td>' +
+            '</tr>';
+            break;
+
+        case 'salesbyproduct':
+            html += '<tr class="totals-row">' +
+                '<td>TOTAL</td><td>—</td>' +
+                '<td>' + totals.total_products + '</td>' +
+                '<td>' + fmt(totals.r_price) + '</td>' +
+                '<td>' + fmt(totals.r_tax) + '</td>' +
+                '<td>' + fmt(totals.r_total) + '</td>' +
+                '<td>' + fmt(totals.s_price) + '</td>' +
+                '<td>' + fmt(totals.s_tax) + '</td>' +
+                '<td>' + fmt(totals.s_total) + '</td>' +
+                '<td>' + fmt(totals.profit) + '</td>' +
+                '<td>' + fmt(totals.discount) + '</td>' +
+            '</tr>';
+            break;
+
+        case 'salesbynumber':
+            html += '<tr class="totals-row">' +
+                '<td>TOTAL</td><td>—</td><td>—</td>' +
+                '<td>' + totals.no_orders + '</td>' +
+                '<td>' + totals.no_products + '</td>' +
+                '<td>' + fmt(totals.s_total) + '</td>' +
+                '<td>' + fmt(totals.cash) + '</td>' +
+                '<td>' + fmt(totals.upi) + '</td>' +
+                '<td>' + fmt(totals.advance) + '</td>' +
+                '<td>' + fmt(totals.due) + '</td>' +
+                '<td>' + fmt(totals.coupon) + '</td>' +
+                '<td>—</td>' +
+            '</tr>';
+            break;
+
+        case 'salesbyseller':
+            html += '<tr class="totals-row">' +
+                '<td>TOTAL</td><td>—</td><td>—</td><td>—</td>' +
+                '<td>' + totals.total_orders + '</td>' +
+                '<td>' + totals.total_products + '</td>' +
+                '<td>' + fmt(totals.sale_total) + '</td>' +
+                '<td>' + fmt(totals.tax_total) + '</td>' +
+                '<td>' + fmt(totals.discount_total) + '</td>' +
+                '<td>' + fmt(totals.profit) + '</td>' +
+            '</tr>';
+            break;
+
+        case 'salesbycoupon':
+            html += '<tr class="totals-row">' +
+                '<td>TOTAL</td><td>—</td><td>—</td><td>—</td><td>—</td>' +
+                '<td>' + totals.no_orders + '</td>' +
+                '<td>' + totals.no_products + '</td>' +
+                '<td>' + fmt(totals.r_price) + '</td>' +
+                '<td>' + fmt(totals.r_tax) + '</td>' +
+                '<td>' + fmt(totals.r_total) + '</td>' +
+                '<td>' + fmt(totals.s_price) + '</td>' +
+                '<td>' + fmt(totals.s_tax) + '</td>' +
+                '<td>' + fmt(totals.s_total) + '</td>' +
+                '<td>' + fmt(totals.profit) + '</td>' +
+                '<td>' + fmt(totals.discount) + '</td>' +
+            '</tr>';
+            break;
+
+        case 'salesbytotal':
+            html += '<tr class="totals-row">' +
+                '<td>TOTAL</td><td>—</td>' +
+                '<td>' + totals.no_orders + '</td>' +
+                '<td>' + totals.no_products + '</td>' +
+                '<td>' + fmt(totals.r_price) + '</td>' +
+                '<td>' + fmt(totals.r_tax) + '</td>' +
+                '<td>' + fmt(totals.r_total) + '</td>' +
+                '<td>' + fmt(totals.s_price) + '</td>' +
+                '<td>' + fmt(totals.s_tax) + '</td>' +
+                '<td>' + fmt(totals.s_total) + '</td>' +
+                '<td>' + fmt(totals.profit) + '</td>' +
+                '<td>' + fmt(totals.discount) + '</td>' +
+                '<td>' + fmt(totals.cash) + '</td>' +
+                '<td>' + fmt(totals.upi) + '</td>' +
+                '<td>' + fmt(totals.due) + '</td>' +
+                '<td>' + fmt(totals.coupon) + '</td>' +
+                '<td>' + fmt(totals.advance) + '</td>' +
+            '</tr>';
+            break;
+    }
 
     tbody.innerHTML = html;
 }
@@ -1119,7 +2117,7 @@ function renderPagination(tabName, total, page, limit) {
     let html = '<ul class="pagination">';
 
     if (page > 1) {
-        html += '<li><a href="#" onclick="loadTabData(\'' + tabName + '\', ' + (page - 1) + '); return false;">«</a></li>';
+        html += '<li><a href="#" onclick="loadTabData(\'' + tabName + '\', ' + (page - 1) + '); return false;">Â«</a></li>';
     }
 
     const startPage = Math.max(1, page - 2);
@@ -1134,48 +2132,266 @@ function renderPagination(tabName, total, page, limit) {
     }
 
     if (page < totalPages) {
-        html += '<li><a href="#" onclick="loadTabData(\'' + tabName + '\', ' + (page + 1) + '); return false;">»</a></li>';
+        html += '<li><a href="#" onclick="loadTabData(\'' + tabName + '\', ' + (page + 1) + '); return false;">Â»</a></li>';
     }
 
     html += '</ul>';
     paginationDiv.innerHTML = html;
 }
-function openCustomerHistory(phone) {
+/* ================= GST MODAL LOGIC ================= */
 
-    const tbody = document.getElementById('customer-history-data');
-    tbody.innerHTML = '<tr><td colspan="9" class="text-center">Loading...</td></tr>';
+// Auto-calculate tax when % changes (optional)
+document.getElementById('gst_percentage')?.addEventListener('input', function () {
+    const percent = parseFloat(this.value || 0);
 
-    fetch('index.php?route=sale/retail.getCustomerOrderHistory'
-        + '&user_token=' + USER_TOKEN
-        + '&phone=' + phone)
-    .then(res => res.json())
-    .then(data => {
+    // Example: you can replace this with actual total from backend later
+    const baseAmount = 1000; // demo base amount
 
-        if (!data.status || !data.rows.length) {
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center">No orders found</td></tr>';
-            return;
-        }
- let html = '';
-        data.rows.forEach((row, index) => {
-            html += '<tr>' +
-                '<td>' + (index + 1) + '</td>' +
-                '<td>' + row.date + '</td>' +
-                '<td>' + row.order_id + '</td>' +
-                '<td>' + row.no_products + '</td>' +
-                '<td>' + row.s_total + '</td>' +
-                '<td>' + row.cash + '</td>' +
-                '<td>' + row.upi + '</td>' +
-                '<td>' + (row.advance ?? '0.00') + '</td>' +
-                '<td>' + row.due + '</td>' +
-            '</tr>';
-        });
+    if (percent > 0) {
+        const tax = (baseAmount * percent) / 100;
+        document.getElementById('gst_tax_amount').value = tax.toFixed(2);
+    }
+});
 
+// Search button click
+/*document.getElementById('button-gst-search')?.addEventListener('click', function () {
 
-        tbody.innerHTML = html;
+    const fromDate = document.getElementById('gst_from_date')?.value || '';
+    const toDate   = document.getElementById('gst_to_date')?.value || '';
+    const percent  = document.getElementById('gst_percentage')?.value || '';
+    const taxAmt   = document.getElementById('gst_tax_amount')?.value || '';
+
+    // ðŸ”¹ For now logging (you can connect API here)
+    console.log('GST Search:', {
+        fromDate,
+        toDate,
+        percent,
+        taxAmt
     });
 
-    new bootstrap.Modal(document.getElementById('customerHistoryModal')).show();
+    // Example: reload Sales by Total with GST params
+    let url = 'index.php?route=sale/retail.getSalesByTotalData'
+        + '&user_token=' + USER_TOKEN;
+
+    if (fromDate) url += '&filter_date_added=' + encodeURIComponent(fromDate);
+    if (toDate)   url += '&filter_date_modified=' + encodeURIComponent(toDate);
+    if (percent)  url += '&gst_percent=' + encodeURIComponent(percent);
+    if (taxAmt)   url += '&gst_tax=' + encodeURIComponent(taxAmt);
+
+    // You can fetch data or just call your existing loader
+    currentPage.salesbytotal = 1;
+    loadTabData('salesbytotal');
+
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('gstModal'));
+    modal.hide();
+});*/
+document.getElementById('button-gst-search').addEventListener('click', function () {
+
+    const fromDate = document.getElementById('gst_from_date').value;
+    const toDate   = document.getElementById('gst_to_date').value;
+    const gstPct   = parseFloat(document.getElementById('gst_percentage').value) || 0;
+    const taxPct   = parseFloat(document.getElementById('gst_tax_percentage').value) || 0;
+
+    if (!fromDate || !toDate) {
+        alert('Please select From and To dates');
+        return;
+    }
+
+    let billData = [];
+
+    document.querySelectorAll('#tab-salesbytotal table tbody tr').forEach(row => {
+
+        const dateText = row.children[1]?.innerText.trim() || '';
+
+        // Filter by selected date range
+        if (dateText < fromDate || dateText > toDate) return;
+
+        const saleTotal = parseFloat(
+            row.children[9]?.innerText.replace(/,/g,'')
+        ) || 0;
+
+    const taxAmount = (saleTotal * taxPct) / 100;   // 10% of saleTotal
+const gstAmount = (taxAmount * gstPct) / 100;   // GST on that tax amount
+const finalTotal = taxAmount + gstAmount;
+
+billData.push({
+    date: dateText,
+    sale: taxAmount.toFixed(2),
+    gst: gstAmount.toFixed(2),
+    total: finalTotal.toFixed(2)
+});
+    });
+
+    if (!billData.length) {
+        alert('No data found for selected date range');
+        return;
+    }
+
+    sessionStorage.setItem('MONTHLY_BILL_DATA', JSON.stringify({
+        gstPct,
+        taxPct,
+        rows: billData
+    }));
+
+    window.open(
+        'index.php?route=sale/monthly_sale&user_token=' + USER_TOKEN,
+        '_blank'
+    );
+
+    bootstrap.Modal.getInstance(document.getElementById('gstModal')).hide();
+});
+
+    /*let billData = [];
+
+    window.SALES_BY_TOTAL_DATA.forEach(row => {
+
+        const rowDate   = row.date;
+        const saleTotal = parseFloat(
+    String(row.s_total).replace(/,/g, '')
+) || 0;
+
+
+        if (rowDate >= fromDate && rowDate <= toDate) {
+
+            // Remove tax %
+            const removed = (saleTotal * taxPct) / 100;
+
+            // Add GST %
+            const gstAmt = (removed * gstPct) / 100;
+
+            // Final total
+            const final = removed + gstAmt;
+
+            billData.push({
+                date: rowDate,
+                sale: removed.toFixed(2),
+                gst: gstAmt.toFixed(2),
+                total: final.toFixed(2)
+            });
+        }
+    });
+
+    if (!billData.length) {
+        alert('No data found for selected date range');
+        return;
+    }
+
+    // âœ… SAVE DATA FOR MONTHLY BILL PAGE
+    sessionStorage.setItem('MONTHLY_BILL_DATA', JSON.stringify({
+        gstPct,
+        taxPct,
+        rows: billData
+    }));
+
+    // âœ… OPEN MONTHLY BILL TWIG PAGE (HERE ONLY)
+    window.open(
+        'index.php?route=sale/monthly_sale&user_token=' + USER_TOKEN,
+        '_blank'
+    );
+
+    // Close modal
+    bootstrap.Modal.getInstance(document.getElementById('gstModal')).hide();
+});*/
+
+function loadAllSalesByTotalForGST(callback) {
+
+    let url = 'index.php?route=sale/retail.getSalesByTotalData'
+        + '&user_token=' + USER_TOKEN
+        + '&limit=100000'; // ðŸ”¥ VERY IMPORTANT
+
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            if (data.status) {
+                window.SALES_BY_TOTAL_DATA = data.rows || [];
+                callback();
+            } else {
+                alert('Failed to load sales data for GST');
+            }
+        })
+        .catch(() => alert('Error loading sales data for GST'));
 }
+
+
+function fetchAllSalesForMonthly(fromDate, toDate, callback) {
+
+    let url = 'index.php?route=sale/retail.getSalesByTotalForMonthly'
+        + '&user_token=' + USER_TOKEN
+        + '&filter_date_added=' + fromDate
+        + '&filter_date_modified=' + toDate;
+
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            if (data.status) {
+                callback(data.rows); // ðŸ”¥ ALL ROWS HERE
+            } else {
+                alert('Failed to load sales');
+            }
+        });
+}
+
+function openGstInvoice() {
+
+    const orderId    = document.getElementById('orderId').value.trim();
+    const gstPercent = document.getElementById('gstPercent').value || 0;
+    const taxPercent = document.getElementById('taxPercent').value || 0;
+    const userToken  = '{{ user_token }}';
+     const r_name    = document.getElementById('r_name')?.value || '';
+    const r_address = document.getElementById('r_address')?.value || '';
+    const r_state   = document.getElementById('r_state')?.value || '';
+    const r_mobile  = document.getElementById('r_mobile')?.value || '';
+    const r_gstin   = document.getElementById('r_gstin')?.value || '';
+    const r_pan     = document.getElementById('r_pan')?.value || '';
+
+    const c_name    = document.getElementById('c_name')?.value || '';
+    const c_address = document.getElementById('c_address')?.value || '';
+    const c_state   = document.getElementById('c_state')?.value || '';
+    const c_mobile  = document.getElementById('c_mobile')?.value || '';
+    const c_gstin   = document.getElementById('c_gstin')?.value || '';
+    const c_pan     = document.getElementById('c_pan')?.value || '';
+
+    if (!orderId) {
+        alert('Please enter Order ID');
+        return;
+    }
+
+    const url =
+        'index.php?route=sale/gstinvoice'
+        + '&user_token=' + userToken
+        + '&order_id=' + encodeURIComponent(orderId)
+        + '&gst_percent=' + encodeURIComponent(gstPercent)
+        + '&tax_percent=' + encodeURIComponent(taxPercent)
+        + '&user_token=' + encodeURIComponent(userToken)
+        + '&order_id=' + encodeURIComponent(orderId)
+        + '&gst_percent=' + encodeURIComponent(gstPercent)
+        + '&tax_percent=' + encodeURIComponent(taxPercent)
+
+        + '&r_name=' + encodeURIComponent(r_name)
+        + '&r_address=' + encodeURIComponent(r_address)
+        + '&r_state=' + encodeURIComponent(r_state)
+        + '&r_mobile=' + encodeURIComponent(r_mobile)
+        + '&r_gstin=' + encodeURIComponent(r_gstin)
+        + '&r_pan=' + encodeURIComponent(r_pan)
+
+        + '&c_name=' + encodeURIComponent(c_name)
+        + '&c_address=' + encodeURIComponent(c_address)
+        + '&c_state=' + encodeURIComponent(c_state)
+        + '&c_mobile=' + encodeURIComponent(c_mobile)
+        + '&c_gstin=' + encodeURIComponent(c_gstin)
+        + '&c_pan=' + encodeURIComponent(c_pan);
+
+
+    // âœ… OPEN LIKE MONTHLY SALE (NEW TAB)
+    window.open(url, '_blank');
+
+    bootstrap.Modal.getInstance(
+        document.getElementById('gstModal')
+    ).hide();
+}
+// ✅ OK button — submit payment
+
 </script>
 <!-- Customer History Modal -->
 <div class="modal fade" id="customerHistoryModal" tabindex="-1">
@@ -1199,6 +2415,7 @@ function openCustomerHistory(phone) {
                 <th>UPI</th>
                 <th>Advance</th>
                 <th>Due</th>
+                <th>Coupon</th>
               </tr>
             </thead>
             <tbody id="customer-history-data">
@@ -1209,6 +2426,80 @@ function openCustomerHistory(phone) {
           </table>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+<!-- Replace your existing balanceModal with this -->
+<div class="modal fade" id="balanceModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:#1e293b; color:#fff; border-radius:10px; border:none;">
+
+      <div class="modal-header" style="border-bottom:1px solid #334155;">
+        <h5 class="modal-title"><i class="fa fa-edit"></i> Edit Due Amount</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <input type="hidden" id="edit_order_id">
+        <input type="hidden" id="edit_customer_id">
+
+        <!-- ✅ NEW: Inline message area -->
+        <div id="balance-modal-msg" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:6px; font-size:14px; font-weight:500;"></div>
+
+       
+
+        <!-- Due Amount (readonly) -->
+        <div class="mb-3">
+          <label class="form-label" style="color:#cbd5e1;">Current Due Amount</label>
+          <input type="text" id="edit_balance" class="form-control"
+                 style="background:#0f172a;color:#4ade80;border:1px solid #334155;font-weight:700;font-size:16px;"
+                 readonly>
+        </div>
+
+        <!-- Amount to Pay -->
+        <div class="mb-3">
+          <label class="form-label" style="color:#cbd5e1;">Enter Amount Paid</label>
+          <input type="number" id="edit_amount" class="form-control"
+                 placeholder="0.00"
+                 style="background:#0f172a;color:#fff;border:1px solid #334155;">
+        </div>
+
+        <!-- Payment Method -->
+        <div class="mb-3">
+          <label class="form-label" style="color:#cbd5e1;">Payment Method</label>
+          <div class="d-flex gap-4 mt-1">
+
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="edit_payment_type"
+                     id="pay_cash" value="cash" checked>
+              <label class="form-check-label" for="pay_cash" style="color:#fff;">
+                <i class="fa fa-money"></i> Cash
+              </label>
+            </div>
+
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="edit_payment_type"
+                     id="pay_upi" value="upi">
+              <label class="form-check-label" for="pay_upi" style="color:#fff;">
+                <i class="fa fa-mobile"></i> UPI
+              </label>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer" style="border-top:1px solid #334155;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="min-width:100px;">
+          <i class="fa fa-times"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-success" id="updateDue" style="min-width:100px;">
+          <i class="fa fa-check"></i> OK
+        </button>
+      </div>
+
     </div>
   </div>
 </div>

@@ -476,15 +476,15 @@
         {% endif %}
         {% if order.invoice.advance_used > 0 %}
  <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; margin-top: 3px;">
-            <span>ADVANCE USED</span><span>{{ order.invoice.advance_used }}</span>
+            <span>ADVANCE USED</span><span>{{ order.invoice.advance_used }}.00</span>
         </div> 
 {% endif %}
-
-        {% if order.invoice.due_amount > 0 %}
-        <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; margin-top: 3px; color: red;">
-            <span>DUE AMOUNT</span><span>{{ order.invoice.due_amount }}</span>
-        </div>
-        {% endif %}
+{% if order.invoice.balance > 0 %}
+    <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:700; margin-top:3px; color:red;">
+        <span>DUE AMOUNT</span>
+        <span>{{ order.invoice.balance }}.00</span>
+    </div>
+{% endif %}
 
         <div class="line"></div>
 

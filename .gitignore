@@ -1,0 +1,106 @@
+# =========================
+# OpenCart 4 .gitignore
+# =========================
+ 
+# =========================
+# System Storage (IMPORTANT)
+# =========================
+ 
+# Cache
+system/storagex8nclbm3t3z3/cache/*
+system/storagex8nclbm3t3z3/cache/**
+ 
+# Sessions
+system/storagex8nclbm3t3z3/session/*
+system/storagex8nclbm3t3z3/session/**
+ 
+# Logs
+system/storagex8nclbm3t3z3/logs/*
+system/storagex8nclbm3t3z3/logs/**
+ 
+# Modification cache
+system/storagex8nclbm3t3z3/modification/*
+system/storagex8nclbm3t3z3/modification/**
+ 
+# Uploads temp
+system/storagex8nclbm3t3z3/upload/*
+system/storagex8nclbm3t3z3/upload/**
+ 
+# Vendor (if using composer locally)
+system/storagex8nclbm3t3z3/vendor/*
+ 
+# =========================
+# Template Cache (Twig)
+# =========================
+ 
+system/storagex8nclbm3t3z3/cache/template/*
+system/storagex8nclbm3t3z3/cache/template/**
+ 
+# =========================
+# Image Cache
+# =========================
+ 
+image/cache/*
+image/cache/**
+ 
+# =========================
+# Config Files (Sensitive)
+# =========================
+ 
+config.php
+admin/config.php
+ 
+# =========================
+# Environment Files
+# =========================
+ 
+.env
+.env.*
+ 
+# =========================
+# IDE / OS Files
+# =========================
+ 
+# VS Code
+.vscode/
+ 
+# PHPStorm
+.idea/
+ 
+# Mac
+.DS_Store
+ 
+# Linux
+*.swp
+ 
+# Windows
+Thumbs.db
+ 
+# =========================
+# Composer
+# =========================
+ 
+ 
+# =========================
+# Logs & Debug
+# =========================
+ 
+*.log
+error_log
+ 
+# =========================
+# Node (if used)
+# =========================
+ 
+node_modules/
+npm-debug.log
+yarn-error.log
+ 
+# =========================
+# Backup Files
+# =========================
+ 
+*.zip
+*.tar.gz
+*.sql
+*.bak

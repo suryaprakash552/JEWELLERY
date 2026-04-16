@@ -1636,24 +1636,29 @@ if ($customer_id > 0) {
 
             $this->load->model("account/customer");
 
-            $credit = [
-                "customerid" => $agentId,
-                "order_id" => $order_id,
-                "amount" => $subtotal,
-                "description" => $mobile,
-                "transactiontype" => "CREDIT",
-                "transactionsubtype" => "TRADE",
-                "txtid" => $order_id,
-            ];
-            return $this->response->setOutput(
-                json_encode([
-                    "status" => "success",
-                    "order_id" => $order_id,
-                    "walletUpdate" => $this->model_checkout_order->doWalletCredit(
-                        $credit
-                    ),
-                ])
-            );
+           // Only run this for specific payment types, not all orders
+if (strtolower($paymentThrough) === 'advance') {
+    $credit = [
+        "customerid" => $customer_id,
+        "order_id"   => $order_id,
+        "amount"     => $subtotal,
+        "description" => $mobile,
+        "transactiontype"    => "CREDIT",
+        "transactionsubtype" => "TRADE",
+        "txtid" => $order_id,
+    ];
+    $walletUpdate = $this->model_checkout_order->doWalletCredit($credit);
+} else {
+    $walletUpdate = null;
+}
+
+return $this->response->setOutput(
+    json_encode([
+        "status"       => "success",
+        "order_id"     => $order_id,
+        "walletUpdate" => $walletUpdate,
+    ])
+);
         } catch (Throwable $e) {
             return $this->response->setOutput(
                 json_encode([
@@ -3488,8 +3493,8 @@ $this->load->view(
         $download_link = HTTP_SERVER
             . 'index.php?route=extension/purpletree_pos/pos/home|publicInvoice'
             . '&order_id=' . $order_id;
-        $download_invoice = 
-            'JEWELLERY2/index.php?route=extension/purpletree_pos/pos/home|publicInvoice'
+        $download_invoice = HTTP_SERVER
+            . 'index.php?route=extension/purpletree_pos/pos/home|publicInvoice'
             . '&order_id=' . $order_id;
     }
         $link = 'https://myteknoland.com/';

@@ -1536,13 +1536,15 @@ if ($this->user->hasPermission('access', 'gst/retail_order')) {
     ];
 }
 
-			$data['menus'][] = [
-    'id'       => 'menu-gst',
-    'icon'     => 'fas fa-percent',
-    'name'     => 'GST',
-    'href'     => '',
-    'children' => $gst
-];
+		if ($gst) {
+    $data['menus'][] = [
+        'id'       => 'menu-gst',
+        'icon'     => 'fas fa-percent',
+        'name'     => 'GST',
+        'href'     => '',
+        'children' => $gst
+    ];
+}
 
 			return $this->load->view('common/column_left', $data);
 		} else {

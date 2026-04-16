@@ -48,7 +48,7 @@ class Gst extends \Opencart\System\Engine\Controller {
         foreach ($results as $r) {
             $rows[] = [
                 'date' => $r['order_date'],
-                's_total' => $r['s_total']
+               's_total' => $r['s_price']
             ];
         }
 

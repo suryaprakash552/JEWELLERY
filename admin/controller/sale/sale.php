@@ -587,7 +587,7 @@ $total   = $this->model_sale_sale->getTotalSellers($filter);
                 <th>Discount</th>
                 <th>Cash</th>
                 <th>UPI</th>
-                <th>AA</th>
+                <th>Advance</th>
             </tr>";
 
             $results = $this->model_sale_sale->getReport($filter);
@@ -611,7 +611,7 @@ $total   = $this->model_sale_sale->getTotalSellers($filter);
                     <td>{$r['discount']}</td>
                     <td>{$r['cash']}</td>
                     <td>{$r['upi']}</td>
-                    <td>{$r['aa']}</td>
+                    <td>{$r['advance']}</td>
                 </tr>";
                 $sr++;
             }

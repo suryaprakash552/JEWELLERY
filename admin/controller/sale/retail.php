@@ -581,7 +581,8 @@ class Retail extends \Opencart\System\Engine\Controller {
                     <th>R Price</th><th>R Tax</th><th>R Total</th>
                     <th>S Price</th><th>S Tax</th><th>S Total</th>
                     <th>Profit</th><th>Cash</th><th>UPI</th>
-                    <th>Advance</th><th>Ref</th><th>Discount</th><th>Seller ID</th>
+                    <th>Advance</th><th>Due</th>
+<th>Coupon</th><th>Discount</th>
                 </tr>";
 
                 $results = $this->model_sale_retail->getOrders($filter);
@@ -593,7 +594,8 @@ class Retail extends \Opencart\System\Engine\Controller {
                         <td>{$r['r_price']}</td><td>{$r['r_tax']}</td><td>{$r['r_total']}</td>
                         <td>{$r['s_price']}</td><td>{$r['s_tax']}</td><td>{$r['s_price']}</td>
                         <td>{$profit}</td><td>{$r['cash']}</td><td>{$r['upi']}</td>
-                        <td>{$r['advance']}</td><td>{$r['ref']}</td><td>{$r['discount']}</td><td>{$r['seller_id']}</td>
+                        <td>{$r['advance']}</td><td>{$r['balance']}</td>
+                    <td>{$r['coupon']}</td><td>{$r['discount']}</td>
                     </tr>";
                     $sr++;
                 }
@@ -604,7 +606,7 @@ class Retail extends \Opencart\System\Engine\Controller {
                     <th>SRNO</th><th>Date</th><th>No Orders</th><th>No Products</th>
                     <th>R Price</th><th>R Tax</th><th>R Total</th>
                     <th>S Price</th><th>S Tax</th><th>S Total</th>
-                    <th>Profit</th><th>Discount</th><th>Cash</th><th>UPI</th><th>Due</th><th>Advance</th>
+                    <th>Profit</th><th>Discount</th><th>Cash</th><th>UPI</th><th>Due</th><th>Advance</th><th>Coupon</th>
                 </tr>";
 
                 $results = $this->model_sale_retail->getReport($filter);
@@ -616,7 +618,7 @@ class Retail extends \Opencart\System\Engine\Controller {
                         <td>{$r['r_price']}</td><td>{$r['r_tax']}</td><td>{$r['r_total']}</td>
                         <td>{$r['s_price']}</td><td>{$r['s_tax']}</td><td>{$r['s_price']}</td>
                         <td>{$profit}</td><td>{$r['discount']}</td>
-                        <td>{$r['cash']}</td><td>{$r['upi']}</td><td>{$r['due']}</td><td>{$r['advance']}</td>
+                        <td>{$r['cash']}</td><td>{$r['upi']}</td><td>{$r['due']}</td><td>{$r['advance']}</td><td>{$r['coupon']}</td>
                     </tr>";
                     $sr++;
                 }

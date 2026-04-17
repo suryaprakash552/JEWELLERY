@@ -20,176 +20,214 @@ class Wholesale extends \Opencart\System\Engine\Controller {
 
     /* ================= TAB 1: SALES PRICE (per order) ================= */
 
-    public function orders(): void {
-        $this->load->model('orders/wholesale');
+   public function orders(): void {
+    $this->load->model('orders/wholesale');
 
-        $order_id = $this->request->get['order_id'] ?? 0;
+    $order_id = $this->request->get['order_id'] ?? 0;
 
-        if ($order_id) {
-            // Single order lookup
-            $this->load->model('sale/order');
-            $order = $this->model_orders_wholesale->getOrderReport((int)$order_id);
+    if ($order_id) {
+        // Single order lookup
+        $this->load->model('sale/order');
+        $order = $this->model_orders_wholesale->getOrderReport((int)$order_id);
 
-            if (!$order) {
-                $this->sendJson(['success' => false, 'error' => 'Order not found']);
-                return;
-            }
-
-            $this->sendJson(['success' => true, 'order' => $order]);
+        if (!$order) {
+            $this->sendJson(['success' => false, 'error' => 'Order not found']);
             return;
         }
 
-        // Paginated list  →  mirrors admin getSalesPriceData
-        $page  = $this->page();
-        $limit = $this->limit();
-
-        $filter = [
-            'filter_date_added'    => $this->request->get['filter_date_added'] ?? '',
-            'filter_date_modified' => $this->request->get['filter_date_modified'] ?? '',
-            'start'                => ($page - 1) * $limit,
-            'limit'                => $limit
-        ];
-
-        $results = $this->model_orders_wholesale->getOrders($filter);
-        $total   = $this->model_orders_wholesale->getTotalOrders($filter);
-
-        $rows = [];
-        $sr   = 1 + (($page - 1) * $limit);
-
-        foreach ($results as $r) {
-            $s_total = $r['s_price'] ?? 0;   // Bill Amount  (same as admin)
-            $r_total = $r['r_total'] ?? 0;   // Purchase Total
-            $profit  = $s_total - $r_total;
-
-            $rows[] = [
-                'srno'      => $sr++,
-                'order_id'  => $r['order_id']  ?? '',
-                'date_added'=> $r['date_added'] ?? '',
-                'r_price'   => number_format($r['r_price']   ?? 0, 2),
-                'r_tax'     => number_format($r['r_tax']     ?? 0, 2),
-                'r_total'   => number_format($r['r_total']   ?? 0, 2),
-                's_price'   => number_format($r['s_price']   ?? 0, 2),
-                's_tax'     => number_format($r['s_tax']     ?? 0, 2),
-                's_total'   => number_format($r['s_price']   ?? 0, 2),  // s_total = s_price (admin logic)
-                'cash'      => number_format($r['cash']      ?? 0, 2),
-                'upi'       => number_format($r['upi']       ?? 0, 2),
-                'advance'   => number_format($r['advance']   ?? 0, 2),
-                'balance'   => number_format($r['balance']   ?? 0, 2),
-                'coupon'  => $r['coupon'] ?? '',
-                'discount'  => number_format($r['discount']  ?? 0, 2),
-                'seller_id' => $r['seller_id'] ?? '',
-                'profit'    => number_format($profit, 2)
-            ];
-        }
-
-        $this->sendJson([
-            'success' => true,
-            'rows'    => $rows,
-            'total'   => $total,
-            'page'    => $page,
-            'limit'   => $limit
-        ]);
+        $this->sendJson(['success' => true, 'order' => $order]);
+        return;
     }
 
+    // Paginated list
+    $page  = $this->page();
+    $limit = $this->limit();
+
+    // ✅ FILTERS ADDED (ONLY CHANGE)
+    $filter = [
+        // support both formats
+        'filter_date_added'    => $this->request->get['filter_date_added'] ?? $this->request->get['from_date'] ?? '',
+        'filter_date_modified' => $this->request->get['filter_date_modified'] ?? $this->request->get['to_date'] ?? '',
+
+        // new keys for model
+        'filter_date_from' => $this->request->get['from_date'] ?? '',
+        'filter_date_to'   => $this->request->get['to_date'] ?? '',
+
+        'start' => ($page - 1) * $limit,
+        'limit' => $limit
+    ];
+
+    $results = $this->model_orders_wholesale->getOrders($filter);
+    $total   = $this->model_orders_wholesale->getTotalOrders($filter);
+
+    $rows = [];
+    $sr   = 1 + (($page - 1) * $limit);
+
+    foreach ($results as $r) {
+        $s_total = $r['s_price'] ?? 0;
+        $r_total = $r['r_total'] ?? 0;
+        $profit  = $s_total - $r_total;
+
+        $rows[] = [
+            'srno'      => $sr++,
+            'order_id'  => $r['order_id']  ?? '',
+            'date_added'=> $r['date_added'] ?? '',
+            'r_price'   => number_format($r['r_price']   ?? 0, 2),
+            'r_tax'     => number_format($r['r_tax']     ?? 0, 2),
+            'r_total'   => number_format($r['r_total']   ?? 0, 2),
+            's_price'   => number_format($r['s_price']   ?? 0, 2),
+            's_tax'     => number_format($r['s_tax']     ?? 0, 2),
+
+            // ❌ NOT CHANGED
+            's_total'   => number_format($r['s_price']   ?? 0, 2),
+
+            'cash'      => number_format($r['cash']      ?? 0, 2),
+            'upi'       => number_format($r['upi']       ?? 0, 2),
+            'advance'   => number_format($r['advance']   ?? 0, 2),
+            'balance'   => number_format($r['balance']   ?? 0, 2),
+            'coupon'    => $r['coupon'] ?? '',
+            'discount'  => number_format($r['discount']  ?? 0, 2),
+            'seller_id' => $r['seller_id'] ?? '',
+
+            'profit'    => number_format($profit, 2)
+        ];
+    }
+
+    $this->sendJson([
+        'success' => true,
+        'rows'    => $rows,
+        'total'   => $total,
+        'page'    => $page,
+        'limit'   => $limit
+    ]);
+}
     /* ================= TAB 2: SALES BY ORDER (daily summary) ================= */
 
-    public function salesByOrder(): void {
-        $this->load->model('orders/wholesale');
+  public function salesByOrder(): void {
+    $this->load->model('orders/wholesale');
 
-        $page  = $this->page();
-        $limit = $this->limit();
+    $page  = $this->page();
+    $limit = $this->limit();
 
-        $results = $this->model_orders_wholesale->getDailyOrderSummary([
-            'start' => ($page - 1) * $limit,
-            'limit' => $limit
-        ]);
+    // ✅ FILTERS ADDED (ONLY CHANGE)
+    $filter = [
+        // support both formats
+        'filter_date_added'    => $this->request->get['filter_date_added'] ?? $this->request->get['from_date'] ?? '',
+        'filter_date_modified' => $this->request->get['filter_date_modified'] ?? $this->request->get['to_date'] ?? '',
 
-        $total = $this->model_orders_wholesale->getTotalOrderDays();
+        // new keys for model
+        'filter_date_from' => $this->request->get['from_date'] ?? '',
+        'filter_date_to'   => $this->request->get['to_date'] ?? '',
 
-        $rows = [];
-        $sr   = 1 + (($page - 1) * $limit);
+        'start' => ($page - 1) * $limit,
+        'limit' => $limit
+    ];
 
-        foreach ($results as $r) {
-            $s_price = $r['s_price'] ?? 0;
-            $s_tax   = $r['s_tax']   ?? 0;
-            $r_total = $r['r_total'] ?? 0;
-            $s_total = $s_price;               // s_total = s_price only (admin logic)
-            $profit  = $s_total - $r_total;
+    $results = $this->model_orders_wholesale->getDailyOrderSummary($filter);
 
-            $rows[] = [
-                'srno'        => $sr++,
-                'date'        => $r['order_date'] ?? '',
-                'no_orders'   => $r['no_orders']  ?? 0,
-                'no_products' => $r['no_products'] ?? 0,
-                'r_price'     => number_format($r['r_price'] ?? 0, 2),
-                'r_tax'       => number_format($r['r_tax']   ?? 0, 2),
-                'r_total'     => number_format($r_total,             2),
-                's_price'     => number_format($s_price,             2),
-                's_tax'       => number_format($s_tax,               2),
-                's_total'     => number_format($s_total,             2),  // s_total = s_price
-                'discount'    => number_format($r['discount'] ?? 0, 2),
-                'profit'      => number_format($profit,              2)
-            ];
-        }
+    // ✅ ALSO PASS FILTER TO TOTAL
+    $total = $this->model_orders_wholesale->getTotalOrderDays($filter);
 
-        $this->sendJson([
-            'success' => true,
-            'rows'    => $rows,
-            'total'   => $total,
-            'page'    => $page,
-            'limit'   => $limit
-        ]);
+    $rows = [];
+    $sr   = 1 + (($page - 1) * $limit);
+
+    foreach ($results as $r) {
+        $s_price = $r['s_price'] ?? 0;
+        $s_tax   = $r['s_tax']   ?? 0;
+        $r_total = $r['r_total'] ?? 0;
+
+        // ❌ NOT CHANGED
+        $s_total = $s_price;
+
+        $profit  = $s_total - $r_total;
+
+        $rows[] = [
+            'srno'        => $sr++,
+            'date'        => $r['order_date'] ?? '',
+            'no_orders'   => $r['no_orders']  ?? 0,
+            'no_products' => $r['no_products'] ?? 0,
+            'r_price'     => number_format($r['r_price'] ?? 0, 2),
+            'r_tax'       => number_format($r['r_tax']   ?? 0, 2),
+            'r_total'     => number_format($r_total,             2),
+            's_price'     => number_format($s_price,             2),
+            's_tax'       => number_format($s_tax,               2),
+            's_total'     => number_format($s_total,             2),
+            'discount'    => number_format($r['discount'] ?? 0, 2),
+            'profit'      => number_format($profit,              2)
+        ];
     }
 
+    $this->sendJson([
+        'success' => true,
+        'rows'    => $rows,
+        'total'   => $total,
+        'page'    => $page,
+        'limit'   => $limit
+    ]);
+}
     /* ================= TAB 3: SALES BY PRODUCT (daily summary) ================= */
 
-    public function salesByProduct(): void {
-        $this->load->model('orders/wholesale');
+  public function salesByProduct(): void {
+    $this->load->model('orders/wholesale');
 
-        $page  = $this->page();
-        $limit = $this->limit();
+    $page  = $this->page();
+    $limit = $this->limit();
 
-        $results = $this->model_orders_wholesale->getDailyProductReport([
-            'start' => ($page - 1) * $limit,
-            'limit' => $limit
-        ]);
+    // ✅ FILTERS ADDED (ONLY CHANGE)
+    $filter = [
+        // support both formats
+        'filter_date_added'    => $this->request->get['filter_date_added'] ?? $this->request->get['from_date'] ?? '',
+        'filter_date_modified' => $this->request->get['filter_date_modified'] ?? $this->request->get['to_date'] ?? '',
 
-        $total = $this->model_orders_wholesale->getTotalDays();
+        // new keys for model
+        'filter_date_from' => $this->request->get['from_date'] ?? '',
+        'filter_date_to'   => $this->request->get['to_date'] ?? '',
 
-        $rows = [];
-        $sr   = 1 + (($page - 1) * $limit);
+        'start' => ($page - 1) * $limit,
+        'limit' => $limit
+    ];
 
-        foreach ($results as $r) {
-            $s_price = $r['s_price'] ?? 0;
-            $s_tax   = $r['s_tax']   ?? 0;
-            $r_total = $r['r_total'] ?? 0;
-            $s_total = $s_price;               // s_total = s_price only (admin logic)
-            $profit  = $s_total - $r_total;
+    $results = $this->model_orders_wholesale->getDailyProductReport($filter);
 
-            $rows[] = [
-                'srno'           => $sr++,
-                'date'           => $r['order_date']    ?? '',
-                'total_products' => $r['total_products'] ?? 0,
-                'r_price'        => number_format($r['r_price'] ?? 0, 2),
-                'r_tax'          => number_format($r['r_tax']   ?? 0, 2),
-                'r_total'        => number_format($r_total,             2),
-                's_price'        => number_format($s_price,             2),
-                's_tax'          => number_format($s_tax,               2),
-                's_total'        => number_format($s_total,             2),  // s_total = s_price
-                'discount'       => number_format($r['discount'] ?? 0, 2),
-                'profit'         => number_format($profit,              2)
-            ];
-        }
+    // ✅ ALSO PASS FILTER TO TOTAL
+    $total = $this->model_orders_wholesale->getTotalDays($filter);
 
-        $this->sendJson([
-            'success' => true,
-            'rows'    => $rows,
-            'total'   => $total,
-            'page'    => $page,
-            'limit'   => $limit
-        ]);
+    $rows = [];
+    $sr   = 1 + (($page - 1) * $limit);
+
+    foreach ($results as $r) {
+        $s_price = $r['s_price'] ?? 0;
+        $s_tax   = $r['s_tax']   ?? 0;
+        $r_total = $r['r_total'] ?? 0;
+
+        // ❌ NOT CHANGED
+        $s_total = $s_price;
+
+        $profit  = $s_total - $r_total;
+
+        $rows[] = [
+            'srno'           => $sr++,
+            'date'           => $r['order_date']    ?? '',
+            'total_products' => $r['total_products'] ?? 0,
+            'r_price'        => number_format($r['r_price'] ?? 0, 2),
+            'r_tax'          => number_format($r['r_tax']   ?? 0, 2),
+            'r_total'        => number_format($r_total,             2),
+            's_price'        => number_format($s_price,             2),
+            's_tax'          => number_format($s_tax,               2),
+            's_total'        => number_format($s_total,             2),
+            'discount'       => number_format($r['discount'] ?? 0, 2),
+            'profit'         => number_format($profit,              2)
+        ];
     }
 
+    $this->sendJson([
+        'success' => true,
+        'rows'    => $rows,
+        'total'   => $total,
+        'page'    => $page,
+        'limit'   => $limit
+    ]);
+}
     /* ================= TAB 4: SALES BY NUMBER (phone) ================= */
 
     public function salesByNumber(): void {
@@ -335,117 +373,139 @@ class Wholesale extends \Opencart\System\Engine\Controller {
 
     /* ================= TAB 6: SALES BY TOTAL AMOUNT (daily, with payments) ================= */
 
-    public function salesByTotalAmount(): void {
-        $this->load->model('orders/wholesale');
+   public function salesByTotalAmount(): void {
+    $this->load->model('orders/wholesale');
 
-        $page  = $this->page();
-        $limit = $this->limit();
+    $page  = $this->page();
+    $limit = $this->limit();
 
-        $filter = [
-            'filter_date_added'    => $this->request->get['filter_date_added']    ?? '',
-            'filter_date_modified' => $this->request->get['filter_date_modified'] ?? '',
-            'start'                => ($page - 1) * $limit,
-            'limit'                => $limit
+    // ✅ FILTERS ADDED (ONLY CHANGE)
+    $filter = [
+        // support both formats
+        'filter_date_added'    => $this->request->get['filter_date_added'] ?? $this->request->get['from_date'] ?? '',
+        'filter_date_modified' => $this->request->get['filter_date_modified'] ?? $this->request->get['to_date'] ?? '',
+
+        // new keys for model
+        'filter_date_from' => $this->request->get['from_date'] ?? '',
+        'filter_date_to'   => $this->request->get['to_date'] ?? '',
+
+        'start' => ($page - 1) * $limit,
+        'limit' => $limit
+    ];
+
+    $results = $this->model_orders_wholesale->getReport($filter);
+
+    // ✅ ALSO PASS FILTER TO TOTAL
+    $total = $this->model_orders_wholesale->getTotalDaysByAmountFiltered($filter);
+
+    $rows = [];
+    $sr   = 1 + (($page - 1) * $limit);
+
+    foreach ($results as $r) {
+        $s_price = $r['s_price'] ?? 0;
+        $s_tax   = $r['s_tax']   ?? 0;
+        $r_total = $r['r_total'] ?? 0;
+
+        // ❌ NOT CHANGED
+        $s_total = $s_price;
+
+        $profit  = $s_total - $r_total;
+
+        $rows[] = [
+            'srno'        => $sr++,
+            'date'        => $r['order_date']  ?? '',
+            'no_orders'   => $r['no_orders']   ?? 0,
+            'no_products' => $r['no_products'] ?? 0,
+            'r_price'     => number_format($r['r_price']  ?? 0, 2),
+            'r_tax'       => number_format($r['r_tax']    ?? 0, 2),
+            'r_total'     => number_format($r_total,             2),
+            's_price'     => number_format($s_price,             2),
+            's_tax'       => number_format($s_tax,               2),
+            's_total'     => number_format($s_total,             2),
+            'discount'    => number_format($r['discount'] ?? 0, 2),
+            'coupon'      => $r['coupon'] ?? '',
+            'cash'        => number_format($r['cash']     ?? 0, 2),
+            'upi'         => number_format($r['upi']      ?? 0, 2),
+            'due'         => number_format($r['due']      ?? 0, 2),
+            'advance'     => number_format($r['advance']  ?? 0, 2),
+            'profit'      => number_format($profit,              2)
         ];
-
-        $results = $this->model_orders_wholesale->getReport($filter);
-        $total   = $this->model_orders_wholesale->getTotalDaysByAmountFiltered($filter);
-
-        $rows = [];
-        $sr   = 1 + (($page - 1) * $limit);
-
-        foreach ($results as $r) {
-            $s_price = $r['s_price'] ?? 0;
-            $s_tax   = $r['s_tax']   ?? 0;
-            $r_total = $r['r_total'] ?? 0;
-            $s_total = $s_price;               // s_total = s_price only (admin logic)
-            $profit  = $s_total - $r_total;
-
-            $rows[] = [
-                'srno'        => $sr++,
-                'date'        => $r['order_date']  ?? '',
-                'no_orders'   => $r['no_orders']   ?? 0,
-                'no_products' => $r['no_products'] ?? 0,
-                'r_price'     => number_format($r['r_price']  ?? 0, 2),
-                'r_tax'       => number_format($r['r_tax']    ?? 0, 2),
-                'r_total'     => number_format($r_total,             2),
-                's_price'     => number_format($s_price,             2),
-                's_tax'       => number_format($s_tax,               2),
-                's_total'     => number_format($s_total,             2),  // s_total = s_price
-                'discount'    => number_format($r['discount'] ?? 0, 2),
-                  'coupon' => $r['coupon'] ?? '',
-                'cash'        => number_format($r['cash']     ?? 0, 2),
-                'upi'         => number_format($r['upi']      ?? 0, 2),
-                'due'         => number_format($r['due']      ?? 0, 2),
-                'advance'     => number_format($r['advance']  ?? 0, 2),
-                'profit'      => number_format($profit,              2)
-            ];
-        }
-
-        $this->sendJson([
-            'success' => true,
-            'rows'    => $rows,
-            'total'   => $total,
-            'page'    => $page,
-            'limit'   => $limit
-        ]);
     }
 
+    $this->sendJson([
+        'success' => true,
+        'rows'    => $rows,
+        'total'   => $total,
+        'page'    => $page,
+        'limit'   => $limit
+    ]);
+}
     /* ================= TAB 7: SALES BY COUPON ================= */
+public function salesByCoupon(): void {
+    $this->load->model('orders/wholesale');
 
-    public function salesByCoupon(): void {
-        $this->load->model('orders/wholesale');
+    $page  = $this->page();
+    $limit = $this->limit();
 
-        $page  = $this->page();
-        $limit = $this->limit();
+    // ✅ FILTERS ADDED (ONLY CHANGE)
+    $filter = [
+        // support both formats
+        'filter_date_added'    => $this->request->get['filter_date_added'] ?? $this->request->get['from_date'] ?? '',
+        'filter_date_modified' => $this->request->get['filter_date_modified'] ?? $this->request->get['to_date'] ?? '',
 
-        $filter = [
-            'filter_date_added'    => $this->request->get['filter_date_added']    ?? '',
-            'filter_date_modified' => $this->request->get['filter_date_modified'] ?? '',
-            'start'                => ($page - 1) * $limit,
-            'limit'                => $limit
+        // new keys for model
+        'filter_date_from' => $this->request->get['from_date'] ?? '',
+        'filter_date_to'   => $this->request->get['to_date'] ?? '',
+
+        'start' => ($page - 1) * $limit,
+        'limit' => $limit
+    ];
+
+    $results = $this->model_orders_wholesale->getCouponSummary($filter);
+
+    // ✅ ALSO PASS FILTER TO TOTAL
+    $total = $this->model_orders_wholesale->getTotalCoupons($filter);
+
+    $rows = [];
+    $sr   = 1 + (($page - 1) * $limit);
+
+    foreach ($results as $r) {
+        $s_price = $r['s_price'] ?? 0;
+        $s_tax   = $r['s_tax']   ?? 0;
+        $r_total = $r['r_total'] ?? 0;
+
+        // ❌ NOT CHANGED
+        $s_total = $s_price;
+
+        $profit  = $s_total - $r_total;
+
+        $rows[] = [
+            'srno'        => $sr++,
+            'date'        => $r['order_date']  ?? '',
+            'number'      => $r['number']      ?? '',
+            'name'        => $r['name']        ?? '',
+            'coupon'      => $r['coupon_code'] ?? '',
+            'no_orders'   => $r['no_orders']   ?? 0,
+            'no_products' => $r['no_products'] ?? 0,
+            'r_price'     => number_format($r['r_price']  ?? 0, 2),
+            'r_tax'       => number_format($r['r_tax']    ?? 0, 2),
+            'r_total'     => number_format($r_total,             2),
+            's_price'     => number_format($s_price,             2),
+            's_tax'       => number_format($s_tax,               2),
+            's_total'     => number_format($s_total,             2),
+            'discount'    => number_format($r['discount'] ?? 0, 2),
+            'profit'      => number_format($profit,              2)
         ];
-
-        $results = $this->model_orders_wholesale->getCouponSummary($filter);
-        $total   = $this->model_orders_wholesale->getTotalCoupons();
-
-        $rows = [];
-        $sr   = 1 + (($page - 1) * $limit);
-
-        foreach ($results as $r) {
-            $s_price = $r['s_price'] ?? 0;
-            $s_tax   = $r['s_tax']   ?? 0;
-            $r_total = $r['r_total'] ?? 0;
-            $s_total = $s_price;               // s_total = s_price only (admin logic)
-            $profit  = $s_total - $r_total;
-
-            $rows[] = [
-                'srno'        => $sr++,
-                'date'        => $r['order_date']  ?? '',
-                'number'      => $r['number']       ?? '',
-                'name'        => $r['name']         ?? '',
-                'coupon'      => $r['coupon_code']  ?? '',
-                'no_orders'   => $r['no_orders']    ?? 0,
-                'no_products' => $r['no_products']  ?? 0,
-                'r_price'     => number_format($r['r_price']  ?? 0, 2),
-                'r_tax'       => number_format($r['r_tax']    ?? 0, 2),
-                'r_total'     => number_format($r_total,             2),
-                's_price'     => number_format($s_price,             2),
-                's_tax'       => number_format($s_tax,               2),
-                's_total'     => number_format($s_total,             2),  // s_total = s_price
-                'discount'    => number_format($r['discount'] ?? 0, 2),
-                'profit'      => number_format($profit,              2)
-            ];
-        }
-
-        $this->sendJson([
-            'success' => true,
-            'rows'    => $rows,
-            'total'   => $total,
-            'page'    => $page,
-            'limit'   => $limit
-        ]);
     }
+
+    $this->sendJson([
+        'success' => true,
+        'rows'    => $rows,
+        'total'   => $total,
+        'page'    => $page,
+        'limit'   => $limit
+    ]);
+}
 public function salesTodayTotalAmount(): void {
     $this->load->model('orders/wholesale'); 
 
@@ -509,4 +569,4 @@ public function salesTodayTotalAmount(): void {
         ]
     ]);
 }
-}  
+}

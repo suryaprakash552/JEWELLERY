@@ -1,5 +1,4 @@
-
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
    <head>
       <meta charset="utf-8">
@@ -12488,11 +12487,18 @@ if (data.upc && data.upc !== '') {
            });
          }
          let mainSearchAutocompleteTimer;
+         let autoAddPending = false;
+         let lastAutoAddedBarcode = '';
+         let lastAutoAddTimestamp = 0;
          function handleImmediateInput(inputElement) {
              const currentValue = inputElement.value.trim();
 
              if (currentValue.length === 8 || currentValue.length === 15) {
+                 autoAddPending = true;
+                 lastAutoAddedBarcode = currentValue;
+                 lastAutoAddTimestamp = Date.now();
                  findProductBySKU(currentValue).then(function(product) {
+                     autoAddPending = false;
                      if (product) {
                          inputElement.classList.remove('error');
                          inputElement.classList.add('success');
@@ -12507,6 +12513,8 @@ if (data.upc && data.upc !== '') {
                          setTimeout(() => inputElement.classList.remove('error'), 2000);
                          showErrorFeedback('Product not found: ' + currentValue);
                      }
+                 }).catch(function() {
+                     autoAddPending = false;
                  });
                  hideSearchAutocomplete();
                  return;
@@ -12563,13 +12571,22 @@ if (data.upc && data.upc !== '') {
                  return;
              }
              if (event.key === 'Enter') {
+                 const searchTerm = inputElement.value.trim();
+                 if (autoAddPending && searchTerm && searchTerm === lastAutoAddedBarcode) {
+                     event.preventDefault();
+                     return;
+                 }
+                 if (lastAutoAddedBarcode && searchTerm && searchTerm === lastAutoAddedBarcode && Date.now() - lastAutoAddTimestamp < 1500) {
+                     event.preventDefault();
+                     lastAutoAddedBarcode = '';
+                     return;
+                 }
                  event.preventDefault();
                  const selectedItem = getSelectedAutocompleteItem();
                  if (selectedItem) {
                      selectSearchAutocompleteProduct(selectedItem.dataset.productId);
                      return;
                  }
-                 const searchTerm = inputElement.value.trim();
                  const firstItem = document.querySelector('#main_search_autocomplete_list li[data-product-id]');
                  if (firstItem) {
                      selectSearchAutocompleteProduct(firstItem.dataset.productId);

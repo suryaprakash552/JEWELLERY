@@ -13,7 +13,13 @@ class Retail extends \Opencart\System\Engine\Model {
         SELECT
             inv.order_id,
             DATE(MAX(o.date_added)) AS date_added,
-            GREATEST(MAX(inv.cash_amount) - IFNULL(MAX(inv.returnable_balance),0), 0) AS cash,
+            CASE 
+        WHEN MAX(o.order_status_id) = 6 THEN MAX(inv.sub_total)
+        ELSE GREATEST(
+            MAX(inv.cash_amount) -
+            IF(MAX(inv.cash_amount) > 0, IFNULL(MAX(inv.returnable_balance),0), 0),
+        0)
+    END AS cash,
             GREATEST(MAX(inv.upi_amount)  - IFNULL(MAX(inv.returnable_balance),0), 0) AS upi,
             MAX(inv.advance_used) AS advance,
             MAX(inv.balance)      AS balance,

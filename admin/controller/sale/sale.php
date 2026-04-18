@@ -584,10 +584,12 @@ $total   = $this->model_sale_sale->getTotalSellers($filter);
                 <th>S Tax</th>
                 <th>S Total</th>
                 <th>Profit</th>
-                <th>Discount</th>
                 <th>Cash</th>
                 <th>UPI</th>
                 <th>Advance</th>
+                <th>Due</th>
+                   <th>Discount</th>
+                   <th>Coupon</th>
             </tr>";
 
             $results = $this->model_sale_sale->getReport($filter);
@@ -608,10 +610,12 @@ $total   = $this->model_sale_sale->getTotalSellers($filter);
                     <td>{$r['s_tax']}</td>
                     <td>{$r['s_total']}</td>
                     <td>{$profit}</td>
-                    <td>{$r['discount']}</td>
                     <td>{$r['cash']}</td>
                     <td>{$r['upi']}</td>
                     <td>{$r['advance']}</td>
+                    <td>{$r['due']}</td>
+                     <td>{$r['discount']}</td>
+                     <td>{$r['coupon']}</td>
                 </tr>";
                 $sr++;
             }
@@ -634,9 +638,10 @@ $total   = $this->model_sale_sale->getTotalSellers($filter);
                 <th>Cash</th>
                 <th>UPI</th>
                 <th>Advance</th>
-                <th>Ref</th>
+                <th>Due</th>
+               <th>Coupon</th>
                 <th>Discount</th>
-                <th>Seller ID</th>
+              
             </tr>";
 
             $results = $this->model_sale_sale->getOrders($filter);
@@ -659,9 +664,10 @@ $total   = $this->model_sale_sale->getTotalSellers($filter);
                     <td>{$r['cash']}</td>
                     <td>{$r['upi']}</td>
                     <td>{$r['advance']}</td>
-                    <td>{$r['ref']}</td>
+                    <td>{$r['balance']}</td>
+                    <td>{$r['coupon']}</td>
                     <td>{$r['discount']}</td>
-                    <td>{$r['seller_id']}</td>
+                  
                 </tr>";
                 $sr++;
             }

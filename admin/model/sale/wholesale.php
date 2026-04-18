@@ -262,9 +262,14 @@ class Wholesale extends \Opencart\System\Engine\Model {
     }
 
     if (!empty($data['filter_name'])) {
-        $name = $this->db->escape($data['filter_name']);
-        $where .= " AND (o.firstname LIKE '%$name%' OR o.lastname LIKE '%$name%') ";
-    }
+    $name = trim($data['filter_name']);
+    $name = $this->db->escape($name);
+
+    $where .= " AND (
+        LOWER(TRIM(CONCAT(o.firstname, ' ', o.lastname))) 
+        LIKE LOWER('%" . $name . "%')
+    ) ";
+}
 
     $sql = "
         SELECT
@@ -747,10 +752,15 @@ END AS coupon,
         if (!empty($data['filter_phone'])) {
             $sql .= " AND o.telephone LIKE '%" . $this->db->escape($data['filter_phone']) . "%'";
         }
-        if (!empty($data['filter_name'])) {
-            $name  = $this->db->escape($data['filter_name']);
-            $sql  .= " AND (o.firstname LIKE '%$name%' OR o.lastname LIKE '%$name%')";
-        }
+       if (!empty($data['filter_name'])) {
+    $name = trim($data['filter_name']);
+    $name = $this->db->escape($name);
+
+    $sql .= " AND (
+        LOWER(TRIM(CONCAT(o.firstname, ' ', o.lastname))) 
+        LIKE LOWER('%" . $name . "%')
+    )";
+}
 
         $sql .= "
             GROUP BY o.order_id

@@ -549,7 +549,7 @@ $total   = $this->model_sale_sale->getTotalSellers($filter);
     }
     
     
-    public function exportExcel(): void {
+   public function exportExcel(): void {
     try {
         $this->guard();
         $this->load->model('sale/sale');
@@ -561,7 +561,6 @@ $total   = $this->model_sale_sale->getTotalSellers($filter);
             'filter_date_modified' => $this->request->get['filter_date_modified'] ?? ''
         ];
 
-        // Excel headers
         header("Content-Type: application/vnd.ms-excel");
         header("Content-Disposition: attachment; filename={$tab}_report.xls");
         header("Pragma: no-cache");
@@ -588,15 +587,42 @@ $total   = $this->model_sale_sale->getTotalSellers($filter);
                 <th>UPI</th>
                 <th>Advance</th>
                 <th>Due</th>
-                   <th>Discount</th>
-                   <th>Coupon</th>
+                <th>Discount</th>
+                <th>Coupon</th>
             </tr>";
 
             $results = $this->model_sale_sale->getReport($filter);
 
+            // 🔢 TOTALS INIT
+            $total_r_price = $total_r_tax = $total_r_total = 0;
+            $total_s_price = $total_s_tax = $total_s_total = 0;
+            $total_cash = $total_upi = $total_adv = $total_due = 0;
+            $total_discount = $total_coupon = $total_profit = 0;
+
             $sr = 1;
+
             foreach ($results as $r) {
-                $profit = ($r['s_total'] ?? 0) - ($r['r_total'] ?? 0);
+
+                $s_total = $r['s_price'] ?? $r['s_price'] ?? 0;
+                $profit  = $s_total - ($r['r_total'] ?? 0);
+
+                // ➕ accumulate
+                $total_r_price += $r['r_price'] ?? 0;
+                $total_r_tax   += $r['r_tax'] ?? 0;
+                $total_r_total += $r['r_total'] ?? 0;
+
+                $total_s_price += $r['s_price'] ?? 0;
+                $total_s_tax   += $r['s_tax'] ?? 0;
+                $total_s_total += $s_total;
+
+                $total_cash += $r['cash'] ?? 0;
+                $total_upi  += $r['upi'] ?? 0;
+                $total_adv  += $r['advance'] ?? 0;
+                $total_due  += $r['due'] ?? 0;
+
+                $total_discount += $r['discount'] ?? 0;
+                $total_coupon   += $r['coupon'] ?? 0;
+                $total_profit   += $profit;
 
                 echo "<tr>
                     <td>{$sr}</td>
@@ -608,20 +634,39 @@ $total   = $this->model_sale_sale->getTotalSellers($filter);
                     <td>{$r['r_total']}</td>
                     <td>{$r['s_price']}</td>
                     <td>{$r['s_tax']}</td>
-                    <td>{$r['s_total']}</td>
+                    <td>{$s_total}</td>
                     <td>{$profit}</td>
                     <td>{$r['cash']}</td>
                     <td>{$r['upi']}</td>
                     <td>{$r['advance']}</td>
                     <td>{$r['due']}</td>
-                     <td>{$r['discount']}</td>
-                     <td>{$r['coupon']}</td>
+                    <td>{$r['discount']}</td>
+                    <td>{$r['coupon']}</td>
                 </tr>";
+
                 $sr++;
             }
 
+            // ✅ TOTAL ROW
+            echo "<tr style='font-weight:bold; background:#d4edda;'>
+                <td colspan='4'>TOTAL</td>
+                <td>$total_r_price</td>
+                <td>$total_r_tax</td>
+                <td>$total_r_total</td>
+                <td>$total_s_price</td>
+                <td>$total_s_tax</td>
+                <td>$total_s_total</td>
+                <td>$total_profit</td>
+                <td>$total_cash</td>
+                <td>$total_upi</td>
+                <td>$total_adv</td>
+                <td>$total_due</td>
+                <td>$total_discount</td>
+                <td>$total_coupon</td>
+            </tr>";
         }
-        /* ================= SALES PRICE (DEFAULT) ================= */
+
+        /* ================= SALES PRICE ================= */
         else {
 
             echo "<tr>
@@ -639,16 +684,42 @@ $total   = $this->model_sale_sale->getTotalSellers($filter);
                 <th>UPI</th>
                 <th>Advance</th>
                 <th>Due</th>
-               <th>Coupon</th>
+                <th>Coupon</th>
                 <th>Discount</th>
-              
             </tr>";
 
             $results = $this->model_sale_sale->getOrders($filter);
 
+            // 🔢 TOTALS INIT
+            $total_r_price = $total_r_tax = $total_r_total = 0;
+            $total_s_price = $total_s_tax = $total_s_total = 0;
+            $total_cash = $total_upi = $total_adv = $total_due = 0;
+            $total_discount = $total_coupon = $total_profit = 0;
+
             $sr = 1;
+
             foreach ($results as $r) {
-                $profit = ($r['s_total'] ?? 0) - ($r['r_total'] ?? 0);
+
+                $s_total = $r['s_price'] ?? $r['s_price'] ?? 0;
+                $profit  = $s_total - ($r['r_total'] ?? 0);
+
+                // ➕ totals
+                $total_r_price += $r['r_price'] ?? 0;
+                $total_r_tax   += $r['r_tax'] ?? 0;
+                $total_r_total += $r['r_total'] ?? 0;
+
+                $total_s_price += $r['s_price'] ?? 0;
+                $total_s_tax   += $r['s_tax'] ?? 0;
+                $total_s_total += $s_total;
+
+                $total_cash += $r['cash'] ?? 0;
+                $total_upi  += $r['upi'] ?? 0;
+                $total_adv  += $r['advance'] ?? 0;
+                $total_due  += $r['balance'] ?? 0;
+
+                $total_discount += $r['discount'] ?? 0;
+                $total_coupon   += $r['coupon'] ?? 0;
+                $total_profit   += $profit;
 
                 echo "<tr>
                     <td>{$sr}</td>
@@ -659,7 +730,7 @@ $total   = $this->model_sale_sale->getTotalSellers($filter);
                     <td>{$r['r_total']}</td>
                     <td>{$r['s_price']}</td>
                     <td>{$r['s_tax']}</td>
-                    <td>{$r['s_total']}</td>
+                    <td>{$s_total}</td>
                     <td>{$profit}</td>
                     <td>{$r['cash']}</td>
                     <td>{$r['upi']}</td>
@@ -667,10 +738,28 @@ $total   = $this->model_sale_sale->getTotalSellers($filter);
                     <td>{$r['balance']}</td>
                     <td>{$r['coupon']}</td>
                     <td>{$r['discount']}</td>
-                  
                 </tr>";
+
                 $sr++;
             }
+
+            // ✅ TOTAL ROW
+            echo "<tr style='font-weight:bold; background:#d4edda;'>
+                <td colspan='3'>TOTAL</td>
+                <td>$total_r_price</td>
+                <td>$total_r_tax</td>
+                <td>$total_r_total</td>
+                <td>$total_s_price</td>
+                <td>$total_s_tax</td>
+                <td>$total_s_total</td>
+                <td>$total_profit</td>
+                <td>$total_cash</td>
+                <td>$total_upi</td>
+                <td>$total_adv</td>
+                <td>$total_due</td>
+                <td>$total_coupon</td>
+                <td>$total_discount</td>
+            </tr>";
         }
 
         echo "</table>";
@@ -821,6 +910,35 @@ public function getWalletBalance(): void {
         'status'      => true,
         'aeps_amount' => $wallet->num_rows ? (float)$wallet->row['aeps_amount'] : 0.00
     ]));
+}
+public function getDueCustomers(): void {
+    try {
+        $this->guard();
+        $this->load->model('sale/sale');
+
+        $from = $this->request->get['from'] ?? '';
+        $to   = $this->request->get['to'] ?? '';
+
+        $results = $this->model_sale_sale->getDueCustomers([
+            'from' => $from,
+            'to'   => $to
+        ]);
+
+        $rows = [];
+
+        foreach ($results as $r) {
+            $rows[] = [
+                'name'  => $r['name'],
+                'phone' => $r['phone'],
+                'due'   => number_format($r['due'], 2)
+            ];
+        }
+
+        $this->json(['status' => true, 'rows' => $rows]);
+
+    } catch (\Throwable $e) {
+        $this->json(['status' => false, 'error' => $e->getMessage()]);
+    }
 }
 
 

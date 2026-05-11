@@ -417,8 +417,43 @@ public function editPreviousOrder(int $order_id, array $data, array $invoice_ext
         $this->db->query("DELETE FROM `" . DB_PREFIX . "order_invoice` WHERE order_id = '$order_id'");
         $this->db->query("DELETE FROM `" . DB_PREFIX . "order_tax_details` WHERE order_id = '$order_id'");
         $this->db->query("DELETE FROM `" . DB_PREFIX . "customer_reward` WHERE order_id = '$order_id'");
-        
+        // GET OLD TRANSACTION FIRST
+$oldTransaction = $this->db->query("
+    SELECT amount, transactiontype
+    FROM `" . DB_PREFIX . "customer_transaction`
+    WHERE order_id = '" . (int)$order_id . "'
+    LIMIT 1
+")->row;
+
+if ($oldTransaction) {
+
+    if ($oldTransaction['transactiontype'] == 'DEBIT') {
+
+        // REVERSE OLD DEBIT
+        $this->db->query("
+            UPDATE `" . DB_PREFIX . "manage_wallet`
+            SET aeps_amount = IFNULL(aeps_amount,0) + " . (float)$oldTransaction['amount'] . "
+            WHERE customerid = '" . (int)$data['customer_id'] . "'
+        ");
+
+    } else if ($oldTransaction['transactiontype'] == 'CREDIT') {
+
+        // REVERSE OLD CREDIT
+        $this->db->query("
+            UPDATE `" . DB_PREFIX . "manage_wallet`
+            SET aeps_amount = IFNULL(aeps_amount,0) - " . (float)$oldTransaction['amount'] . "
+            WHERE customerid = '" . (int)$data['customer_id'] . "'
+        ");
+    }
+}
+
+// NOW DELETE OLD TRANSACTION
+$this->db->query("
+    DELETE FROM `" . DB_PREFIX . "customer_transaction`
+    WHERE order_id = '$order_id'
+");
          }
+         
 
 
         foreach ($data['products'] as $product) {
@@ -469,6 +504,18 @@ public function editPreviousOrder(int $order_id, array $data, array $invoice_ext
                 ");
             }
         }
+        // RECREATE CUSTOMER TRANSACTION ENTRY
+$credit = [
+    'customerid'         => $data['customer_id'],
+    'order_id'           => $order_id,
+    'description'        => 'Order Edited',
+    'transactiontype'    => 'DEBIT', // change if needed
+    'transactionsubtype' => 'ORDER_EDIT',
+    'amount'             => $invoice_extra['pending_amount'],
+    'txtid'              => 'EDIT_' . $order_id
+];
+
+$this->doWalletAepsCredit($credit);
 
         $this->db->query("COMMIT");
         return true;
@@ -1010,7 +1057,7 @@ $sql = "SELECT
 (
     COALESCE(SUM(
         CASE 
-            WHEN o.order_status_id = 5 
+            WHEN o.order_status_id IN (5,17)
             THEN oi.cash_amount
             ELSE 0
         END
@@ -1018,7 +1065,7 @@ $sql = "SELECT
     -
     COALESCE(SUM(
         CASE 
-            WHEN o.order_status_id = 5 
+            WHEN o.order_status_id IN (5,17)
             AND oi.cash_amount > 0 
             AND oi.upi_amount = 0
             THEN oi.returnable_balance
@@ -1032,7 +1079,7 @@ $sql = "SELECT
 (
     COALESCE(SUM(
         CASE 
-            WHEN o.order_status_id = 5 
+            WHEN o.order_status_id IN (5,17)
             THEN oi.upi_amount
             ELSE 0
         END
@@ -1040,7 +1087,7 @@ $sql = "SELECT
     -
     COALESCE(SUM(
         CASE 
-            WHEN o.order_status_id = 5 
+            WHEN o.order_status_id IN (5,17)
             AND oi.upi_amount > 0 
             AND oi.cash_amount = 0
             THEN oi.returnable_balance
@@ -1098,7 +1145,7 @@ $sql = "SELECT
 
 COALESCE(SUM(
     CASE 
-        WHEN o.order_status_id = 5 
+        WHEN o.order_status_id IN (5,17)
         THEN oi.sub_total
         ELSE 0
     END
@@ -1117,7 +1164,7 @@ COALESCE(SUM(
 
 COALESCE(SUM(
     CASE 
-        WHEN o.order_status_id = 5 
+        WHEN o.order_status_id IN (5,17)
         THEN oi.total_received
         ELSE 0
     END
@@ -1136,7 +1183,7 @@ COALESCE(SUM(
 
 COALESCE(SUM(
     CASE 
-        WHEN o.order_status_id = 5 
+        WHEN o.order_status_id IN (5,17)
         THEN oi.returnable_balance
         ELSE 0
     END
@@ -1155,7 +1202,7 @@ COALESCE(SUM(
 
 COALESCE(SUM(
     CASE 
-        WHEN o.order_status_id = 5 
+        WHEN o.order_status_id IN (5,17)
         THEN oi.balance
         ELSE 0
     END

@@ -1504,6 +1504,45 @@ class Home extends \Opencart\System\Engine\Controller
             
             // 2️⃣ RETURN ORDER
             } elseif ($previousOrderId > 0) {
+                // REVERSE OLD RETURN ORDER DUE TRANSACTION
+$oldTransaction = $this->db->query("
+    SELECT amount, transactiontype
+    FROM `" . DB_PREFIX . "customer_transaction`
+    WHERE order_id = '" . (int)$previousOrderId . "'
+    AND transactionsubtype = 'AEPS'
+    ORDER BY customer_transaction_id DESC
+    LIMIT 1
+")->row;
+
+if ($oldTransaction) {
+
+    if ($oldTransaction['transactiontype'] == 'DEBIT') {
+
+        // Reverse old debit
+        $this->db->query("
+            UPDATE `" . DB_PREFIX . "manage_wallet`
+            SET aeps_amount = IFNULL(aeps_amount,0) + " . (float)$oldTransaction['amount'] . "
+            WHERE customerid = '" . (int)$customer_id . "'
+        ");
+
+    } else if ($oldTransaction['transactiontype'] == 'CREDIT') {
+
+        // Reverse old credit
+        $this->db->query("
+            UPDATE `" . DB_PREFIX . "manage_wallet`
+            SET aeps_amount = IFNULL(aeps_amount,0) - " . (float)$oldTransaction['amount'] . "
+            WHERE customerid = '" . (int)$customer_id . "'
+        ");
+
+    }
+
+    // DELETE OLD TRANSACTION
+    $this->db->query("
+        DELETE FROM `" . DB_PREFIX . "customer_transaction`
+        WHERE order_id = '" . (int)$previousOrderId . "'
+        AND transactionsubtype = 'AEPS'
+    ");
+}
             
                 $this->model_checkout_order->addHistory(
                     $previousOrderId,

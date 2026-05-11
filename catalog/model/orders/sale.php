@@ -251,10 +251,16 @@ GREATEST(MAX(inv.upi_amount) - IFNULL(MAX(inv.returnable_balance),0),0) AS upi,
         $where .= " AND o.telephone LIKE '%" . $this->db->escape($data['filter_phone']) . "%' ";
     }
 
-    if (!empty($data['filter_name'])) {
-        $name = $this->db->escape($data['filter_name']);
-        $where .= " AND (o.firstname LIKE '%$name%' OR o.lastname LIKE '%$name%') ";
-    }
+ if (!empty($data['filter_name'])) {
+
+    $name = strtolower(trim($data['filter_name']));
+    $name = preg_replace('/\s+/', ' ', $name); // normalize spaces
+    $name = $this->db->escape($name);
+
+    $where .= " AND (
+        LOWER(TRIM(CONCAT(o.firstname, ' ', o.lastname))) LIKE '%$name%'
+    ) ";
+}
 
     $sql = "
         SELECT

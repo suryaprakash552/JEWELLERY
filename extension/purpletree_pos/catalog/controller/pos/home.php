@@ -48,7 +48,7 @@ class Home extends \Opencart\System\Engine\Controller
                         "return_order"  => (int)$agent_detail["return_order"],
                         "cancel_order"  => (int)$agent_detail["cancel_order"],
                         "delete_order"  => (int)$agent_detail["delete_order"]
-                    ];
+                    ];  
                     
                     $data["agent_flags"] = $agent_detail;
 

@@ -492,7 +492,7 @@ $this->db->query("
                                 total_received     = '" . (float)$invoice_extra['total_received'] . "',
                                 balance            = '" . (float)$invoice_extra['balance'] . "',
                                 date_added         = NOW()
-                        ");
+                        ");  
 
 
         if (!empty($data['custom_fields'])) {

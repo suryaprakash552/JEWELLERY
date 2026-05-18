@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+    <!DOCTYPE html>
 <html lang="en">
    <head>
       <meta charset="utf-8">
@@ -59,6 +60,19 @@
              letter-spacing: 2px;
              text-transform: uppercase;
              text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+         }
+         #quick_add_gst::placeholder,
+         #quick_add_name::placeholder,
+         #quick_add_price::placeholder,
+         #quick_add_quantity::placeholder {
+             color: #555 !important;
+             opacity: 1 !important;
+         }
+         #quick_add_gst,
+         #quick_add_name,
+         #quick_add_price,
+         #quick_add_quantity {
+             color: #000 !important;
          }
          @keyframes pos-spin {
              0% { transform: rotate(0deg); }
@@ -568,18 +582,32 @@
          color: #000 !important;
          background-color: #fff !important;
          }
-         #product_autocomplete_list {
+         .pos-autocomplete-list {
+         position: fixed;
+         display: none;
          background: #0f121a;
          border: 1px solid #2a3040;
          border-radius: 4px;
-         bottom: 100%;
-         margin-bottom: 4px;
+         box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+         z-index: 999999;
+         max-height: 220px;
+         overflow-y: auto;
+         margin: 0;
+         padding: 0;
+         list-style: none;
+         min-width: 100px;
          }
-         #product_autocomplete_list .dropdown-item {
+         .pos-autocomplete-item {
+         cursor: pointer;
+         padding: 8px 12px;
+         border-bottom: 1px solid #2a3040;
          color: #fff;
-         transition: background 0.2s ease;
+         white-space: nowrap;
          }
-         #product_autocomplete_list .dropdown-item:hover {
+         .pos-autocomplete-item:last-child {
+         border-bottom: none;
+         }
+         .pos-autocomplete-item:hover {
          background: #1a1f2e;
          }
          #main_search_autocomplete_list {
@@ -779,7 +807,7 @@
          transition: background-color 0.3s ease;
          }
          .cart-row.highlighted-row {
-         background-color: #f573ea !important; 
+         background-color: #eaefff !important; 
          transition: background-color 0.5s ease;
          }
          .pos-search-div {
@@ -937,6 +965,14 @@
          .cart-row.excluded-row .cart-cell:last-child {
              text-decoration: none; 
          }
+         .cart-cell-index{
+                margin: 0px 17px;
+        border: 5px double #cfbd77;
+    background: #edeaa1;
+    text-align: center;
+    padding: 0px;
+    font-size: 17px;
+         }
          *{
          margin:0;
          padding:0;
@@ -948,7 +984,7 @@
          overflow-x:hidden;
          }
          .header-bar{
-         background:white;
+         background:black;
          padding:8px 15px;
          display:flex;
          justify-content:space-between;
@@ -984,25 +1020,28 @@
          .btn-blue{background:#5588cc;color:#fff;}
          .btn-red{background:#cc3333;color:#fff;}
          .main-content{
-         background:white;
+         background:black;
          min-height:calc(100vh - 170px);
          }
          .content-wrapper{
          display:flex;
          }
          .left-section{
-             width: 74.5%;
-         flex-basis:74%;
-         background:#C9A24D;
-         border:1px solid #ccc;
-         color: black;
+            width: 65%;
+    flex-basis: 75%;
+    color: black;
+    padding: 14px 10px 0px 10px;
+    background: black;
+        
          }
          .right-section{
-         flex-basis:26%;
-         width:320px;
+         flex-basis:35%;
+        
          display:flex;
          flex-direction:column;
-         background:white;
+         background:#f5f5f5;
+         overflow: hidden;
+             margin-top: 15px;
          }
          .store-header{
          text-align:right;
@@ -1054,13 +1093,23 @@
          }
          .search-label{font-size:12px;margin:3px 0;}
          .search-bar{display:flex;gap:5px;}
+         .search-input-wrapper{position:relative;width:100%;}
          .search-input{
              flex: 1;
-    width: 100%;
+        width: 36%;
     height: 100%;
-    padding: 0px 0px 0px 14px;
+    padding: 10px 0px 10px 42px;
     border: 1px solid #999;
-    font-size: 12px;
+    font-size: 22px;
+         }
+         .search-input-icon{
+                 position: absolute;
+    left: 10px;
+    top: 45%;
+    transform: translateY(-50%);
+    color: black;
+    font-size: 28px;
+    pointer-events: none;
          }
          .btn-search{
          background: #ffcc33;
@@ -1073,21 +1122,25 @@
     width: 9.85%;
          }
          .btn-add-product{
-         background: #7dd47d;
+             display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #e9d274;
     color: #000;
-    border: 1px solid #cc9900;
+    border: 1px solid darkblue;
     padding: 1px 16px;
-    font-size: 14px;
+    font-size: 21px;
     cursor: pointer;
     min-width: 100px;
-    width: 12.85%;
+    width: 23%;
          }
          .cart-wrapper{
          margin-top:8px;
          background:#fff;
          position: relative; 
          overflow: hidden;
-         width: 90%;
+         width: 100%;
          }
          #productsContent .cart-category-container {
              display: flex;
@@ -1105,18 +1158,19 @@
              box-sizing: border-box; 
          }
          #productsContent .cart-wrapper {
-             width: 90%;
+             width: 100%;
          }
          .tab-header .tab-btn{
              flex:1;
              padding:8px 0;
              border:1px solid #ccc;
-             background:#eee;
+             background: #37b030;
              cursor:pointer;
              font-weight:bold;
+             color: #fff;
          }
          .tab-header .tab-btn.active{
-             background:#C9A24D;
+             background: #37b030;
              color:#fff;
          }
          .product-list{
@@ -1127,13 +1181,7 @@
              max-height:710px;
              overflow-y:auto;
          }
-          .category-list{
-                 gap: 6px;
-    padding: 2px 15px 2px 9px;
-    max-height: 792px;
-    overflow-y: scroll;
-    scrollbar-width: thin;
-         }
+          
          .category-list .category-btn
          {
               border: 1px solid #999;
@@ -1161,20 +1209,24 @@
          }
          .cart-area{
          background: transparent; 
-         height: 755px;
+         height: 473px;
          position: relative;
          z-index: 2;
          }
          .cart-row{
-         background: transparent; 
-         display:grid;
-          grid-template-columns: 45px 106px 1.8fr 61px 132px 93px 144px 93px 70px 127px 129px;  
-         align-items:center;
-         font-size:13px;
-         padding:0px;
-         margin: -3px 0px;
-         position: relative;
-         z-index: 3;
+                display: grid;
+    grid-template-columns: 71px 309px 2.2fr 135px 60px 174px 70px 108px 145px 78px 4px;
+    align-items: center;
+    font-size: 20px;
+    padding: 4px 0px;
+    margin: 0px 0px;
+    position: relative;
+    z-index: 3;
+    border-bottom: 1px solid #ffffff;
+         }
+         /* Hide only the ID column */
+         .cart-row .cart-cell:nth-child(2) {
+            display: none;
          }
          .cart-cell{
          padding:2px 2px;
@@ -1230,16 +1282,55 @@
          padding: 0px;
          }
          .discount-row{
-         display:flex;
-         justify-content:space-between;
-         align-items:center;
+         display: block;
          margin-bottom: -2px;
+         padding: 8px 0px 0px 0px;
+         background: #f5f5f5;
          }
          .discount-left{
-         display: contents;
-         align-items: center;
-         gap: 5px;
-         padding-left: 29px;
+         display: block;
+         padding-left: 0;
+         }
+         /* Hide pull order/quote search section */
+         .discount-search-row {
+            display: none !important;
+         }
+         .discount-summary {
+            display: block;
+            background: #f6f6e9;
+                border: 1px solid #bfbdbd;
+         }
+         .summary-item {
+                display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 26px;
+    border-bottom: 1px solid #bab1b1;
+    font-size: 21px;
+         }
+         .summary-item:last-child {
+            border-bottom: none;
+         }
+         .summary-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+         }
+         .summary-label {
+            font-size: 20px;
+            color: #333;
+            font-weight: 400;
+         }
+         .summary-number {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+         }
+         .summary-amount {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            text-align: right;
          }
          .discount-controls{
          display:flex;
@@ -1288,7 +1379,7 @@
     background: white;
     padding-top: 1px;
     width: 103%;
-    border-top: 3px solid #928e8e;
+    
          }
          .category-btn{
          background:#C9A24D;
@@ -1308,18 +1399,29 @@
          padding:6px 4px 40px 6px;
          }
          .action-grid-btn{
-            background: #C9A24D;
-    color: #000;
-    border: 1px solid #ffffff;
-    border-radius: 3px;
-    padding: 4px;
+            background: #10b981;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px;
     cursor: pointer;
     text-align: center;
-    line-height: 1.2;
-    width: 121px;
-    font-size: 14px;
-    margin: 2px;
-    border: 2px solid #000000;
+    line-height: 1.3;
+    width: 100%;
+    font-size: 12px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+         }
+         .action-grid-btn:hover {
+            background: #059669;
+            transform: scale(1.02);
+         }
+         .action-grid-btn:active {
+            transform: scale(0.98);
          }
          .action-grid-btn.active-highlight,
          .footer-btn.active-highlight,
@@ -1363,13 +1465,12 @@
          }
          .footer-btn.pay{background:red;}
          .status-bar{
-         background:#f0f0f0;
+         background:black;
          padding:5px 15px;
          display:flex;
          justify-content:space-between;
          font-size:11px;
-         border-top:1px solid #ccc;
-         color:black;
+         color:white;
          }
          .status-left{display:flex;gap:20px;}
          .status-right{display:flex;align-items:center;gap:5px;}
@@ -1557,20 +1658,23 @@
          margin-top:8px;
          background:#fff;
          border:1px solid #ccc;
-                  width: 90%;
+                  width: 100%;
          }
-         overflow-y:auto;
-         border-top:1px solid #b6b2a0;
-         }
+         
          .cart-row{
          background:#fff;
          }
          .cart-header-row{
          display:grid;
-          grid-template-columns: 45px 106px 1.8fr 103px 128px 84px 147px 97px 108px 99px 107px;  
-         font-size:14px;
-         color:white;
-         background:#6b6b6b;
+          grid-template-columns: 71px 313px 2.2fr 101px 89px 145px 83px 140px 103px 77px 4px;  
+         font-size:20px;
+         color: black;
+    background: #f6f6e9;
+    padding: 5px 0px;
+         }
+         /* Hide only the ID header */
+         .cart-header-row > span:nth-child(2) {
+            display: none;
          }
          .cart-hr{
          border:0;
@@ -1669,7 +1773,7 @@
          display: flex;
          align-items: center;
          justify-content: space-between;
-         background-color: white;
+         background-color: black;
          padding: 0px 18px;
          color: #fff;
          font-family: "Segoe UI", Roboto, Arial, sans-serif;
@@ -1689,6 +1793,7 @@
          }
          #loginTime { font-weight: 600; color: black; font-size:15px; }
          #currentTime { display: block; margin-top: 2px; font-size:15px; }
+         #headerCurrentTime { color: white; font-size: 30px; font-weight: bold; margin: 0; text-align: right; font-family: 'Courier New', monospace; }
          .invoice-row {
          transition: background-color 0.3s ease;
          }
@@ -1839,23 +1944,7 @@
          .calc-close-red:hover {
          background-color: #ff1f1f !important;
          }
-         .watermark {
-         position: absolute;
-         top: 50%;
-         left: 50%;
-         transform: translate(-50%, -50%);
-         opacity: 0.18;
-         pointer-events: none;
-         z-index: 1; 
-         width: 45%;
-         height: auto;
-         }
-         .watermark img {
-         width: 100%;
-         height: auto;
-         display: block;
-         border-radius: 50%;
-         }
+         
          .content-wrapper {
          position: relative;
          z-index: 1;
@@ -1870,8 +1959,8 @@
          }
          .store-header-inner {
          display: inline-block;
-         padding-left: 100%;         
-         animation: storeHeaderScroll 20s linear infinite;
+                 
+         
          }
          @keyframes storeHeaderScroll {
          0% {
@@ -2028,6 +2117,7 @@
       </style>
    </head>
    <body style="width: 100%; scrollbar-width: none;">
+      <ul id="product_autocomplete_list" class="pos-autocomplete-list" style="display:none;"></ul>
       <div id="appCover" class="app-cover"></div>
       <div id="appLoader" class="app-loader">
          <div class="d-flex align-items-center gap-3">
@@ -2046,10 +2136,10 @@
                   ">
             </div>
             <div class="time-block">
-               <div class="store-header" style="width: 58%; margin-left: -11%;">
+               <div class="store-header" style="width: 36%; margin-left: -23%;">
                   <div class="store-header-inner">
-                     <h4 style="color: #C9A24D;">SALEEM GOLD COVERING</h4>
-                     <p style="color: #C9A24D;"> {{ agentBusinessClass }} BRANCH</p>
+                     <h4 style="color: white;">SGC POS</h4>
+                     <p style="color: white;"> {{ agentBusinessClass }} BRANCH</p>
                   </div>
                </div>
                <div style="display: unset; margin-right: -10%;font-size: 39px;
@@ -2058,57 +2148,66 @@
                   <span id="walletAmount" style="display: none; font-size:20px;"> ₹00.00</span>
                </div>
             </div>
-            <div class="header-right">
-               <button id="toggleWalletBtn" onclick="toggleWalletAmount()" class="header-btn btn-light-yellow">Wallet Amount</button>
-                           <button class="header-btn btn-light-yellow" id="newSale" style="background-color:#7dd47d; color:black">New sale</button>
-                <button
-                        id="fullscreenBtn"
-                        class="header-btn btn-light-yellow"
-                        onclick="toggleFullscreen()">Full screen ON
-                     </button>
-               <button class="header-btn btn-red" onclick="posLogout()">Close</button>
-            </div>
+           <div class="header-right">
+               <h3 id="headerCurrentTime">00:00:00</h3>
+            </div>  
          </div>
          <div class="main-content">
             <div class="content-wrapper">
                <div class="left-section">
-                  <div id="appContent">
+                  <div id="appContent" style="padding: 9px; background: #f6f6e9;">
                   <div class="search-section">
-                     <div class="search-bar" style="padding-right: 15px; padding-top: 7px; position: relative;">
-                        <div class="search-input-wrapper" style="position:relative; width:100%;">
+                     <div class="search-bar" style="position: relative; background-color: #ebe6c2; display:flex; gap:10px; align-items:flex-end; flex-wrap:nowrap; padding:10px; overflow: visible;">
+                        <div class="search-input-wrapper" style="position:relative; flex:1 1 38%; min-width:220px; max-width:520px; min-width:0;">
+                           <i class="fas fa-search search-input-icon"></i>
                            <input type="text"
                               class="search-input"
                               id="pos_search"
-                              placeholder="Scan barcode or enter SKU"
+                              placeholder="Enter SKU code or Scan Product"
                               autocomplete="off"
                               oninput="handleImmediateInput(this)"
                               onkeydown="handleSearchKeypress(event, this)"
                               onpaste="handlePasteEvent(event, this)"
-                              autofocus>
-                           <ul id="main_search_autocomplete_list" class="dropdown-menu" style="display:none; position:absolute; top:100%; left:0; right:0; max-height:760px; overflow-y:auto; z-index:10000; background:#C9A24D; padding: 0px;"></ul>
+                              autofocus
+                              style="width:100%;">
+                           <ul id="main_search_autocomplete_list" class="dropdown-menu" style="display:none; position:absolute; top:100%; left:0; right:0; max-height:460px; overflow-y:auto; z-index:10000; background:rgb(122 120 117); padding: 0px;"></ul>
                         </div>
-                        <button class="btn-add-product" onclick="openQuickAddModal()">Add Product</button>
+                        <div class="quick-add-inline" style="display:flex; flex-wrap:nowrap; gap:10px; align-items:flex-end; flex:1 1 62%; min-width:0;">
+                           <div style="flex: 0 0 106px;min-width: 108px;">
+                              <input type="number" id="quick_add_gst" class="form-control" placeholder="GST %" value="3" min="0" aria-label="GST %" style="background: #ffffff;width:148px; border: 1px solid #2a3040; color: #000; height: 46px; padding: 0 12px; font-size: 14px;">
+                           </div>
+                           <div style="flex: 0 0 229px;min-width: 58px;position:relative;margin-left: -5%;margin-right: -65px;/">
+                              <input type="text" id="quick_add_name" oninput="search_product_info(this)" class="form-control" placeholder="Product Name" aria-label="Product Name" style="background: #ffffff;margin-left:83px; width:229px; border: 1px solid #2a3040; color: #000; height: 46px; padding: 0 12px; font-size: 14px; min-width:0;">
+                           </div>
+                           <div style="flex: 0 0 180px;min-width: 101px;margin-left: 19%;">
+                              <input type="number" id="quick_add_price" class="form-control" placeholder="Price" aria-label="Price" style="background: #ffffff; border: 1px solid #2a3040; color: #000; height: 46px; padding: 0 12px; font-size: 14px;">
+                           </div>
+                           <div style="flex: 0 0 145px;min-width:75px;margin-left: 1%;">
+                              <input type="number" id="quick_add_quantity" class="form-control" value="1" min="1" placeholder="Qty" aria-label="Qty" style="background: #ffffff; border: 1px solid #2a3040; color: #000; height: 46px; padding: 0 12px; font-size: 14px;">
+                           </div>
+                           <div style="flex:0 0 auto; margin-top: 0px; display: none;">
+                              <button type="button" class="btn btn-success" onclick="saveQuickAddProduct()" style="height: 46px; padding: 0 18px; font-weight: 700; background: #22c55e; border: none; color: #fff;">Enter</button>
+                           </div>
+                        </div>
                      </div>
                   </div> 
-                  <div style="display:flex;">
+                  <div style="display:flex; background-color: white;">
                   <div class="cart-wrapper">
                      <div class="cart-header-row">
-                        <span>SL</span>
+                        <span style="padding-left: 23px;">SL</span>
                         <span>ID</span> 
                         <span>Product</span> 
                         <span>A.Qty</span>
                         <span>P.Qty</span> 
                         <span>Disc</span> 
                         <span>Row.Price</span>
-                        <span>GST%</span>
+                        <span>GST</span>
                         <span>Row.GST</span>
-                        <span>Row.Total</span> 
+                        <span>Amount</span> 
                         <span>Action</span> 
                      </div>
                      <hr class="cart-hr">
-                     <div class="watermark">
-                        <img src="https://myteknoland.com/MTL/image/saleem_logo2.jpg" alt="Watermark">
-                     </div>
+                    
                      <div class="cart-area" id="cartArea" style="overflow-y: auto; scrollbar-width: none;">
                         <div class="content-wrapper">
                         </div>
@@ -2483,47 +2582,44 @@
                   </div>
                   <div id="categoryListRight" class="category-list" style="display:grid;"></div>
                   </div>
-                  <div class="discount-row" style="padding: 0px 0px;">
-                     <div class="discount-left">
-                        <div>
-                             <div class="discount-search-row" style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
+                   <div class="discount-row" >
+                      <div class="discount-left">
+                         <div class="discount-search-row" style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
                             <input id="orderIdSearch" type="text" placeholder="Enter Order Id" class="form-control" style="width:114px;font-size:13px;padding:4px;border: 2px solid white;     margin: 0px 12px;
-    border-radius: 10px;" />
+     border-radius: 10px;" />
                             <button type="button" class="btn btn-warning btn-sm" style="height:26px;" onclick="searchAndRestoreEditOrder(document.getElementById('orderIdSearch').value)">Pull Order</button>
-                        </div>
-                        <div class="discount-search-row" style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
+                         </div>
+                         <div class="discount-search-row" style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
                             <input id="quotationIdSearch" type="text" placeholder="Enter Quote Id" class="form-control" style="width:115px;font-size:13px;padding:4px;border: 2px solid white;     margin: 0px 12px;
-    border-radius: 10px;" />
+     border-radius: 10px;" />
                             <button type="button" class="btn btn-primary btn-sm" style="height:24px;" onclick="searchAndRestoreQuotation(document.getElementById('quotationIdSearch').value)">Pull Quote</button>
-                        </div>
-                        </div>
-                        <div>
-                        <span id="summaryNumberOfItems" style="font-size: 15px;"></span><br />
-                        <span id="summaryQuantityTotal" style="font-size: 15px;    padding-left: 16px;"></span>
-                        </div>
-                                                <div class="total-row" style="font-size: 33px;
-    color: blue;
-    width: 17%;">
-                           <span id="grandTotalValue" style="font-weight: bold;
-    width: 100%;
-    text-align: end;margin-right: 8%;">₹0.00</span>
-                        </div>
-                     </div>
-                                        <div class="totals-box">
-                        <div class="total-row">
-                           <span style="margin-left: 25px;">Net Total:</span>
-                           <span id="netTotalValue" style="font-weight: bold; margin-right: 25px;">₹0.00</span>
-                        </div>
-                        <div class="total-row">
-                           <span style="margin-left: 25px;">Discount:</span>
-                           <span id="discountValue" style="font-weight: bold; margin-right: 25px;">₹0.00</span>
-                        </div>
-                        <div class="total-row">
-                           <span style="margin-left: 25px;">Total Tax:</span>
-                           <span id="taxValue" style="font-weight: bold; margin-right: 25px;">₹0.00</span>
-                        </div>
-                     </div>
-                  </div>
+                         </div>
+                         <div class="discount-summary">
+                            <div class="summary-item">
+                               <span class="summary-label">Sub Total:</span>
+                               <span class="summary-value" id="subtotalValue">₹0.00</span>
+                            </div>
+                            <div class="summary-item">
+                               <span class="summary-label">Item Discount:</span>
+                               <span class="summary-value" id="itemDiscountValue">₹0.00</span>
+                            </div>
+                            <div class="summary-item">
+                               <span class="summary-left">
+                                  <span class="summary-label">GST Total:</span>
+                                  <span class="summary-number" id="gstCountValue">0</span>
+                               </span>
+                               <span class="summary-amount" id="gstTotalValue">₹0.00</span>
+                            </div>
+                            <div class="summary-item" style="border-bottom: none; font-weight: bold; font-size: 15px;">
+                               <span class="summary-left">
+                                  <span class="summary-label">Item Count:</span>
+                                  <span class="summary-number" id="itemQtyValue">0</span>
+                               </span>
+                               <span class="summary-amount" id="itemCountValue" style="font-size:30px;">₹0.00</span>
+                            </div>
+                         </div>
+                      </div>
+                   </div>
                </div> 
                <div id="productsContent" style="display:none;">
                    <div class="cart-category-container" style="display:flex;">
@@ -2534,129 +2630,104 @@
                </div>
            </div> 
                <div class="right-section">
-                   <div class="tab-header" style="display:flex; gap:5px; padding:0px 5px; background:#f5f5f5;">
+                   <div class="tab-header" style="display:flex; gap:5px; padding:0px 5px; background:black; padding-left: 0px;">
                      <button id="tabApp" class="tab-btn active">App</button>
                      <button id="tabProducts" class="tab-btn">Products</button>
                   </div>
                   <div id="productListRight" class="product-list" style="display:none;"></div>
-                  <div id="appRightContent">
-                  <div class="category-buttons" style="padding-right: 12px;">
-                    <button class="action-grid-btn" style="background-color: #C9A24D; font-weight: bold; color:white;" id="quotationHistoryBtn" onclick="openQuotationHistory()">Quotations</button>
-                     <button class="action-grid-btn" style="background-color: #C9A24D; font-weight: bold; color:white; " id="invoiceHistoryBtn">Invoice</button> 
-                                                    <button class="action-grid-btn" style="background-color: #C9A24D; font-weight: bold; color:white;"  id="walletBtn">Customer</button>
-                    <button class="action-grid-btn" style="background-color: #C9A24D; font-weight: bold; color:white;" id="editOrderBtn" onclick="openEditOrderHistory()">Edit</button>
-                     <button class="action-grid-btn" style="background-color: #C9A24D; font-weight: bold; color:white; " id="cancelOrderBtn" onclick="openCancelOrderHistory()">Cancel</button>
-                     <button class="action-grid-btn" style="background-color: #C9A24D; font-weight: bold; color:white; " id="returnBtn">Return</button> 
+                  <div id="appRightContent" style="display: flex; flex-direction: column; flex: 1; overflow: hidden; background: black;">
+                  <div class="category-buttons" style="padding: 12px 25px 5px 0px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; background: black;">
+                    <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="quotationHistoryBtn" onclick="openQuotationHistory()"><i class="fas fa-file-contract" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Quotations</button>
+                     <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="invoiceHistoryBtn" onclick="openInvoiceHistory()"><i class="fas fa-file-invoice-dollar" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Invoice</button>
+                     <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="walletBtn" onclick="openCustomerPanel()"><i class="fas fa-users" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Customer</button>
+                     <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="editOrderBtn" onclick="openEditOrderHistory()"><i class="fas fa-edit" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Edit</button>
+                     <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="cancelOrderBtn" onclick="openCancelOrderHistory()"><i class="fas fa-ban" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Cancel</button>
+                     <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="returnBtn" onclick="openReturnHistory()"><i class="fas fa-undo" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Return</button>
+                     <button type="button" class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#000; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="newSale"><i class="fas fa-plus" style="font-size: 24px; margin-bottom: 4px; color: #000; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>New sale</button>
+                     <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="fullscreenBtn" onclick="toggleFullscreen()"><i class="fas fa-expand" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Full screen</button>
+                     <button class="action-grid-btn" style="background-color: #cc3333; font-weight: bold; color:#fff; height: 65px; border-radius: 4px; border: 1px solid #cc3333; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" onclick="posLogout()"><i class="fas fa-times" style="font-size: 24px; margin-bottom: 4px; color: #fff; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Close</button>
                   </div>
-                  <div>
-    <div class="calc-wrapper" style="height: 340px;
-    display:none;">
-    <div class="screen" id="display">0</div>
-    <button class="btn" style="background-color: #ea4335;" onclick="clearDisplay()">C</button>
-    <button class="btn" style="background-color: #1a73e8;" onclick="input('/')">/</button>
-    <button class="btn" style="background-color: #1a73e8;" onclick="input('*')">*</button>
-    <button class="btn" style="background-color: #1a73e8;" onclick="input('-')">-</button>
-    <button class="btn" style="background-color: #ffffff; color: #333;" onclick="input('7')">7</button>
-    <button class="btn" style="background-color: #ffffff; color: #333;" onclick="input('8')">8</button>
-    <button class="btn" style="background-color: #ffffff; color: #333;" onclick="input('9')">9</button>
-    <button class="btn" style="background-color: #1a73e8;" onclick="input('+')">+</button>
-    <button class="btn" style="background-color: #ffffff; color: #333;" onclick="input('4')">4</button>
-    <button class="btn" style="background-color: #ffffff; color: #333;" onclick="input('5')">5</button>
-    <button class="btn" style="background-color: #ffffff; color: #333;" onclick="input('6')">6</button>
-    <button class="btn btn-tall" style="background-color: white;
-    color: black;" onclick="calculate()">=</button>
-    <button class="btn" style="background-color: #ffffff; color: #333;" onclick="input('1')">1</button>
-    <button class="btn" style="background-color: #ffffff; color: #333;" onclick="input('2')">2</button>
-    <button class="btn" style="background-color: #ffffff; color: #333;" onclick="input('3')">3</button>
-    <button class="btn" style="background-color: #ffffff; color: #333;" onclick="input('0')">0</button>
-    <button class="btn" style="background-color: #ffffff; color: #333;" onclick="input('.')">.</button>
-</div>
- <h3 style="color: white;
-    background: #6e6a6a;
-    text-align: center;
-    padding: 0px 0px;
-    font-size: 20px;">Price Calculation</h3>
-                 <div class="pricing-box">
-    <div class="pricing-grid">
-        <div class="input-group">
-            <h5 style="font-size: 17px;">Price</h5>
-            <input type="number" id="userPrice" class="pos-input" placeholder="0" oninput="liveUpdate()">
-        </div>
-        <div class="input-group">
-            <h5 style="font-size: 17px;">Additional (%)</h5>
-            <input type="number" id="userAdditional" class="pos-input" value="25" placeholder="0" oninput="liveUpdate()">
-        </div>
-        <div class="input-group">
-            <h5 style="font-size: 17px;">Retail Price</h5>
-            <input type="text" id="retailResult" class="pos-input readonly-input" value="0.00" readonly>
-        </div>
-        <div class="input-group">
-            <h5 style="font-size: 17px;">Wholesale Price</h5>
-            <input type="text" id="wholesaleResult" class="pos-input readonly-input" value="0.00" readonly>
-        </div>
-    </div>
-</div> 
-                 </div>
-                    <h3 style="color: white;
-    background: #6e6a6a;
-    text-align: center;
-    padding: 0px 0px;
-    font-size: 20px; margin-top:17%">Save List</h3>
-                  <div id="holdCartList" style="display: grid; grid-template-columns: repeat(4, 1fr);width: 100%;
-    height: auto;">
+                  <div class="calc-wrapper-container" style="padding: 2px 8px 0px 0px; background: black; flex: 1; overflow-y: auto; display: flex; flex-direction: column;">
+                     <div class="calc-display-box" style="background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 2px; margin-bottom: 10px;">
+                        <div class="screen" id="display" style="background: #2d2d2d; color: #fff; text-align: right; padding: 12px; font-size: 28px; font-weight: bold; border-radius: 4px; min-height: 48px; line-height: 1;">0</div>
+                     </div>
+                     <div class="calc-keypad" style="display: grid; grid-template-columns: 22% 22% 22% 30%; gap: 6px; background: black; padding: 0; margin-bottom: 10px;">
+                        <button class="calc-key" onclick="input('1')" style="background: #313131; color: #fff; border: 1px solid white; padding: 1px; font-size: 40px; font-weight: bold; border-radius: 4px; cursor: pointer; text-align: center;">1</button>
+                        <button class="calc-key" onclick="input('2')" style="background: #313131; color: #fff; border: 1px solid white; padding: 1px; font-size: 40px; font-weight: bold; border-radius: 4px; cursor: pointer; text-align: center;">2</button>
+                        <button class="calc-key" onclick="input('3')" style="background: #313131; color: #fff; border: 1px solid white; padding: 1px; font-size: 40px; font-weight: bold; border-radius: 4px; cursor: pointer; text-align: center;">3</button>
+                        <button class="calc-key" onclick="input('+')" style="background: #313131; color: #fff; border: 1px solid white; padding: 1px; font-size: 40px; font-weight: bold; border-radius: 4px; cursor: pointer; text-align: center;">+</button>
+                        <button class="calc-key" onclick="input('4')" style="background: #313131; color: #fff; border: 1px solid white; padding: 1px; font-size: 40px; font-weight: bold; border-radius: 4px; cursor: pointer; text-align: center;">4</button>
+                        <button class="calc-key" onclick="input('5')" style="background: #313131; color: #fff; border: 1px solid white; padding: 1px; font-size: 40px; font-weight: bold; border-radius: 4px; cursor: pointer; text-align: center;">5</button>
+                        <button class="calc-key" onclick="input('6')" style="background: #313131; color: #fff; border: 1px solid white; padding: 1px; font-size: 40px; font-weight: bold; border-radius: 4px; cursor: pointer; text-align: center;">6</button>
+                        <button class="calc-key" onclick="input('-')" style="background: #313131; color: #fff; border: 1px solid white; padding: 1px; font-size: 40px; font-weight: bold; border-radius: 4px; cursor: pointer; text-align: center;">−</button>
+                        <button class="calc-key" onclick="input('7')" style="background: #313131; color: #fff; border: 1px solid white; padding: 1px; font-size: 40px; font-weight: bold; border-radius: 4px; cursor: pointer; text-align: center;">7</button>
+                        <button class="calc-key" onclick="input('8')" style="background: #313131; color: #fff; border: 1px solid white; padding: 1px; font-size: 40px; font-weight: bold; border-radius: 4px; cursor: pointer; text-align: center;">8</button>
+                        <button class="calc-key" onclick="input('9')" style="background: #313131; color: #fff; border: 1px solid white; padding: 1px; font-size: 40px; font-weight: bold; border-radius: 4px; cursor: pointer; text-align: center;">9</button>
+                        <button class="calc-key" onclick="input('*')" style="background: #313131; color: #fff; border: 1px solid white; padding: 1px; font-size: 40px; font-weight: bold; border-radius: 4px; cursor: pointer; text-align: center;">×</button>
+                        <button class="calc-key" onclick="input('.')" style="background: #313131; color: #fff; border: 1px solid white; padding: 1px; font-size: 40px; font-weight: bold; border-radius: 4px; cursor: pointer; text-align: center;">.</button>
+                        <button class="calc-key" onclick="input('0')" style="background: #313131; color: #fff; border: 1px solid white; padding: 1px; font-size: 40px; font-weight: bold; border-radius: 4px; cursor: pointer; text-align: center;">0</button>
+                        <button class="calc-key" onclick="input('00')" style="background: #313131; color: #fff; border: 1px solid white; padding: 1px; font-size: 40px; font-weight: bold; border-radius: 4px; cursor: pointer; text-align: center;">00</button>
+                        <button class="calc-key" onclick="input('/')" style="background: #313131; color: #fff; border: 1px solid white; padding: 1px; font-size: 40px; font-weight: bold; border-radius: 4px; cursor: pointer; text-align: center;">÷</button>
+                     </div>
+                     <div style="display: grid; grid-template-columns: 29% 70%; gap: 6px; margin-bottom: 10px;">
+                        <button class="btn btn-clear" onclick="clearDisplay()" style="background: #e9d274; color: #fff; border: 1px solid white; padding: 1px; font-size: 30px; font-weight: bold; border-radius: 4px; cursor: pointer;">X</button>
+                        <button class="btn btn-enter" onclick="calculate()" style="background: #37b030; color: #fff; border: 1px solid white; padding: 1px; font-size: 30px; font-weight: bold; border-radius: 4px; cursor: pointer;">ENTER > </button>
+                     </div>
+                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 10px;">
+                        <button class="btn btn-back" onclick="deleteLastChar()" style="background: #313131;border: 1px solid white; color: #fff; padding: 1px; font-size: 30px; font-weight: bold; border-radius: 4px; cursor: pointer;">BACK</button>
+                        <button class="btn btn-clear-all" onclick="clearDisplay()" style="background: #313131;border: 1px solid white; color: #fff; padding: 1px; font-size: 30px; font-weight: bold; border-radius: 4px; cursor: pointer;">CLEAR</button>
+                     </div>
+                  </div>
+                  <h3 style="display: none;">Save List</h3>
+                  <div id="holdCartList" style="display: grid; grid-template-columns: repeat(4, 1fr); width: 100%; height: auto; padding: 1px; background: black;">
                   </div>   
                </div>
             </div>
          </div>
-         <div class="footer-bar">
-       <button class="footer-btn slice" id="walletHistoryBtn" style="background-color: #C9A24D; border: 1px solid white; color: white; cursor: pointer; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 81px; height: 54px; border-radius: 4px; padding: 0;">
-    <span class="text" style="display: flex; flex-direction: column; align-items: center; font-size: 12px; line-height: 1.2;">
-        <i class="fas fa-history" style="font-size: 25px; margin-bottom: 4px;"></i>
-        Agent
-    </span>
-</button>
-<button class="footer-btn slice" id="saveSaleBtn" style="background-color: #C9A24D; border: 1px solid white; color: white; cursor: pointer; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 81px; height: 54px; border-radius: 4px; padding: 0;" onclick="openHoldCartPopup()">
-    <span class="text" style="display: flex; flex-direction: column; align-items: center; font-size: 12px; line-height: 1.2;">
-        <i class="fas fa-save" style="font-size: 25px; margin-bottom: 4px;"></i>
-        Save
-    </span>
-</button>
-<button class="footer-btn slice" id="manageProductBtn" style="background-color: #C9A24D; border: 1px solid white; color: white; cursor: pointer; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 81px; height: 54px; border-radius: 4px; padding: 0;" onclick="openManageProduct()">
-    <span class="text" style="display: flex; flex-direction: column; align-items: center; font-size: 12px; line-height: 1.2;">
-        <i class="fas fa-gem" style="font-size: 25px; margin-bottom: 4px;"></i>
-        Products
-    </span>
-</button> 
-<button class="footer-btn slice" id="sendQuotationBtn" style="background-color: #C9A24D; border: 1px solid white; color: white; cursor: pointer; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 81px; height: 54px; border-radius: 4px; padding: 0;" onclick="openQuotationModal()">
-    <span class="text" style="display: flex; flex-direction: column; align-items: center; font-size: 12px; line-height: 1.2;">
-        <i class="fas fa-paper-plane" style="font-size: 25px; margin-bottom: 4px;"></i>
-        Quotation
-    </span>
-</button>
-<button class="footer-btn slice" id="taxExemptBtn" onclick="openTaxExemptModal()" style="background-color: #C9A24D; border: 1px solid white; color: white; cursor: pointer; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 81px; height: 54px; border-radius: 4px; padding: 0;">
-    <span class="text" style="display: flex; flex-direction: column; align-items: center; font-size: 12px; line-height: 1.2;">
-        <i class="fas fa-hand-holding-dollar" style="font-size: 25px; margin-bottom: 4px;"></i>
-      Exempt
-    </span>
-</button>
-<button class="footer-btn slice" onclick="connectDQ12(this)" style="background-color: #C9A24D; border: 1px solid white; color: white; cursor: pointer; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 81px; height: 54px; border-radius: 4px; padding: 0;">
-    <span class="text" style="display: flex; flex-direction: column; align-items: center; font-size: 12px; line-height: 1.2;">
-        <i class="fas fa-percentage" style="font-size: 25px; margin-bottom: 4px;"></i>
-        DQ12
-    </span>
-</button>
-<button class="footer-btn slice" id="printCartBtn" style="background-color: #C9A24D; border: 1px solid white; color: white; cursor: pointer; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 81px; height: 54px; border-radius: 4px; padding: 0;" onclick="openPrintDetailsModal()">
-    <span class="text" style="display: flex; flex-direction: column; align-items: center; font-size: 12px; line-height: 1.2;">
-        <i class="fas fa-print" style="font-size: 25px; margin-bottom: 4px;"></i>
-        Print
-    </span>
-</button>
-<button class="footer-btn pay slice" id="submit-order-btn" style="background-color: #red; border: 1px solid white; color: white; padding: 10px; cursor: pointer; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; min-width: 210px; border-radius: 4px; height: 54px; margin-left: 30.5%" onclick="orderSummery()">
-    <span class="text" style="display: flex; flex-direction: column; align-items: center; font-size: 22px; font-weight: bold;">
-        <i class="fas fa-credit-card" style="font-size: 22px; margin-bottom: 5px;"></i>
-        Payment
-    </span>
-</button>
+         <div class="footer-bar" style="margin-left:10px; display: flex; align-items: center; justify-content: flex-start; border: 1px solid #bab1b1; gap: 1px; padding: 8px 12px; background: #f5f5f5; height: 60px; padding-right:0px;">
+            <!-- Footer Buttons Row -->
+            <button class="footer-btn" id="walletHistoryBtn" style="background-color: #f6f6e9; border: 1px solid grey; color: black; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border-radius: 4px; padding: 0 12px; font-size: 20px; font-weight: 500; flex-shrink: 0; width:7%;">
+                <i class="fas fa-user-circle" style="font-size: 25px; border: 5px double #cfbd77; background: #edeaa1;width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px; color: #333;"></i>
+                <span>Agent</span>
+            </button>
+            <button class="footer-btn" id="saveSaleBtn" style="background-color: #f6f6e9; border: 1px solid grey; color: black; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border-radius: 4px; padding: 0 12px; font-size: 20px; font-weight: 500; flex-shrink: 0; width:7%;" onclick="openHoldCartPopup()">
+                <i class="fas fa-save" style="font-size: 25px; border: 5px double #cfbd77; background: #edeaa1;width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px; color: #333;"></i>
+                <span>Hold</span>
+            </button>
+            <button class="footer-btn" id="manageProductBtn" style="background-color: #f6f6e9; border: 1px solid grey; color: black; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border-radius: 4px; padding: 0 12px; font-size: 18px; font-weight: 500; flex-shrink: 0;width:7%;" onclick="openManageProduct()">
+                <i class="fas fa-gem" style="font-size: 25px; border: 5px double #cfbd77; background: #edeaa1;width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px; color: #333;"></i>
+                <span>Products</span>
+            </button>
+            <button class="footer-btn" id="sendQuotationBtn" style="background-color: #f6f6e9; border: 1px solid grey; color: black; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border-radius: 4px; padding: 0 12px; font-size: 20px; font-weight: 500; flex-shrink: 0; width:7%;" onclick="openQuotationModal()">
+                <i class="fas fa-file-contract" style="font-size: 25px; border: 5px double #cfbd77; background: #edeaa1;width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px; color: #333;"></i>
+                <span>Quote</span>
+            </button>
+            <button class="footer-btn" id="taxExemptBtn" style="background-color: #f6f6e9; border: 1px solid grey; color: black; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border-radius: 4px; padding: 0 12px; font-size: 20px; font-weight: 500; flex-shrink: 0; width:7%;" onclick="openTaxExemptModal()">
+                <i class="fas fa-crown" style="font-size: 25px; border: 5px double #cfbd77; background: #edeaa1;width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px; color: #333;"></i>
+                <span>Exempt</span>
+            </button>
+            <button class="footer-btn" id="dq12Btn" style="background-color: #f6f6e9; border: 1px solid grey; color: black; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border-radius: 4px; padding: 0 12px; font-size: 20px; font-weight: 500; flex-shrink: 0; width:7%;" onclick="connectDQ12(this)">
+                <i class="fas fa-calculator" style="font-size: 25px; border: 5px double #cfbd77; background: #edeaa1;width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px; color: #333;"></i>
+                <span>DQ12</span>
+            </button>
+            <button class="footer-btn" id="printCartBtn" style="background-color: #f6f6e9; border: 1px solid grey; color: black; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border-radius: 4px; padding: 0 12px; font-size: 20px; font-weight: 500; flex-shrink: 0; width:7%;" onclick="openPrintDetailsModal()">
+                <i class="fas fa-print" style="font-size: 25px; border: 5px double #cfbd77; background: #edeaa1;width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px; color: #333;"></i>
+                <span>Print</span>
+            </button>
+            <div style="background: white; padding: 7px 3px; border-radius: 4px; border: 1px solid #ddd; font-size: 23px; font-weight: 600; color: #333; width: 17.4%; text-align: center;">
+                    <span id="footerSubtotalValue">₹0.00</span>
+                </div>
+
+            <!-- Subtotal Display -->
+            <div style="display: flex; align-items: center; gap: 15px; width: 34.4%; margin-left: 1.39%; padding:6px; background:black; ">
+                
+
+                <!-- Proceed to Payment Button -->
+                <button id="submit-order-btn" onclick="orderSummery()" style="background-color: rgb(103 127 207); border: 1px solid #1e3a8a; color: white; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border-radius: 4px; padding: 0 20px; font-size: 25px; font-weight: 600; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%;">
+                    <span>Proceed to Payment</span>
+                    <i class="fas fa-chevron-right" style="font-size: 16px;"></i>
+                </button>
+            </div>
          </div>
          <div class="status-bar">
             <div class="status-left">
@@ -2752,40 +2823,7 @@
             </div>
          </div>
       </div>
-      <div class="modal fade" id="quickAddProductModal" tabindex="-1" aria-hidden="true" style="z-index: 9999;">
-         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="background:#1a1f2e;color:#fff;border-radius:12px;box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-               <div class="modal-header" style="border-bottom: 1px solid #2a3040;">
-                  <h5 class="modal-title" style="font-weight: 700; color: #f57c00;">Quick Add Product</h5>
-                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-               </div>
-               <div class="modal-body" style="padding: 0px 12px;">
-                  <div class="form-group mb-1">
-                     <label class="form-label" style="font-size: 13px; color: #8a93a2; text-transform: uppercase; letter-spacing: 0.5px;">GST %</label>
-                     <input type="number" id="quick_add_gst" class="form-control" placeholder="3" value="3" min="0" style="background: #0f121a; border: 1px solid #2a3040; color: #fff; height: 27px;font-size: 18px;">
-                  </div>
-                  <div class="form-group mb-4" style="position: relative;">
-                     <label class="form-label" style="font-size: 13px; color: #8a93a2; text-transform: uppercase; letter-spacing: 0.5px;">Product Name</label>
-                     <input type="text" id="quick_add_name" oninput="search_product_info(this)" class="form-control" placeholder="Type to search products..." style="background: #0f121a; border: 1px solid #2a3040; color: #fff; height: 27px;font-size: 18px;">
-                     <ul id="product_autocomplete_list" class="dropdown-menu" style="display:none; position:absolute; width:100%; max-height:200px; overflow-y:auto; z-index:10000; background: #0f121a; border: 1px solid #2a3040; border-radius: 4px; bottom: 100%; margin-bottom: -27px;"></ul>
-                  </div>
-                  <div class="form-group mb-1">
-                     <label class="form-label" style="font-size: 13px; color: #8a93a2; text-transform: uppercase; letter-spacing: 0.5px;">Price <span class="text-danger">*</span></label>
-                     <input type="number" id="quick_add_price" class="form-control" placeholder="Enter Price" style="background: #0f121a; border: 1px solid #2a3040; color: #fff; height: 27px;font-size: 18px;">
-                  </div>
-                  <div class="form-group mb-4">
-                     <label class="form-label" style="font-size: 13px; color: #8a93a2; text-transform: uppercase; letter-spacing: 0.5px;">Quantity</label>
-                     <input type="number" id="quick_add_quantity" class="form-control" value="1" min="1" style="background: #0f121a; border: 1px solid #2a3040; color: #fff; height: 27px;font-size: 18px;">
-                  </div>
-                  <div id="quick_add_error" class="text-danger" style="display:none; font-size: 12px; margin-top: 8px;">Please enter a valid price.</div>
-               </div>
-               <div class="modal-footer" style="border-top: 1px solid #2a3040; padding: 16px 24px;">
-                  <button type="button" class="btn btn-link" data-bs-dismiss="modal" style="color: #8a93a2; text-decoration: none; font-weight: 600;">Cancel</button>
-                  <button type="button" class="btn btn-success" onclick="saveQuickAddProduct()" style="background: #22c55e; border: none; padding: 10px 24px; font-weight: 700; border-radius: 6px;">Save & Add to Cart</button>
-               </div>
-            </div>
-         </div>
-      </div>
+      <div class="modal fade" id="quickAddProductModal" tabindex="-1" aria-hidden="true" style="z-index: 9999;"></div>
       <div class="modal fade" id="quotationModal" tabindex="-1" aria-hidden="true" style="z-index: 9999;">
          <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="background:#1a1f2e;color:#fff;border-radius:12px;box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
@@ -2918,54 +2956,7 @@
             </div>
          </div>
       </div>
-      <div class="modal fade" id="editProduct154Modal" tabindex="-1">
-         <div class="modal-dialog">
-            <div class="modal-content" 
-               style="border-radius:12px; overflow:hidden; border:1px solid #C9A24D; background:#ffffff;">
-               <div class="modal-header"
-                  style="background:linear-gradient(135deg,#C9A24D 0%,#a58435 100%);
-                  color:#fff; border-bottom:none; padding:10px 16px;">
-                  <h5 class="modal-title" 
-                     style="margin:0; font-size:18px; font-weight:700; text-transform:uppercase; letter-spacing:1px;">
-                     ✏️ Edit Product 154
-                  </h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal"
-                     style="filter:invert(1); opacity:0.9;"></button>
-               </div>
-               <div class="modal-body" 
-                  style="background:#ffffff; padding:18px 20px;">
-                  <div class="mb-3">
-                     <label class="form-label"
-                        style="font-size:13px; font-weight:600; text-transform:uppercase; color:#777;">
-                     Name:
-                     </label>
-                     <input type="text" class="form-control" id="prod154_name"
-                        style="border-radius:6px; border:1px solid #ccc; padding:8px 10px; font-size:14px; color:black;">
-                  </div>
-                  <div class="mb-3">
-                     <label class="form-label"
-                        style="font-size:13px; font-weight:600; text-transform:uppercase; color:#777;">
-                     Price:
-                     </label>
-                     <input type="number" class="form-control" id="prod154_price" step="0.01"
-                        style="border-radius:6px; border:1px solid #ccc; padding:8px 10px; font-size:14px; color:black;">
-                  </div>
-               </div>
-               <div class="modal-footer"
-                  style="background:#f5f5f5; border-top:1px solid #e0e0e0; padding:10px 16px;">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                     style="border-radius:20px; padding:6px 18px; font-size:13px; text-transform:uppercase;">
-                  Cancel
-                  </button>
-                  <button type="button" class="btn btn-success" onclick="saveProduct154()"
-                     style="border-radius:20px; padding:6px 22px; font-size:13px; text-transform:uppercase;
-                     background-color:#C9A24D; border-color:#C9A24D; font-weight:700;">
-                  Save
-                  </button>
-               </div>
-            </div>
-         </div>
-      </div>
+
       <div class="modal" id="customtaxapply">
          <div class="modal-dialog">
             <div class="modal-content" style="height:400px;">
@@ -6694,12 +6685,11 @@
                      #modalXl .modal-content {
                          background: linear-gradient(135deg, #E6B8D7 0%, #F5E6F0 100%);
                          border: 3px solid var(--pos-border);
-                         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
                      }
                      .form-control-pos {
-                         height: 32px;
+                         height: 46px;
                          padding: 4px 10px;
-                         font-size: 13px;
+                         font-size: 19px;
                          font-weight: 600;
                          border: 2px solid var(--pos-border);
                          border-radius: 4px;
@@ -6908,14 +6898,20 @@
                  </style>
              `;
              html += '<div class="modal-dialog modal-xl" role="document">';
-             html += '  <div class="modal-content">';
-             html += '    <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px 30px; border-bottom: none; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">';
-             html += '      <div class="d-flex align-items-center justify-content-between w-100">';
-             html += '        <div class="d-flex align-items-center">';
-             html += '          <i class="fas fa-credit-card me-3" style="font-size: 32px; color: #FFD700; text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></i>';
-             html += '          <span class="fw-bold" style="font-size: 28px; color: #FFFFFF; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">PAYMENT</span>';
-             html += '        </div>';
-             html += '        <div class="d-flex align-items-center" style="font-size: 14px; color: #FFFFFF; font-weight: 500;">';
+             html += '  <div class="modal-content" style="border: 4px solid white; border-bottom: 0px;">';
+             html += '    <div class="modal-body p-0" style="background: #f6f6e9; padding: 0 !important;">';
+             
+             // Black Header with Invoice Details
+             html += '    <div style="background: #000; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 4px solid #FFD700;">';
+             html += '      <div style="display: flex; align-items: center; gap: 16px;">';
+             html += '        <i class="fas fa-credit-card" style="color: #FFD700; font-size: 28px;"></i>';
+             html += '        <div style="display:flex;">';
+             html += '          <h2 style="margin: 0 0 8px 0; color: #fff; font-size: 22px; font-weight: 700; letter-spacing: 1.5px;">PAYMENT</h2>';
+             
+             // Generate and display invoice details
+             html += '          <div style="display: flex; gap: 30px; padding-left: 25px; font-size: 20px; color: #FFD700; font-weight: 600;">';
+             
+             // Invoice number
              function generateInvoiceNumber() {
     const prefix = 'SGC-';
     const today = new Date();
@@ -6935,275 +6931,387 @@ if (!invoiceNumber) {
     invoiceNumber = generateInvoiceNumber();
     sessionStorage.setItem('currentInvoiceNumber', invoiceNumber);
 }
-html += '          <span class="me-4"><strong style="color: #FFD700;">Invoice:</strong> <span id="invoiceNumber" style="color: #FFFFFF;">' + invoiceNumber + '</span></span>';
+             html += '            <span>Invoice: <span style="color: #FFFFFF; font-weight: 700;">' + invoiceNumber + '</span></span>';
+             
+             // Date
              const today = new Date();
              const day = String(today.getDate()).padStart(2, '0');
              const month = String(today.getMonth() + 1).padStart(2, '0');
              const year = today.getFullYear();
-             html += `          <span class="me-4"><strong style="color: #FFD700;">Date:</strong> <span style="color: #FFFFFF;">${day}/${month}/${year}</span></span>`;
-             html += '          <span><strong style="color: #FFD700;">Executive:</strong> <span style="color: #FFFFFF;">{{agentEmail}}</span></span>';
-             html += '           <span class="fw-normal" id="salesExcutiveId" style="display: none;">{{agentId}}</span>';
-             html += '        </div>';
-             html += '   <div class="d-flex align-items-center">';
-             html += '          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>';
+             html += `            <span>Date: <span style="color: #FFFFFF; font-weight: 700;">${day}/${month}/${year}</span></span>`;
+             
+             // Executive
+             html += '            <span>Executive: <span style="color: #FFFFFF; font-weight: 700;">{{agentEmail}}</span></span>';
+             html += '           <span id="salesExcutiveId" style="display: none;">{{agentId}}</span>';
+             
+             html += '          </div>';
              html += '        </div>';
              html += '      </div>';
+             html += '      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="background: transparent; border: none; color: #ff0000; font-size: 32px; font-weight: 700; padding: 0; opacity: 1; cursor: pointer; line-height: 1;">&times;</button>';
              html += '    </div>';
-             html += '    <div class="modal-body p-4" style="background: #EFF3F8;">';
-             html += '    <div style="background: #FFFFFF; padding: 25px 20px 10px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid #667eea; position: relative;">';
-             html += '      <div style="position: absolute; top: -12px; left: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 4px 15px; font-size: 11px; font-weight: 700; border-radius: 20px; letter-spacing: 1px; box-shadow: 0 2px 5px rgba(118, 75, 162, 0.4);">CUSTOMER DETAILS</div>';
-             html += '      <div class="row pt-2">';
-             html += '        <div class="col-md-6">';
-             html += '          <div class="d-flex align-items-center mb-3" style="    margin-top: -15px;">';
-             html += '            <label class="label-pos me-2" style="min-width: 100px; font-size: 19px; font-weight: 700; color: #333;">Mobile No :</label>';
-         html += '            <input type="tel" id="customerMobileInput" oninput="search_customer_info(this)" value="' + customerMobile + '" class="form-control-pos pos_text_insert flex-grow-1" style="max-width: 250px; font-size: 16px; padding: 8px 12px; background: #FFFFFF; border: 2px solid #D4AF37; border-radius: 6px; color: #000; font-weight: 600;" pattern="^[0-9]{10}$" minlength="10" maxlength="10" required>';
-             html += '<button id="btnAddCustomer" type="button" onclick="showAddCustomerModal()" class="btn btn-sm header-icon-btn ms-1" title="Add Customer" style="background: linear-gradient(135deg, #D4AF37, #C9A24D); border: none; padding: 6px 10px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: all 0.3s ease;">';
-             html += '  <i class="fas fa-user-plus" style="color: #FFF; font-size: 16px;"></i>';
-             html += '</button>';
-             html += '          </div>';
-             html += '          <ul id="modal_customer_list" class="dropdown-menu" style="position:absolute;top:123px;left:164px;max-height:250px;width:244px;overflow-y:auto;display:none;z-index:9999; margin-top: -65px; margin-left: -8px;"></ul>';
-             html += '          <ul id="all_customers_dropdown" class="dropdown-menu" style="position:absolute;overflow-y:auto;max-height:250px;width:260px;display:none;z-index:9999;"></ul>';
-             html += '          <div id="phoneError" style="color: #D32F2F; font-size: 18px; margin-left: 105px; font-weight: 700;"></div>';
-             html += '          <div id="pos_customer_lists" style="font-size: 19px; margin-left: 105px; font-weight: 600; color: #333;"></div>';
-             html += '          <div class="info-row-pos" style="margin-left: 141px; width: 45.5%; margin-top: -4%;">';
-             html += '            <p class="mb-1" style="font-size: 19px; font-weight: 700; color: #000; padding-left: 44px;">Points: <span class="fw-bold" id="creditLimitSpan" style="color: #1976D2;">0.00</span></p>';
-             html += '            <p class="mb-0" style="font-size: 19px; font-weight: 700; color: #000; padding-left: 66px;">AA: <span class="fw-bold" id="advancedAmountSpan" style="color: #388E3C;">0.00</span></p>';
-             html += '            <p class="mb-0" style="font-size: 12px; font-weight: 700; color: #000;">';
-             html += '              <span class="form-check-pos d-inline-flex align-items-center" style="margin-bottom: -20px; margin-top: -16px;">';
-             var daCheckEnabled = (globalDueAmount > 0) ? '' : 'disabled';
-             html += '<button id="btnViewWallet" type="button" onclick="quickViewWallet()" class="btn btn-sm header-icon-btn ms-1" title="View Wallet">';
-             html += '<i class="fas fa-eye" style="color: #000; font-size: 14px;"></i>';
-             html += '</button>';
-             html += '                <input class="form-check-input me-1" type="checkbox" id="includeDAInTotal" onchange="updateTotals()" ' + daCheckEnabled + ' style="width: 16px; height: 16px; border: 2px solid #000;">';
-             html += '                DA: <span class="fw-bold" id="dueAmountSpan" data-original="' + globalDueAmount + '" style="color: #D32F2F; margin-right: 5px;"> ' + globalDueAmount.toFixed(2) + '</span>';
-             html += '                <input type="number" id="includeDAAmount" oninput="updateTotals()" placeholder="0" class="form-control-pos" disabled style="width: 70px; height: 24px; padding: 2px 5px; font-size: 11px;">';
-             html += '              </span>';
-             html += '            </p>';
-             html += '          </div>';
+             
+             html += '    <div style="display: grid; grid-template-columns: 36% 30% 31%; gap: 14px; padding: 13px; margin-bottom: 0;">';
+             
+             // Column 1: Customer Details
+             html += '    <div style="background: #ffffff; padding: 16px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;">';
+             html += '      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #e5e7eb;">';
+             html += '        <i class="fas fa-user-circle" style="color: #333; font-size: 20px;"></i>';
+             html += '        <h3 style="margin: 0; font-size: 23px; font-weight: 700; color: #333;">Customer Details</h3>';
+             html += '      </div>';
+             
+             html += '      <div style="margin-bottom: 10px;">';
+             html += '        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">';
+             html += '        <label style="font-size: 19px; font-weight: 600; color: #666; min-width: 65px;">Mobile NO :</label>';
+         html += '        <div style="display: flex; gap: 4px; align-items: center;">';
+             html += '        <input type="tel" id="customerMobileInput" oninput="search_customer_info(this)" value="' + customerMobile + '" class="form-control-pos pos_text_insert" style="width: 191px; font-size: 19px; background: #fff; border: 2px solid #d4a574; border-radius: 4px; color: #000; box-sizing: border-box;" pattern="^[0-9]{10}$" minlength="10" maxlength="10" required>';
+             html += '<button id="btnAddCustomer" type="button" onclick="showAddCustomerModal()" class="btn btn-sm" title="Add Customer" style="background: #d4a574; border: none; padding: 2px 9px; height:44px; border-radius: 4px; color: #fff; font-size: 29px; cursor: pointer;"><i class="fas fa-plus"></i></button>';
              html += '        </div>';
-             html += '        <div class="col-md-6">';
-             html += '          <div class="d-flex align-items-center mb-3">';
-             html += '            <label class="label-pos me-2" style="min-width: 130px;">Customer Name :</label>';
-              html += '            <input type="text" id="customerNameInput" value = "' + customerName + '" class="form-control-pos flex-grow-1">';
-             html += '          </div>';
-             html += '          <div id="nameError" style="color: #D32F2F; font-size: 11px; margin-left: 135px; margin-top: -10px; font-weight: 700;"></div>';
-             html += '          <div class="d-flex align-items-center mb-3">';
-             html += '            <label class="label-pos me-2" style="min-width: 130px; padding-left: 79px;">Email :</label>';
-              html += '            <input type="email" id="customerEmailInput" value = "' + customerEmail + '" class="form-control-pos flex-grow-1">';
-             html += '          </div>';
-             html += '  <div class="d-flex align-items-center mb-3" style="margin-top: -9px;">';
-         html += '    <label class="label-pos me-2" style="min-width: 130px; padding-left: 48px;">Seller Id :</label>';
-         html += '    <input id="sellerId" name="sellerId" type="text" class="form-control-pos flex-grow-1" required/>';
-         html += '  </div>';
              html += '        </div>';
              html += '      </div>';
+             html += '      <ul id="modal_customer_list" class="dropdown-menu" style="position:absolute; max-height:200px; width:22%; overflow-y:auto; display:none; z-index:9999; margin-left: 119px; margin-top: -19px;"></ul>';
+             html += '      <ul id="all_customers_dropdown" class="dropdown-menu" style="position:absolute; overflow-y:auto; max-height:200px; width:auto; display:none; z-index:9999;"></ul>';
+             html += '      <div id="phoneError" style="color: #dc2626; font-size: 12px; margin-top: 4px;"></div>';
+             html += '      <div id="pos_customer_lists" style="font-size: 12px; margin-top: 4px; color: #333;"></div>';
+             
+             html += '      <div style="margin-bottom: 10px; margin-top: 10px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">';
+             html += '        <label style="font-size: 19px; margin-right: 45px; font-weight: 600; color: #666; min-width: 65px;">Name :</label>';
+             html += '        <input type="text" id="customerNameInput" value="' + customerName + '" class="form-control-pos" style="flex: 1; font-size: 16px; padding: 6px 8px; background: #fff; border: 2px solid #d4a574; border-radius: 4px; color: #000; box-sizing: border-box;">';
+             html += '      </div>';
+             html += '      <div id="nameError" style="color: #dc2626; font-size: 12px; margin-top: 4px;"></div>';
+             
+             html += '      <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">';
+             html += '        <label style="font-size: 19px; margin-right: 44px; font-weight: 600; color: #666; min-width: 65px;">Email :</label>';
+             html += '        <input type="email" id="customerEmailInput" value="' + customerEmail + '" class="form-control-pos" style="flex: 1; font-size: 16px; padding: 6px 8px; background: #fff; border: 2px solid #d4a574; border-radius: 4px; color: #000; box-sizing: border-box;">';
+             html += '      </div>';
+             
+             html += '      <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">';
+             html += '        <label style="font-size: 19px; font-weight: 600; color: #666; min-width: 65px; margin-right: 17px;">Seller ID :</label>';
+             html += '        <input id="sellerId" name="sellerId" type="text" class="form-control-pos" style="flex: 1; font-size: 16px; padding: 6px 8px; background: #fff; border: 2px solid #d4a574; border-radius: 4px; color: #000; box-sizing: border-box;" required>';
+             html += '      </div>';
+             
              html += '    </div>';
-         var cartRows = document.querySelectorAll('.cart-row');
-         var subTotal = 0, discount = 0, totalTax = 0, quantity = 0, items = 0, credits = 0;
-         var taxSummary = {};
-         cartRows.forEach(function (row) {
-             if (row.classList.contains('excluded-row')) {
-                 return;
-             }
-             var qtyInput     = row.querySelector('.qty-input');
-             var discountCell = row.querySelector('.cart-cell.discount');
-             var totalCell    = row.querySelector('.cart-cell.total');
-             if (!qtyInput || !totalCell) return;
-             var qty        = parseInt(qtyInput.value) || 1;
-             var rowTotal   = parseFloat(totalCell.textContent.replace(/[^\d.]/g, '')) || 0;
-             var discText   = discountCell ? discountCell.textContent.trim() : '0';
-             var rowDiscountPerUnit = parseFloat(discText.replace(/[^\d.]/g, '')) || 0;
-             quantity += qty;
-             items    += 1;
-             var rowDiscountTotal = rowDiscountPerUnit * qty;
-             subTotal += rowTotal + rowDiscountTotal;
-             discount += rowDiscountTotal;
-         });
-         var netTotalElement  = document.getElementById('netTotalValue'); 
-         var discountTotalElement  = document.getElementById('discountValue'); 
-         var taxTotalElement  = document.getElementById('taxValue'); 
-         var grandTotalElement= document.getElementById('grandTotalValue'); 
-         var netTotal = netTotalElement ? parseFloat(netTotalElement.textContent.replace(/[^\d.]/g, '')) || 0 : 0;
-         totalDiscount     = discountTotalElement ? parseFloat(discountTotalElement.textContent.replace(/[^\d.]/g, '')) || 0 : 0;
-         totalTax     = taxTotalElement ? parseFloat(taxTotalElement.textContent.replace(/[^\d.]/g, '')) || 0 : 0;
-         var totalBeforeRoundOff = subTotal + totalTax - totalDiscount;
-         grandTotalAmount        = Math.round(totalBeforeRoundOff);    
-         roundOffAmount          = grandTotalAmount - totalBeforeRoundOff;
-         var customerData = JSON.parse(sessionStorage.getItem('currentCustomerData') || '{}');
-         globalDueAmount = parseFloat(customerData.due_amount || 0);
-         if (typeof getReward === 'function')           credits   = getReward();
-         if (typeof getTotalProductQty === 'function')  quantity  = getTotalProductQty();
-         if (typeof getTotalProducts === 'function')    items     = getCartTotalProduct();
-         var subTotalFormatted           = format(subTotal,              posData.currency_code);
-         var discountFormatted           = format(totalDiscount,         posData.currency_code);
-         var taxFormatted                = format(totalTax,              posData.currency_code);
-         var totalBeforeRoundOffFormatted= format(totalBeforeRoundOff,   posData.currency_code);
-         var grandTotalFormatted         = format(grandTotalAmount,      posData.currency_code);
-         var roundOffFormatted           = format(roundOffAmount,        posData.currency_code);
-         if (typeof getTaxBreakdownByType !== 'undefined') {
-             taxSummary = getTaxBreakdownByType();
-         }
-         html += '    <div class="row">';
-         html += '      <div class="col-md-8">';
-         html += '        <div style="background: #FFFFFF; padding: 25px 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid #38b2ac; position: relative; height: 100%;">';
-         html += '          <div style="position: absolute; top: -12px; left: 20px; background: linear-gradient(135deg, #38b2ac 0%, #319795 100%); color: #fff; padding: 4px 15px; font-size: 11px; font-weight: 700; border-radius: 20px; letter-spacing: 1px; box-shadow: 0 2px 5px rgba(49, 151, 149, 0.4);">INVOICE SUMMARY</div>';
-         html += '        <div class="row pt-2">';
-         html += '          <div class="col-6">';
-         html += '            <div class="d-flex justify-content-between align-items-center mb-2">';
-         html += '              <label class="input-label-compact me-2" style="margin-left: 57px; font-size: 14px; font-weight: 600; color: #7F8C8D;">Sub Total :</label>';
-         html += '              <div class="value-box-pos" id="subTotal" style="font-size: 15px; font-weight: 600; background: #F8F9FA; padding: 6px 12px; border-radius: 4px; color: #2C3E50;">' + subTotalFormatted + '</div>';
-         html += '            </div>';
-         html += '            <div class="d-flex justify-content-between align-items-center mb-2">';
-         html += '              <label class="input-label-compact me-2" style="margin-left: 62px; font-size: 14px; font-weight: 600; color: #7F8C8D;">Discount :</label>';
-         html += '              <div class="value-box-pos value-box-green" id="discountIncluded" style="font-size: 15px; font-weight: 600; background: #E8F8F5; padding: 6px 12px; border-radius: 4px; color: #27AE60;">' + discountFormatted + '</div>';
-         html += '            </div>';
-         html += '            <div class="d-flex justify-content-between align-items-center mb-2">';
-         html += '              <label class="input-label-compact me-2" style="margin-left: 35px; font-size: 14px; font-weight: 600; color: #7F8C8D;">Tax Included :</label>';
-         html += '              <div class="value-box-pos value-box-blue" id="taxIncluded" style="font-size: 15px; font-weight: 600; background: #EBF5FB; padding: 6px 12px; border-radius: 4px; color: #3498DB;">' + taxFormatted + '</div>';
-         html += '            </div>';
-         html += '            <div class="d-flex justify-content-between align-items-center mb-2">';
-         html += '              <label class="input-label-compact me-2" style="margin-left: 8px; font-size: 14px; font-weight: 600; color: #7F8C8D;">Before Roundoff :</label>';
-         html += '              <div class="value-box-pos value-box-yellow" id="totalBeforeRoundoff" style="font-size: 15px; font-weight: 600; background: #FEF9E7; padding: 6px 12px; border-radius: 4px; color: #F39C12;">' + totalBeforeRoundOffFormatted + '</div>';
-         html += '            </div>';
-         html += '            <div class="d-flex justify-content-between align-items-center mb-2">';
-         html += '              <label class="input-label-compact me-2" style="margin-left: 0px; font-size: 14px; font-weight: 600; color: #7F8C8D;">Roundoff Amount :</label>';
-         html += '              <div class="value-box-pos value-box-gray" id="roundOffAmount" style="font-size: 15px; font-weight: 600; background: #F8F9FA; padding: 6px 12px; border-radius: 4px; color: #95A5A6;">' + roundOffFormatted + '</div>';
-         html += '            </div>';
-         html += '          </div>';
-         var cartRows = document.querySelectorAll('.cart-row');
-         var qtyTotal = 0;
-         var numItems = 0;  
-         cartRows.forEach(function(row) {
-             if (row.classList.contains('excluded-row')) {
-                 return;
-             }
-             var qtyInput = row.querySelector('.qty-input');
-             if (qtyInput) {
-                 qtyTotal += parseInt(qtyInput.value) || 0;
-             }
-             numItems++;  
-         });
-        var credits = 0;
-          if (grandTotalAmount > 1000) {
-              credits = Math.floor(grandTotalAmount / 1000) * 5;
-          } else {
-              credits = 0;
+             
+             // Column 2: Invoice Summary
+             html += '    <div style="background: #FFFFFF; padding: 16px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;">';
+             html += '      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #e5e7eb;">';
+             html += '        <i class="fas fa-file-invoice-dollar" style="color: #333; font-size: 20px;"></i>';
+             html += '        <h3 style="margin: 0; font-size: 23px; font-weight: 700; color: #333;">Invoice Summary</h3>';
+             html += '      </div>';
+             
+          var cartRows = document.querySelectorAll('.cart-row');
+      var subTotal = 0, discount = 0, totalTax = 0, quantity = 0, items = 0, credits = 0;
+      var taxSummary = {};
+      cartRows.forEach(function (row) {
+          if (row.classList.contains('excluded-row')) {
+              return;
           }
-         credits = parseFloat(credits) || 0;
-         credits = Math.floor(credits);
-         html += '          <div class="col-6">';
-         html += '            <div class="d-flex justify-content-between align-items-center mb-2">';
-         html += '              <label class="input-label-compact me-2" style="margin-left: 68px;">Quantity :</label>';
-         html += '              <div class="value-box-pos value-box-gray" id="quantityTotal">' + qtyTotal + '</div>';  
-         html += '            </div>';
-         html += '            <div class="d-flex justify-content-between align-items-center mb-2">';
-         html += '              <label class="input-label-compact me-2" style="margin-left: 41px;">Items Count :</label>';
-         html += '              <div class="value-box-pos value-box-gray" id="numberOfItems">' + numItems + '</div>';  
-         html += '            </div>';
-         html += '            <div class="d-flex justify-content-between align-items-center mb-2">';
-         html += '              <label class="input-label-compact me-2" style="margin-left: 76px;">Credits :</label>';
-         html += '              <div class="value-box-pos value-box-gray" id="creditsOrder">' + credits + '</div>';
-         html += '            </div>';
-         html += '            <div class="mt-3">';
-         html += '              <div class="form-check-pos mb-2">';
-         html += '                <input class="form-check-input" type="checkbox" id="creditLimitInvoice">';
-         html += '                <label class="form-check-label" for="creditLimitInvoice">Redeem Points</label>';
-         html += '<span id="RedeemPointsMessage" style="margin-left:6px; font-size:11px; font-weight:600;">';
-         html += '              </div>';
-         html += '              <div class="d-flex align-items-center">';
-         html += '                <div class="form-check-pos me-2">';
-         html += '                  <input class="form-check-input" type="checkbox" id="useCouponInvoice">';
-         html += '                  <label class="form-check-label" for="useCouponInvoice">Coupon :</label>';
-         html += '                </div>';
-         html += '                <input type="text" id="couponCodeInvoice" class="coupon-input" placeholder="Code" style="width: 100px; height: 27px" disabled>';
-         html += '                <button type="button" id="couponBtnInvoice" class="coupon-btn ms-2" onclick="handleCouponInvoice()" disabled>Apply</button>';
-         html += '              </div>';
-         html += '<span id="couponMessage" style="margin-left:6px; font-size:11px; font-weight:600;">';
-         html += '</span>';
-         html += '              <div id="couponMessage" style="margin-top:6px; font-size:11px; font-weight:700;"></div>';
-         html += '            </div>';
-         html += '          </div>';
-         html += '        </div>'; 
-         html += '      </div>'; 
-         html += '      </div>'; 
-         html += '      <div class="col-md-4">';
-         html += '        <div style="background: #FFFFFF; padding: 25px 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 5px; border-top: 4px solid #ed64a6; position: relative; height: 100%;">';
-         html += '          <div style="position: absolute; top: -12px; left: 20px; background: linear-gradient(135deg, #ed64a6 0%, #d53f8c 100%); color: #fff; padding: 4px 15px; font-size: 11px; font-weight: 700; border-radius: 20px; letter-spacing: 1px; box-shadow: 0 2px 5px rgba(213, 63, 140, 0.4);">ORDER BREAKDOWN</div>';
-         html += '          <div id="liveTaxContainer" class="pt-2">';
-          html += '            <div id="upiQrBreakdownContainer" style="text-align: center; margin-top: -15px; padding-top: 15px;">';
-          html += '              <div id="qrSelectionContainer" style="display:none; margin-bottom: 15px;">';
-          html += '                <p style="font-size: 11px; font-weight: 700; color: #4A5568; margin-bottom: 8px;">SELECT QR TYPE</p>';
-          html += '                <div class="d-flex justify-content-center gap-3">';
-          html += '                  <div class="form-check">';
-          html += '                    <input class="form-check-input" type="radio" name="qr_type" id="qr_type_1" value="1" onchange="triggerQrGeneration()" style="width: 18px; height: 18px; cursor: pointer;">';
-          html += '                    <label class="form-check-label" for="qr_type_1" style="color: #4A5568; font-size: 13px; font-weight: 700; cursor: pointer;">First QR</label>';
-          html += '                  </div>';
-          html += '                  <div class="form-check">';
-          html += '                    <input class="form-check-input" type="radio" name="qr_type" id="qr_type_2" value="2" onchange="triggerQrGeneration()" style="width: 18px; height: 18px; cursor: pointer;">';
-          html += '                    <label class="form-check-label" for="qr_type_2" style="color: #4A5568; font-size: 13px; font-weight: 700; cursor: pointer;">Second QR</label>';
-          html += '                  </div>';
-          html += '                </div>';
-          html += '              </div>';
-          html += '              <div id="upiQrContent" class="upi-qr-blur">';
-          html += '                <p style="font-size: 13px; font-weight: 700; color: #7F8C8D; margin-bottom: 8px;">Scan to Pay: <span id="upiQrAmountPlaceholder">0.00</span></p>';
-          html += '                <div class="upi-qr-container">';
-          html += '                  <img src="https://www.hallmarknameplate.com/wp-content/uploads/2022/08/qr-code-print5-293x300.png" id="upiQrImg" style="width: 150px; height: 150px; opacity: 0.8; object-fit: contain;">';
-          html += '                </div>';
-          html += '              </div>';
-          html += '            </div>';
-         setTimeout(function() {
-             if (typeof updateLiveTaxDetails === 'function') {
-                 updateLiveTaxDetails();
-             }
-         }, 100);
-         html += '      </div>';
-         html += '        </div>'; 
-         html += '      </div>';   
-         html += '    </div>';     
-         html += '    <div class="mt-2">';
-         html += '      <div class="row row-tight">';
-         html += '        <div class="col-md-4 order-md-2">';
-         html += '          <div style="background: #FFFFFF; padding: 25px 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 4px solid #ed8936; position: relative; height: 100%;">';
-         html += '            <div style="position: absolute; top: -12px; left: 20px; background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%); color: #fff; padding: 4px 15px; font-size: 11px; font-weight: 700; border-radius: 20px; letter-spacing: 1px; box-shadow: 0 2px 5px rgba(221, 107, 32, 0.4);">PAYMENT SUMMARY</div>';
-         html += '            <div class="pt-3">';
-                  html += '          <div class="d-flex justify-content-between align-items-center mb-2" id="dueAmountSummaryRow" style="margin-top: -36px; border-top: 1px dashed #E2E8F0; padding-top: 15px;">';
-         html += '            <label class="input-label-compact fw-bold" style="font-size: 14px; color: #E53E3E; padding-left: 80px;">Due Amount :</label>';
-         html += '            <input type="text" id="dueAmountSummary" class="value-box-pos" value="' + format(0, posData.currency_code) + '" disabled style="width: 120px; font-weight: 700; text-align: right; background-color: #FFF5F5; color: #C53030; border: 1px solid #FC8181; border-radius: 4px;">';
-         html += '          </div>';
-         html += '          <div class="d-flex justify-content-between align-items-center mb-1">';
-         html += '            <label class="input-label-compact fw-bold" style="font-size: 16px; color: #2D3748; padding-left: 127px;">Total :</label>';
-         html += '            <input type="text" id="grandTotal" class="value-box-total" value="' + grandTotalFormatted + '" disabled style="width: 120px; background: linear-gradient(135deg, #2c5282 0%, #2a4365 100%); color: #fff; font-weight: 700; text-align: right; font-size: 16px !important; border: none; border-radius: 4px; padding: 4px 8px; box-shadow: 0 2px 4px rgba(44, 82, 130, 0.3);">';
-         html += '          </div>';
-         html += '          <div class="d-flex justify-content-between align-items-center mb-2">';
-         html += '            <label class="input-label-compact mb-1" style="min-width: 140px;">Total Received Amount :</label>';
-         html += '            <input type="text" id="totalReceived" class="value-box-pos value-box-green" value="0.00" disabled style="width: 120px; background-color: #d1e7dd; color: #0f5132; font-weight: 600; text-align: right;">';
-         html += '          </div>';
-         html += '          <div class="d-flex justify-content-between align-items-center mb-2">';
-         html += '            <label class="input-label-compact mb-1" style="min-width: 140px; padding-left: 47px;">Pending Amount :</label>';
-         html += '            <input type="text" class="value-box-total value-box-voilet" id="pendingAmount" disabled value="' + grandTotalFormatted + '" style="width: 120px; background-color: #204080; color: #fff; font-weight: 700; text-align: right; font-size: 16px !important;">';
-         html += '          </div>'; 
-         html += '          <div class="d-flex justify-content-between align-items-center mb-2">';
-         html += '            <label class="input-label-compact mb-1" style="min-width: 140px; padding-left: 24px;">Returnable Balance :</label>';
-         html += '            <div class="value-box-pos value-box-yellow d-flex align-items-center justify-content-end" style="width: 120px; background-color: #fff3cd; color: #664d03; font-weight: 600; padding: 0 12px; height: 32px;">';
-         html += '              <span style="font-size: 14px; margin-right: 2px;">' + curSymbol + '</span>';
-         html += '              <input type="number" id="returnableBalance" placeholder="0" style="background: transparent; border: none; color: inherit; font-weight: inherit; font-size: 14px; text-align: right; width: 80px; outline: none; padding: 0;">';
-         html += '            </div>';
-         html += '          </div>' + returnAmountAsCashCheckbox;
-          html += '          <div class="form-check" style="font-size: 10px;">';
-          html += '            <input class="form-check-input" type="checkbox" id="saveAdvance" style="background-color: black;">';
-          html += '            <label class="form-check-label" for="saveAdvance" style="color:black">Save Returnable Amount as Customer Advance (F4)</label>';
-          html += '          </div>';
-         html += '<input type="hidden" id="agentBusinessClass" value="{{ agentBusinessClass|e('js') }}">'
-         html += '<input type="hidden" id="customerGroupId" value="{{ posData.customer_group_id|e('js') }}">'
-         html += '            </div>';
-         html += '          </div>';
-         html += '        </div>';
-         html += '        <div class="col-md-8 order-md-1">';
-         setTimeout(function() {
-             if (typeof updateTotals === "function") {
-                 updateTotals();  
-             }
-             var saveAdvanceCheckbox = document.getElementById('saveAdvance');
+          var qtyInput     = row.querySelector('.qty-input');
+          var discountCell = row.querySelector('.cart-cell.discount');
+          var totalCell    = row.querySelector('.cart-cell.total');
+          if (!qtyInput || !totalCell) return;
+          var qty        = parseInt(qtyInput.value) || 1;
+          var rowTotal   = parseFloat(totalCell.textContent.replace(/[^\d.]/g, '')) || 0;
+          var discText   = discountCell ? discountCell.textContent.trim() : '0';
+          var rowDiscountPerUnit = parseFloat(discText.replace(/[^\d.]/g, '')) || 0;
+          quantity += qty;
+          items    += 1;
+          var rowDiscountTotal = rowDiscountPerUnit * qty;
+          subTotal += rowTotal + rowDiscountTotal;
+          discount += rowDiscountTotal;
+      });
+      var netTotalElement  = document.getElementById('subtotalValue'); 
+      var discountTotalElement  = document.getElementById('itemDiscountValue'); 
+      var taxTotalElement  = document.getElementById('gstTotalValue'); 
+      var grandTotalElement= document.getElementById('itemCountValue'); 
+      var netTotal = netTotalElement ? parseFloat(netTotalElement.textContent.replace(/[^\d.]/g, '')) || 0 : 0;
+      totalDiscount     = discountTotalElement ? parseFloat(discountTotalElement.textContent.replace(/[^\d.]/g, '')) || 0 : 0;
+      totalTax     = taxTotalElement ? parseFloat(taxTotalElement.textContent.replace(/[^\d.]/g, '')) || 0 : 0;
+      var totalBeforeRoundOff = subTotal + totalTax - totalDiscount;
+      grandTotalAmount        = Math.round(totalBeforeRoundOff);    
+      roundOffAmount          = grandTotalAmount - totalBeforeRoundOff;
+      var customerData = JSON.parse(sessionStorage.getItem('currentCustomerData') || '{}');
+      globalDueAmount = parseFloat(customerData.due_amount || 0);
+      if (typeof getReward === 'function')           credits   = getReward();
+      if (typeof getTotalProductQty === 'function')  quantity  = getTotalProductQty();
+      if (typeof getTotalProducts === 'function')    items     = getCartTotalProduct();
+      var subTotalFormatted           = format(subTotal,              posData.currency_code);
+      var discountFormatted           = format(totalDiscount,         posData.currency_code);
+      var taxFormatted                = format(totalTax,              posData.currency_code);
+      var totalBeforeRoundOffFormatted= format(totalBeforeRoundOff,   posData.currency_code);
+      var grandTotalFormatted         = format(grandTotalAmount,      posData.currency_code);
+      var roundOffFormatted           = format(roundOffAmount,        posData.currency_code);
+      if (typeof getTaxBreakdownByType !== 'undefined') {
+          taxSummary = getTaxBreakdownByType();
+      }
+      var cartRows = document.querySelectorAll('.cart-row');
+      var qtyTotal = 0;
+      var numItems = 0;  
+      cartRows.forEach(function(row) {
+          if (row.classList.contains('excluded-row')) {
+              return;
+          }
+          var qtyInput = row.querySelector('.qty-input');
+          if (qtyInput) {
+              qtyTotal += parseInt(qtyInput.value) || 0;
+          }
+          numItems++;  
+      });
+      var credits = 0;
+      if (grandTotalAmount > 1000) {
+          credits = Math.floor(grandTotalAmount / 1000) * 5;
+      } else {
+          credits = 0;
+      }
+      credits = parseFloat(credits) || 0;
+      credits = Math.floor(credits);
+      
+      // Invoice Summary Section
+      html += '      <div style="display: flex; flex-direction: column; gap: 8px; padding: 0;">';
+      html += '        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 19px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">';
+      html += '          <label style="font-weight: 600; color: #333;">Sub Total :</label>';
+      html += '          <span id="subTotal" style="border: 1px solid green; font-weight: 600; color: #333; font-size: 20px; padding: 6px 10px; background: #e6f9f1; border-radius: 3px; min-width: 150px; text-align: right;">' + subTotalFormatted + '</span>';
+      html += '        </div>';
+      html += '        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 19px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">';
+      html += '          <label style="font-weight: 600; color: #333;">Discount :</label>';
+      html += '          <span id="discountIncluded" style="border: 1px solid red; font-weight: 600; color: #dc2626; font-size: 20px; background: #ffe6e6; padding: 6px 10px; border-radius: 3px; min-width: 150px; text-align: right;">' + discountFormatted + '</span>';
+      html += '        </div>';
+      html += '        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 19px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">';
+      html += '          <label style="font-weight: 600; color: #333;">Tax Included :</label>';
+      html += '          <span id="taxIncluded" style="border: 1px solid green; font-weight: 600; color: #059669; font-size: 20px; background: #e6f9f1; padding: 6px 10px; border-radius: 3px; min-width: 150px; text-align: right;">' + taxFormatted + '</span>';
+      html += '        </div>';
+      html += '        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 19px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb; display: none;">';
+      html += '          <label style="font-weight: 600; color: #333;">Before Roundoff</label>';
+      html += '          <span id="totalBeforeRoundoff" style="font-weight: 600; color: #333; font-size: 20px; background: #f0f0f0; padding: 6px 10px; border-radius: 3px; min-width: 90px; text-align: right;">' + totalBeforeRoundOffFormatted + '</span>';
+      html += '        </div>';
+      html += '        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 19px; padding-bottom: 8px; display: none;">';
+      html += '          <label style="font-weight: 600; color: #333;">Roundoff</label>';
+      html += '          <span id="roundOffAmount" style="font-weight: 600; color: #999; font-size: 19px; background: #f0f0f0; padding: 6px 10px; border-radius: 3px; min-width: 90px; text-align: right;">' + roundOffFormatted + '</span>';
+      html += '        </div>';
+      html += '        <div>';
+      html += '          <label style="font-size: 19px; font-weight: 600; color: #333; display: flex; align-items: cenxter; gap: 6px; cursor: pointer; margin-bottom: 4px;">';
+      html += '            <input class="form-check-input" type="checkbox" id="creditLimitInvoice" style="width: 18px; height: 18px; border-radius:3px; cursor: pointer;">';
+      html += '            <span>Redeem Points</span>';
+      html += '          </label>';
+      html += '          <span id="RedeemPointsMessage" style="margin-left: 20px; font-size: 12px; color: #666;"></span>';
+      html += '        </div>';
+      html += '        <div style="margin-top: 0px;">';
+      html += '          <div style="display: flex; align-items: center; justify-content: space-between;">';
+      html += '            <label style="font-size: 19px; font-weight: 600; color: #333; display: flex; align-items: center; gap: 6px; cursor: pointer; margin: 0;">';
+      html += '              <input class="form-check-input" type="checkbox" id="useCouponInvoice" style="width: 18px; height: 18px; cursor: pointer; border-radius:3px;" onchange="handleCouponInvoice()">';
+      html += '              <span>Coupon</span>';
+      html += '            </label>';
+      html += '            <div style="display: flex; gap: 4px; align-items: center;">';
+      html += '              <input type="text" id="couponCodeInvoice" class="coupon-input" placeholder="Code" style="height: 35px; font-size: 19px; padding: 4px 6px; border: 1px solid #ccc; border-radius: 3px; width:100px;" disabled>';
+      html += '              <button type="button" id="couponBtnInvoice" class="coupon-btn" onclick="handleCouponInvoice()" style="height: 35px; padding: 0 8px; font-size: 19px; background: #999; color: white; border: none; border-radius: 3px; cursor: pointer;" disabled>Apply</button>';
+      html += '            </div>';
+      html += '          </div>';
+      html += '          <span id="couponMessage" style="font-size: 12px; color: #666; display: block; margin-top: 2px; font-weight: 600;"></span>';
+      html += '        </div>';
+      html += '      </div>';
+      html += '    </div>';
+      
+      // Column 3: Create a wrapper for Order Breakdown and Scan to Pay
+      html += '    <div style="display: flex; flex-direction: column; gap: 14px;">';
+      
+      // Order Breakdown Box
+      html += '    <div style="background: #ffffff; padding: 16px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;">';
+      html += '      <div style="display: flex; align-items: center; gap: 8px;">';
+      html += '        <i class="fas fa-boxes" style="color: #333; font-size: 20px;"></i>';
+      html += '        <h3 style="margin: 0; font-size: 23px; font-weight: 700; color: #333;">Order Breakdown</h3>';
+      html += '      </div>';
+      html += '      <div style="display: flex; flex-direction: column; gap: 10px;">';
+      html += '        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 19px;">';
+      html += '          <label style="font-weight: 600; color: #333;">Quantity :</label>';
+      html += '          <span id="quantityTotal" style="font-weight: 600; color: #333; font-size: 19px; background: #d4d4d4; padding: 3px 12px; border-radius: 4px; min-width: 60px; text-align: center; border: 2px solid grey;">' + qtyTotal + '</span>';
+      html += '        </div>';
+      html += '        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 19px; margin-top:-7px;">';
+      html += '          <label style="font-weight: 600; color: #333;">Items Count :</label>';
+      html += '          <span id="numberOfItems" style="font-weight: 600; color: #333; font-size: 19px; background: #d4d4d4; padding: 3px 12px; border-radius: 4px; min-width: 60px; text-align: center; border: 2px solid grey;">' + numItems + '</span>';
+      html += '        </div>';
+      html += '        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 19px; margin-top:-7px;">';
+      html += '          <label style="font-weight: 600; color: #333;">Credits :</label>';
+      html += '          <span id="creditsOrder" style="font-weight: 600; color: #333; font-size: 19px; background: #d4d4d4; padding: 3px 12px; border-radius: 4px; min-width: 60px; text-align: center; border: 2px solid grey;">' + credits + '</span>';
+      html += '        </div>';
+      html += '      </div>';
+      html += '    </div>';
+      
+      // Scan to Pay Box
+      html += '    <div style="background: #ffffff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;">';
+      html += '      <div id="upiQrBreakdownContainer" style="text-align: center;">';
+      html += '        <div id="qrSelectionContainer" style="display:none; margin-bottom: 10px;">';
+      html += '          <div style="font-size: 13px; font-weight: 700; color: #4b5563; margin-bottom: 8px;">SELECT QR TYPE</div>';
+      html += '          <div style="display: flex; justify-content: center; gap: 15px; align-items: center;">';
+      html += '            <label style="font-size: 16px; font-weight: 700; color: #374151; cursor: pointer; display: flex; align-items: center; gap: 4px;"><input type="radio" name="qr_type" id="qr_type_1" value="1" onchange="triggerQrGeneration()" style="width: 18px; height: 18px; cursor: pointer;">First QR</label>';
+      html += '            <label style="font-size: 16px; font-weight: 700; color: #374151; cursor: pointer; display: flex; align-items: center; gap: 4px;"><input type="radio" name="qr_type" id="qr_type_2" value="2" onchange="triggerQrGeneration()" style="width: 18px; height: 18px; cursor: pointer;">Second QR</label>';
+      html += '          </div>';
+      html += '        </div>';
+      html += '        <div id="upiQrContent" class="upi-qr-blur" style="display: flex; flex-direction: column; align-items: center;">';
+      html += '          <p style="font-size: 16px; font-weight: 700; color: #6b7280; margin-bottom: -7px;">Scan to Pay: <span id="upiQrAmountPlaceholder">0.00</span></p>';
+      html += '          <div style="border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;">';
+      html += '            <img src="https://www.hallmarknameplate.com/wp-content/uploads/2022/08/qr-code-print5-293x300.png" id="upiQrImg" style="width: 140px; height: 130px; opacity: 0.8; object-fit: contain;">';
+      html += '          </div>';
+      html += '        </div>';
+      html += '      </div>';
+      html += '    </div>';
+      
+      html += '    </div>';
+      
+      setTimeout(function() {
+          if (typeof updateLiveTaxDetails === 'function') {
+              updateLiveTaxDetails();
+          }
+      }, 100);
+      
+      html += '    </div>';
+      html += '    </div>';
+      
+      // Second Row - Three Columns
+      html += '    <div style="display: grid; grid-template-columns: 36% 30% 31%; gap: 14px; padding: 0 13px 13px 13px; background: #f6f6e9;">';
+      
+      // Column 1: Customer Loyalty
+      html += '    <div style="background: #ffffff; padding: 12px 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;">';
+      html += '      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #f0f0f0;">';
+      html += '        <i class="fas fa-heart" style="color: #333; font-size: 18px;"></i>';
+      html += '        <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: #333;">Customer Loyalty</h3>';
+      html += '      </div>';
+      
+      html += '      <div style="display: flex; flex-direction: column; align-items: center; margin-top: 10px;">';
+      // Semi-circle Arc Gauge
+      html += '        <div style="position: relative; width: 200px; height: 100px; overflow: hidden; margin-bottom: 10px;">';
+      html += '          <div style="position: absolute; top: 0; left: 0; width: 200px; height: 200px; border-radius: 50%; background: conic-gradient(#4CAF50 0deg, #4CAF50 180deg, #f0f0f0 180deg, #f0f0f0 360deg); transform: rotate(-90deg);"></div>';
+      html += '          <div style="position: absolute; top: 12px; left: 12px; width: 176px; height: 176px; background: white; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 25px;">';
+      html += '          </div>';
+      html += '        </div>';
+      
+      // Points and AA labels (overlapping/below the arc center)
+      html += '        <div style="text-align: center; margin-top: -55px; margin-bottom: 15px; position: relative; z-index: 2;">';
+      html += '          <div style="font-size: 20px; font-weight: 700; color: #1e40af; margin-bottom: 2px;">Points: <span id="creditLimitSpan">0.00</span></div>';
+      html += '          <div style="font-size: 18px; font-weight: 700; color: #166534;">AA: <span id="advancedAmountSpan">0.00</span></div>';
+      html += '        </div>';
+      
+      // Footer row with Eye, DA and Button
+      html += '        <div style="display: flex; align-items: center; justify-content: space-between; width: 54%; margin-top: -6px;">';
+      html += '          <div style="display: flex; align-items: center; gap: 8px;">';
+      html += '             <i class="fas fa-eye" onclick="quickViewWallet()" style="color: #333; font-size: 16px; cursor: pointer;"></i>';
+      var daCheckEnabled = (globalDueAmount > 0) ? '' : 'disabled';
+      html += '             <label style="display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 700; color: #991b1b; margin: 0; cursor: pointer; background: #fee2e2; padding: 2px 6px; border-radius: 4px;">';
+      html += '               <input type="checkbox" id="includeDAInTotal" onchange="updateTotals()" ' + daCheckEnabled + ' style="width: 14px; height: 14px; cursor: pointer;">';
+      html += '               <span>DA:<span id="dueAmountSpan" data-original="' + globalDueAmount + '">' + globalDueAmount.toFixed(2) + '</span></span>';
+      html += '             </label>';
+      html += '             <input type="number" id="includeDAAmount" oninput="updateTotals()" placeholder="0" class="form-control-pos" disabled style="width: 70px; height: 26px; padding: 2px 5px; font-size: 15px; border: 1px solid #d4a574; border-radius: 4px; margin-left: 5px;">';
+      html += '          </div>';
+      html += '        </div>';
+      
+      html += '      </div>';
+      html += '    </div>';
+      
+      // Column 2: Payment Options
+      html += '    <div style="background: #ffffff; padding: 12px 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;">';
+      html += '      <div style="margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #f0f0f0;">';
+      html += '        <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: #333;">Payment Options</h3>';
+      html += '      </div>';
+      
+      html += '      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">';
+      // Cash Row
+      html += '        <div style="position: relative;">';
+      html += '          <input type="number" id="cashAmount" placeholder="Cash" oninput="updateTotals()" style="width: 100%; height: 42px; font-size: 18px; font-weight: 600; padding: 8px 40px 8px 12px; border: 1.5px solid #ccc; border-radius: 6px; color: #333; box-sizing: border-box;">';
+      html += '          <i class="fas fa-money-bill-alt" style="position: absolute; right: 12px; top: 11px; font-size: 20px; color: #333;"></i>';
+      html += '        </div>';
+      // UPI Row
+      html += '        <div style="display: flex; gap: 8px; align-items: center;">';
+      html += '          <div style="position: relative; flex: 1;">';
+      html += '            <input type="number" id="upiAmount" placeholder="UPI" oninput="updateTotals()" style="width: 100%; height: 42px; font-size: 18px; font-weight: 600; padding: 8px 58px 8px 12px; border: 1.5px solid #ccc; border-radius: 6px; color: #333; box-sizing: border-box;">';
+      html += '            <div style="position: absolute; right: 12px; top: 11px; display: flex; align-items: center; gap: 4px; font-style: italic; font-weight: 900; color: #666; font-size: 18px;">UPI <span style="font-size: 14px; color: #d4a574;">▶</span></div>';
+      html += '          </div>';
+      html += '          <button id="btnGenerateUpiQr" onclick="generateUpiQrCode()" style="display: none; height: 42px; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none; padding: 0 15px; border-radius: 6px; font-weight: 700; white-space: nowrap; cursor: pointer;">Generate QR</button>';
+      html += '        </div>';
+      
+      // Use AA Row
+      html += '        <div style="position: relative;">';
+      html += '          <input type="number" id="advanceAmount" placeholder="Use AA" oninput="updateTotals()" disabled style="width: 100%; height: 42px; font-size: 18px; font-weight: 600; padding: 8px 40px 8px 12px; border: 1.5px solid #ccc; border-radius: 6px; color: #333; box-sizing: border-box;">';
+      html += '          <i class="fas fa-wallet" style="position: absolute; right: 12px; top: 11px; font-size: 20px; color: #333;"></i>';
+      html += '        </div>';
+      // Due Amount Row
+      html += '        <div style="position: relative;">';
+      html += '          <input type="number" id="dueAmountInput" placeholder="Due Amount" oninput="updateTotals()" disabled style="width: 100%; height: 42px; font-size: 18px; font-weight: 600; padding: 8px 40px 8px 12px; border: 1.5px solid #ccc; border-radius: 6px; color: #333; box-sizing: border-box;">';
+      html += '          <i class="fas fa-file-invoice-dollar" style="position: absolute; right: 12px; top: 11px; font-size: 20px; color: #333;"></i>';
+      html += '        </div>';
+      html += '      </div>';
+      html += '    </div>';
+      
+      // Column 3: Payment Summary
+      html += '    <div style="background: #ffffff; padding: 12px 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;">';
+      html += '      <div style="margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #f0f0f0;">';
+      html += '        <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: #333;">Payment Summary</h3>';
+      html += '      </div>';
+      
+      html += '      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">';
+      
+      // Rows with colored outputs
+      html += '        <div style="display: flex; justify-content: space-between; align-items: center;">';
+      html += '          <span style="font-size: 14px; font-weight: 700; color: #991b1b;">Due Amount :</span>';
+      html += '          <input type="text" id="dueAmountSummary" value="' + format(0, posData.currency_code) + '" disabled style="width: 140px; background: #fee2e2; color: #991b1b; font-weight: 700; text-align: right; border: none; font-size: 16px; padding: 4px 10px; border-radius: 6px;">';
+      html += '        </div>';
+      
+      html += '        <div style="display: flex; justify-content: space-between; align-items: center;">';
+      html += '          <span style="font-size: 14px; font-weight: 700; color: #333;">Total :</span>';
+      html += '          <input type="text" id="grandTotal" value="' + grandTotalFormatted + '" disabled style="width: 140px; background: #16a34a; color: #ffffff; font-weight: 700; text-align: right; border: none; font-size: 16px; padding: 4px 10px; border-radius: 6px;">';
+      html += '        </div>';
+      
+      html += '        <div style="display: flex; justify-content: space-between; align-items: center;">';
+      html += '          <span style="font-size: 14px; font-weight: 700; color: #333;">Total Received :</span>';
+      html += '          <input type="text" id="totalReceived" value="0.00" disabled style="width: 140px; background: #dcfce7; color: #166534; font-weight: 700; text-align: right; border: none; font-size: 16px; padding: 4px 10px; border-radius: 6px;">';
+      html += '        </div>';
+      
+      html += '        <div style="display: flex; justify-content: space-between; align-items: center;">';
+      html += '          <span style="font-size: 14px; font-weight: 700; color: #333;">Pending Amount :</span>';
+      html += '          <input type="text" id="pendingAmount" value="' + grandTotalFormatted + '" disabled style="width: 140px; background: #1e40af; color: #ffffff; font-weight: 700; text-align: right; border: none; font-size: 16px; padding: 4px 10px; border-radius: 6px;">';
+      html += '        </div>';
+      
+      html += '        <div style="display: flex; justify-content: space-between; align-items: center;">';
+      html += '          <span style="font-size: 14px; font-weight: 700; color: #333;">Returnable Balance :</span>';
+      html += '          <input type="text" id="returnableBalanceDisplay" value="₹ 0" disabled style="width: 140px; background: #fef3c7; color: #92400e; font-weight: 700; text-align: right; border: none; font-size: 16px; padding: 4px 10px; border-radius: 6px;">';
+      html += '          <input type="hidden" id="returnableBalance" value="0">'; // Keep original hidden or used ID
+      html += '        </div>';
+      
+      html += returnAmountAsCashCheckbox;
+      
+      html += '        <div style="margin-top: 4px; padding-top: 6px; border-top: 1px solid #f0f0f0;">';
+      html += '          <label style="display: flex; align-items: start; gap: 8px; cursor: pointer; font-size: 12px; font-weight: 700; color: #333;">';
+      html += '            <input type="checkbox" id="saveAdvance" style="width: 16px; height: 16px; margin-top: 2px; cursor: pointer; accent-color: #000;">';
+      html += '            <span>Save Returnable Amount as Customer Advance</span>';
+      html += '          </label>';
+      html += '        </div>';
+      
+      html += '<input type="hidden" id="agentBusinessClass" value="{{ agentBusinessClass|e('js') }}">';
+      html += '<input type="hidden" id="customerGroupId" value="{{ posData.customer_group_id|e('js') }}">';
+      html += '      </div>';
+      html += '    </div>'; // End modal-body
+      
+      // Footer Buttons and Last Order Info
+      var customerData = JSON.parse(sessionStorage.getItem('currentCustomerData') || '{}');
+      var lastOrderText = '';
+      if (customerData && customerData.last_order_id && customerData.last_order_total) {
+          lastOrderText = 'Your last order is ' + customerData.last_order_id + ' with invoice amount of ' + customerData.last_order_total;
+      }
+      
+      html += '    <div class="d-flex justify-content-between align-items-center" style="padding: 12px 0px; width: 279%; ">';
+      html += '        <div id="lastOrderDisplay" style="color: #ff0000; font-weight: 700; font-size: 15px; white-space: nowrap; margin-bottom: 0;">' + lastOrderText + '</div>';
+      html += '        <div class="d-flex align-items-center" style="gap: 12px;">';
+      html += '            <button type="button" class="btn" id="saveOrderBtn" onclick="window.processOrderPayment(this, false)" style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); color: #FFFFFF; font-size: 15px; font-weight: 600; padding: 12px 28px; border: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(66, 153, 225, 0.4); transition: all 0.3s ease; white-space: nowrap;" onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 7px 14px rgba(66, 153, 225, 0.5)\'; this.style.filter=\'brightness(110%)\';" onmouseout="this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 4px 6px rgba(66, 153, 225, 0.4)\'; this.style.filter=\'brightness(100%)\';">Save Order</button>';
+      html += '            <button type="button" class="btn" id="payNowBtn" onclick="window.processOrderPayment(this, true)" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: #FFFFFF; font-size: 15px; font-weight: 600; padding: 12px 28px; border: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(72, 187, 120, 0.4); transition: all 0.3s ease; white-space: nowrap;" onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 7px 14px rgba(72, 187, 120, 0.5)\'; this.style.filter=\'brightness(110%)\';" onmouseout="this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 4px 6px rgba(72, 187, 120, 0.4)\'; this.style.filter=\'brightness(100%)\';">Pay Now</button>';
+      html += '            <button type="button" class="btn" id="cancelPaymentBtn" data-bs-dismiss="modal" onclick="window.clearCustomerSession()" style="background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%); color: #2d3748; font-size: 15px; font-weight: 600; padding: 12px 28px; border: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(160, 174, 192, 0.4); transition: all 0.3s ease; white-space: nowrap;" onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 7px 14px rgba(160, 174, 192, 0.5)\'; this.style.filter=\'brightness(110%)\';" onmouseout="this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 4px 6px rgba(160, 174, 192, 0.4)\'; this.style.filter=\'brightness(100%)\';">Cancel</button>';
+      html += '        </div>';
+      html += '    </div>';
+      html += '  </div>'; // End modal-content
+      html += '</div>'; // End modal-dialog
+             $('#modalXl').html(html);
+             $('#modalXl').modal('show');
+             setTimeout(function() {
+                 if (typeof updateTotals === "function") {
+                     updateTotals();  
+                 }
+                 var saveAdvanceCheckbox = document.getElementById('saveAdvance');
                  var returnableInput = document.getElementById('returnableBalance');
                  if (!saveAdvanceCheckbox || !returnableInput) {
                      return;
@@ -7217,81 +7325,14 @@ html += '          <span class="me-4"><strong style="color: #FFD700;">Invoice:</
                  } else {
                      saveAdvanceCheckbox.checked = false;
                  }
-         }, 100);
-         html += '    <div style="background: #FFFFFF; padding: 25px 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 4px solid #5a67d8; position: relative;">';
-         html += '      <div style="position: absolute; top: -12px; left: 20px; background: linear-gradient(135deg, #5a67d8 0%, #4c51bf 100%); color: #fff; padding: 4px 15px; font-size: 11px; font-weight: 700; border-radius: 20px; letter-spacing: 1px; box-shadow: 0 2px 5px rgba(90, 103, 216, 0.4);">PAYMENT OPTIONS</div>';
-         html += '      <div class="row row-tight pt-2" style="height: 207px;">';
-         html += '        <div class="col-md-12">';
-         html += '          <div class="row mb-3">';
-         html += '            <div class="col-md-3 fw-bold pt-2" style="font-size: 15px; color: #4A5568;">Method:</div>';
-         html += '            <div class="col-md-9">';
-         html += '              <div class="d-flex mb-3">';
-         html += '                <div class="me-4">';
-         html += '                  <label class="form-label mb-1" style="color:#7F8C8D; font-size: 14px; font-weight: 600;">Cash</label>';
-         html += '                  <input type="number" class="form-control" placeholder="0.00" oninput="updateTotals()" id="cashAmount" style="width: 140px; background-color: #FFFFFF; color: #000000; font-size: 22px; padding: 8px 12px; border: 2px solid #D5D8DC; border-radius: 4px;">';
-         html += '                </div>';
-         html += '                <div>';
-         html += '                  <label class="form-label mb-1" style="color:#7F8C8D; font-size: 14px; font-weight: 600;">UPI</label>';
-         html += '                  <div class="d-flex gap-2">';
-         html += '                    <input type="number" class="form-control" placeholder="0.00" id="upiAmount" oninput="updateTotals()" style="width: 140px; color:black; font-size: 22px; padding: 8px 12px; border: 2px solid #D5D8DC; border-radius: 4px;">';
-        html += '                    <button type="button" id="btnGenerateUpiQr" onclick="generateUpiQrCode()" class="btn" style="display:none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: none; border-radius: 4px; padding: 0 15px; height: 46px; font-size: 13px; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.1); white-space: nowrap;">Generate QR</button>';
-        html += '                  </div>';
-         html += '                </div>';
-         html += '              </div>';
-         html += '              <div class="d-flex">';
-         html += '                <div class="me-4" style="min-width: 120px;">';
-         html += '                  <div class="form-check">';
-         html += '                    <input class="form-check-input" style="background-color: black; width: 14px; height: 14px;" type="checkbox" id="advancedAmountInvoice" onchange="handleAdvanceCheckbox()">';
-         html += '                    <label class="form-check-label" for="advancedAmountInvoice" style="color:black; font-size: 12px; font-weight: 600;">Use AA</label>';
-         html += '                  </div>';
-         html += '                  <div id="advanceWrapper" style="display:none;">';
-         html += '                    <input type="number" class="value-box-amount" id="advanceAmount" style="width:120px; color:black;" readonly>';
-         html += '                  </div>';
-         html += '                </div>';
-         html += '                <div style="min-width: 120px; padding-left: 24px;">';
-         html += '                  <div class="form-check" >';
-         html += '                    <input class="form-check-input" style="background-color: black; width: 14px; height: 14px;" type="checkbox" id="dueAmountInvoice" onchange="handleDueAmountCheckbox()">';
-         html += '                    <label class="form-check-label" for="dueAmountInvoice" style="color:black; font-size: 12px; font-weight: 600;">Due Amount</label>';
-         html += '                  </div>';
-         html += '                  <div id="dueAmountWrapper" style="display:none;">';
-         html += '                    <input type="number" class="value-box-amount" id="dueAmountInput" placeholder="0" oninput="updateTotals()" style="width:120px; color:black; font-size:22px;">';
-         html += '                  </div>';
-         html += '                </div>';
-         html += '              </div>';
-         html += '            </div>';
-         html += '          </div>';
-         html += '          <div id="advanceAmountDesc" class="form-text" style="display:none; margin-left: 140px; color: #666; font-size: 22px;"></div>';
-         html += '        </div>';
-             html += '    </div>';
-             html += '    </div>';
-             html += '  </div>'; 
-             html += '</div>'; 
-                 html += '  <hr style="color:black; margin-top: 0px; margin-bottom: 1px;">';  
-            html += '    <div id="lastOrderDisplay" style="text-align: right; margin-right: 5px; margin-bottom: 5px; font-weight: bold; font-size: 13px; color: #333; display: none; display: inline; color:red;"></div>';
-             html += '    <div class="d-flex justify-content-end" style="margin-bottom: -13px; margin-top: -20px;">';
-                          html += '        <button class="btn me-3" id="saveOrderBtn" style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); color: #FFFFFF; font-size: 15px; font-weight: 600; padding: 12px 32px; border: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(66, 153, 225, 0.4); transition: all 0.3s ease;" onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 7px 14px rgba(66, 153, 225, 0.5)\'; this.style.filter=\'brightness(110%)\';" onmouseout="this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 4px 6px rgba(66, 153, 225, 0.4)\'; this.style.filter=\'brightness(100%)\';">Save Order</button>';
-             html += '        <button class="btn me-3" id="payNowBtn" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: #FFFFFF; font-size: 15px; font-weight: 600; padding: 12px 32px; border: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(72, 187, 120, 0.4); transition: all 0.3s ease;" onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 7px 14px rgba(72, 187, 120, 0.5)\'; this.style.filter=\'brightness(110%)\';" onmouseout="this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 4px 6px rgba(72, 187, 120, 0.4)\'; this.style.filter=\'brightness(100%)\';">Pay Now</button>';
-             html += '        <button class="btn" id="cancelPaymentBtn" data-bs-dismiss="modal" style="background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%); color: #2d3748; font-size: 15px; font-weight: 600; padding: 12px 32px; border: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(160, 174, 192, 0.4); transition: all 0.3s ease;" onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 7px 14px rgba(160, 174, 192, 0.5)\'; this.style.filter=\'brightness(110%)\';" onmouseout="this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 4px 6px rgba(160, 174, 192, 0.4)\'; this.style.filter=\'brightness(100%)\';">Cancel</button>';
-             html += '      </div>';
-             html += '</div>'; 
-             $('#modalXl').html(html);
-             $('#modalXl').modal('show');
-             setTimeout(function() {
-             const cancelBtn = document.getElementById('cancelPaymentBtn');
-             if (cancelBtn) {
-                 cancelBtn.onclick = function() {
-                     clearCustomerSession();
-                 };
-             }
-         }, 100);
+             }, 100);
+
+
+
          $(document).on('hidden.bs.modal', '#modalXl', function () {
          });
-         $(document).on('click', '#modalXl button[data-bs-dismiss="modal"]', function() {
-             if ($(this).text() === 'Cancel') {
-                 clearCustomerSession();
-             }
-         });
-         function clearCustomerSession() {
+
+         window.clearCustomerSession = function() {
              sessionStorage.removeItem('currentCustomerData');
              sessionStorage.removeItem('customerSData');
              sessionStorage.removeItem('payment_address');
@@ -7302,9 +7343,18 @@ html += '          <span class="me-4"><strong style="color: #FFD700;">Invoice:</
              if ($('#creditLimitSpan').length) $('#creditLimitSpan').text('0.00');
              if ($('#advancedAmountSpan').length) $('#advancedAmountSpan').text('0.00');
              if ($('#dueAmountSpan').length) $('#dueAmountSpan').text('0.00');
-             if ($('#dueAmountInput').length) $('#dueAmountInput').val('');
-             if ($('#dueAmountInvoice').length) $('#dueAmountInvoice').prop('checked', false);
-             if ($('#dueAmountWrapper').length) $('#dueAmountWrapper').hide();
+             
+             const advanceInput = document.getElementById('advanceAmount');
+             if (advanceInput) {
+                 advanceInput.value = '';
+                 advanceInput.disabled = true; 
+             }
+             const dueAmountInput = document.getElementById('dueAmountInput');
+             if (dueAmountInput) {
+                 dueAmountInput.value = '';
+                 dueAmountInput.disabled = true; 
+             }
+             
              if (typeof globalAdvanceAmount !== 'undefined') {
                  globalAdvanceAmount = 0;
                  globalDueAmount = 0;
@@ -7321,11 +7371,6 @@ html += '          <span class="me-4"><strong style="color: #FFD700;">Invoice:</
              if (creditCheckbox && creditCheckbox.checked) {
                  creditCheckbox.checked = false;
                  removeCreditPoints();
-             }
-             const advanceCheckbox = document.getElementById('advancedAmountInvoice');
-             if (advanceCheckbox) {
-                 advanceCheckbox.checked = false;
-                 advanceCheckbox.disabled = true; 
              }
          }
           window.generateUpiQrCode = function() {
@@ -7396,7 +7441,7 @@ $('#modalXl').on('keydown', 'input', function (e) {
         $('#payNowBtn').trigger('click');  
     }
 });
-function processOrderPayment(btn, shouldPrint) {
+window.processOrderPayment = function(btn, shouldPrint) {
     if (btn.dataset.locked === '1') return;
     btn.dataset.locked = '1';
     btn.disabled = true;
@@ -7408,10 +7453,10 @@ function processOrderPayment(btn, shouldPrint) {
       return ('value' in el) ? el.value : el.textContent.trim();
     }
     const customerData = JSON.parse(sessionStorage.getItem('currentCustomerData') || '{}');
-    const name = $('#customerNameInput').val().trim()
+    const name = ($('#customerNameInput').val() || '').trim()
       || ((customerData.firstname || '') + ' ' + (customerData.lastname || '')).trim();
-    const phone = $('#customerMobileInput').val().trim() || customerData.telephone || '';
-    const email = $('#customerEmailInput').val().trim() || customerData.email || '';
+    const phone = ($('#customerMobileInput').val() || '').trim() || customerData.telephone || '';
+    const email = ($('#customerEmailInput').val() || '').trim() || customerData.email || '';
     $('#nameError').text('');
     $('#phoneError').text('');
     if (!name) {
@@ -7439,6 +7484,8 @@ function processOrderPayment(btn, shouldPrint) {
     if (cashAmt > 0) paymentThrough.push("CASH");
     if (upiAmt  > 0) paymentThrough.push("UPI");
     if (advAmt  > 0) paymentThrough.push("ADVANCE");
+    const dueAmountVal = parseFloat(getElementValue('dueAmountInput')) || 0;
+    if (dueAmountVal > 0) paymentThrough.push("DUE");
     paymentThrough = paymentThrough.join(", ") || "NONE";
     const pendingAmount = parseFloat(
       (getElementValue('pendingAmount') || '0').replace(/[^0-9.-]/g, '')
@@ -7483,7 +7530,7 @@ function processOrderPayment(btn, shouldPrint) {
           CreditPointsUsed: creditPointsUsed,
           AvailableAdvancedAmount: document.getElementById('advancedAmountSpan')?.textContent || '0.00',
           CartProducts: cartProducts.map(p => {
-            const gstPercent = parseFloat(p.gst_percent || 0);
+            const gstPercent = parseFloat(p.gst_percent || 3);
             const linePrice = parseFloat(p.price || 0) * parseInt(p.quantity || 1);
             const rowGst = (gstPercent / 100) * linePrice;
             const discountPercent = parseFloat(p.gst_percent || 0);
@@ -7529,7 +7576,7 @@ function processOrderPayment(btn, shouldPrint) {
           TotalReceivedAmount: getElementValue('totalReceived'),
           PendingAmount: getElementValue('pendingAmount'),
           ReturnableBalance: getElementValue('returnableBalance'),
-          DueAmountUsed: document.getElementById('dueAmountInvoice')?.checked || false,
+          DueAmountUsed: (parseFloat(getElementValue('dueAmountInput')) || 0) > 0,
           DueAmountValue: parseFloat(getElementValue('dueAmountInput')) || 0,
           includedDA: document.getElementById('includeDAInTotal')?.checked || false,
           includedDAAmount: parseFloat(getElementValue('includeDAAmount')) || 0,
@@ -7539,6 +7586,7 @@ function processOrderPayment(btn, shouldPrint) {
           previourseditorderid: previourseditorderid,
           redeem_points_status: document.getElementById('creditLimitInvoice')?.checked || false
         };
+        console.log("order details", orderDetails);
         sessionStorage.setItem('paidOrderDetails', JSON.stringify(orderDetails));
         $.ajax({
           url: 'index.php?route=extension/purpletree_pos/pos/home|addorder',
@@ -7597,7 +7645,7 @@ function processOrderPayment(btn, shouldPrint) {
         unlockPayBtn(btn);
       });
 }
-function disableFooterButtons(clickedId) {
+window.disableFooterButtons = function(clickedId) {
     ['saveOrderBtn','payNowBtn','cancelPaymentBtn'].forEach(function(id) {
         if (id !== clickedId) {
             var btn = document.getElementById(id);
@@ -7605,29 +7653,8 @@ function disableFooterButtons(clickedId) {
         }
     });
 }
-setTimeout(function () {
-  const payBtn = document.getElementById('payNowBtn');
-  if (payBtn) {
-    payBtn.onclick = function () {
-        disableFooterButtons('payNowBtn');
-        processOrderPayment(this, true); 
-    };
-  }
-  const saveBtn = document.getElementById('saveOrderBtn');
-  if (saveBtn) {
-    saveBtn.onclick = function () {
-        disableFooterButtons('saveOrderBtn');
-        processOrderPayment(this, false); 
-    };
-  }
-  const cancelBtn = document.getElementById('cancelPaymentBtn');
-  if (cancelBtn) {
-      cancelBtn.onclick = function() {
-          disableFooterButtons('cancelPaymentBtn');
-          clearCustomerSession();
-      };
-  }
-}, 500);
+
+// Handlers are now inline for maximum reliability
          initializeCouponFunctionality();
          initializeCreditLimitFunctionality();
          }
@@ -8859,7 +8886,7 @@ function printMergeLongBill() {
              var orderProducts = selectedOrder.products || [];
              var cartProducts = [];
              orderProducts.forEach(function (p, index) {
-                 var gstPercent = parseFloat(p.gst_percent || p.tax_percent || 0) || 0;
+                 var gstPercent = parseFloat(p.gst_percent || p.tax_percent || 3) || 3;
                  if (!gstPercent && Array.isArray(p.proTax)) {
                      p.proTax.forEach(function(t){ if ((t.name||'').toLowerCase().includes('gst')) gstPercent += parseFloat(t.rate)||0; });
                  }
@@ -9480,6 +9507,62 @@ if (data.upc && data.upc !== '') {
               highlightSidebarButton('quotationHistoryBtn');
               setTodayDates();
               loadQuotationData();
+          }
+          function openInvoiceHistory() {
+              $('#invoiceContent').show();
+              $('#quotationHistoryContent').hide();
+              $('#loadWalletContent').hide();
+              $('#manageProductContent').hide();
+              $('#returnContent').hide();
+              $('#walletHistoryContent').hide();
+              $('#editOrderHistoryContent').hide();
+              $('#cancelOrderContent').hide();
+              $('#cartArea').hide();
+              $('.cart-header-row').hide();
+              $('.discount-row').hide();
+              $('.search-section').hide();
+              $('#submit-order-btn, #sendQuotationBtn, #printCartBtn, #saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
+              highlightSidebarButton('invoiceHistoryBtn');
+              const today = new Date().toISOString().split('T')[0];
+              $('#invoice1_from_date').val(today);
+              $('#invoice1_to_date').val(today);
+              loadInvoiceData();
+          }
+          function openCustomerPanel() {
+              $('#loadWalletContent').show();
+              $('#walletHistoryContent').hide();
+              $('#quotationHistoryContent').hide();
+              $('#invoiceContent').hide();
+              $('#returnContent').hide();
+              $('#editOrderHistoryContent').hide();
+              $('#cancelOrderContent').hide();
+              $('#manageProductContent').hide();
+              $('#cartArea').hide();
+              $('.cart-header-row').hide();
+              $('.discount-row').hide();
+              $('.search-section').hide();
+              $('#submit-order-btn, #sendQuotationBtn, #printCartBtn, #saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
+              highlightSidebarButton('walletBtn');
+          }
+          function openReturnHistory() {
+              $('#returnContent').show();
+              $('#quotationHistoryContent').hide();
+              $('#invoiceContent').hide();
+              $('#loadWalletContent').hide();
+              $('#manageProductContent').hide();
+              $('#walletHistoryContent').hide();
+              $('#editOrderHistoryContent').hide();
+              $('#cancelOrderContent').hide();
+              $('#cartArea').hide();
+              $('.cart-header-row').hide();
+              $('.discount-row').hide();
+              $('.search-section').hide();
+              $('#submit-order-btn, #sendQuotationBtn, #printCartBtn, #saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
+              highlightSidebarButton('returnBtn');
+              const today = new Date().toISOString().split('T')[0];
+              $('#invoice_from_date').val(today);
+              $('#invoice_to_date').val(today);
+              loadReturnData();
           }
           function openEditOrderHistory() {
               $('#cartArea').hide();
@@ -10332,11 +10415,11 @@ if (data.upc && data.upc !== '') {
                subTotal += lineTotal;
                let prod = null;
                try { prod = decodeProduct(row.dataset.product); } catch (e) { prod = null; }
-               let gstPercent = 0;
-               if (prod && prod.gst_percent) gstPercent = parseFloat(prod.gst_percent) || 0;
-               if (!gstPercent) {
+               let gstPercent = 3;
+               if (prod && prod.gst_percent) gstPercent = parseFloat(prod.gst_percent) || 3;
+               if (gstPercent === 3) {
                   const gstCell = row.querySelector('.gst-percent');
-                  if (gstCell) gstPercent = parseFloat(gstCell.textContent.replace('%','')) || 0;
+                  if (gstCell) gstPercent = parseFloat(gstCell.textContent.replace('%','')) || 3;
                }
                const lineGst = (gstPercent / 100) * lineTotal;
                totalTax += lineGst;
@@ -10546,94 +10629,14 @@ if (data.upc && data.upc !== '') {
          var totalReceivedAmount = 0;
          var globalAdvanceAmount = 0;
          var globalDueAmount = 0;
-         function handleDueAmountCheckbox() {
-             const useDA = document.getElementById('dueAmountInvoice');
-             const daWrapper = document.getElementById('dueAmountWrapper');
-             const daInput = document.getElementById('dueAmountInput');
-             if (useDA && useDA.checked) {
-                 if (daWrapper) daWrapper.style.display = 'block';
-             } else {
-                 if (daWrapper) daWrapper.style.display = 'none';
-                 if (daInput) daInput.value = ''; 
-             }
-             updateTotals();
-         }
-         function handleAdvanceCheckbox() {
-             const useAdvance      = document.getElementById('advancedAmountInvoice')?.checked || false;
-             const advanceInput    = document.getElementById('advanceAmount');
-             const advanceWrapper  = document.getElementById('advanceWrapper');
-             const desc            = document.getElementById('advanceAmountDesc');
-             const cashInput       = document.getElementById('cashAmount');
-             const upiInput        = document.getElementById('upiAmount');
-             const totalDue        = grandTotalAmount || 0;
-             const availableAdvance = globalAdvanceAmount || 0;
-             if (!cashInput || !upiInput) return;
-             if (!useAdvance || availableAdvance <= 0) {
-                 if (advanceWrapper) advanceWrapper.style.display = 'none';
-                 if (desc)          desc.style.display = 'none';
-                 if (advanceInput)  advanceInput.value = '';
-                 cashInput.readOnly = false;
-                 cashInput.style.backgroundColor = '';
-                 cashInput.style.cursor = '';
-                 upiInput.readOnly  = false;
-                 upiInput.style.backgroundColor = '';
-                 upiInput.style.cursor = '';
-                 updateTotals();
-                 return;
-             }
-             const advUsed = Math.min(availableAdvance, totalDue);
-            if (advanceWrapper) advanceWrapper.style.display = 'block';
-             if (advanceInput) {
-                 advanceInput.value  = advUsed.toFixed(2);
-                 advanceInput.readOnly = true;
-             }
-             const remainingDue = Math.max(totalDue - advUsed, 0);
-             let text = '';
-             if (advUsed >= totalDue) {
-                 const balAdv = availableAdvance - advUsed;
-                 text = 'Balance ' + balAdv.toFixed(2);
-             } else {
-                 text = 'Remaining Pending ' + remainingDue.toFixed(2) +
-                        ', Balance ' + (availableAdvance - advUsed).toFixed(2);
-             }
-             if (desc) {
-                 desc.style.display = 'block';
-                 desc.innerHTML = text;
-                 desc.style.marginTop = '-5px'; 
-             }
-             if (advUsed >= totalDue) {
-                 cashInput.value = '';
-                 upiInput.value  = '';
-                 cashInput.readOnly = true;
-                 upiInput.readOnly  = true;
-                 cashInput.style.backgroundColor = '#e9ecef';
-                 cashInput.style.cursor = 'not-allowed';
-                 upiInput.style.backgroundColor = '#e9ecef';
-                 upiInput.style.cursor = 'not-allowed';
-             } else {
-                 cashInput.readOnly = false;
-                 upiInput.readOnly  = false;
-                 cashInput.style.backgroundColor = '';
-                 cashInput.style.cursor = '';
-                 upiInput.style.backgroundColor = '';
-                 upiInput.style.cursor = '';
-             }
-             updateTotals();
-         }
-         function parseMoney(val) {
-             if (!val) return 0;
-             return parseFloat(String(val).replace(/[^0-9.-]/g, '')) || 0;
-         }
          function updateTotals() {
              var cashInput   = document.getElementById('cashAmount');
              var upiInput    = document.getElementById('upiAmount');
              var totalRecEl  = document.getElementById('totalReceived');
              var pendEl      = document.getElementById('pendingAmount');
              var retEl       = document.getElementById('returnableBalance');
-             var advChk      = document.getElementById('advancedAmountInvoice');
              var advInput    = document.getElementById('advanceAmount');
              var upiRefInput = document.getElementById('upiReference');  
-             var daChk       = document.getElementById('dueAmountInvoice');
              var daInput     = document.getElementById('dueAmountInput');
              var gtEl        = document.getElementById('grandTotal');
              var cashVal = cashInput ? (parseFloat(cashInput.value) || 0) : 0;
@@ -10666,7 +10669,7 @@ if (data.upc && data.upc !== '') {
                      qrImg.style.opacity = '0.8';
                  }
              }
-              var daVal = (daChk && daChk.checked) ? (parseFloat(daInput?.value) || 0) : 0;
+              var daVal = daInput ? (parseFloat(daInput.value) || 0) : 0;
               var currentCurrency = (typeof posData !== 'undefined' && posData.currency_code) ? posData.currency_code : 'INR';
               var includeDAChk = document.getElementById('includeDAInTotal');
               var includeDAInput = document.getElementById('includeDAAmount');
@@ -10695,12 +10698,10 @@ if (data.upc && data.upc !== '') {
               var effectiveGrandTotal = baseGrandTotal + enteredDA;
               var adjustedGrandTotal = Math.max(effectiveGrandTotal - daVal, 0);
               if (gtEl) gtEl.value = format(effectiveGrandTotal, currentCurrency);
-              var advUsed = 0;
-              if (advChk && advChk.checked && globalAdvanceAmount > 0) {
-                  advUsed = Math.min(globalAdvanceAmount, adjustedGrandTotal);
+              var advUsed = advInput ? (parseFloat(advInput.value) || 0) : 0;
+              if (advUsed > globalAdvanceAmount) {
+                  advUsed = globalAdvanceAmount;
                   if (advInput) advInput.value = advUsed.toFixed(2);
-              } else if (advInput) {
-                  advInput.value = '';
               }
               var alreadyPaid = window.alreadyPaidAmount || 0;
               var totalReceivedAmount = alreadyPaid + advUsed + cashVal + upiVal;
@@ -10714,11 +10715,14 @@ if (data.upc && data.upc !== '') {
               if (totalRecEl) totalRecEl.value = format(totalReceivedAmount, currentCurrency);
               if (pendEl)     pendEl.value     = format(pendingAmount,     currentCurrency);
               if (retEl)      retEl.value      = returnableBalance > 0 ? returnableBalance.toFixed(0) : '';
+              var retDisplayEl = document.getElementById('returnableBalanceDisplay');
+              if (retDisplayEl) retDisplayEl.value = returnableBalance > 0 ? '\u20B9 ' + returnableBalance.toFixed(0) : '\u20B9 0';
          }
          window.addEventListener('DOMContentLoaded', function () {
              var cashInput = document.getElementById('cashAmount');
              var upiInput  = document.getElementById('upiAmount');
-             var advChk    = document.getElementById('advancedAmountInvoice');
+             var advInput  = document.getElementById('advanceAmount');
+             var daInput   = document.getElementById('dueAmountInput');
              if (cashInput) {
                  cashInput.addEventListener('input', function () {
                      if (this.value === '-') this.value = '';
@@ -10733,7 +10737,8 @@ if (data.upc && data.upc !== '') {
                      updateTotals();
                  });
              }
-             if (advChk)    advChk.addEventListener('change', updateTotals);
+             if (advInput) advInput.addEventListener('input', updateTotals);
+             if (daInput)  daInput.addEventListener('input', updateTotals);
              updateTotals();
          });
          function ptscustomerdata(customer_id){
@@ -10758,6 +10763,12 @@ if (data.upc && data.upc !== '') {
                         } else {
                             $('#lastOrderDisplay').hide();
                         }
+                          if (globalAdvanceAmount > 0) {
+                              $('#advanceAmount').prop('disabled', false);
+                          } else {
+                              $('#advanceAmount').prop('disabled', true).val('');
+                          }
+                          $('#dueAmountInput').prop('disabled', false);
                           if (globalDueAmount > 0) {
                               $('#includeDAInTotal').prop('disabled', false);
                           } else {
@@ -10890,14 +10901,7 @@ if (data.upc && data.upc !== '') {
                  }, 3000);
              }
          }
-         $(document).ready(function() {
-             const couponBtn = document.getElementById('couponBtnInvoice');
-             if (couponBtn) {
-                 couponBtn.addEventListener('click', handleCouponInvoice);
-             }
-             initializeCreditLimitFunctionality();
-             initializeCouponFunctionality();
-         });
+         // Cleaned up duplicate JS blocks
          function updateTotalsWithCoupon(discount, couponCode) {
              let totals = JSON.parse(sessionStorage.getItem("totals")) || [];
              totals = totals.filter(item => item.code !== 'coupon');
@@ -12842,45 +12846,7 @@ if (data.upc && data.upc !== '') {
              if (!searchTerm) return;
              updateSearchAutocomplete(searchTerm, true);
          }
-         function editCartProduct(cartId, productId) {
-             if (!EDITABLE_PRODUCT_IDS.includes(parseInt(productId))) {
-                 return;
-             }
-             let productToEdit = null;
-             if (typeof posData !== 'undefined' && posData && posData.products) {
-                 if (posData.products[productId]) {
-                     productToEdit = posData.products[productId];
-                 } else {
-                     Object.keys(posData.products).forEach(function (key) {
-                         const p = posData.products[key];
-                         if (!productToEdit && (p.productid == productId || p.product_id == productId)) {
-                             productToEdit = p;
-                         }
-                     });
-                 }
-             }
-             if (!productToEdit) {
-                 let allProductsCount = JSON.parse(localStorage.getItem("allProductsCount") || "[]");
-                 productToEdit = allProductsCount.find(p => p.product_id == productId || p.productid == productId);
-             }
-             if (!productToEdit && typeof allProducts !== 'undefined' && allProducts) {
-                 productToEdit = allProducts.find(p => p.product_id == productId || p.productid == productId);
-             }
-             if (!productToEdit) {
-                 console.error('Product ' + productId + ' not found');
-                 return;
-             }
-             const modalEl = document.getElementById('editProduct154Modal');
-             modalEl.setAttribute('data-product-id', productId);
-             const modalTitle = modalEl.querySelector('.modal-title');
-             if (modalTitle) {
-                 modalTitle.textContent = '✏️ Edit Product ' + productId;
-             }
-             document.getElementById('prod154_name').value  = productToEdit.heading_title || productToEdit.name || '';
-             document.getElementById('prod154_price').value = productToEdit.price || 0;
-             const modal = new bootstrap.Modal(document.getElementById('editProduct154Modal'));
-             modal.show();
-         }
+
          function updateSearchAutocomplete(searchTerm, showNoResults = false) {
              const autocompleteList = document.getElementById('main_search_autocomplete_list');
              if (!autocompleteList) return;
@@ -12975,84 +12941,8 @@ if (data.upc && data.upc !== '') {
              }
          }
 
-         $(document).on('click', '.edit-product-any', function(e) {
-             e.preventDefault();
-             e.stopPropagation();
-             let productId = $(this).attr('data-product-id') || $(this).data('product-id');
-             if (!productId) return;
-             editCartProduct(null, productId);
-         });
-         function saveProduct154() {
-             const modalEl = document.getElementById('editProduct154Modal');
-             const productId = parseInt(modalEl.getAttribute('data-product-id'));
-             if (isNaN(productId)) {
-                 console.error("Invalid product ID in modal");
-                 return;
-             }
-             var name  = document.getElementById('prod154_name').value || "";
-             var price = parseFloat(document.getElementById('prod154_price').value) || 0;
-             let productToEdit = null;
-             let allProductsCount = JSON.parse(localStorage.getItem("allProductsCount") || "[]");
-             if (!allProductsCount || allProductsCount.length === 0) {
-                 console.error("allProductsCount not available");
-                 return;
-             }
-             if (allProductsCount[productId]) {
-                 productToEdit = allProductsCount[productId];
-             } else {
-                 productToEdit = allProductsCount.find(p => p.product_id == productId || p.productid == productId);
-             }
-             if (!productToEdit) {
-                 console.error("Product " + productId + " not found in allProductsCount");
-                 return;
-             }
-             productToEdit.heading_title = name;
-             productToEdit.headingtitle  = name;
-             productToEdit.name          = name;
-             productToEdit.price         = price;
-             localStorage.setItem("allProductsCount", JSON.stringify(allProductsCount));
-             if (window.posData && posData.products) {
-                 if (posData.products[productId]) {
-                     posData.products[productId].price = price;
-                     posData.products[productId].name = name;
-                     posData.products[productId].heading_title = name;
-                 } else {
-                      Object.keys(posData.products).forEach(function (key) {
-                         var p = posData.products[key];
-                         if (p.product_id == productId || p.productid == productId) {
-                             p.price = price;
-                             p.name = name;
-                             p.heading_title = name;
-                         }
-                     });
-                 }
-             }
-             let posCart = JSON.parse(localStorage.getItem('poscart') || '[]');
-             posCart = posCart.filter(function (item) {
-                 return parseInt(item.productid) !== productId;
-             });
-             localStorage.setItem('poscart', JSON.stringify(posCart));
-             if (typeof removeFromCart === 'function') {
-                 removeFromCart(productId);
-             }
-             if (typeof addToCartProducts === 'function') {
-                 addToCartProducts(productToEdit);
-             }
-             if (typeof addProductRowToCartArea === 'function') {
-                 addProductRowToCartArea(productToEdit);
-             }
-             if (typeof getCartProductHTML === 'function') {
-                 getCartProductHTML();
-             }
-             if (typeof updateCartTotals === 'function') {
-                 updateCartTotals();
-             }
-             if (typeof updateInvoiceRightColumn === 'function') {
-                 updateInvoiceRightColumn();
-             }
-             var modal = bootstrap.Modal.getInstance(modalEl);
-             if (modal) modal.hide();
-         }
+
+
          function addProductRowToCartArea(product) {
          const cartArea = document.getElementById('cartArea');
          if (!cartArea) {
@@ -13084,16 +12974,21 @@ if (data.upc && data.upc !== '') {
          const actualQuantity = Math.max(0, stockQuantity - editableQuantity);
          const existingRow = document.querySelector('.cart-row[data-product-id="' + product.product_id + '"]');
          if (existingRow) {
-         const actualQtySpan = existingRow.querySelector('.actual-qty');
-         const qtyInput = existingRow.querySelector('.qty-input');
-         if (actualQtySpan) actualQtySpan.textContent = actualQuantity;
-         if (qtyInput) {
-         qtyInput.value = editableQuantity;
-         updateRowTotal(existingRow, editableQuantity);
-         }
-         applyRowHighlight(existingRow);
-         updateInvoiceRightColumn();
-         return;
+             const actualQtySpan = existingRow.querySelector('.actual-qty');
+             const qtyInput = existingRow.querySelector('.qty-input');
+             if (actualQtySpan) actualQtySpan.textContent = actualQuantity;
+             if (qtyInput) qtyInput.value = editableQuantity;
+             const existingProductData = decodeProduct(existingRow.dataset.product);
+             if (existingProductData) {
+                 existingProductData.quantity = editableQuantity;
+                 existingProductData.total = existingProductData.price * editableQuantity;
+                 existingRow.dataset.product = encodeProduct(existingProductData);
+             }
+             updateRowTotal(existingRow, editableQuantity);
+             updateLocalStorageQuantity(product.product_id, editableQuantity);
+             applyRowHighlight(existingRow);
+             updateInvoiceRightColumn();
+             return;
          }
                   let formattedPrice = product.price || 0;
           if (typeof format === 'function' && typeof posData !== 'undefined') {
@@ -13117,7 +13012,7 @@ if (data.upc && data.upc !== '') {
                   '<span class="qty-label">' + editableQuantity + 'x</span>' +
                  '<input type="number" step="0.01" min="0" class="cart-price-input" value="' + Number(product.price).toFixed(2) + '" ' +
                  'oninput="handleCartPriceChange(this, \'' + product.product_id + '\')" ' +
-                 'style="width: 100px;border: 1px; padding: 4px; font-size: 14px; background: white;" />' +
+                 'style="width: 100px;border: 1px; padding: 4px; font-size: 20px; background: white; height:36px; width:93px;" />' +
                  '</div>';
          } else {
              priceCellHtml =
@@ -13125,19 +13020,21 @@ if (data.upc && data.upc !== '') {
                  editableQuantity + 'x ' + Math.round(product.price) + ' </div>';
          }
          const rowIndex = document.querySelectorAll('.cart-row').length + 1;
-          let gstPercent = 0;
+          let gstPercent = 3;
           if (product.gst_percent != null && product.gst_percent !== '') {
-              gstPercent = parseFloat(product.gst_percent) || 0;
+              gstPercent = parseFloat(product.gst_percent) || 3;
           } else if (product.gst != null && product.gst !== '') {
-              gstPercent = parseFloat(product.gst) || 0;
+              gstPercent = parseFloat(product.gst) || 3;
           } else if (product.categories && Array.isArray(product.categories) && product.categories.length > 0 && product.categories[0].gst) {
-              gstPercent = parseFloat(product.categories[0].gst) || 0;
+              gstPercent = parseFloat(product.categories[0].gst) || 3;
           } else if (product.proTax && Array.isArray(product.proTax)) {
+              let proTaxGst = 0;
               product.proTax.forEach(function(tax) {
                   if ((tax.name || '').toLowerCase().includes('gst')) {
-                      gstPercent += parseFloat(tax.rate) || 0;
+                      proTaxGst += parseFloat(tax.rate) || 0;
                   }
               });
+              if (proTaxGst > 0) gstPercent = proTaxGst;
           }
           let rowGst = (gstPercent / 100) * (product.price * editableQuantity);
           let formattedRowGst = rowGst;
@@ -13160,16 +13057,11 @@ if (data.upc && data.upc !== '') {
              };
           const cartRowHTML =
           '<div data-product="' + encodeProduct(productObj) + '" class="cart-row" data-product-id="' + product.product_id + '" data-price="' + product.price + '">' +
-          '<div class="cart-cell index">' + rowIndex + '</div>' +
+          '<div class="cart-cell index cart-cell-index">' + rowIndex + '</div>' +
           '<div class="cart-cell">' + product.product_id + '</div>' +
           '<div class="cart-cell">' + (product.name || product.heading_title) + '</div>' +
           '<div class="cart-cell actual-qty" style="color:blue;" data-initial-stock="' + stockQuantity + '">' + actualQuantity + '</div>' +
-          '<div class="cart-cell amount"><div class="qty-controls">' +
-          '<button class="qty-btn" onclick="decreaseQuantity(\'' + product.product_id + '\')"> - </button>' +
-          '<input type="number" class="qty-input" style="width: 59px; border-left: 1px solid #999; border-right: 1px solid #999; border-bottom: 1px solid #999;" ' +
-          'value="' + editableQuantity + '" data-product-id="' + product.product_id + '" oninput="handleManualQuantityEntry(this, \'' + product.product_id + '\')">' +
-          '<button class="qty-btn" onclick="increaseQuantity(\'' + product.product_id + '\')">+</button>' +
-          '</div></div>' +
+          '<div class="cart-cell amount" style="text-align: center;"><input type="number" class="qty-input" value="' + editableQuantity + '" min="1" onchange="handleManualQuantityEntry(this, \'' + product.product_id + '\')" style="width: 93px; height:36px; text-align: center; font-size:20px;"></div>' +
           '<div class="cart-cell discount" style="text-align: center;">0 %</div>' +
           priceCellHtml +
           '<div class="cart-cell gst-percent" style="text-align: center; color: #856404;" data-product-id="' + product.product_id + '">' + gstPercent + ' %</div>' +
@@ -13177,13 +13069,6 @@ if (data.upc && data.upc !== '') {
           '<div class="cart-cell total" data-product-id="' + product.product_id + '">' + formattedTotal + '</div>' +
           '<div class="cart-cell" style="text-align: center; display:flex; align-items:center; justify-content:center; gap:6px;">' +
           '<button class="exclude-toggle-btn included" onclick="toggleProductExclusion(\'' + product.product_id + '\')"><i class="fa-solid fa-empty-set"></i></button>' +
-          '<button class="delete-btn" ' +
-          'style="background-color: lightgray; border: 1px solid #959393; font-size: 15px; color: black;' +
-          ((isEditable && !isCustomProduct) ? '' : ' opacity:0.3; cursor:not-allowed;') + '" ' +
-          ((isEditable && !isCustomProduct) ? 'onclick="editCartProduct(null, \'' + product.product_id + '\')"' : 'disabled') +
-          '>' +
-          '<i class="fas fa-edit"></i>' +
-          '</button>' +
           '<button class="delete-btn" style="background-color: lightgray; border: 1px solid #959393; font-size: 15px; color: black;" ' +
           'onclick="removeFromCart(\'' + product.product_id + '\')">✖️</button>' +
           '</div>' +
@@ -13264,7 +13149,7 @@ if (data.upc && data.upc !== '') {
           function updateRowTotal(row, quantity) {
               const price = parseFloat(row.dataset.price) || 0;
               const product = decodeProduct(row.dataset.product);
-              const gstPercent = product ? (product.gst_percent || 0) : 0;
+              const gstPercent = product ? (product.gst_percent || 3) : 3;
               const totalCell = row.querySelector('.cart-cell.total');
               const totalSingleCell = row.querySelector('.cart-cell.single-qty');
               const rowGstCell = row.querySelector('.cart-cell.row-gst');
@@ -13275,6 +13160,10 @@ if (data.upc && data.upc !== '') {
                    } else {
                        totalCell.textContent = '₹' + Math.round(totalPrice);
                    }
+              }
+              const qtyInput = row.querySelector('.qty-input');
+              if (qtyInput) {
+                  qtyInput.value = quantity;
               }
               if (totalSingleCell) {
                    const priceInput = totalSingleCell.querySelector('.cart-price-input');
@@ -13566,12 +13455,12 @@ if (data.upc && data.upc !== '') {
                   if (row.classList.contains('excluded-row')) {
                       return;
                   }
-                  const qtyInput     = row.querySelector('.qty-input');
+                  const qtyInput   = row.querySelector('.qty-input');
                   const product      = decodeProduct(row.dataset.product);
                   if (!qtyInput || !product) return;
                   const quantity = parseInt(qtyInput.value) || 0;
                   const unitPrice = parseFloat(row.dataset.price) || 0;
-                  const gstPercent = product.gst_percent || 0;
+                  const gstPercent = product.gst_percent || 3;
                   let lineTotal = unitPrice * quantity;
                   netTotal += lineTotal;
                   let lineGst = (gstPercent / 100) * lineTotal;
@@ -13603,6 +13492,40 @@ if (data.upc && data.upc !== '') {
               if (totalDiscountSpan) totalDiscountSpan.textContent = formattedTotalDiscount;
               if (totalTaxSpan) totalTaxSpan.textContent = formattedTotalTax;
               if (grandTotalSpan) grandTotalSpan.textContent = formattedGrandTotal;
+              
+              // Update footer subtotal display
+              const footerSubtotalSpan = document.getElementById('footerSubtotalValue');
+              if (footerSubtotalSpan) footerSubtotalSpan.textContent = formattedGrandTotal;
+              
+              // Update new summary display elements
+              const subtotalSpan = document.getElementById('subtotalValue');
+              const itemDiscountSpan = document.getElementById('itemDiscountValue');
+              const gstTotalSpan = document.getElementById('gstTotalValue');
+              const itemCountSpan = document.getElementById('itemCountValue');
+              
+              if (subtotalSpan) subtotalSpan.textContent = formattedNetTotal;
+              if (itemDiscountSpan) itemDiscountSpan.textContent = formattedTotalDiscount;
+              
+              // GST Total: show number of items (count) + GST amount on same row
+              const cartRows = document.querySelectorAll('.cart-row:not(.excluded-row)');
+              const gstCountSpan = document.getElementById('gstCountValue');
+              if (gstCountSpan) gstCountSpan.textContent = cartRows.length;
+              if (gstTotalSpan) gstTotalSpan.textContent = formattedTotalTax;
+              
+              // Item Count: show quantity total and grand total amount
+              let qtyTotal = 0;
+              cartRows.forEach(function(row) {
+                  const qtyInput = row.querySelector('.qty-input');
+                  const qtyDisplay = row.querySelector('.qty-display');
+                  if (qtyInput) {
+                      qtyTotal += parseInt(qtyInput.value) || 0;
+                  } else if (qtyDisplay) {
+                      qtyTotal += parseInt(qtyDisplay.textContent) || 0;
+                  }
+              });
+              const itemQtySpan = document.getElementById('itemQtyValue');
+              if (itemQtySpan) itemQtySpan.textContent = qtyTotal;
+              if (itemCountSpan) itemCountSpan.textContent = formattedGrandTotal;
           }
          const style = document.createElement('style');
          style.textContent = '@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } } @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }';
@@ -13637,7 +13560,7 @@ if (data.upc && data.upc !== '') {
                      element.msRequestFullscreen();
                  }
                  if (btn) {
-                     btn.innerHTML = 'Full screen OFF';
+                     btn.innerHTML = 'Full screen';
                  }
              } else {
                  if (document.exitFullscreen) {
@@ -13650,7 +13573,7 @@ if (data.upc && data.upc !== '') {
                      document.msExitFullscreen();
                  }
                  if (btn) {
-                     btn.innerHTML = 'Full screen ON';
+                     btn.innerHTML = '<i class="fas fa-expand" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Full screen';
                  }
              }
          }
@@ -13662,7 +13585,7 @@ if (data.upc && data.upc !== '') {
                  document.mozFullScreenElement ||
                  document.webkitFullscreenElement ||
                  document.msFullscreenElement;
-             btn.innerHTML = isFs ? 'Full screen OFF' : 'Full screen ON';
+             btn.innerHTML = isFs ? '<i class="fas fa-expand" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Full screen' : '<i class="fas fa-expand" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Full screen';
          }
          document.addEventListener('fullscreenchange', updateFullscreenButton);
          document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
@@ -13761,7 +13684,7 @@ if (data.upc && data.upc !== '') {
                  card.appendChild(title);
                  if (isDefaultHold) {
                      card.style.backgroundColor = "rgb(124 117 117)";
-                     card.style.border = "3px solid black";
+                     card.style.border = "3px solid white";
                  }
                  var info = document.createElement("div");
                  var itemCount = hold.cart ? hold.cart.length : 0;
@@ -13875,6 +13798,7 @@ if (data.upc && data.upc !== '') {
              });
              toggleFullscreen();
              emptyCart();
+             updateHeaderClock();
          });
          function posLogout() {
              if (!confirm('Do you want to logout?')) return;
@@ -13935,6 +13859,16 @@ if (data.upc && data.upc !== '') {
                  clockBtn.textContent = 'Clock in';
              }
          }
+         function updateHeaderClock() {
+             const headerClockEl = document.getElementById('headerCurrentTime');
+             if (headerClockEl) {
+                 const now = new Date();
+                 const hours = String(now.getHours()).padStart(2, '0');
+                 const minutes = String(now.getMinutes()).padStart(2, '0');
+                 headerClockEl.textContent = hours + ':' + minutes;
+                 setTimeout(updateHeaderClock, 1000);
+             }
+         }
           function openQuickAddModal() {
     $('#quick_add_name').val('SGC Product');
     $('#quick_add_quantity').val('1');
@@ -13959,35 +13893,74 @@ if (data.upc && data.upc !== '') {
                  saveQuickAddProduct();
              }
          });
+         $('#quick_add_gst, #quick_add_name, #quick_add_price, #quick_add_quantity').on('keydown', function (e) {
+             if (e.key === 'Enter') {
+                 e.preventDefault();
+                 saveQuickAddProduct();
+             }
+         });
          function search_product_info(input) {
-             var searchTerm = input.value.trim().toLowerCase();
+             const searchTerm = input.value.trim().toLowerCase();
+             const autocompleteList = document.getElementById('product_autocomplete_list');
+             if (!autocompleteList) return;
              if (searchTerm.length === 0) {
-                 $('#product_autocomplete_list').empty().hide();
+                 autocompleteList.innerHTML = '';
+                 autocompleteList.style.display = 'none';
                  return;
              }
              let cartProducts = [];
              if (localStorage.getItem("pos_cart") !== null) {
                  cartProducts = JSON.parse(localStorage.getItem("pos_cart"));
              }
-             let uniqueProductNames = new Set();
+             const uniqueProductNames = new Set();
              cartProducts.forEach(product => {
                  if (product.name && product.name.toLowerCase().includes(searchTerm)) {
                      uniqueProductNames.add(product.name);
                  }
              });
-             $('#product_autocomplete_list').empty().show();
-             if (uniqueProductNames.size > 0) {
-                 uniqueProductNames.forEach(name => {
-                     let item = `
-                     <li class="dropdown-item" 
-                         onclick="selectProductByName('${name.replace(/'/g, "\\'")}')"
-                         style="cursor:pointer; padding:8px 12px; border-bottom:1px solid #2a3040; color: #fff;">
-                         ${name}
-                     </li>`;
-                     $('#product_autocomplete_list').append(item);
-                 });
-             } 
+             autocompleteList.innerHTML = '';
+             if (uniqueProductNames.size === 0) {
+                 autocompleteList.style.display = 'none';
+                 return;
+             }
+             uniqueProductNames.forEach(name => {
+                 const item = document.createElement('li');
+                 item.className = 'pos-autocomplete-item';
+                 item.textContent = name;
+                 item.onclick = function () {
+                     selectProductByName(name);
+                 };
+                 autocompleteList.appendChild(item);
+             });
+             positionProductAutocomplete(input);
+             autocompleteList.style.display = 'block';
          }
+         function positionProductAutocomplete(input) {
+             const autocompleteList = document.getElementById('product_autocomplete_list');
+             if (!autocompleteList || !input) return;
+             const rect = input.getBoundingClientRect();
+             autocompleteList.style.position = 'fixed';
+             autocompleteList.style.left = `${rect.left}px`;
+             autocompleteList.style.top = `${rect.bottom}px`;
+             autocompleteList.style.width = `${rect.width}px`;
+             autocompleteList.style.maxHeight = '220px';
+             autocompleteList.style.overflowY = 'auto';
+             autocompleteList.style.zIndex = '999999';
+         }
+         window.addEventListener('resize', function () {
+             const input = document.getElementById('quick_add_name');
+             const autocompleteList = document.getElementById('product_autocomplete_list');
+             if (autocompleteList && autocompleteList.style.display === 'block') {
+                 positionProductAutocomplete(input);
+             }
+         });
+         window.addEventListener('scroll', function () {
+             const input = document.getElementById('quick_add_name');
+             const autocompleteList = document.getElementById('product_autocomplete_list');
+             if (autocompleteList && autocompleteList.style.display === 'block') {
+                 positionProductAutocomplete(input);
+             }
+         }, true);
          function selectProductByName(productName) {
              $('#quick_add_name').val(productName);
              $('#product_autocomplete_list').hide();
@@ -14096,6 +14069,7 @@ if (data.upc && data.upc !== '') {
              const randomDigits = Math.floor(100 + Math.random() * 900);
              const productId = hour + minute + second + randomDigits;
              $('#quick_add_name').val('');
+             $('#quick_add_quantity').val('1');
              $('#quick_add_price').val('');
              $('#quick_add_gst').val('3');
              let customProducts = [];
@@ -14145,7 +14119,7 @@ if (data.upc && data.upc !== '') {
              localStorage.setItem('pos_cart', JSON.stringify(cartProducts));
              $('#quick_add_name').val('');
              $('#quick_add_price').val('');
-             $('#quick_add_gst').val('0');
+             $('#quick_add_gst').val('3');
      if (typeof PlaySound === 'function') PlaySound();
              if (typeof addProductRowToCartArea === 'function') {
                  addProductRowToCartArea(customProductObj);
@@ -14183,6 +14157,14 @@ if (data.upc && data.upc !== '') {
         currentVal = "0";
         update();
     }
+    function deleteLastChar() {
+        if (currentVal === "Error" || currentVal.length <= 1) {
+            currentVal = "0";
+        } else {
+            currentVal = currentVal.slice(0, -1);
+        }
+        update();
+    }
     function calculate() {
         try {
             currentVal = eval(currentVal).toString();
@@ -14205,7 +14187,7 @@ if (data.upc && data.upc !== '') {
         } else if (key === "Enter") {
             calculate();
         } else if (key === "Backspace") {
-            screen.innerText = screen.innerText.slice(0, -1) || "0";
+            deleteLastChar();
         } else if (key === "Escape") {
             clearDisplay();
         }
@@ -15057,4 +15039,7 @@ document.addEventListener('keydown', function(event) {
       
 </body>
 </html>
+
+
+
 

@@ -219,6 +219,30 @@
     background: #3b82f6;
     color: #fff;
 }
+ #due-data tr {
+    background: #1a2535;
+    border-bottom: 1px solid #2a4a6b;
+    transition: background .15s;
+  }
+  #due-data tr:hover {
+    background: #1e2f42;
+  }
+  #due-data td {
+    padding: 10px 14px;
+    color: #c8ddf0;
+    border-right: 1px solid #2a4a6b;
+    border-bottom: 1px solid #2a4a6b;
+  }
+  #due-data td:last-child {
+    border-right: none;
+    text-align: right;
+    color: #4fc3f7;
+    font-weight: 600;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(.5) sepia(1) saturate(2) hue-rotate(180deg);
+    cursor: pointer;
+  }
 
 /* Text Alignment */
 .text-center {
@@ -912,6 +936,9 @@
                     <button type="button" id="button-download-total" class="btn btn-success btn-sm">
                         <i class="fa fa-download"></i> Download
                     </button>
+                    <button type="button" id="button-due" class="btn btn-warning btn-sm">
+    <i class="fa fa-exclamation-circle"></i> DUE
+</button>
             {#        <button type="button" id="button-gst-total" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#gstModal">#}
             {#    <i class="fa fa-percent"></i> GST#}
             {#</button>#}
@@ -1353,7 +1380,7 @@ document.getElementById('btn-filter-order')?.addEventListener('click', function 
 
     currentPage.salesbyorder = 1;
 
-    loadTabData('salesbyorder'); // 🔥 USE MAIN FUNCTION
+    loadTabData('salesbyorder'); //  USE MAIN FUNCTION
 });
 document.getElementById('btn-clear-order')?.addEventListener('click', function () {
 
@@ -1364,7 +1391,7 @@ document.getElementById('btn-clear-order')?.addEventListener('click', function (
 
     loadTabData('salesbyorder');
 });
-// ✅ FILTER
+//  FILTER
 // ================= SALES BY PRODUCT =================
 
 // FILTER
@@ -1382,7 +1409,7 @@ document.getElementById('btn-clear-product')?.addEventListener('click', function
     currentPage.salesbyproduct = 1;
     loadTabData('salesbyproduct');
 });
-// ✅ CLEAR – Sales by Number
+//  CLEAR – Sales by Number
 document.getElementById('button-clear-number').addEventListener('click', function () {
 
     // clear phone
@@ -1559,6 +1586,7 @@ document.getElementById('button-clear-total')?.addEventListener('click', functio
     }, 300);
 });
 
+
 //  Open modal on edit-due click
 //  Replace your existing edit-due-btn click handler
 $(document).on('click', '.edit-due-btn', function () {
@@ -1573,10 +1601,101 @@ $(document).on('click', '.edit-due-btn', function () {
     $('#edit_amount').val('');
     $('#pay_cash').prop('checked', true);
 
-    // ✅ Just hide message, no fetch
+    //  Just hide message, no fetch
     $('#balance-modal-msg').hide().html('').css({background:'', color:'', border:''});
 
     new bootstrap.Modal(document.getElementById('balanceModal')).show();
+});
+function fetchDueCustomers() {
+
+    let from = document.getElementById('due_from').value;
+    let to   = document.getElementById('due_to').value;
+
+    fetch(`index.php?route=sale/sale.getDueCustomers&user_token=${USER_TOKEN}&from=${from}&to=${to}`)
+    .then(res => res.json())
+    .then(json => {
+
+        let html = '';
+
+        if (json.rows && json.rows.length) {
+
+            json.rows.forEach((r, i) => {
+
+                html += `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${r.name}</td>
+                    <td>${r.phone}</td>
+                    <td>${r.due}</td>
+                </tr>`;
+
+            });
+
+        } else {
+
+            html = `
+            <tr>
+                <td colspan="4" class="text-center">
+                    No Data
+                </td>
+            </tr>`;
+
+        }
+
+        document.getElementById('due-data').innerHTML = html;
+
+    })
+    .catch(err => console.error("API Error:", err));
+
+}
+
+
+
+document.addEventListener('click', function(e) {
+
+    // OPEN MODAL
+    if (e.target.closest('#button-due')) {
+
+        new bootstrap.Modal(
+            document.getElementById('dueModal')
+        ).show();
+
+    }
+
+
+    // SEARCH BUTTON
+    if (e.target.closest('#search-due')) {
+
+        fetchDueCustomers();
+
+    }
+
+
+    // REFRESH BUTTON
+    if (e.target.closest('#refresh-due')) {
+
+        e.preventDefault();
+
+        const icon = document.getElementById('refresh-icon');
+
+        if (icon) {
+
+            icon.style.transition = 'transform 0.5s ease';
+            icon.style.transform = 'rotate(360deg)';
+
+            setTimeout(() => {
+
+                icon.style.transition = 'none';
+                icon.style.transform = 'rotate(0deg)';
+
+            }, 520);
+
+        }
+
+        fetchDueCustomers();
+
+    }
+
 });
 function openCustomerHistory(phone) {
 
@@ -2158,6 +2277,7 @@ document.getElementById('gst_percentage')?.addEventListener('input', function ()
     }
 });
 
+
 // Search button click
 /*document.getElementById('button-gst-search')?.addEventListener('click', function () {
 
@@ -2395,7 +2515,7 @@ function openGstInvoice() {
         document.getElementById('gstModal')
     ).hide();
 }
-// ✅ OK button — submit payment
+//  OK button — submit payment
 
 </script>
 <!-- Customer History Modal -->
@@ -2449,7 +2569,7 @@ function openGstInvoice() {
         <input type="hidden" id="edit_order_id">
         <input type="hidden" id="edit_customer_id">
 
-        <!-- ✅ NEW: Inline message area -->
+        <!--  NEW: Inline message area -->
         <div id="balance-modal-msg" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:6px; font-size:14px; font-weight:500;"></div>
 
        
@@ -2505,6 +2625,95 @@ function openGstInvoice() {
         </button>
       </div>
 
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="dueModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0" style="background:#1e2a3a; border-radius:12px; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.5);">
+
+      <!-- HEADER -->
+      <div class="modal-header border-0 px-4 pt-4 pb-2">
+        <div class="d-flex align-items-center gap-2">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7eb3ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <h5 class="modal-title mb-0 fw-semibold" style="font-size:15px; color:#e0eaff;">Due Customers</h5>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="font-size:11px; opacity:.5;"></button>
+      </div>
+      <div class="modal-body px-4 pb-4 pt-3">
+
+        <!-- FILTER -->
+      <!-- Replace your filter row with this -->
+<div class="row g-2 mb-3">
+  <div class="col-md-5">
+    <label class="mb-1" style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:#7a9cc4;">From Date</label>
+    <input type="date" id="due_from"
+      style="width:100%; height:40px; background:#162032; border:1.5px solid #2a4a6b; border-radius:8px; color:#e0eaff; font-size:13px; padding:0 12px; outline:none; box-sizing:border-box; transition:border .2s;"
+      onfocus="this.style.border='1.5px solid #4fc3f7'"
+      onblur="this.style.border='1.5px solid #2a4a6b'">
+  </div>
+  <div class="col-md-5">
+    <label class="mb-1" style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:#7a9cc4;">To Date</label>
+    <input type="date" id="due_to"
+      style="width:100%; height:40px; background:#162032; border:1.5px solid #2a4a6b; border-radius:8px; color:#e0eaff; font-size:13px; padding:0 12px; outline:none; box-sizing:border-box; transition:border .2s;"
+      onfocus="this.style.border='1.5px solid #4fc3f7'"
+      onblur="this.style.border='1.5px solid #2a4a6b'">
+  </div>
+  <div class="col-md-1 d-flex align-items-end">
+    <button id="search-due"
+      style="width:100%; height:40px; background:linear-gradient(135deg,#3ecf6e,#27ae60); border:none; border-radius:8px; color:#fff; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 14px rgba(39,174,96,.35); transition:opacity .2s;"
+      onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      Search
+    </button>
+  </div>
+  <div class="col-md-1 d-flex align-items-end">
+   <button id="refresh-due" title="Refresh"
+  style="height:40px; width:40px; background:#162032; border:1.5px solid #2a4a6b; border-radius:8px; color:#7a9cc4; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;"
+  onmouseover="this.style.border='1.5px solid #4fc3f7'; this.style.color='#4fc3f7'"
+  onmouseout="this.style.border='1.5px solid #2a4a6b'; this.style.color='#7a9cc4'">
+  <svg id="refresh-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+    style="pointer-events:none;">
+    <polyline points="23 4 23 10 17 10"/>
+    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+  </svg>
+</button>
+  </div>
+</div>
+        
+
+        <!-- TABLE -->
+        <div class="table-responsive" style="border:1.5px solid #2a4a6b; border-radius:10px; overflow:hidden;">
+          <table class="table mb-0" style="font-size:13px; border-collapse:collapse;">
+            <thead>
+              <tr style="background:#162032;">
+                <th style="padding:10px 14px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:#7a9cc4; border-bottom:1.5px solid #2a4a6b; border-right:1px solid #2a4a6b; width:60px;">SR NO</th>
+                <th style="padding:10px 14px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:#7a9cc4; border-bottom:1.5px solid #2a4a6b; border-right:1px solid #2a4a6b;">Customer Name</th>
+                <th style="padding:10px 14px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:#7a9cc4; border-bottom:1.5px solid #2a4a6b; border-right:1px solid #2a4a6b;">Mobile</th>
+                <th style="padding:10px 14px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:#7a9cc4; border-bottom:1.5px solid #2a4a6b; text-align:right;">Due Amount</th>
+              </tr>
+            </thead>
+            <tbody id="due-data">
+              <tr>
+                <td colspan="4" style="padding:40px 14px; text-align:center; color:#3a5a7a; background:#1a2535; border:none;">
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2a4a6b" stroke-width="1.5" style="display:block; margin:0 auto 8px;">
+                    <rect x="2" y="3" width="20" height="14" rx="2"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/>
+                    <line x1="12" y1="17" x2="12" y2="21"/>
+                  </svg>
+                  No Data Found
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </div>

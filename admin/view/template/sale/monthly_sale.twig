@@ -271,13 +271,20 @@ if (billData && billData.rows && billData.rows.length) {
 function printMonthlySale() { window.print(); }
 
 function downloadMonthlyPDF() {
+
+    const noPrint = document.querySelector('.no-print');
+    noPrint.style.display = 'none'; //  hide buttons
+
     html2pdf().set({
         margin: [10,10,10,10],
         filename: 'Monthly_Sales_Bill.pdf',
         image: { type: 'jpeg', quality: 1 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    }).from(document.querySelector('.pdf-page')).save();
+    }).from(document.querySelector('.pdf-page')).save()
+    .then(() => {
+        noPrint.style.display = 'block'; //  show again
+    });
 }
 </script>
 

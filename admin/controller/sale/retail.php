@@ -557,81 +557,227 @@ class Retail extends \Opencart\System\Engine\Controller {
        EXCEL EXPORT
     ══════════════════════════════════════ */
 
-    public function exportExcel(): void {
-        try {
-            $this->guard();
-            $this->load->model('sale/retail');
+   public function exportExcel(): void {
+    try {
+        $this->guard();
+        $this->load->model('sale/retail');
 
-            $tab    = $this->request->get['tab'] ?? 'salesprice';
-            $filter = [
-                'filter_date_added'    => $this->request->get['filter_date_added']    ?? '',
-                'filter_date_modified' => $this->request->get['filter_date_modified'] ?? ''
-            ];
+        $tab = $this->request->get['tab'] ?? 'salesprice';
 
-            header("Content-Type: application/vnd.ms-excel");
-            header("Content-Disposition: attachment; filename={$tab}_retail_report.xls");
-            header("Pragma: no-cache");
-            header("Expires: 0");
+        $filter = [
+            'filter_date_added'    => $this->request->get['filter_date_added'] ?? '',
+            'filter_date_modified' => $this->request->get['filter_date_modified'] ?? ''
+        ];
 
-            echo "<table border='1'>";
+        header("Content-Type: application/vnd.ms-excel");
+        header("Content-Disposition: attachment; filename={$tab}_report.xls");
+        header("Pragma: no-cache");
+        header("Expires: 0");
 
-            if ($tab === 'salesprice') {
+        echo "<table border='1'>";
+
+        /* ================= SALES BY TOTAL ================= */
+        if ($tab === 'salesbytotal') {
+
+            echo "<tr>
+                <th>SRNO</th>
+                <th>Date</th>
+                <th>No Orders</th>
+                <th>No Products</th>
+                <th>R Price</th>
+                <th>R Tax</th>
+                <th>R Total</th>
+                <th>S Price</th>
+                <th>S Tax</th>
+                <th>S Total</th>
+                <th>Profit</th>
+                <th>Cash</th>
+                <th>UPI</th>
+                <th>Advance</th>
+                <th>Due</th>
+                <th>Discount</th>
+                <th>Coupon</th>
+            </tr>";
+
+            $results = $this->model_sale_retail->getReport($filter);
+
+            // 🔢 TOTALS INIT
+            $total_r_price = $total_r_tax = $total_r_total = 0;
+            $total_s_price = $total_s_tax = $total_s_total = 0;
+            $total_cash = $total_upi = $total_adv = $total_due = 0;
+            $total_discount = $total_coupon = $total_profit = 0;
+
+            $sr = 1;
+
+            foreach ($results as $r) {
+
+                $s_total = $r['s_price'] ?? $r['s_price'] ?? 0;
+                $profit  = $s_total - ($r['r_total'] ?? 0);
+
+                // ➕ accumulate
+                $total_r_price += $r['r_price'] ?? 0;
+                $total_r_tax   += $r['r_tax'] ?? 0;
+                $total_r_total += $r['r_total'] ?? 0;
+
+                $total_s_price += $r['s_price'] ?? 0;
+                $total_s_tax   += $r['s_tax'] ?? 0;
+                $total_s_total += $s_total;
+
+                $total_cash += $r['cash'] ?? 0;
+                $total_upi  += $r['upi'] ?? 0;
+                $total_adv  += $r['advance'] ?? 0;
+                $total_due  += $r['due'] ?? 0;
+
+                $total_discount += $r['discount'] ?? 0;
+                $total_coupon   += $r['coupon'] ?? 0;
+                $total_profit   += $profit;
+
                 echo "<tr>
-                    <th>SRNO</th><th>Order ID</th><th>Date</th>
-                    <th>R Price</th><th>R Tax</th><th>R Total</th>
-                    <th>S Price</th><th>S Tax</th><th>S Total</th>
-                    <th>Profit</th><th>Cash</th><th>UPI</th>
-                    <th>Advance</th><th>Due</th>
-<th>Coupon</th><th>Discount</th>
+                    <td>{$sr}</td>
+                    <td>{$r['order_date']}</td>
+                    <td>{$r['no_orders']}</td>
+                    <td>{$r['no_products']}</td>
+                    <td>{$r['r_price']}</td>
+                    <td>{$r['r_tax']}</td>
+                    <td>{$r['r_total']}</td>
+                    <td>{$r['s_price']}</td>
+                    <td>{$r['s_tax']}</td>
+                    <td>{$s_total}</td>
+                    <td>{$profit}</td>
+                    <td>{$r['cash']}</td>
+                    <td>{$r['upi']}</td>
+                    <td>{$r['advance']}</td>
+                    <td>{$r['due']}</td>
+                    <td>{$r['discount']}</td>
+                    <td>{$r['coupon']}</td>
                 </tr>";
 
-                $results = $this->model_sale_retail->getOrders($filter);
-                $sr = 1;
-                foreach ($results as $r) {
-                    $profit = ($r['s_price'] ?? 0) - ($r['r_total'] ?? 0);
-                    echo "<tr>
-                        <td>{$sr}</td><td>{$r['order_id']}</td><td>{$r['date_added']}</td>
-                        <td>{$r['r_price']}</td><td>{$r['r_tax']}</td><td>{$r['r_total']}</td>
-                        <td>{$r['s_price']}</td><td>{$r['s_tax']}</td><td>{$r['s_price']}</td>
-                        <td>{$profit}</td><td>{$r['cash']}</td><td>{$r['upi']}</td>
-                        <td>{$r['advance']}</td><td>{$r['balance']}</td>
-                    <td>{$r['coupon']}</td><td>{$r['discount']}</td>
-                    </tr>";
-                    $sr++;
-                }
+                $sr++;
             }
 
-            if ($tab === 'salesbytotal') {
-                echo "<tr>
-                    <th>SRNO</th><th>Date</th><th>No Orders</th><th>No Products</th>
-                    <th>R Price</th><th>R Tax</th><th>R Total</th>
-                    <th>S Price</th><th>S Tax</th><th>S Total</th>
-                    <th>Profit</th><th>Discount</th><th>Cash</th><th>UPI</th><th>Due</th><th>Advance</th><th>Coupon</th>
-                </tr>";
-
-                $results = $this->model_sale_retail->getReport($filter);
-                $sr = 1;
-                foreach ($results as $r) {
-                    $profit = ($r['s_price'] ?? 0) - ($r['r_total'] ?? 0);
-                    echo "<tr>
-                        <td>{$sr}</td><td>{$r['order_date']}</td><td>{$r['no_orders']}</td><td>{$r['no_products']}</td>
-                        <td>{$r['r_price']}</td><td>{$r['r_tax']}</td><td>{$r['r_total']}</td>
-                        <td>{$r['s_price']}</td><td>{$r['s_tax']}</td><td>{$r['s_price']}</td>
-                        <td>{$profit}</td><td>{$r['discount']}</td>
-                        <td>{$r['cash']}</td><td>{$r['upi']}</td><td>{$r['due']}</td><td>{$r['advance']}</td><td>{$r['coupon']}</td>
-                    </tr>";
-                    $sr++;
-                }
-            }
-
-            echo "</table>";
-            exit;
-
-        } catch (\Throwable $e) {
-            echo "Export failed: " . $e->getMessage();
-            exit;
+            // ✅ TOTAL ROW
+            echo "<tr style='font-weight:bold; background:#d4edda;'>
+                <td colspan='4'>TOTAL</td>
+                <td>$total_r_price</td>
+                <td>$total_r_tax</td>
+                <td>$total_r_total</td>
+                <td>$total_s_price</td>
+                <td>$total_s_tax</td>
+                <td>$total_s_total</td>
+                <td>$total_profit</td>
+                <td>$total_cash</td>
+                <td>$total_upi</td>
+                <td>$total_adv</td>
+                <td>$total_due</td>
+                <td>$total_discount</td>
+                <td>$total_coupon</td>
+            </tr>";
         }
+
+        /* ================= SALES PRICE ================= */
+        else {
+
+            echo "<tr>
+                <th>SRNO</th>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>R Price</th>
+                <th>R Tax</th>
+                <th>R Total</th>
+                <th>S Price</th>
+                <th>S Tax</th>
+                <th>S Total</th>
+                <th>Profit</th>
+                <th>Cash</th>
+                <th>UPI</th>
+                <th>Advance</th>
+                <th>Due</th>
+                <th>Coupon</th>
+                <th>Discount</th>
+            </tr>";
+
+            $results = $this->model_sale_retail->getOrders($filter);
+
+            // 🔢 TOTALS INIT
+            $total_r_price = $total_r_tax = $total_r_total = 0;
+            $total_s_price = $total_s_tax = $total_s_total = 0;
+            $total_cash = $total_upi = $total_adv = $total_due = 0;
+            $total_discount = $total_coupon = $total_profit = 0;
+
+            $sr = 1;
+
+            foreach ($results as $r) {
+
+                $s_total = $r['s_price'] ?? $r['s_price'] ?? 0;
+                $profit  = $s_total - ($r['r_total'] ?? 0);
+
+                // ➕ totals
+                $total_r_price += $r['r_price'] ?? 0;
+                $total_r_tax   += $r['r_tax'] ?? 0;
+                $total_r_total += $r['r_total'] ?? 0;
+
+                $total_s_price += $r['s_price'] ?? 0;
+                $total_s_tax   += $r['s_tax'] ?? 0;
+                $total_s_total += $s_total;
+
+                $total_cash += $r['cash'] ?? 0;
+                $total_upi  += $r['upi'] ?? 0;
+                $total_adv  += $r['advance'] ?? 0;
+                $total_due  += $r['balance'] ?? 0;
+
+                $total_discount += $r['discount'] ?? 0;
+                $total_coupon   += $r['coupon'] ?? 0;
+                $total_profit   += $profit;
+
+                echo "<tr>
+                    <td>{$sr}</td>
+                    <td>{$r['order_id']}</td>
+                    <td>{$r['date_added']}</td>
+                    <td>{$r['r_price']}</td>
+                    <td>{$r['r_tax']}</td>
+                    <td>{$r['r_total']}</td>
+                    <td>{$r['s_price']}</td>
+                    <td>{$r['s_tax']}</td>
+                    <td>{$s_total}</td>
+                    <td>{$profit}</td>
+                    <td>{$r['cash']}</td>
+                    <td>{$r['upi']}</td>
+                    <td>{$r['advance']}</td>
+                    <td>{$r['balance']}</td>
+                    <td>{$r['coupon']}</td>
+                    <td>{$r['discount']}</td>
+                </tr>";
+
+                $sr++;
+            }
+
+            // ✅ TOTAL ROW
+            echo "<tr style='font-weight:bold; background:#d4edda;'>
+                <td colspan='3'>TOTAL</td>
+                <td>$total_r_price</td>
+                <td>$total_r_tax</td>
+                <td>$total_r_total</td>
+                <td>$total_s_price</td>
+                <td>$total_s_tax</td>
+                <td>$total_s_total</td>
+                <td>$total_profit</td>
+                <td>$total_cash</td>
+                <td>$total_upi</td>
+                <td>$total_adv</td>
+                <td>$total_due</td>
+                <td>$total_coupon</td>
+                <td>$total_discount</td>
+            </tr>";
+        }
+
+        echo "</table>";
+        exit;
+
+    } catch (\Throwable $e) {
+        echo "Export failed: " . $e->getMessage();
+        exit;
     }
+}
    public function updateDueAmount(): void {
 
     ob_clean();
@@ -644,7 +790,7 @@ class Retail extends \Opencart\System\Engine\Controller {
         $amount       = (float)($this->request->post['amount'] ?? 0);
         $payment_type = $this->request->post['payment_type'] ?? 'cash';
 
-        // ✅ Validate Order ID
+        //  Validate Order ID
         if ($order_id <= 0) {
             $this->response->setOutput(json_encode([
                 'status' => false,

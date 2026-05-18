@@ -313,6 +313,7 @@ foreach ($posQtyMap as $product_id => $qty) {
                                                                         `credit_points`      = '" . (float)$invoice_extra['credit_points'] . "',
                                                                         `rewards`      = '" . (float)$invoice_extra['creditpointsused'] . "',
                                                                         `discount`           = '" . (float)$invoice_extra['discount'] . "',
+                                                                        `discount_type`      = '" . $this->db->escape($invoice_extra['discount_type'] ?? '') . "',
                                                                         `number_of_items`    = '" . (int)$invoice_extra['number_of_items'] . "',
                                                                         `quantity_of_items`  = '" . (int)$invoice_extra['quantity_of_items'] . "',
                                                                         `sub_total`          = '" . (float)$invoice_extra['sub_total'] . "',

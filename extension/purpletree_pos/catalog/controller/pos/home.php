@@ -1344,6 +1344,7 @@ class Home extends \Opencart\System\Engine\Controller
 
             $subtotal = $money($get($invoiceInfo, "SUBTotal", 0));
             $discount = $money($get($invoiceInfo, "DiscountIncluded", 0));
+            $discountType = $get($invoiceInfo, "DiscountType", "");
             $tax_included = $money($get($invoiceInfo, "TaxIncluded", 0));
             $total_before_round = $money($get($invoiceInfo, "TotalBeforeRoundoff", 0));
             $roundoff_amount = $money($get($invoiceInfo, "RoundOffAmount", 0));
@@ -1446,6 +1447,7 @@ class Home extends \Opencart\System\Engine\Controller
                 "coupon" => $coupon_final,
                 "credit_points" => $reward_points,
                 "discount" => $discount,
+                "discount_type" => $discountType,
                 "number_of_items" => $items_count,
                 "quantity_of_items" => $qty_total,
                 "sub_total" => $subtotal,

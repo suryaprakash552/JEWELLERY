@@ -1018,34 +1018,6 @@ public function updateDueAmount($order_id, $customer_id, $amount, $payment_type)
     'message' => 'Payment updated successfully'
 ];
 }
-public function getDueCustomers(array $data = []): array {
-
-    $sql = "
-        SELECT 
-            o.telephone AS phone,
-            CONCAT(o.firstname, ' ', o.lastname) AS name,
-            SUM(inv.balance) AS due
-
-        FROM `" . DB_PREFIX . "order` o
-        LEFT JOIN `" . DB_PREFIX . "order_invoice` inv 
-            ON inv.order_id = o.order_id
-
-        WHERE o.order_status_id IN (5,6,17)
-        AND inv.balance > 0
-    ";
-
-    if (!empty($data['from'])) {
-        $sql .= " AND DATE(o.date_added) >= '" . $this->db->escape($data['from']) . "'";
-    }
-
-    if (!empty($data['to'])) {
-        $sql .= " AND DATE(o.date_added) <= '" . $this->db->escape($data['to']) . "'";
-    }
-
-    $sql .= " GROUP BY o.telephone ORDER BY due DESC";
-
-    return $this->db->query($sql)->rows;
-}
 
 
 }

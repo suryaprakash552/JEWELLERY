@@ -303,15 +303,9 @@ class Retail extends \Opencart\System\Engine\Model {
 
     // ✅ FILTER NAME (ADDED)
     if (!empty($data['filter_name'])) {
-
-    $name = strtolower(trim($data['filter_name']));
-    $name = preg_replace('/\s+/', ' ', $name); // normalize spaces
-    $name = $this->db->escape($name);
-
-    $where .= " AND (
-        LOWER(TRIM(CONCAT(o.firstname, ' ', o.lastname))) LIKE '%$name%'
-    ) ";
-}
+        $name = $this->db->escape($data['filter_name']);
+        $where .= " AND (o.firstname LIKE '%$name%' OR o.lastname LIKE '%$name%') ";
+    }
 
     $sql = "
         SELECT

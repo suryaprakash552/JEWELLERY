@@ -30,17 +30,6 @@ class ColumnLeft extends \Opencart\System\Engine\Controller {
 					'children' => array()		
 				);	
 			}
-			if ($this->user->hasPermission('access', 'extension/purpletree_pos/pos/posbatch')) {			
-    $purpletree_pos[] = array(
-        'name'     => 'POS Batch',
-        'href'     => $this->url->link(
-            'extension/purpletree_pos/pos/posbatch',
-            'user_token=' . $this->session->data['user_token'],
-            true
-        ),
-        'children' => array()		
-    );	
-}
 			if ($this->user->hasPermission('access', 'extension/purpletree_pos/pos/sale_report')) {			
 				$purpletree_pos[] = array(
 					'name'	   => $this->language->get('sale_report'),

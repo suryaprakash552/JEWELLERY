@@ -822,11 +822,8 @@ END AS coupon,
         $result = $this->db->query($sql)->row;
         return $result ?: [];
     }
- public function updateDueAmount($order_id, $customer_id, $amount, $payment_type) {
+  public function updateDueAmount($order_id, $customer_id, $amount, $payment_type) {
 
-    // ---------------------------------------
-    // STEP 0: CHECK WALLET
-    // ---------------------------------------
     $wallet = $this->db->query("
         SELECT aeps_amount 
         FROM `" . DB_PREFIX . "manage_wallet`
@@ -834,25 +831,17 @@ END AS coupon,
         LIMIT 1
     ");
 
-    if (!$wallet->num_rows) {
-        return [
-            'status' => false,
-            'message' => 'Wallet not found'
-        ];
-    }
+    if (!$wallet->num_rows) return;
 
     $aeps_amount = (float)$wallet->row['aeps_amount'];
 
+  
     if ($aeps_amount < $amount) {
-        return [
-            'status' => false,
-            'message' => 'Insufficient wallet balance',
-            'available' => $aeps_amount
-        ];
+        return; // nothing will update
     }
 
     // ---------------------------------------
-    // STEP 1: GET INVOICE DATA
+    // ✅ STEP 1: GET CURRENT INVOICE DATA
     // ---------------------------------------
     $query = $this->db->query("
         SELECT balance, cash_amount, upi_amount, total_received
@@ -860,33 +849,19 @@ END AS coupon,
         WHERE order_id = '" . (int)$order_id . "'
     ");
 
-    if (!$query->num_rows) {
-        return [
-            'status' => false,
-            'message' => 'Invoice not found'
-        ];
-    }
+    if (!$query->num_rows) return;
 
     $row                = $query->row;
     $old_balance        = (float)$row['balance'];
     $old_cash           = (float)$row['cash_amount'];
     $old_upi            = (float)$row['upi_amount'];
+    $old_total_received = (float)$row['total_received'];
 
-    // ---------------------------------------
-    // EXTRA CHECK (VERY IMPORTANT)
-    // ---------------------------------------
-    if ($old_balance <= 0) {
-        return [
-            'status' => false,
-            'message' => 'No due remaining'
-        ];
-    }
-
-    // Prevent overpayment
+    // ✅ PREVENT OVERPAYMENT
     $amount = min($amount, $old_balance);
 
     // ---------------------------------------
-    // STEP 2: CALCULATE
+    // ✅ STEP 2: CALCULATE VALUES
     // ---------------------------------------
     if ($payment_type === 'upi') {
         $new_upi  = $old_upi + $amount;
@@ -902,7 +877,7 @@ END AS coupon,
     $new_total_received = $new_cash + $new_upi;
 
     // ---------------------------------------
-    // STEP 3: UPDATE INVOICE
+    // ✅ STEP 3: UPDATE ORDER INVOICE
     // ---------------------------------------
     $this->db->query("
         UPDATE `" . DB_PREFIX . "order_invoice`
@@ -915,7 +890,7 @@ END AS coupon,
     ");
 
     // ---------------------------------------
-    // STEP 4: INSERT TRANSACTION
+    // ✅ STEP 4: INSERT TRANSACTION
     // ---------------------------------------
     $this->db->query("
         INSERT INTO `" . DB_PREFIX . "customer_transaction`
@@ -933,7 +908,7 @@ END AS coupon,
     ");
 
     // ---------------------------------------
-    // STEP 5: UPDATE WALLET
+    // ✅ STEP 5: UPDATE WALLET
     // ---------------------------------------
     $this->db->query("
         UPDATE `" . DB_PREFIX . "manage_wallet`
@@ -941,14 +916,5 @@ END AS coupon,
             aeps_amount = aeps_amount - '" . (float)$amount . "'
         WHERE customerid = '" . (int)$customer_id . "'
     ");
-
-    // ---------------------------------------
-    // SUCCESS RESPONSE
-    // ---------------------------------------
-    return [
-        'status' => true,
-        'message' => 'Payment updated successfully',
-        'remaining_due' => $new_balance
-    ];
 }
 }

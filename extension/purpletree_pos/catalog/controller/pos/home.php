@@ -1344,7 +1344,6 @@ class Home extends \Opencart\System\Engine\Controller
 
             $subtotal = $money($get($invoiceInfo, "SUBTotal", 0));
             $discount = $money($get($invoiceInfo, "DiscountIncluded", 0));
-            $discountType = $get($invoiceInfo, "DiscountType", "");
             $tax_included = $money($get($invoiceInfo, "TaxIncluded", 0));
             $total_before_round = $money($get($invoiceInfo, "TotalBeforeRoundoff", 0));
             $roundoff_amount = $money($get($invoiceInfo, "RoundOffAmount", 0));
@@ -1447,7 +1446,6 @@ class Home extends \Opencart\System\Engine\Controller
                 "coupon" => $coupon_final,
                 "credit_points" => $reward_points,
                 "discount" => $discount,
-                "discount_type" => $discountType,
                 "number_of_items" => $items_count,
                 "quantity_of_items" => $qty_total,
                 "sub_total" => $subtotal,
@@ -1506,45 +1504,6 @@ class Home extends \Opencart\System\Engine\Controller
             
             // 2️⃣ RETURN ORDER
             } elseif ($previousOrderId > 0) {
-                // REVERSE OLD RETURN ORDER DUE TRANSACTION
-$oldTransaction = $this->db->query("
-    SELECT amount, transactiontype
-    FROM `" . DB_PREFIX . "customer_transaction`
-    WHERE order_id = '" . (int)$previousOrderId . "'
-    AND transactionsubtype = 'AEPS'
-    ORDER BY customer_transaction_id DESC
-    LIMIT 1
-")->row;
-
-if ($oldTransaction) {
-
-    if ($oldTransaction['transactiontype'] == 'DEBIT') {
-
-        // Reverse old debit
-        $this->db->query("
-            UPDATE `" . DB_PREFIX . "manage_wallet`
-            SET aeps_amount = IFNULL(aeps_amount,0) + " . (float)$oldTransaction['amount'] . "
-            WHERE customerid = '" . (int)$customer_id . "'
-        ");
-
-    } else if ($oldTransaction['transactiontype'] == 'CREDIT') {
-
-        // Reverse old credit
-        $this->db->query("
-            UPDATE `" . DB_PREFIX . "manage_wallet`
-            SET aeps_amount = IFNULL(aeps_amount,0) - " . (float)$oldTransaction['amount'] . "
-            WHERE customerid = '" . (int)$customer_id . "'
-        ");
-
-    }
-
-    // DELETE OLD TRANSACTION
-    $this->db->query("
-        DELETE FROM `" . DB_PREFIX . "customer_transaction`
-        WHERE order_id = '" . (int)$previousOrderId . "'
-        AND transactionsubtype = 'AEPS'
-    ");
-}
             
                 $this->model_checkout_order->addHistory(
                     $previousOrderId,

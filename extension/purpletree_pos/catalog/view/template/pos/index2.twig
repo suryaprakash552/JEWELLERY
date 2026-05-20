@@ -581,19 +581,27 @@
          color: #000 !important;
          background-color: #fff !important;
          }
-         #product_autocomplete_list {
-         background: #0f121a;
-         border: 1px solid #2a3040;
-         border-radius: 4px;
-         bottom: 100%;
-         margin-bottom: 4px;
+         .product-autocomplete-list {
+         background: #1a2332 !important;
+         border: none !important;
+         border-radius: 3px !important;
+         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+         padding: 0 !important;
+         margin: 0 !important;
          }
-         #product_autocomplete_list .dropdown-item {
+         .product-autocomplete-list .dropdown-item {
          color: #fff;
+         padding: 12px 15px !important;
+         border-bottom: 1px solid #2a3040;
          transition: background 0.2s ease;
+         cursor: pointer;
+         font-size: 14px;
          }
-         #product_autocomplete_list .dropdown-item:hover {
-         background: #1a1f2e;
+         .product-autocomplete-list .dropdown-item:last-child {
+         border-bottom: none;
+         }
+         .product-autocomplete-list .dropdown-item:hover {
+         background: #273142 !important;
          }
          #main_search_autocomplete_list {
          background: #0f121a;
@@ -2159,7 +2167,7 @@
                   <div id="appContent" style="padding: 9px; background: #f6f6e9;">
                   <div class="search-section">
                      <div class="search-bar" style="position: relative; background-color: #ebe6c2;">
-                        <div class="search-input-wrapper" style="position:relative; width:100%;">
+                        <div class="search-input-wrapper" style="position:relative; width:64%;">
                            <i class="fas fa-search search-input-icon"></i>
                            <input type="text"
                               class="search-input"
@@ -2197,7 +2205,7 @@
     </div>
 
     <!-- Product Name -->
-    <div style="flex:1; min-width:0;">
+    <div style="flex:1; min-width:0; position: relative;">
         <input type="text"
                id="quick_add_name"
                oninput="search_product_info(this)"
@@ -2214,6 +2222,7 @@
                     padding:0 12px;
                     font-size:14px;
                ">
+        <ul class="product-autocomplete-list dropdown-menu" style="display:none; position:absolute; top:100%; left:0; right:0; width:100%; max-height:250px; overflow-y:auto; z-index:10000; margin-top:4px;"></ul>
     </div>
 
     <!-- Price -->
@@ -2933,7 +2942,7 @@
                   <div class="form-group mb-4" style="position: relative;">
                      <label class="form-label" style="font-size: 13px; color: #8a93a2; text-transform: uppercase; letter-spacing: 0.5px;">Product Name</label>
                      <input type="text" id="quick_add_name" oninput="search_product_info(this)" class="form-control" placeholder="Type to search products..." style="background: #0f121a; border: 1px solid #2a3040; color: #fff; height: 27px;font-size: 18px;">
-                     <ul id="product_autocomplete_list" class="dropdown-menu" style="display:none; position:absolute; width:100%; max-height:200px; overflow-y:auto; z-index:10000; background: #0f121a; border: 1px solid #2a3040; border-radius: 4px; bottom: 100%; margin-bottom: -27px;"></ul>
+                     <ul class="product-autocomplete-list dropdown-menu" style="display:none; position:absolute; width:100%; max-height:220px; overflow-y:auto; z-index:10000; top:100%; left:0; margin-top:6px;"></ul>
                   </div>
                   <div class="form-group mb-1">
                      <label class="form-label" style="font-size: 13px; color: #8a93a2; text-transform: uppercase; letter-spacing: 0.5px;">Price <span class="text-danger">*</span></label>
@@ -4256,13 +4265,16 @@
          			couponApply(0);
          		}
          		function getSubTotal() {
-         			var total = 0;
-         			if(typeof CartObj.getProducts() != 'undefined'){
-         				$.each(CartObj.getProducts(),function(key,val){
-         				total+=val.total;
-         				});
-         			}
-         			return total;
+                    var total = 0;
+                    if(typeof CartObj.getProducts() != 'undefined'){
+                        $.each(CartObj.getProducts(),function(key,val){
+                            var excluded = val.excluded === true || val.excluded === 1 || String(val.excluded).toLowerCase() === 'true' || false;
+                            if (!excluded) {
+                                total += parseFloat(val.total || 0);
+                            }
+                        });
+                    }
+                    return total;
          		}
          		function getTotal() {
          			var total = 0;
@@ -4307,27 +4319,36 @@
              return taxSummary;
          }
          		function getDiscount() {
-         			var total = 0;
-         			$.each(CartObj.getProducts(),function(key,val){
-         				total += val.disc_price* val.quantity;
-         			});
-         			return total;
+                    var total = 0;
+                    $.each(CartObj.getProducts(),function(key,val){
+                        var excluded = val.excluded === true || val.excluded === 1 || String(val.excluded).toLowerCase() === 'true' || false;
+                        if (!excluded) {
+                            total += (parseFloat(val.disc_price) || 0) * (parseInt(val.quantity) || 0);
+                        }
+                    });
+                    return total;
          		}
          		function getReward() {
-         			var total = 0;
-         			$.each(CartObj.getProducts(),function(key,val){
-         				total += val.reward;
-         			});
-         			return total;
+                    var total = 0;
+                    $.each(CartObj.getProducts(),function(key,val){
+                        var excluded = val.excluded === true || val.excluded === 1 || String(val.excluded).toLowerCase() === 'true' || false;
+                        if (!excluded) {
+                            total += parseFloat(val.reward || 0);
+                        }
+                    });
+                    return total;
          		}
          		function getTotalProductQty() {
-         			var total = 0;
-         			if(typeof CartObj.getProducts() != 'undefined'){
-         				$.each(CartObj.getProducts(),function(key,val){
-         				total+=parseInt(val.quantity);
-         				});
-         			}
-         			return total;
+                    var total = 0;
+                    if(typeof CartObj.getProducts() != 'undefined'){
+                        $.each(CartObj.getProducts(),function(key,val){
+                            var excluded = val.excluded === true || val.excluded === 1 || String(val.excluded).toLowerCase() === 'true' || false;
+                            if (!excluded) {
+                                total += parseInt(val.quantity) || 0;
+                            }
+                        });
+                    }
+                    return total;
          		}
 
          	function updateTaxDisplay() {
@@ -4339,7 +4360,13 @@
          }
 
          		function getCartTotalProduct() {
-         			return CartObj.getProducts().length
+                    var prods = CartObj.getProducts() || [];
+                    var count = 0;
+                    prods.forEach(function(p) {
+                        var excluded = p.excluded === true || p.excluded === 1 || String(p.excluded).toLowerCase() === 'true' || false;
+                        if (!excluded) count++;
+                    });
+                    return count;
          		}
             function addToCartProducts(productData){
              var options = [];
@@ -14316,7 +14343,7 @@ setTimeout(function () {
         if (productNameField) {
             productNameField.focus();
             productNameField.select();
-            $('#product_autocomplete_list').hide();
+            $('.product-autocomplete-list').hide();
         }
     }, { once: true });
     myModal.show();
@@ -14335,7 +14362,7 @@ setTimeout(function () {
          });
          function search_product_info(input) {
              const searchTerm = input.value.trim().toLowerCase();
-             const autocompleteList = document.getElementById('product_autocomplete_list');
+             const autocompleteList = input.parentElement?.querySelector('.product-autocomplete-list') || document.querySelector('.product-autocomplete-list');
              if (!autocompleteList) return;
              if (searchTerm.length === 0) {
                  autocompleteList.innerHTML = '';
@@ -14359,18 +14386,17 @@ setTimeout(function () {
              }
              uniqueProductNames.forEach(name => {
                  const item = document.createElement('li');
-                 item.className = 'pos-autocomplete-item';
+                 item.className = 'dropdown-item';
                  item.textContent = name;
                  item.onclick = function () {
-                     selectProductByName(name);
+                     selectProductByName(name, input);
                  };
                  autocompleteList.appendChild(item);
              });
-             positionProductAutocomplete(input);
+             positionProductAutocomplete(input, autocompleteList);
              autocompleteList.style.display = 'block';
          }
-         function positionProductAutocomplete(input) {
-             const autocompleteList = document.getElementById('product_autocomplete_list');
+         function positionProductAutocomplete(input, autocompleteList) {
              if (!autocompleteList || !input) return;
              const rect = input.getBoundingClientRect();
              autocompleteList.style.position = 'fixed';
@@ -14382,27 +14408,37 @@ setTimeout(function () {
              autocompleteList.style.zIndex = '999999';
          }
          window.addEventListener('resize', function () {
-             const input = document.getElementById('quick_add_name');
-             const autocompleteList = document.getElementById('product_autocomplete_list');
-             if (autocompleteList && autocompleteList.style.display === 'block') {
-                 positionProductAutocomplete(input);
-             }
+             document.querySelectorAll('.product-autocomplete-list').forEach(list => {
+                 if (list.style.display === 'block') {
+                     const input = list.previousElementSibling;
+                     if (input && input.id === 'quick_add_name') {
+                         positionProductAutocomplete(input, list);
+                     }
+                 }
+             });
          });
          window.addEventListener('scroll', function () {
-             const input = document.getElementById('quick_add_name');
-             const autocompleteList = document.getElementById('product_autocomplete_list');
-             if (autocompleteList && autocompleteList.style.display === 'block') {
-                 positionProductAutocomplete(input);
-             }
+             document.querySelectorAll('.product-autocomplete-list').forEach(list => {
+                 if (list.style.display === 'block') {
+                     const input = list.previousElementSibling;
+                     if (input && input.id === 'quick_add_name') {
+                         positionProductAutocomplete(input, list);
+                     }
+                 }
+             });
          }, true);
-         function selectProductByName(productName) {
-             $('#quick_add_name').val(productName);
-             $('#product_autocomplete_list').hide();
+         function selectProductByName(productName, input) {
+             if (!input) return;
+             $(input).val(productName);
+             const list = input.parentElement?.querySelector('.product-autocomplete-list');
+             if (list) {
+                 list.style.display = 'none';
+             }
          }
          $(document).on('click', function (e) {
-             if (!$(e.target).closest('#product_autocomplete_list').length && 
+             if (!$(e.target).closest('.product-autocomplete-list').length && 
                  !$(e.target).closest('#quick_add_name').length) {
-                 $('#product_autocomplete_list').hide();
+                 $('.product-autocomplete-list').hide();
              }
              if (!$(e.target).closest('#main_search_autocomplete_list').length && 
                  !$(e.target).closest('#pos_search').length) {
@@ -14553,7 +14589,7 @@ setTimeout(function () {
              localStorage.setItem('pos_cart', JSON.stringify(cartProducts));
              $('#quick_add_name').val('');
              $('#quick_add_price').val('');
-             $('#quick_add_gst').val('0');
+             $('#quick_add_gst').val('3');
      if (typeof PlaySound === 'function') PlaySound();
              if (typeof addProductRowToCartArea === 'function') {
                  addProductRowToCartArea(customProductObj);

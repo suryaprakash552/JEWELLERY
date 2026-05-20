@@ -437,13 +437,13 @@
         Discount Amt : 
 {% if order.invoice.discount <= 10 %}
 
-  {{ order.invoice.discount|number_format(0) }}%
+    {{ order.invoice.discount|number_format(2) }}%
 
 {% else %}
 
     ₹{{ order.invoice.discount|number_format(2) }}
 
-{% endif %}
+{% endif %}/-
     </span>
 </div>
             {#<div style="display:flex; justify-content:space-between; margin-bottom: 2px;">#}
@@ -475,11 +475,11 @@
         <div class="line"></div>
 
         <div class="savings-line">
-            Total Amount Save On This Bills : {% if order.invoice.discount <= 10 %}
+            Total Amount Save On This Bills :{% if order.invoice.discount <= 10 %}
 
-  {{ order.invoice.discount|number_format(0) }}%
+    {{ order.invoice.discount|number_format(2) }}%
 
-{% else %}  
+{% else %}
 
     ₹{{ order.invoice.discount|number_format(2) }}
 

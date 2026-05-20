@@ -456,7 +456,7 @@ public function editPreviousOrder(int $order_id, array $data, array $invoice_ext
                                 total_received     = '" . (float)$invoice_extra['total_received'] . "',
                                 balance            = '" . (float)$invoice_extra['balance'] . "',
                                 date_added         = NOW()
-                        ");
+                        ");  
 
 
         if (!empty($data['custom_fields'])) {

@@ -1,4 +1,3 @@
-
     <!DOCTYPE html>
 <html lang="en">
    <head>
@@ -1759,7 +1758,7 @@
          display: flex;
          align-items: center;
          justify-content: space-between;
-         background-color: black;
+         background-color: #ffffff;
          padding: 0px 18px;
          color: #fff;
          font-family: "Segoe UI", Roboto, Arial, sans-serif;
@@ -1779,7 +1778,7 @@
          }
          #loginTime { font-weight: 600; color: black; font-size:15px; }
          #currentTime { display: block; margin-top: 2px; font-size:15px; }
-         #headerCurrentTime { color: white; font-size: 30px; font-weight: bold; margin: 0; text-align: right; font-family: 'Courier New', monospace; }
+         #headerCurrentTime { color: #C9A227; font-size: 30px; font-weight: bold; margin: 0; text-align: right; font-family: 'Courier New', monospace; }
          .invoice-row {
          transition: background-color 0.3s ease;
          }
@@ -1929,6 +1928,23 @@
          }
          .calc-close-red:hover {
          background-color: #ff1f1f !important;
+         }
+         .watermark {
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         opacity: 0.18;
+         pointer-events: none;
+         z-index: 1; 
+         width: 45%;
+         height: auto;
+         }
+         .watermark img {
+         width: 100%;
+         height: auto;
+         display: block;
+         border-radius: 50%;
          }
          
          .content-wrapper {
@@ -2123,8 +2139,8 @@
             <div class="time-block">
                <div class="store-header" style="width: 36%; margin-left: -23%;">
                   <div class="store-header-inner">
-                     <h4 style="color: white;">SGC POS</h4>
-                     <p style="color: white;"> {{ agentBusinessClass }} BRANCH</p>
+                     <h4 style="color: #C9A227;">SGC POS</h4>
+                     <p style="color: #C9A227;"> {{ agentBusinessClass }} BRANCH</p>
                   </div>
                </div>
                <div style="display: unset; margin-right: -10%;font-size: 39px;
@@ -2276,6 +2292,9 @@
                         <span>Action</span> 
                      </div>
                      <hr class="cart-hr">
+                     <div class="watermark">
+                        <img src="https://myteknoland.com/MTL/image/saleem_logo2.jpg" alt="Watermark">
+                     </div>
                     
                      <div class="cart-area" id="cartArea" style="overflow-y: auto; scrollbar-width: none;">
                         <div class="content-wrapper">
@@ -7133,7 +7152,7 @@ if (!invoiceNumber) {
       var taxTotalElement  = document.getElementById('gstTotalValue'); 
       var grandTotalElement= document.getElementById('itemCountValue'); 
       var netTotal = netTotalElement ? parseFloat(netTotalElement.textContent.replace(/[^\d.]/g, '')) || 0 : 0;
-      totalDiscount     = discountTotalElement ? parseFloat(discountTotalElement.textContent.replace(/[^\d.]/g, '')) || 0 : 0;
+     totalDiscount = discountTotalElement ? parseFloat(discountTotalElement.value) || 0 : 0;
       totalTax     = taxTotalElement ? parseFloat(taxTotalElement.textContent.replace(/[^\d.]/g, '')) || 0 : 0;
      // WITH THIS:
 var dMode = document.getElementById('discountMode').value;
@@ -7148,7 +7167,11 @@ var totalBeforeRoundOff = subTotal + totalTax - actualDiscountAmt;
       if (typeof getTotalProductQty === 'function')  quantity  = getTotalProductQty();
       if (typeof getTotalProducts === 'function')    items     = getCartTotalProduct();
       var subTotalFormatted           = format(subTotal,              posData.currency_code);
-      var discountFormatted           = format(totalDiscount,         posData.currency_code);
+     var dMode = document.getElementById('discountMode').value;
+var dInput = parseFloat(document.getElementById('itemDiscountValue').value) || 0;
+var subtotal = getSubTotal();
+var discountAmt = dMode === 'flat' ? dInput : (dInput / 100) * subtotal;
+var discountFormatted = format(discountAmt, posData.currency_code);
       var taxFormatted                = format(totalTax,              posData.currency_code);
       var totalBeforeRoundOffFormatted= format(totalBeforeRoundOff,   posData.currency_code);
       var grandTotalFormatted         = format(grandTotalAmount,      posData.currency_code);
@@ -7664,7 +7687,18 @@ window.processOrderPayment = function(btn, shouldPrint) {
           }),
           InvoiceInfo: {
             SUBTotal: getElementValue('subTotal'),
-            DiscountIncluded: getElementValue('discountIncluded'),
+           DiscountType: document.getElementById('discountMode').value,
+           
+
+     DiscountIncluded: (function() {
+
+        const dInput = parseFloat(
+            document.getElementById('itemDiscountValue').value
+        ) || 0;
+
+        return dInput;
+
+    })(),
             TaxIncluded: getElementValue('taxIncluded'),
             TotalBeforeRoundoff: getElementValue('totalBeforeRoundoff'),
             RoundOffAmount: getElementValue('roundOffAmount'),
@@ -13861,6 +13895,13 @@ setTimeout(function () {
               const grandTotal = netTotal;
               updateTotalsDisplay(netTotal, totalTax, grandTotal, totalDiscount);
               updateInvoiceRightColumn();
+
+              // Refresh discount input when cart changes
+              window.userEditedFlat = false;
+              window.userEditedPercent = false;
+              if (typeof onDiscountModeChange === 'function') {
+                  onDiscountModeChange();
+              }
           }
           function updateTotalsDisplay(netTotal, totalTax, grandTotal, totalDiscount) {
               let formattedNetTotal, formattedTotalTax, formattedGrandTotal, formattedTotalDiscount;
@@ -13895,7 +13936,7 @@ setTimeout(function () {
               const itemCountSpan = document.getElementById('itemCountValue');
               
               if (subtotalSpan) subtotalSpan.textContent = formattedNetTotal;
-              if (itemDiscountSpan) itemDiscountSpan.textContent = formattedTotalDiscount;
+            if (itemDiscountSpan) itemDiscountSpan.value = parseFloat(formattedTotalDiscount.replace(/[^\d.]/g, '')).toFixed(2);
               
               // GST Total: show number of items (count) + GST amount on same row
               const cartRows = document.querySelectorAll('.cart-row:not(.excluded-row)');
@@ -13929,9 +13970,11 @@ setTimeout(function () {
              } else {
                  console.error('Input not found');
              }
+             updateSummary(false);
          };
          window.debugPos = function() {
          };
+        
          function toggleFullscreen() {
              const element = document.documentElement;
              const btn = document.getElementById('fullscreenBtn');
@@ -14520,6 +14563,11 @@ setTimeout(function () {
              } else if (typeof getCartProductHTML === 'function') {
                  getCartProductHTML();
              }
+
+             if (!window.userEditedFlat && !window.userEditedPercent) {
+                 onDiscountModeChange();
+             }
+
              const modalElement = document.getElementById('quickAddProductModal');
              const modalInstance = bootstrap.Modal.getInstance(modalElement);
              if (modalInstance) {
@@ -15613,7 +15661,3 @@ function updateSummary(userEdited = true) {
       
 </body>
 </html>
-
-
-
-

@@ -48,7 +48,7 @@ class Home extends \Opencart\System\Engine\Controller
                         "return_order"  => (int)$agent_detail["return_order"],
                         "cancel_order"  => (int)$agent_detail["cancel_order"],
                         "delete_order"  => (int)$agent_detail["delete_order"]
-                    ];
+                    ];  
                     
                     $data["agent_flags"] = $agent_detail;
 
@@ -1344,6 +1344,7 @@ class Home extends \Opencart\System\Engine\Controller
 
             $subtotal = $money($get($invoiceInfo, "SUBTotal", 0));
             $discount = $money($get($invoiceInfo, "DiscountIncluded", 0));
+            $discountType = $get($invoiceInfo, "DiscountType", "");
             $tax_included = $money($get($invoiceInfo, "TaxIncluded", 0));
             $total_before_round = $money($get($invoiceInfo, "TotalBeforeRoundoff", 0));
             $roundoff_amount = $money($get($invoiceInfo, "RoundOffAmount", 0));
@@ -1446,6 +1447,7 @@ class Home extends \Opencart\System\Engine\Controller
                 "coupon" => $coupon_final,
                 "credit_points" => $reward_points,
                 "discount" => $discount,
+                "discount_type" => $discountType,
                 "number_of_items" => $items_count,
                 "quantity_of_items" => $qty_total,
                 "sub_total" => $subtotal,
@@ -1504,6 +1506,45 @@ class Home extends \Opencart\System\Engine\Controller
             
             // 2️⃣ RETURN ORDER
             } elseif ($previousOrderId > 0) {
+                // REVERSE OLD RETURN ORDER DUE TRANSACTION
+$oldTransaction = $this->db->query("
+    SELECT amount, transactiontype
+    FROM `" . DB_PREFIX . "customer_transaction`
+    WHERE order_id = '" . (int)$previousOrderId . "'
+    AND transactionsubtype = 'AEPS'
+    ORDER BY customer_transaction_id DESC
+    LIMIT 1
+")->row;
+
+if ($oldTransaction) {
+
+    if ($oldTransaction['transactiontype'] == 'DEBIT') {
+
+        // Reverse old debit
+        $this->db->query("
+            UPDATE `" . DB_PREFIX . "manage_wallet`
+            SET aeps_amount = IFNULL(aeps_amount,0) + " . (float)$oldTransaction['amount'] . "
+            WHERE customerid = '" . (int)$customer_id . "'
+        ");
+
+    } else if ($oldTransaction['transactiontype'] == 'CREDIT') {
+
+        // Reverse old credit
+        $this->db->query("
+            UPDATE `" . DB_PREFIX . "manage_wallet`
+            SET aeps_amount = IFNULL(aeps_amount,0) - " . (float)$oldTransaction['amount'] . "
+            WHERE customerid = '" . (int)$customer_id . "'
+        ");
+
+    }
+
+    // DELETE OLD TRANSACTION
+    $this->db->query("
+        DELETE FROM `" . DB_PREFIX . "customer_transaction`
+        WHERE order_id = '" . (int)$previousOrderId . "'
+        AND transactionsubtype = 'AEPS'
+    ");
+}
             
                 $this->model_checkout_order->addHistory(
                     $previousOrderId,
@@ -3190,6 +3231,32 @@ public function mergeBill(): void
 }
 
 
+    public function addProductName() {
+        $json = array();
+        
+        if (isset($this->request->post['product_name']) && !empty(trim($this->request->post['product_name']))) {
+            $product_name = $this->db->escape(trim($this->request->post['product_name']));
+            
+            // Create table if not exists
+            $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "pos_product_names` (
+                `id` int(11) NOT NULL AUTO_INCREMENT,
+                `name` varchar(255) NOT NULL,
+                `date_added` datetime NOT NULL,
+                PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+            
+            // Insert the product name
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "pos_product_names` SET `name` = '" . $product_name . "', `date_added` = NOW()");
+            
+            $json['success'] = 'Success: Product name added successfully!';
+        } else {
+            $json['error'] = 'Error: Product name cannot be empty!';
+        }
+        
+        $this->response->addHeader('Content-Type: application/json');
+        $this->response->setOutput(json_encode($json));
+    }
+
 public function publicInvoice(): void
 {
     $order_id = (int)($this->request->get['order_id'] ?? 0);
@@ -4541,6 +4608,46 @@ $this->load->view(
     );
 
 }
+
+    public function addPname() {
+        $this->response->addHeader('Content-Type: application/json');
+        if (isset($this->request->post['pname']) && !empty($this->request->post['pname'])) {
+            $pname = $this->db->escape($this->request->post['pname']);
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "pname` SET `name` = '" . $pname . "'");
+            $this->response->setOutput(json_encode(['status' => 'success', 'message' => 'Product Name added successfully!']));
+        } else {
+            $this->response->setOutput(json_encode(['status' => 'error', 'message' => 'Product Name is required!']));
+        }
+    }
+
+    public function getPnames() {
+        $this->response->addHeader('Content-Type: application/json');
+        $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "pname` ORDER BY pname_id DESC");
+        $this->response->setOutput(json_encode(['status' => 'success', 'pnames' => $query->rows]));
+    }
+
+    public function deletePname() {
+        $this->response->addHeader('Content-Type: application/json');
+        if (isset($this->request->post['pname_id'])) {
+            $pname_id = (int)$this->request->post['pname_id'];
+            $this->db->query("DELETE FROM `" . DB_PREFIX . "pname` WHERE `pname_id` = '" . $pname_id . "'");
+            $this->response->setOutput(json_encode(['status' => 'success', 'message' => 'Product Name deleted!']));
+        } else {
+            $this->response->setOutput(json_encode(['status' => 'error', 'message' => 'Invalid ID']));
+        }
+    }
+
+    public function editPname() {
+        $this->response->addHeader('Content-Type: application/json');
+        if (isset($this->request->post['pname_id']) && isset($this->request->post['pname']) && !empty($this->request->post['pname'])) {
+            $pname_id = (int)$this->request->post['pname_id'];
+            $pname = $this->db->escape($this->request->post['pname']);
+            $this->db->query("UPDATE `" . DB_PREFIX . "pname` SET `name` = '" . $pname . "' WHERE `pname_id` = '" . $pname_id . "'");
+            $this->response->setOutput(json_encode(['status' => 'success', 'message' => 'Product Name updated successfully!']));
+        } else {
+            $this->response->setOutput(json_encode(['status' => 'error', 'message' => 'Invalid ID or Name']));
+        }
+    }
 
 } 
 ?>

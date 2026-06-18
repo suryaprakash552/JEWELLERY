@@ -60,6 +60,7 @@
              text-transform: uppercase;
              text-shadow: 0 2px 4px rgba(0,0,0,0.5);
          }
+         #quick_add_xyz::placeholder,
          #quick_add_gst::placeholder,
          #quick_add_name::placeholder,
          #quick_add_price::placeholder,
@@ -350,6 +351,9 @@
          }
          body, html {
          overflow-x: hidden;
+         height: 100vh;
+         margin: 0;
+         padding: 0;
          }
          .modal-dialog {
          max-width: 95%;
@@ -959,12 +963,19 @@
              text-decoration: none; 
          }
          .cart-cell-index{
-                margin: 0px 17px;
-        border: 5px double #cfbd77;
-    background: #edeaa1;
-    text-align: center;
-    padding: 0px;
-    font-size: 17px;
+         display: inline-flex;
+         justify-content: center;
+         align-items: center;
+         margin: 0 auto;
+         min-width: 24px;
+         height: 24px;
+         padding: 0 4px;
+         border: 1px solid #cfbd77;
+         background: #fcf9d9;
+         border-radius: 4px;
+         font-size: 13px;
+         font-weight: bold;
+         color: #665b1c;
          }
          *{
          margin:0;
@@ -1014,21 +1025,25 @@
          .btn-red{background:#cc3333;color:#fff;}
          .main-content{
          background:black;
-         min-height:calc(100vh - 170px);
+         flex: 1;
+         display:flex;
+         flex-direction:column;
          }
          .content-wrapper{
          display:flex;
+         flex:1;
          }
          .left-section{
-            width: 65%;
-    flex-basis: 75%;
+            width: 80%;
+    flex-basis: 80%;
     color: black;
     padding: 14px 10px 0px 10px;
     background: black;
-        
+    display: flex;
+    flex-direction: column;
          }
          .right-section{
-         flex-basis:35%;
+         flex-basis:20%;
         
          display:flex;
          flex-direction:column;
@@ -1091,17 +1106,17 @@
              flex: 1;
         width: 99%;
     height: 100%;
-    padding: 10px 0px 10px 42px;
+    padding: 6px 0px 6px 42px;
     border: 1px solid #999;
-    font-size: 22px;
+    font-size: 18px;
          }
          .search-input-icon{
                  position: absolute;
     left: 10px;
-    top: 45%;
+    top: 50%;
     transform: translateY(-50%);
     color: black;
-    font-size: 28px;
+    font-size: 22px;
     pointer-events: none;
          }
          .btn-search{
@@ -1134,6 +1149,10 @@
          position: relative; 
          overflow: hidden;
          width: 100%;
+         display: flex;
+         flex-direction: column;
+         flex: 1;
+         min-height: 0;
          }
          #productsContent .cart-category-container {
              display: flex;
@@ -1198,19 +1217,21 @@
              background:#e0e0e0;
          }
          .cart-header-row span{
-         padding:2px 2px 4px 2px;
+         padding:2px;
+         text-align: center;
          }
          .cart-area{
          background: transparent; 
-         height: 473px;
+         flex: 1;
+         min-height: 0;
          position: relative;
          z-index: 2;
          }
          .cart-row{
                 display: grid;
-    grid-template-columns: 71px 309px 2.2fr 135px 60px 174px 70px 108px 145px 78px 4px;
+    grid-template-columns: 71px 313px 2.2fr 101px 89px 145px 83px 140px 103px 77px 4px;
     align-items: center;
-    font-size: 20px;
+    font-size: 16px;
     padding: 4px 0px;
     margin: 0px 0px;
     position: relative;
@@ -1222,11 +1243,11 @@
             display: none;
          }
          .cart-cell{
-         padding:2px 2px;
+         padding:0px 2px;
+         text-align: center;
          }
          .cart-cell.total{
-             text-align: end;
-    padding-right: 15px;
+             text-align: center;
          }
          .qty-controls{
          display:flex;
@@ -1297,9 +1318,9 @@
                 display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 4px 26px;
+    padding: 2px 15px;
     border-bottom: 1px solid #bab1b1;
-    font-size: 21px;
+    font-size: 16px;
          }
          .summary-item:last-child {
             border-bottom: none;
@@ -1310,17 +1331,17 @@
             gap: 0.75rem;
          }
          .summary-label {
-            font-size: 20px;
+            font-size: 16px;
             color: #333;
             font-weight: 400;
          }
          .summary-number {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 600;
             color: #333;
          }
          .summary-amount {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 600;
             color: #333;
             text-align: right;
@@ -1399,9 +1420,10 @@
     padding: 8px;
     cursor: pointer;
     text-align: center;
-    line-height: 1.3;
+    line-height: 1.2 !important;
     width: 100%;
-    font-size: 12px;
+    font-size: 11px !important;
+    white-space: nowrap !important;
     margin: 0;
     display: flex;
     flex-direction: column;
@@ -1660,10 +1682,10 @@
          .cart-header-row{
          display:grid;
           grid-template-columns: 71px 313px 2.2fr 101px 89px 145px 83px 140px 103px 77px 4px;  
-         font-size:20px;
+         font-size:16px;
          color: black;
     background: #f6f6e9;
-    padding: 5px 0px;
+    padding: 2px 0px;
          }
          /* Hide only the ID header */
          .cart-header-row > span:nth-child(2) {
@@ -1942,7 +1964,7 @@
          top: 50%;
          left: 50%;
          transform: translate(-50%, -50%);
-         opacity: 0.18;
+         opacity: 0.35;
          pointer-events: none;
          z-index: 1; 
          width: 45%;
@@ -2124,6 +2146,29 @@
             color: #999;
             margin-top: 4px;
         }
+        div[id$="Pager"] button {
+            height: 26px !important;
+            padding: 2px 12px !important;
+            font-size: 13px !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        div[id$="Results"] table tr {
+            height: 30px !important;
+        }
+        div[id$="Results"] table td, div[id$="Results"] table th {
+            padding: 2px 8px !important;
+        }
+        div[id$="Results"] table td button {
+            height: 24px !important;
+            padding: 2px 10px !important;
+            font-size: 12px !important;
+            line-height: 1 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
       </style>
    </head>
    <body style="width: 100%; scrollbar-width: none;">
@@ -2134,7 +2179,7 @@
             <div class="app-loader-text">LOADING...</div>
          </div>
       </div>
-      <div id="app" class="app app-content-full-height app-without-sidebar app-without-header">
+      <div id="app" class="app app-content-full-height app-without-sidebar app-without-header" style="display: flex; flex-direction: column; height: 100vh; overflow: hidden;">
          <div class="header-bar">
             <div class="logo">
                <img src="https://myteknoland.com/MTL/image/saleem_logo2.jpg"
@@ -2146,9 +2191,9 @@
             </div>
             <div class="time-block">
                <div class="store-header" style="width: 36%; margin-left: -23%;">
-                  <div class="store-header-inner">
-                     <h4 style="color: #C9A227;">SGC POS</h4>
-                     <p style="color: #C9A227;"> {{ agentBusinessClass }} BRANCH</p>
+                  <div class="store-header-inner" style="text-align: center;">
+                     <h4 style="color: #C9A227; margin: 0;">SGC POS</h4>
+                     <p style="color: #C9A227; margin: 0;"> {{ agentBusinessClass }} BRANCH</p>
                   </div>
                </div>
                <div style="display: unset; margin-right: -10%;font-size: 39px;
@@ -2157,17 +2202,20 @@
                   <span id="walletAmount" style="display: none; font-size:20px;"> ₹00.00</span>
                </div>
             </div>
-           <div class="header-right">
-               <h3 id="headerCurrentTime">00:00:00</h3>
+           <div class="header-right" style="display: flex; align-items: center; gap: 15px;">
+               <h3 id="headerCurrentTime" style="margin: 0;">00:00:00</h3>
+               <button class="btn" style="background-color: #ff3f3f; color: white; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 4px 15px; height: 38px; border-radius: 4px;" onclick="posLogout()">
+                  <i class="fas fa-sign-out-alt"></i> Logout
+               </button>
             </div>  
          </div>
          <div class="main-content">
             <div class="content-wrapper">
                <div class="left-section">
-                  <div id="appContent" style="padding: 9px; background: #f6f6e9;">
+                  <div id="appContent" style="padding: 9px; background: #f6f6e9; flex: 1; display: flex; flex-direction: column;">
                   <div class="search-section">
                      <div class="search-bar" style="position: relative; background-color: #ebe6c2;">
-                        <div class="search-input-wrapper" style="position:relative; width:64%;">
+                        <div class="search-input-wrapper" style="position:relative; width:50%;">
                            <i class="fas fa-search search-input-icon"></i>
                            <input type="text"
                               class="search-input"
@@ -2183,22 +2231,21 @@
                                <div class="quick-add-inline" 
      style="display:flex; flex-wrap:nowrap; gap:10px; align-items:center; flex:1 1 62%; min-width:0; overflow:hidden;">
 
-    <!-- GST -->
+    <!-- XYZ Field -->
     <div style="flex: 0 0 110px; min-width:110px;">
-        <input type="number"
-               id="quick_add_gst"
+        <input type="text"
+               id="quick_add_xyz"
                class="form-control"
-               placeholder="GST %"
-               value="3"
-               min="0"
-               aria-label="GST %"
+               placeholder="xyt"
+               aria-label="xyt"
+               oninput="calculatePriceFromXYZ(this.value)"
                style="
                     background:#ffffff;
                     width:100%;
                     box-sizing:border-box;
                     border:1px solid #2a3040;
                     color:#000;
-                    height:46px;
+                    height:36px;
                     padding:0 12px;
                     font-size:14px;
                ">
@@ -2218,7 +2265,7 @@
                     box-sizing:border-box;
                     border:1px solid #2a3040;
                     color:#000;
-                    height:46px;
+                    height:36px;
                     padding:0 12px;
                     font-size:14px;
                ">
@@ -2226,7 +2273,7 @@
     </div>
 
     <!-- Price -->
-    <div style="flex: 0 0 140px; min-width:100px;">
+    <div style="flex: 0 0 90px; min-width:80px;">
         <input type="number"
                id="quick_add_price"
                class="form-control"
@@ -2238,14 +2285,14 @@
                     box-sizing:border-box;
                     border:1px solid #2a3040;
                     color:#000;
-                    height:46px;
+                    height:36px;
                     padding:0 12px;
                     font-size:14px;
                ">
     </div>
 
     <!-- Quantity -->
-    <div style="flex: 0 0 100px; min-width:70px;">
+    <div style="flex: 0 0 70px; min-width:60px;">
         <input type="number"
                id="quick_add_quantity"
                class="form-control"
@@ -2259,7 +2306,28 @@
                     box-sizing:border-box;
                     border:1px solid #2a3040;
                     color:#000;
-                    height:46px;
+                    height:36px;
+                    padding:0 12px;
+                    font-size:14px;
+               ">
+    </div>
+
+    <!-- GST -->
+    <div style="flex: 0 0 70px; min-width:70px;">
+        <input type="number"
+               id="quick_add_gst"
+               class="form-control"
+               placeholder="GST %"
+               value="3"
+               min="0"
+               aria-label="GST %"
+               style="
+                    background:#ffffff;
+                    width:100%;
+                    box-sizing:border-box;
+                    border:1px solid #2a3040;
+                    color:#000;
+                    height:36px;
                     padding:0 12px;
                     font-size:14px;
                ">
@@ -2285,10 +2353,10 @@
 </div>
                      </div>
                   </div> 
-                  <div style="display:flex; background-color: white;">
+                  <div style="display:flex; flex-direction: column; flex: 1; min-height: 0; background-color: white;">
                   <div class="cart-wrapper">
                      <div class="cart-header-row">
-                        <span style="padding-left: 23px;">SL</span>
+                        <span>SL</span>
                         <span>ID</span> 
                         <span>Product</span> 
                         <span>A.Qty</span>
@@ -2339,8 +2407,8 @@
                                <input type="text" id="quote_name_search" class="form-control" style="color:black; font-size: 11px; padding: 4px;" placeholder="Name">
                             </div>
                             <div class="col-2 d-flex align-items-end">
-                               <button id="searchQuotationHistoryBtn" class="btn btn-success w-100" style="font-size: 11px; padding: 4px;">Search</button>
-                               <button id="exportQuotationBtn" class="btn btn-info w-50" style="margin-left: 5px; font-size: 11px; padding: 4px;">
+                               <button id="searchQuotationHistoryBtn" class="btn btn-success w-auto" style="font-size: 14px; padding: 6px 15px; flex-grow: 1;">Search</button>
+                               <button id="exportQuotationBtn" class="btn btn-info w-auto" style="margin-left: 5px; font-size: 14px; padding: 6px 15px; flex-grow: 1;">
                                <i class="fas fa-file-excel"></i> Export
                                </button>
                             </div>
@@ -2377,8 +2445,8 @@
                                <input type="text" id="return_name_search" class="form-control" style="color:black; font-size: 11px; padding: 4px;" placeholder="Name">
                             </div>
                             <div class="col-2 d-flex align-items-end">
-                               <button id="searchReturnBtn" class="btn btn-success w-100" style="font-size: 11px; padding: 4px;">Search</button>
-                               <button id="exportReturnBtn" class="btn btn-info w-50" style="margin-left: 5px; font-size: 11px; padding: 4px;">
+                               <button id="searchReturnBtn" class="btn btn-success w-auto" style="font-size: 14px; padding: 6px 15px; flex-grow: 1;">Search</button>
+                               <button id="exportReturnBtn" class="btn btn-info w-auto" style="margin-left: 5px; font-size: 14px; padding: 6px 15px; flex-grow: 1;">
                                <i class="fas fa-file-excel"></i> Export
                                </button>
                             </div>
@@ -2415,8 +2483,8 @@
                                <input type="text" id="cancel_name_search" class="form-control" style="color:black; font-size: 11px; padding: 4px;" placeholder="Name">
                             </div>
                             <div class="col-2 d-flex align-items-end">
-                               <button id="searchCancelOrderBtn" class="btn btn-success w-100" style="font-size: 11px; padding: 4px;">Search</button>
-                               <button id="exportCancelOrderBtn" class="btn btn-info w-50" style="margin-left: 5px; font-size: 11px; padding: 4px;">
+                               <button id="searchCancelOrderBtn" class="btn btn-success w-auto" style="font-size: 14px; padding: 6px 15px; flex-grow: 1;">Search</button>
+                               <button id="exportCancelOrderBtn" class="btn btn-info w-auto" style="margin-left: 5px; font-size: 14px; padding: 6px 15px; flex-grow: 1;">
                                <i class="fas fa-file-excel"></i> Export
                                </button>
                             </div>
@@ -2453,8 +2521,8 @@
                                <input type="text" id="edit_name_search" class="form-control" style="color:black; font-size: 11px; padding: 4px;" placeholder="Name">
                             </div>
                             <div class="col-2 d-flex align-items-end">
-                               <button id="searchEditOrderBtn" class="btn btn-success w-100" style="font-size: 11px; padding: 4px;">Search</button>
-                               <button id="exportEditOrderBtn" class="btn btn-info w-50" style="margin-left: 5px; font-size: 11px; padding: 4px;">
+                               <button id="searchEditOrderBtn" class="btn btn-success w-auto" style="font-size: 14px; padding: 6px 15px; flex-grow: 1;">Search</button>
+                               <button id="exportEditOrderBtn" class="btn btn-info w-auto" style="margin-left: 5px; font-size: 14px; padding: 6px 15px; flex-grow: 1;">
                                <i class="fas fa-file-excel"></i> Export
                                </button>
                             </div>
@@ -2491,8 +2559,8 @@
                                <input type="text" id="invoice_name_search" class="form-control" style="color:black; font-size: 11px; padding: 4px;" placeholder="Name">
                             </div>
                             <div class="col-2 d-flex align-items-end">
-                               <button id="searchInvoiceBtn" class="btn btn-success w-100" style="font-size: 25px; padding: 4px;">Search</button>
-                               <button id="exportInvoiceBtn" class="btn btn-info w-50" style="margin-left: 5px; font-size: 25px; padding: 4px;">
+                               <button id="searchInvoiceBtn" class="btn btn-success w-auto" style="font-size: 14px; padding: 6px 15px; flex-grow: 1;">Search</button>
+                               <button id="exportInvoiceBtn" class="btn btn-info w-auto" style="margin-left: 5px; font-size: 14px; padding: 6px 15px; flex-grow: 1;">
                                <i class="fas fa-file-excel"></i> Export
                                </button>
                             </div>
@@ -2555,7 +2623,7 @@
                               <input type="date" id="wallet_history_to_date" class="form-control" style="color:black;">
                            </div>
                            <div class="col-3 d-flex align-items-end">
-                              <button id="searchWalletHistoryBtn" class="btn btn-success w-100">Search</button>
+                              <button id="searchWalletHistoryBtn" class="btn btn-success w-auto" style="padding: 4px 20px; font-weight: bold; font-size: 14px; height: 38px;">Search</button>
                            </div>
                         </div>
                         <div id="walletHistoryResults"></div>
@@ -2587,6 +2655,141 @@
                           </div>
                          <div id="walletResults" style="min-height: 200px;">
                          </div>
+                      </div>
+                      <div id="pNameContent" style="display:none; padding: 20px; height: 881px; background: #f8f9fa;">
+                          <div class="mb-4">
+                              <div class="mb-3">
+                                  <button class="btn btn-secondary backToCartBtn" style="background-color: #6c757d; color: white; font-weight: bold; padding: 8px 15px; border-radius: 4px; border: none; display: flex; align-items: center; gap: 8px;">
+                                      <i class="fas fa-arrow-left"></i> <span>Back</span>
+                                  </button>
+                              </div>
+                              <h4 style="font-weight: 700; color: #C9A24D; text-transform: uppercase;">Product Names</h4>
+                              <div class="mt-3 p-3" style="background: white; border: 1px solid #dee2e6; border-radius: 8px;">
+                                  <div class="d-flex align-items-center gap-2">
+                                      <div style="width: 400px;">
+                                           <input type="text" id="newProductNameInput" class="form-control" style="color:black; height: 45px; font-size: 18px; width: 100%; box-shadow: none; border: 1px solid #ced4da; border-radius: 4px;" placeholder="Enter Product Name">
+                                       </div>
+                                      <button id="addProductNameBtn" class="btn btn-primary" style="height: 45px; font-weight: bold; background-color: #C9A24D; border: none; padding: 0 25px; display: flex; align-items: center; gap: 8px; border-radius: 4px;">
+                                          <i class="fas fa-plus"></i> Add
+                                      </button>
+                                  </div>
+                                  <script>
+                                      function loadPnames() {
+                                          $.ajax({
+                                              url: 'index.php?route=extension/purpletree_pos/pos/home|getPnames',
+                                              dataType: 'json',
+                                              success: function(json) {
+                                                  var html = '';
+                                                  if (json.status === 'success' && json.pnames && json.pnames.length > 0) {
+                                                      for (var i = 0; i < json.pnames.length; i++) {
+                                                          html += '<tr style="height: 30px;">';
+                                                          html += '<td style="color: black; font-weight: 500; vertical-align: middle; padding: 2px 8px !important;">' + json.pnames[i]['name'] + '</td>';
+                                                          html += '<td style="text-align: center; padding: 2px 8px !important; vertical-align: middle;">';
+                                                          html += '<div style="display: flex; justify-content: center; align-items: center; gap: 6px;">';
+                                                          html += '<button type="button" class="btn btn-info btn-sm" title="Edit" onclick="editPname(' + json.pnames[i]['pname_id'] + ', \'' + json.pnames[i]['name'].replace(/'/g, "\\'") + '\')" style="background-color: #0dcaf0; color: white; border: none; border-radius: 4px; padding: 2px 6px !important; font-size: 12px; height: 24px; line-height: 1; display: flex; align-items: center;"><i class="fas fa-edit"></i></button>';
+                                                          html += '<button type="button" class="btn btn-danger btn-sm" title="Delete" onclick="deletePname(' + json.pnames[i]['pname_id'] + ')" style="background-color: #dc3545; border: none; border-radius: 4px; padding: 2px 6px !important; font-size: 12px; height: 24px; line-height: 1; display: flex; align-items: center;"><i class="fas fa-trash"></i></button>';
+                                                          html += '</div></td>';
+                                                          html += '</tr>';
+                                                      }
+                                                  } else {
+                                                      html += '<tr><td colspan="2" class="text-center" style="color: black; padding: 15px;">No product names found.</td></tr>';
+                                                  }
+                                                  $('#pnameTable tbody').html(html);
+                                              }
+                                          });
+                                      }
+
+                                      function editPname(id, currentName) {
+                                          var newName = prompt("Edit Product Name:", currentName);
+                                          if (newName !== null && newName.trim() !== '') {
+                                              $.ajax({
+                                                  url: 'index.php?route=extension/purpletree_pos/pos/home|editPname',
+                                                  type: 'post',
+                                                  data: { pname_id: id, pname: newName.trim() },
+                                                  dataType: 'json',
+                                                  success: function(json) {
+                                                      if (json.status === 'success') {
+                                                          if (typeof successMessage === 'function') successMessage(json.message, 2000);
+                                                          else alert(json.message);
+                                                          loadPnames();
+                                                      } else {
+                                                          if (typeof errorMessage === 'function') errorMessage(json.message, 2000);
+                                                          else alert(json.message);
+                                                      }
+                                                  }
+                                              });
+                                          }
+                                      }
+
+                                      function deletePname(id) {
+                                          if (confirm('Are you sure you want to delete this product name?')) {
+                                              $.ajax({
+                                                  url: 'index.php?route=extension/purpletree_pos/pos/home|deletePname',
+                                                  type: 'post',
+                                                  data: { pname_id: id },
+                                                  dataType: 'json',
+                                                  success: function(json) {
+                                                      if (json.status === 'success') {
+                                                          if (typeof successMessage === 'function') successMessage(json.message, 2000);
+                                                          else alert(json.message);
+                                                          loadPnames();
+                                                      } else {
+                                                          if (typeof errorMessage === 'function') errorMessage(json.message, 2000);
+                                                          else alert(json.message);
+                                                      }
+                                                  }
+                                              });
+                                          }
+                                      }
+
+                                      $(document).ready(function() {
+                                          loadPnames();
+                                          $('#addProductNameBtn').on('click', function() {
+                                              var pName = $('#newProductNameInput').val().trim();
+                                              if (pName === '') {
+                                                  if (typeof errorMessage === 'function') errorMessage('Please enter a product name.', 2000);
+                                                  else alert('Please enter a product name.');
+                                                  return;
+                                              }
+                                              $.ajax({
+                                                  url: 'index.php?route=extension/purpletree_pos/pos/home|addPname',
+                                                  type: 'post',
+                                                  data: { pname: pName },
+                                                  dataType: 'json',
+                                                  success: function(json) {
+                                                      if (json.status === 'success') {
+                                                          if (typeof successMessage === 'function') successMessage(json.message, 2000);
+                                                          else alert(json.message);
+                                                          $('#newProductNameInput').val('');
+                                                          loadPnames();
+                                                      } else if (json.status === 'error') {
+                                                          if (typeof errorMessage === 'function') errorMessage(json.message, 2000);
+                                                          else alert(json.message);
+                                                      }
+                                                  },
+                                                  error: function(xhr, ajaxOptions, thrownError) {
+                                                      console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                                                  }
+                                              });
+                                          });
+                                      });
+                                  </script>
+                              </div>
+
+                              <div class="mt-4" style="background: white; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; height: 500px; overflow-y: auto;">
+                                  <table class="table table-bordered table-striped table-hover mb-0" id="pnameTable">
+                                      <thead>
+                                          <tr>
+                                              <th style="background-color: #1a1f2e; color: #C9A24D; width: 80%; padding: 12px; font-weight: 600; border-bottom: 2px solid #C9A24D;">Product Name</th>
+                                              <th style="background-color: #1a1f2e; color: #C9A24D; width: 20%; text-align: center; padding: 12px; font-weight: 600; border-bottom: 2px solid #C9A24D;">Action</th>
+                                          </tr>
+                                      </thead>
+                                      <tbody>
+                                          <!-- Populated via AJAX -->
+                                      </tbody>
+                                  </table>
+                              </div>
+                          </div>
                       </div>
                       <div id="manageProductContent" style="display:none; padding: 20px; height: 881px; background: #f8f9fa;">
                           <div id="manageProductHeaderArea" class="mb-4">
@@ -2679,7 +2882,7 @@
                   </div>
                   <div id="categoryListRight" class="category-list" style="display:grid;"></div>
                   </div>
-                   <div class="discount-row" >
+                   <div class="discount-row" style="margin-top: auto;">
                       <div class="discount-left">
                          <div class="discount-search-row" style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
                             <input id="orderIdSearch" type="text" placeholder="Enter Order Id" class="form-control" style="width:114px;font-size:13px;padding:4px;border: 2px solid white;     margin: 0px 12px;
@@ -2719,7 +2922,7 @@
                                   <span class="summary-label">Item Count:</span>
                                   <span class="summary-number" id="itemQtyValue">0</span>
                                </span>
-                               <span class="summary-amount" id="itemCountValue" style="font-size:30px;">₹0.00</span>
+                               <span class="summary-amount" id="itemCountValue" style="font-size:20px;">₹0.00</span>
                             </div>
                          </div>
                       </div>
@@ -2748,10 +2951,12 @@
                      <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="cancelOrderBtn" onclick="openCancelOrderHistory()"><i class="fas fa-ban" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Cancel</button>
                      <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="returnBtn" onclick="openReturnHistory()"><i class="fas fa-undo" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Return</button>
                      <button type="button" class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#000; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="newSale"><i class="fas fa-plus" style="font-size: 24px; margin-bottom: 4px; color: #000; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>New sale</button>
-                     <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="fullscreenBtn" onclick="toggleFullscreen()"><i class="fas fa-expand" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Full screen</button>
-                     <button class="action-grid-btn" style="background-color: #cc3333; font-weight: bold; color:#fff; height: 65px; border-radius: 4px; border: 1px solid #cc3333; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" onclick="posLogout()"><i class="fas fa-times" style="font-size: 24px; margin-bottom: 4px; color: #fff; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Close</button>
+                     <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="fullscreenBtn" onclick="toggleFullscreen()"><i class="fas fa-expand" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Fullscreen</button>
+                     <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="pNameBtn" onclick="openPNamePage()"><i class="fas fa-tag" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>P.Name</button>
+                     <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" onclick="toggleInlineCalculator()"><i class="fas fa-calculator" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Calculator</button>
+
                   </div>
-                  <div class="calc-wrapper-container" style="padding: 2px 8px 0px 0px; background: black; flex: 1; overflow-y: auto; display: flex; flex-direction: column;">
+                  <div class="calc-wrapper-container" id="inlineCalculator" style="padding: 2px 8px 0px 0px; background: black; flex: 1; overflow-y: auto; display: none; flex-direction: column;">
                      <div class="calc-display-box" style="background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 2px; margin-bottom: 10px;">
                         <div class="screen" id="display" style="background: #2d2d2d; color: #fff; text-align: right; padding: 12px; font-size: 28px; font-weight: bold; border-radius: 4px; min-height: 48px; line-height: 1;">0</div>
                      </div>
@@ -2782,6 +2987,7 @@
                         <button class="btn btn-clear-all" onclick="clearDisplay()" style="background: #313131;border: 1px solid white; color: #fff; padding: 1px; font-size: 30px; font-weight: bold; border-radius: 4px; cursor: pointer;">CLEAR</button>
                      </div>
                   </div>
+
                   <h3 style="display: none;">Save List</h3>
                   <div id="holdCartList" style="display: grid; grid-template-columns: repeat(4, 1fr); width: 100%; height: auto; padding: 1px; background: black;">
                   </div>   
@@ -2823,7 +3029,7 @@
                 </div>
 
             <!-- Subtotal Display -->
-            <div style="display: flex; align-items: center; gap: 15px; width: 34.4%; margin-left: 1.39%; padding:6px; background:black; ">
+            <div style="display: flex; align-items: center; gap: 15px; width: 20.77%; margin-left: auto; padding:6px; background:black; ">
                 
 
                 <!-- Proceed to Payment Button -->
@@ -6762,9 +6968,9 @@
 	             }
 	             let html = '';
 	                          let returnOrderId = 0;
-	              let customerMobile = "";
-	              let customerName = "";
-	              let customerEmail = "";
+	              let customerMobile = "7337011206";
+	              let customerName = "saleem gold";
+	              let customerEmail = "scg@gmail.com";
 
 	              const currentQuotationOrder = sessionStorage.getItem('currentQuotationOrder');
 	              if (currentQuotationOrder) {
@@ -6840,6 +7046,11 @@
                      #modalXl .modal-content {
                          background: linear-gradient(135deg, #E6B8D7 0%, #F5E6F0 100%);
                          border: 3px solid var(--pos-border);
+                     }
+                     #creditLimitInvoice:checked, #useCouponInvoice:checked {
+                         background-color: #000000;
+                         border-color: #000000;
+                         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
                      }
                      .form-control-pos {
                          height: 46px;
@@ -7257,7 +7468,7 @@ var discountFormatted = format(discountAmt, posData.currency_code);
       html += '          </label>';
       html += '          <span id="RedeemPointsMessage" style="margin-left: 20px; font-size: 12px; color: #666;"></span>';
       html += '        </div>';
-      html += '        <div style="margin-top: -28px;">';
+      html += '        <div style="margin-top: 5px;">';
       html += '          <div style="display: flex; align-items: center; justify-content: space-between;">';
       html += '            <label style="font-size: 19px; font-weight: 600; color: #333; display: flex; align-items: center; gap: 6px; cursor: pointer; margin: 0;">';
       html += '              <input class="form-check-input" type="checkbox" id="useCouponInvoice" style="width: 18px; height: 18px; cursor: pointer; border-radius:3px;" onchange="handleCouponInvoice()">';
@@ -8517,7 +8728,7 @@ function printMergeLongBill() {
                               + '</tr>';
                       });
                       html += '  </tbody></table>';
-                      html += '<div id="invoicePager" style="margin-top:-15px; text-align:right;display: flex; justify-content: end;">'
+                      html += '<div id="invoicePager" style="margin-top: 15px; text-align:right;display: flex; justify-content: end;">'
                            + '  <button type="button" id="invFirst1" class="btn btn-sm btn-secondary me-1">Start</button>'
                            + '  <button type="button" id="invPrev1"  class="btn btn-sm btn-secondary me-1"> < </button>'
                            + '  <button type="button" id="invNext1"  class="btn btn-sm btn-secondary me-1"> > </button>'
@@ -8950,7 +9161,7 @@ function printMergeLongBill() {
              }
              html += '</tbody></table>';
              if (totalPages > 1) {
-                 html += '<div id="quotationPager" style="margin-top:-15px; text-align:right; display: flex; justify-content: end; ">'
+                 html += '<div id="quotationPager" style="margin-top: 15px; text-align:right; display: flex; justify-content: end; ">'
                       + '  <button type="button" class="btn btn-sm btn-secondary me-1" onclick="jumpToQuotationPage(1)">Start</button>'
                       + '  <button type="button" class="btn btn-sm btn-secondary me-1" onclick="changeQuotationPage(-1)"> < </button>'
                       + '  <button type="button" class="btn btn-sm btn-secondary me-1" onclick="changeQuotationPage(1)"> > </button>'
@@ -9411,7 +9622,7 @@ function restoreReturnOrder(orderId) {
              });
              html += '  </tbody></table>';
              html += '<div id="invoicePager" '
-                  + '     style="margin-top:-15px; text-align:right; display: flex; justify-content: end;">'
+                  + '     style="margin-top: 15px; text-align:right; display: flex; justify-content: end;">'
                   + '  <button type="button" id="invFirst" class="btn btn-sm btn-secondary me-1">Start</button>'
                   + '  <button type="button" id="invPrev"  class="btn btn-sm btn-secondary me-1"> < </button>'
                   + '  <button type="button" id="invNext"  class="btn btn-sm btn-secondary me-1"> > </button>'
@@ -9469,6 +9680,13 @@ function restoreReturnOrder(orderId) {
             $('#cancel_from_date').val(today);
             $('#cancel_to_date').val(today);
             loadCancelOrderData();
+        }
+        function openPNamePage() {
+            $('#pNameContent').show();
+            $('#manageProductContent, #quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #cartArea').hide();
+            $('.cart-header-row, .discount-row, .search-section').hide();
+            $('#submit-order-btn, #sendQuotationBtn, #printCartBtn, #saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
+             highlightSidebarButton('pNameBtn');
         }
         function openManageProduct() {
             $('#manageProductContent').show();
@@ -9732,7 +9950,7 @@ if (data.upc && data.upc !== '') {
                     + '</tr>';
             });
             html += '  </tbody></table>';
-             html += '<div id="cancelPager" style="margin-top:-15px; text-align:right;display: flex; justify-content: end;">'
+             html += '<div id="cancelPager" style="margin-top: 15px; text-align:right;display: flex; justify-content: end;">'
                    + '  <button type="button" id="canFirst" class="btn btn-sm btn-secondary me-1">Start</button>'
                    + '  <button type="button" id="canPrev"  class="btn btn-sm btn-secondary me-1"> < </button>'
                    + '  <button type="button" id="canNext"  class="btn btn-sm btn-secondary me-1"> > </button>'
@@ -9969,7 +10187,7 @@ if (data.upc && data.upc !== '') {
                       + '</tr>';
               });
               html += '</tbody></table>';
-              html += '<div id="editOrderPager" style="margin-top:-15px; text-align:right;display: flex; justify-content: end;">'
+              html += '<div id="editOrderPager" style="margin-top: 15px; text-align:right;display: flex; justify-content: end;">'
                    + '  <button type="button" id="eoFirst" class="btn btn-sm btn-secondary me-1">Start</button>'
                    + '  <button type="button" id="eoPrev"  class="btn btn-sm btn-secondary me-1"> < </button>'
                    + '  <button type="button" id="eoNext"  class="btn btn-sm btn-secondary me-1"> > </button>'
@@ -10274,7 +10492,7 @@ if (data.upc && data.upc !== '') {
              highlightSidebarButton('walletBtn');
          });
          $(document).on('click', '.backToCartBtn', function () {
-             $('#invoiceContent, #returnContent, #walletHistoryContent, #quotationHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent').hide();
+             $('#invoiceContent, #returnContent, #walletHistoryContent, #quotationHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent').hide();
              $('#cartArea').show();
              $('.cart-header-row').show();
              $('.discount-row').show();
@@ -13450,15 +13668,15 @@ if (data.upc && data.upc !== '') {
          let priceCellHtml;
          if (isCustomProduct) {
              priceCellHtml =
-                 '<div class="cart-cell single-qty" style="padding-left: 15px;" data-product-id="' + product.product_id + '">' +
+                 '<div class="cart-cell single-qty" style="text-align: center;" data-product-id="' + product.product_id + '">' +
                   '<span class="qty-label">' + editableQuantity + 'x</span>' +
                  '<input type="number" step="0.01" min="0" class="cart-price-input" value="' + Number(product.price).toFixed(2) + '" ' +
                  'oninput="handleCartPriceChange(this, \'' + product.product_id + '\')" ' +
-                 'style="width: 100px;border: 1px; padding: 4px; font-size: 20px; background: white; height:36px; width:93px;" />' +
+                 'style="width: 100px;border: 1px solid #ccc; padding: 4px; font-size: 14px; background: white; height:24px; width:93px; text-align:center;" />' +
                  '</div>';
          } else {
              priceCellHtml =
-                 '<div class="cart-cell single-qty" style="padding-left: 15px;" data-product-id="' + product.product_id + '">' +
+                 '<div class="cart-cell single-qty" style="text-align: center;" data-product-id="' + product.product_id + '">' +
                  editableQuantity + 'x ' + Math.round(product.price) + ' </div>';
          }
          const rowIndex = document.querySelectorAll('.cart-row').length + 1;
@@ -13497,15 +13715,15 @@ if (data.upc && data.upc !== '') {
              };
           const cartRowHTML =
           '<div data-product="' + encodeProduct(productObj) + '" class="cart-row" data-product-id="' + product.product_id + '" data-price="' + product.price + '">' +
-          '<div class="cart-cell index cart-cell-index">' + rowIndex + '</div>' +
+          '<div class="cart-cell index" style="display: flex; justify-content: center; align-items: center;"><span class="cart-cell-index">' + rowIndex + '</span></div>' +
           '<div class="cart-cell">' + product.product_id + '</div>' +
           '<div class="cart-cell">' + (product.name || product.heading_title) + '</div>' +
           '<div class="cart-cell actual-qty" style="color:blue;" data-initial-stock="' + stockQuantity + '">' + actualQuantity + '</div>' +
-          '<div class="cart-cell amount" style="text-align: center;"><input type="number" class="qty-input" value="' + editableQuantity + '" min="1" onchange="handleManualQuantityEntry(this, \'' + product.product_id + '\')" style="width: 93px; height:36px; text-align: center; font-size:20px;"></div>' +
+          '<div class="cart-cell amount" style="text-align: center;"><input type="number" class="qty-input" value="' + editableQuantity + '" min="1" onchange="handleManualQuantityEntry(this, \'' + product.product_id + '\')" style="width: 60px; height:24px; text-align: center; font-size:14px;"></div>' +
           '<div class="cart-cell discount" style="text-align: center;">0 %</div>' +
           priceCellHtml +
           '<div class="cart-cell gst-percent" style="text-align: center; color: #856404;" data-product-id="' + product.product_id + '">' + gstPercent + ' %</div>' +
-          '<div class="cart-cell row-gst" style="text-align: right; padding-right: 10px; color: #856404;" data-product-id="' + product.product_id + '">' + formattedRowGst + '</div>' +
+          '<div class="cart-cell row-gst" style="text-align: center; color: #856404;" data-product-id="' + product.product_id + '">' + formattedRowGst + '</div>' +
           '<div class="cart-cell total" data-product-id="' + product.product_id + '">' + formattedTotal + '</div>' +
           '<div class="cart-cell" style="text-align: center; display:flex; align-items:center; justify-content:center; gap:6px;">' +
           '<button class="exclude-toggle-btn included" onclick="toggleProductExclusion(\'' + product.product_id + '\')"><i class="fa-solid fa-empty-set"></i></button>' +
@@ -13866,9 +14084,12 @@ setTimeout(function () {
          function reindexCartRows() {
              const rows = document.querySelectorAll('.cart-row');
              rows.forEach((row, index) => {
-                 const indexCell = row.querySelector('.cart-cell.index');
-                 if (indexCell) {
-                     indexCell.textContent = index + 1;
+                 const indexSpan = row.querySelector('.cart-cell-index');
+                 if (indexSpan) {
+                     indexSpan.textContent = index + 1;
+                 } else {
+                     const indexCell = row.querySelector('.cart-cell.index');
+                     if (indexCell) indexCell.textContent = index + 1;
                  }
              });
          }
@@ -14046,7 +14267,7 @@ setTimeout(function () {
                  document.mozFullScreenElement ||
                  document.webkitFullscreenElement ||
                  document.msFullscreenElement;
-             btn.innerHTML = isFs ? '<i class="fas fa-expand" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Full screen' : '<i class="fas fa-expand" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Full screen';
+             btn.innerHTML = isFs ? '<i class="fas fa-expand" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Fullscreen' : '<i class="fas fa-expand" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Fullscreen';
          }
          document.addEventListener('fullscreenchange', updateFullscreenButton);
          document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
@@ -14324,9 +14545,13 @@ setTimeout(function () {
              const headerClockEl = document.getElementById('headerCurrentTime');
              if (headerClockEl) {
                  const now = new Date();
-                 const hours = String(now.getHours()).padStart(2, '0');
+                 let h = now.getHours();
+                 const ampm = h >= 12 ? 'PM' : 'AM';
+                 h = h % 12;
+                 h = h ? h : 12;
+                 const hours = String(h).padStart(2, '0');
                  const minutes = String(now.getMinutes()).padStart(2, '0');
-                 headerClockEl.textContent = hours + ':' + minutes;
+                 headerClockEl.textContent = hours + ':' + minutes + ' ' + ampm;
                  setTimeout(updateHeaderClock, 1000);
              }
          }
@@ -14369,32 +14594,34 @@ setTimeout(function () {
                  autocompleteList.style.display = 'none';
                  return;
              }
-             let cartProducts = [];
-             if (localStorage.getItem("pos_cart") !== null) {
-                 cartProducts = JSON.parse(localStorage.getItem("pos_cart"));
-             }
-             const uniqueProductNames = new Set();
-             cartProducts.forEach(product => {
-                 if (product.name && product.name.toLowerCase().includes(searchTerm)) {
-                     uniqueProductNames.add(product.name);
+
+             $.ajax({
+                 url: 'index.php?route=extension/purpletree_pos/pos/home|getPnames',
+                 dataType: 'json',
+                 success: function(json) {
+                     autocompleteList.innerHTML = '';
+                     if (json.status === 'success' && json.pnames && json.pnames.length > 0) {
+                         const filteredPnames = json.pnames.filter(p => p.name.toLowerCase().includes(searchTerm));
+                         if (filteredPnames.length === 0) {
+                             autocompleteList.style.display = 'none';
+                             return;
+                         }
+                         filteredPnames.forEach(p => {
+                             const item = document.createElement('li');
+                             item.className = 'dropdown-item';
+                             item.textContent = p.name;
+                             item.onclick = function () {
+                                 selectProductByName(p.name, input);
+                             };
+                             autocompleteList.appendChild(item);
+                         });
+                         positionProductAutocomplete(input, autocompleteList);
+                         autocompleteList.style.display = 'block';
+                     } else {
+                         autocompleteList.style.display = 'none';
+                     }
                  }
              });
-             autocompleteList.innerHTML = '';
-             if (uniqueProductNames.size === 0) {
-                 autocompleteList.style.display = 'none';
-                 return;
-             }
-             uniqueProductNames.forEach(name => {
-                 const item = document.createElement('li');
-                 item.className = 'dropdown-item';
-                 item.textContent = name;
-                 item.onclick = function () {
-                     selectProductByName(name, input);
-                 };
-                 autocompleteList.appendChild(item);
-             });
-             positionProductAutocomplete(input, autocompleteList);
-             autocompleteList.style.display = 'block';
          }
          function positionProductAutocomplete(input, autocompleteList) {
              if (!autocompleteList || !input) return;
@@ -14538,6 +14765,22 @@ setTimeout(function () {
              const second = String(now.getSeconds()).padStart(2, '0');
              const randomDigits = Math.floor(100 + Math.random() * 900);
              const productId = hour + minute + second + randomDigits;
+             
+             // Save P.Name to database
+             if (name !== 'SGC Product') {
+                 $.ajax({
+                     url: 'index.php?route=extension/purpletree_pos/pos/home|addPname',
+                     type: 'post',
+                     data: 'pname=' + encodeURIComponent(name),
+                     dataType: 'json',
+                     success: function(json) {
+                         if(json.status == 'success') {
+                             console.log('Custom product name saved to DB');
+                         }
+                     }
+                 });
+             }
+
              $('#quick_add_name').val('');
              $('#quick_add_quantity').val('1');
              $('#quick_add_price').val('');
@@ -15695,5 +15938,35 @@ function updateSummary(userEdited = true) {
 }
       </script>
       
+<script>
+function toggleInlineCalculator() {
+    var calc = document.getElementById('inlineCalculator');
+    if(calc.style.display === 'none') {
+        calc.style.display = 'flex';
+    } else {
+        calc.style.display = 'none';
+    }
+}
+</script>
+<script>
+function calculatePriceFromXYZ(val) {
+    let xytAmt = parseFloat(val);
+    if(isNaN(xytAmt)) {
+        document.getElementById('quick_add_price').value = '';
+        return;
+    }
+    
+    // Base wholesale calculation
+    let wholesalePrice = xytAmt / 5;
+    
+    // Determine final price based on business class
+    let finalPrice = wholesalePrice;
+    if (typeof AGENT_BUSINESS_CLASS !== 'undefined' && AGENT_BUSINESS_CLASS === 'RETAIL') {
+        finalPrice = wholesalePrice + (wholesalePrice * 25 / 100);
+    }
+    
+    document.getElementById('quick_add_price').value = finalPrice.toFixed(2);
+}
+</script>
 </body>
 </html>

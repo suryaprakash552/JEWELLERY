@@ -1028,10 +1028,12 @@
          flex: 1;
          display:flex;
          flex-direction:column;
+         min-height: 0;
          }
          .content-wrapper{
          display:flex;
          flex:1;
+         min-height: 0;
          }
          .left-section{
             width: 80%;
@@ -1041,6 +1043,7 @@
     background: black;
     display: flex;
     flex-direction: column;
+    min-height: 0;
          }
          .right-section{
          flex-basis:20%;
@@ -1964,9 +1967,9 @@
          top: 50%;
          left: 50%;
          transform: translate(-50%, -50%);
-         opacity: 0.35;
+         opacity: 0.25;
          pointer-events: none;
-         z-index: 1; 
+         z-index: 5;
          width: 45%;
          height: auto;
          }
@@ -2212,7 +2215,7 @@
          <div class="main-content">
             <div class="content-wrapper">
                <div class="left-section">
-                  <div id="appContent" style="padding: 9px; background: #f6f6e9; flex: 1; display: flex; flex-direction: column;">
+                  <div id="appContent" style="padding: 9px; background: #f6f6e9; flex: 1; display: flex; flex-direction: column; min-height: 0;">
                   <div class="search-section">
                      <div class="search-bar" style="position: relative; background-color: #ebe6c2;">
                         <div class="search-input-wrapper" style="position:relative; width:50%;">
@@ -3033,7 +3036,7 @@
                 
 
                 <!-- Proceed to Payment Button -->
-                <button id="submit-order-btn" onclick="orderSummery()" style="background-color: rgb(103 127 207); border: 1px solid #1e3a8a; color: white; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border-radius: 4px; padding: 0 20px; font-size: 25px; font-weight: 600; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%;">
+                <button id="submit-order-btn" onclick="orderSummery()" style="background-color: #28a745; border: 1px solid #218838; color: white; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border-radius: 4px; padding: 0 20px; font-size: 25px; font-weight: 600; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%;">
                     <span>Proceed to Payment</span>
                     <i class="fas fa-chevron-right" style="font-size: 16px;"></i>
                 </button>

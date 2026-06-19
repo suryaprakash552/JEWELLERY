@@ -8165,6 +8165,7 @@ window.disableFooterButtons = function(clickedId) {
             }
             if (!rawPhone) {
                 console.warn('Customer phone not found, skipping WhatsApp');
+                setTimeout(() => { location.reload(); }, 500);
                 return;
             }
             $.ajax({
@@ -8350,6 +8351,7 @@ function printMergeLongBill() {
             }
             if (!rawPhone) {
                 console.warn('Customer phone not found, skipping WhatsApp');
+                setTimeout(() => { location.reload(); }, 500);
                 return;
             }
             $.ajax({
@@ -8414,6 +8416,7 @@ function printMergeLongBill() {
             }
             if (!rawPhone) {
                 console.warn('Customer phone not found, skipping WhatsApp');
+                setTimeout(() => { location.reload(); }, 500);
                 return;
             }
             $.ajax({
@@ -14717,7 +14720,6 @@ setTimeout(function () {
              if (list) {
                  list.style.display = 'none';
              }
-             input.focus();
          }
          $(document).on('click', function (e) {
              if (!$(e.target).closest('.product-autocomplete-list').length && 
@@ -15032,27 +15034,18 @@ setTimeout(function () {
                       if (response.success === '1' || response.success === '2') {
                           sessionStorage.setItem('renewal_otp_ref', response.otp_ref);
                           $('#renewalVerifySection').show();
-                          setTimeout(() => $('#renewalOtp').focus(), 100);
                           $('#renewalGenOtpBtn').hide();
                       } else {
                           $('#renewalVerifySection').show();
-                          setTimeout(() => $('#renewalOtp').focus(), 100);
                           $('#renewalGenOtpBtn').hide();
                       }
                   },
                   error: function() {
                       $('#renewalVerifySection').show();
-                      setTimeout(() => $('#renewalOtp').focus(), 100);
                       $('#renewalGenOtpBtn').hide();
                       showRenewalStatus('Error sending OTP. You can try Master OTP.', 'red');
                   }
               });
-          });
-          $('#renewalOtp').on('keypress', function(e) {
-              if (e.which === 13) {
-                  e.preventDefault();
-                  $('#renewalVerifyBtn').click();
-              }
           });
           $('#renewalVerifyBtn').on('click', function() {
               const phone = $('#renewalPhone').val().trim();

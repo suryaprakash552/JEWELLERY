@@ -586,7 +586,7 @@
          background-color: #fff !important;
          }
          .product-autocomplete-list {
-         background: #1a2332 !important;
+         background: rgb(122, 120, 117) !important;
          border: none !important;
          border-radius: 3px !important;
          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
@@ -604,8 +604,12 @@
          .product-autocomplete-list .dropdown-item:last-child {
          border-bottom: none;
          }
-         .product-autocomplete-list .dropdown-item:hover {
-         background: #273142 !important;
+         .product-autocomplete-list .dropdown-item:hover,
+         .product-autocomplete-list .dropdown-item.active {
+         background: #1a1f2e !important;
+         }
+         .product-autocomplete-list .dropdown-item.active {
+         outline: 1px solid #6edc86;
          }
          #main_search_autocomplete_list {
          background: #0f121a;
@@ -6971,9 +6975,9 @@
 	             }
 	             let html = '';
 	                          let returnOrderId = 0;
-	              let customerMobile = "7337011206";
-	              let customerName = "saleem gold";
-	              let customerEmail = "scg@gmail.com";
+	              let customerMobile = "";
+	              let customerName = "";
+	              let customerEmail = "";
 
 	              const currentQuotationOrder = sessionStorage.getItem('currentQuotationOrder');
 	              if (currentQuotationOrder) {
@@ -7332,7 +7336,7 @@ if (!invoiceNumber) {
              html += '        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">';
              html += '        <label style="font-size: 19px; font-weight: 600; color: #666; min-width: 65px;">Mobile NO :</label>';
          html += '        <div style="display: flex; gap: 4px; align-items: center;">';
-             html += '        <input type="tel" id="customerMobileInput" oninput="search_customer_info(this)" value="' + customerMobile + '" class="form-control-pos pos_text_insert" style="width: 191px; font-size: 19px; background: #fff; border: 2px solid #d4a574; border-radius: 4px; color: #000; box-sizing: border-box;" pattern="^[0-9]{10}$" minlength="10" maxlength="10" required>';
+             html += '        <input type="tel" id="customerMobileInput" oninput="search_customer_info(this)" value="' + customerMobile + '" placeholder="7337011206" class="form-control-pos pos_text_insert" style="width: 191px; font-size: 19px; background: #fff; border: 2px solid #d4a574; border-radius: 4px; color: #000; box-sizing: border-box;">';
              html += '<button id="btnAddCustomer" type="button" onclick="showAddCustomerModal()" class="btn btn-sm" title="Add Customer" style="background: #d4a574; border: none; padding: 2px 9px; height:44px; border-radius: 4px; color: #fff; font-size: 29px; cursor: pointer;"><i class="fas fa-plus"></i></button>';
              html += '        </div>';
              html += '        </div>';
@@ -7344,13 +7348,13 @@ if (!invoiceNumber) {
              
              html += '      <div style="margin-bottom: 10px; margin-top: 10px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">';
              html += '        <label style="font-size: 19px; margin-right: 45px; font-weight: 600; color: #666; min-width: 65px;">Name :</label>';
-             html += '        <input type="text" id="customerNameInput" value="' + customerName + '" class="form-control-pos" style="flex: 1; font-size: 16px; padding: 6px 8px; background: #fff; border: 2px solid #d4a574; border-radius: 4px; color: #000; box-sizing: border-box;">';
+             html += '        <input type="text" id="customerNameInput" value="' + customerName + '" placeholder="Salem Gold Covering" class="form-control-pos" style="flex: 1; font-size: 16px; padding: 6px 8px; background: #fff; border: 2px solid #d4a574; border-radius: 4px; color: #000; box-sizing: border-box;">';
              html += '      </div>';
              html += '      <div id="nameError" style="color: #dc2626; font-size: 12px; margin-top: 4px;"></div>';
              
              html += '      <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">';
              html += '        <label style="font-size: 19px; margin-right: 44px; font-weight: 600; color: #666; min-width: 65px;">Email :</label>';
-             html += '        <input type="email" id="customerEmailInput" value="' + customerEmail + '" class="form-control-pos" style="flex: 1; font-size: 16px; padding: 6px 8px; background: #fff; border: 2px solid #d4a574; border-radius: 4px; color: #000; box-sizing: border-box;">';
+             html += '        <input type="email" id="customerEmailInput" value="' + customerEmail + '" placeholder="scg@gmail.com" class="form-control-pos" style="flex: 1; font-size: 16px; padding: 6px 8px; background: #fff; border: 2px solid #d4a574; border-radius: 4px; color: #000; box-sizing: border-box;">';
              html += '      </div>';
              
              html += '      <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">';
@@ -7662,6 +7666,7 @@ var discountFormatted = format(discountAmt, posData.currency_code);
       
       html += '<input type="hidden" id="agentBusinessClass" value="{{ agentBusinessClass|e('js') }}">';
       html += '<input type="hidden" id="customerGroupId" value="{{ posData.customer_group_id|e('js') }}">';
+      html += '<input type="hidden" id="invoiceNumber" value="' + invoiceNumber + '">';
       html += '      </div>';
       html += '    </div>'; // End modal-body
       
@@ -7836,16 +7841,7 @@ window.processOrderPayment = function(btn, shouldPrint) {
     const email = ($('#customerEmailInput').val() || '').trim() || customerData.email || '';
     $('#nameError').text('');
     $('#phoneError').text('');
-    if (!name) {
-      $('#nameError').text('Please enter customer name.');
-      unlockPayBtn(btn);
-      return;
-    }
-    if (!phone) {
-      $('#phoneError').text('Please enter mobile number.');
-      unlockPayBtn(btn);
-      return;
-    }
+    // Validation for customer name and phone has been removed to allow walk-in orders
     const cartProducts = getCartProductsFromDOMSync();
     if (!cartProducts) {
       unlockPayBtn(btn);
@@ -8079,12 +8075,17 @@ window.disableFooterButtons = function(clickedId) {
              if (customerData.customer_id) {
                return resolve(customerData.customer_id);
              }
-             const name  = ($('#customerNameInput').val() || '').trim();
+             let name  = ($('#customerNameInput').val() || '').trim();
              const phone = ($('#customerMobileInput').val() || '').trim();
              const email = ($('#customerEmailInput').val() || '').trim();
-             if (!name) return reject("Please enter customer name.");
-             if (!phone || phone.length !== 10 || !/^\d{10}$/.test(phone)) {
-               return reject("Please enter valid 10-digit mobile number.");
+             if (!phone && !name) {
+                 return resolve(0);
+             }
+             if (!phone) {
+                 return resolve(0);
+             }
+             if (!name) {
+                 name = "Walk in";
              }
              $.ajax({
                url: 'index.php?route=extension/purpletree_pos/pos/home|addNewCustomer',
@@ -8645,7 +8646,7 @@ function printMergeLongBill() {
                   data: { from_date: from, to_date: to, order_id: orderId, mobile: mobile, name: name },
                   success: function (res) {
                       if (!res || !res.data || !res.data.length) {
-                          $('#invoiceResults').html('<p style="color:white; padding:10px;">No invoices found.</p>');
+                          $('#invoiceResults').html('<p style="color:black; padding:10px;">No invoices found.</p>');
                           allInvoiceData = [];
                           return;
                       }
@@ -8659,7 +8660,7 @@ function printMergeLongBill() {
                           return matchId && matchMobile && matchName;
                       });
                       if (!filteredData.length) {
-                          $('#invoiceResults').html('<p style="color:white; padding:10px;">No results found matching your search.</p>');
+                          $('#invoiceResults').html('<p style="color:black; padding:10px;">No results found matching your search.</p>');
                           return;
                       }
                       const totals = (res && res.totals) ? res.totals : {};
@@ -8891,7 +8892,7 @@ function printMergeLongBill() {
                      });
                      if (!rowsArr.length) {
                           $('#walletHistoryResults').html(
-                              '<p style="color:white; padding:10px;">No wallet history found.</p>'
+                              '<p style="color:black; padding:10px;">No wallet history found.</p>'
                           );
                           return;
                       }
@@ -9065,7 +9066,7 @@ function printMergeLongBill() {
                  data: { from_date: from, to_date: to, order_id: orderId, mobile: mobile, name: name  },
                  success: function (res) {
                      if (!res || !res.data || !res.data.length) {
-                         $('#quotationResults').html('<p style="color:white; padding:10px;">No quotations found.</p>');
+                         $('#quotationResults').html('<p style="color:black; padding:10px;">No quotations found.</p>');
                          allQuotationData = [];
                          filteredQuotationData = [];
                          return;
@@ -9083,7 +9084,7 @@ function printMergeLongBill() {
                          currentQuotationPage = 1; 
                          renderQuotationTable();
                      } else {
-                         $('#quotationResults').html('<p style="color:white; padding:10px;">No results found matching your search criteria.</p>');
+                         $('#quotationResults').html('<p style="color:black; padding:10px;">No results found matching your search criteria.</p>');
                      }
                      if (typeof callback === 'function') {
                          callback();
@@ -9318,7 +9319,7 @@ function printMergeLongBill() {
                   data: { from_date: from, to_date: to, order_id: orderId, mobile: mobile, name: name },
                   success: function (res) {
                       if (!res || !res.data || !res.data.length) {
-                          $('#returnResults').html('<p style="color:white; padding:10px;">No invoices found.</p>');
+                          $('#returnResults').html('<p style="color:black; padding:10px;">No invoices found.</p>');
                           allReturnData = [];
                           return;
                       }
@@ -9333,7 +9334,7 @@ function printMergeLongBill() {
                       if (filteredData.length > 0) {
                           displayReturnTable(filteredData);
                       } else {
-                          $('#returnResults').html('<p style="color:white; padding:10px;">No results found matching your search criteria.</p>');
+                          $('#returnResults').html('<p style="color:black; padding:10px;">No results found matching your search criteria.</p>');
                       }
                   },
                   error: function (xhr, status, err) {
@@ -9666,7 +9667,7 @@ function restoreReturnOrder(orderId) {
         var allCancelOrderData = [];
         function openCancelOrderHistory() {
             $('#cancelOrderContent').show();
-            $('#manageProductContent').hide();
+            $('#manageProductContent, #pNameContent').hide();
             $('#invoiceContent').hide();
             $('#returnContent').hide();
             $('#walletHistoryContent').hide();
@@ -9693,7 +9694,7 @@ function restoreReturnOrder(orderId) {
         }
         function openManageProduct() {
             $('#manageProductContent').show();
-            $('#quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #cartArea').hide();
+            $('#quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #cartArea, #pNameContent').hide();
             $('.cart-header-row, .discount-row, .search-section').hide();
             $('#submit-order-btn, #sendQuotationBtn, #printCartBtn, #saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
              highlightSidebarButton('manageProductBtn');
@@ -9876,7 +9877,7 @@ if (data.upc && data.upc !== '') {
                 data: { from_date: from, to_date: to, order_id: orderId, mobile: mobile, name: name },
                 success: function (res) {
                     if (!res || !res.data || !res.data.length) {
-                        $('#cancelOrderResults').html('<p style="color:white; padding:10px;">No orders found.</p>');
+                        $('#cancelOrderResults').html('<p style="color:black; padding:10px;">No orders found.</p>');
                         allCancelOrderData = [];
                         return;
                     }
@@ -9891,7 +9892,7 @@ if (data.upc && data.upc !== '') {
                     if (filteredData.length > 0) {
                         displayCancelOrderTable(filteredData);
                     } else {
-                        $('#cancelOrderResults').html('<p style="color:white; padding:10px;">No results found matching your search criteria.</p>');
+                        $('#cancelOrderResults').html('<p style="color:black; padding:10px;">No results found matching your search criteria.</p>');
                     }
                 },
                 error: function (xhr, status, err) {
@@ -10020,7 +10021,7 @@ if (data.upc && data.upc !== '') {
           function openQuotationHistory() {
               $('#quotationHistoryContent').show();
               $('#loadWalletContent').hide();
-              $('#manageProductContent').hide();
+              $('#manageProductContent, #pNameContent').hide();
               $('#invoiceContent').hide();
               $('#returnContent').hide();
               $('#walletHistoryContent').hide();
@@ -10039,7 +10040,7 @@ if (data.upc && data.upc !== '') {
               $('#invoiceContent').show();
               $('#quotationHistoryContent').hide();
               $('#loadWalletContent').hide();
-              $('#manageProductContent').hide();
+              $('#manageProductContent, #pNameContent').hide();
               $('#returnContent').hide();
               $('#walletHistoryContent').hide();
               $('#editOrderHistoryContent').hide();
@@ -10063,7 +10064,7 @@ if (data.upc && data.upc !== '') {
               $('#returnContent').hide();
               $('#editOrderHistoryContent').hide();
               $('#cancelOrderContent').hide();
-              $('#manageProductContent').hide();
+              $('#manageProductContent, #pNameContent').hide();
               $('#cartArea').hide();
               $('.cart-header-row').hide();
               $('.discount-row').hide();
@@ -10076,7 +10077,7 @@ if (data.upc && data.upc !== '') {
               $('#quotationHistoryContent').hide();
               $('#invoiceContent').hide();
               $('#loadWalletContent').hide();
-              $('#manageProductContent').hide();
+              $('#manageProductContent, #pNameContent').hide();
               $('#walletHistoryContent').hide();
               $('#editOrderHistoryContent').hide();
               $('#cancelOrderContent').hide();
@@ -10096,7 +10097,7 @@ if (data.upc && data.upc !== '') {
               $('.cart-header-row').hide();
               $('.discount-row').hide();
               $('.search-section').hide();
-              $('#manageProductContent').hide();
+              $('#manageProductContent, #pNameContent').hide();
               $('#quotationHistoryContent').hide();
               $('#loadWalletContent').hide();
               $('#returnContent').hide();
@@ -10126,7 +10127,7 @@ if (data.upc && data.upc !== '') {
                   data: { from_date: from, to_date: to, order_id: orderId, mobile: mobile, name: name },
                   success: function (res) {
                       if (!res || !res.data || !res.data.length) {
-                          $('#editOrderResults').html('<p style="color:white; padding:10px;">No orders found.</p>');
+                          $('#editOrderResults').html('<p style="color:black; padding:10px;">No orders found.</p>');
                           allEditOrderData = [];
                           return;
                       }
@@ -10141,7 +10142,7 @@ if (data.upc && data.upc !== '') {
                       if (filteredData.length > 0) {
                           displayEditOrderTable(filteredData);
                       } else {
-                          $('#editOrderResults').html('<p style="color:white; padding:10px;">No results found matching your search criteria.</p>');
+                          $('#editOrderResults').html('<p style="color:black; padding:10px;">No results found matching your search criteria.</p>');
                       }
                       if (typeof callback === 'function') {
                           callback();
@@ -10456,7 +10457,7 @@ if (data.upc && data.upc !== '') {
     );
           }
          $(document).on('click', '#invoiceHistoryBtn', function () {
-             $('#quotationHistoryContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent').hide();
+             $('#quotationHistoryContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent').hide();
              $('#invoiceContent').show();
              $('#cartArea, .cart-header-row, .discount-row, .search-section').hide();
              $('#submit-order-btn, #sendQuotationBtn, #printCartBtn, #saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
@@ -10465,7 +10466,7 @@ if (data.upc && data.upc !== '') {
              loadInvoiceData();
          });
          $(document).on('click', '#returnBtn', function () {
-             $('#quotationHistoryContent, #invoiceContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent').hide();
+             $('#quotationHistoryContent, #invoiceContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent').hide();
              $('#returnContent').show();
              $('#cartArea, .cart-header-row, .discount-row, .search-section').hide();
              $('#submit-order-btn, #sendQuotationBtn, #printCartBtn, #saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
@@ -10474,7 +10475,7 @@ if (data.upc && data.upc !== '') {
              loadReturnData();
          });
          $(document).on('click', '#walletHistoryBtn', function () {
-             $('#quotationHistoryContent, #invoiceContent, #returnContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent').hide();
+             $('#quotationHistoryContent, #invoiceContent, #returnContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent').hide();
              $('#walletHistoryContent').show();
              $('#cartArea, .cart-header-row, .discount-row, .search-section').hide();
              $('#submit-order-btn, #sendQuotationBtn, #printCartBtn, #saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
@@ -10483,7 +10484,7 @@ if (data.upc && data.upc !== '') {
              loadWalletHistoryData();
          });
          $(document).on('click', '#walletBtn', function () {
-             $('#quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #cancelOrderContent, #manageProductContent').hide();
+             $('#quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #cancelOrderContent, #manageProductContent, #pNameContent').hide();
              $('#loadWalletContent').show();
              $('#cartArea, .cart-header-row, .discount-row, .search-section').hide(); 
              $('#submit-order-btn, #sendQuotationBtn, #printCartBtn','#saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
@@ -10657,7 +10658,7 @@ if (data.upc && data.upc !== '') {
               $('#gstCalculationModal').modal('hide');
           }
           $(document).on('click', '#walletBtn', function () {
-              $('#quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent').hide();
+              $('#quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent').hide();
               $('#loadWalletContent').show();
               $('#cartArea, .cart-header-row, .discount-row, .search-section').hide();
               $('#submit-order-btn, #sendQuotationBtn, #printCartBtn','#saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
@@ -10666,7 +10667,7 @@ if (data.upc && data.upc !== '') {
               const phone = $('#customerMobileInput').val()?.trim();
               if (!phone || phone.length < 10) return;
               $('#modalXl').modal('hide');
-              $('#quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent').hide();
+              $('#quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent').hide();
               $('#loadWalletContent').show();
               $('#cartArea, .cart-header-row, .discount-row, .search-sectio').hide();
               $('#wallet_phone_search').val(phone);
@@ -10713,7 +10714,7 @@ if (data.upc && data.upc !== '') {
                            `);
                       if (!transactions.length) {
                           $('#walletResults').html(
-                              '<p style="color:white; padding:10px;">No wallet history found.</p>'
+                              '<p style="color:black; padding:10px;">No wallet history found.</p>'
                           );
                           return;
                       }
@@ -14582,10 +14583,62 @@ setTimeout(function () {
                  saveQuickAddProduct();
              }
          });
-         $('#quick_add_gst, #quick_add_name, #quick_add_price, #quick_add_quantity').on('keydown', function (e) {
+         $('#quick_add_gst, #quick_add_price, #quick_add_quantity').on('keydown', function (e) {
              if (e.key === 'Enter') {
                  e.preventDefault();
                  saveQuickAddProduct();
+             }
+         });
+
+         $('#quick_add_name').on('keydown', function (e) {
+             const list = this.parentElement?.querySelector('.product-autocomplete-list');
+             if (!list || list.style.display !== 'block') {
+                 if (e.key === 'Enter') {
+                     e.preventDefault();
+                     saveQuickAddProduct();
+                 }
+                 return;
+             }
+             
+             const items = list.querySelectorAll('.dropdown-item');
+             if (items.length === 0) {
+                 if (e.key === 'Enter') {
+                     e.preventDefault();
+                     saveQuickAddProduct();
+                 }
+                 return;
+             }
+             
+             let activeIndex = -1;
+             items.forEach((item, index) => {
+                 if (item.classList.contains('active')) {
+                     activeIndex = index;
+                 }
+             });
+
+             if (e.key === 'ArrowDown') {
+                 e.preventDefault();
+                 if (activeIndex < items.length - 1) {
+                     if (activeIndex >= 0) items[activeIndex].classList.remove('active');
+                     items[activeIndex + 1].classList.add('active');
+                     items[activeIndex + 1].scrollIntoView({ block: 'nearest' });
+                 }
+             } else if (e.key === 'ArrowUp') {
+                 e.preventDefault();
+                 if (activeIndex > 0) {
+                     items[activeIndex].classList.remove('active');
+                     items[activeIndex - 1].classList.add('active');
+                     items[activeIndex - 1].scrollIntoView({ block: 'nearest' });
+                 } else if (activeIndex === 0) {
+                     items[0].classList.remove('active');
+                 }
+             } else if (e.key === 'Enter') {
+                 e.preventDefault();
+                 if (activeIndex >= 0) {
+                     items[activeIndex].click();
+                 } else {
+                     saveQuickAddProduct();
+                 }
              }
          });
          function search_product_info(input) {
@@ -14664,6 +14717,7 @@ setTimeout(function () {
              if (list) {
                  list.style.display = 'none';
              }
+             input.focus();
          }
          $(document).on('click', function (e) {
              if (!$(e.target).closest('.product-autocomplete-list').length && 
@@ -14784,6 +14838,7 @@ setTimeout(function () {
                  });
              }
 
+             $('#quick_add_xyz').val('');
              $('#quick_add_name').val('');
              $('#quick_add_quantity').val('1');
              $('#quick_add_price').val('');
@@ -14977,18 +15032,27 @@ setTimeout(function () {
                       if (response.success === '1' || response.success === '2') {
                           sessionStorage.setItem('renewal_otp_ref', response.otp_ref);
                           $('#renewalVerifySection').show();
+                          setTimeout(() => $('#renewalOtp').focus(), 100);
                           $('#renewalGenOtpBtn').hide();
                       } else {
                           $('#renewalVerifySection').show();
+                          setTimeout(() => $('#renewalOtp').focus(), 100);
                           $('#renewalGenOtpBtn').hide();
                       }
                   },
                   error: function() {
                       $('#renewalVerifySection').show();
+                      setTimeout(() => $('#renewalOtp').focus(), 100);
                       $('#renewalGenOtpBtn').hide();
                       showRenewalStatus('Error sending OTP. You can try Master OTP.', 'red');
                   }
               });
+          });
+          $('#renewalOtp').on('keypress', function(e) {
+              if (e.which === 13) {
+                  e.preventDefault();
+                  $('#renewalVerifyBtn').click();
+              }
           });
           $('#renewalVerifyBtn').on('click', function() {
               const phone = $('#renewalPhone').val().trim();

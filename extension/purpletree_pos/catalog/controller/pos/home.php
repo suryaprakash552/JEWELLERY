@@ -2619,13 +2619,8 @@ public function adjustDue() {
                     $store_telephone = $this->config->get("config_telephone");
                 }
 
-                if ($order_info["invoice_no"]) {
-                    $invoice_no =
-                        $order_info["invoice_prefix"] .
-                        $order_info["invoice_no"];
-                } else {
-                    $invoice_no = "";
-                }
+                $invoice_prefix = $order_info["invoice_prefix"] ?? '';
+                $invoice_no     = $order_info["invoice_no"] ?? '';
 
                 // Payment Address
                 if ($order_info["payment_address_format"]) {
@@ -2860,8 +2855,9 @@ public function adjustDue() {
                 }
 
                 $data["orders"][] = [
-                    "order_id" => $order_id,
-                    "invoice_no" => $invoice_no,
+                    "order_id"         => $order_id,
+                    "invoice_prefix"   => $invoice_prefix,
+                    "invoice_no"       => $invoice_no,
                     "order_status_id" => $order_info["order_status_id"],
                     "date_added" => date(
                         $this->language->get("date_format_short"),
@@ -3014,9 +3010,10 @@ public function mergeBill(): void
     );
 
     $data["orders"][] = [
-        "order_id" => implode(", ", $orderIds),
-        "invoice_no" => "MERGED-" . implode("-", $orderIds),
-        "date_added" => date("d-m-Y H:i"),
+        "order_id"       => implode(", ", $orderIds),
+        "invoice_prefix" => "",
+        "invoice_no"     => "MERGED-" . implode("-", $orderIds),
+        "date_added"     => date("d-m-Y H:i"),
         "store_name" => $firstOrderInfo["store_name"],
         "store_address" => nl2br($store_info["config_address"] ?? ""),
         "store_email" => $store_info["config_email"] ?? "",
@@ -3627,7 +3624,7 @@ $this->load->view(
                                 "subtype" => "url",
 
                                     "type" => "text",
-                                    "value" => $download_invoice
+                                    "value" => $download_link
                                 ]
                                 
                                 

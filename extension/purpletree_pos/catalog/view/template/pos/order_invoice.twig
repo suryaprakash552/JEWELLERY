@@ -301,6 +301,7 @@
 {% set cgst = order.invoice.sub_total * 0.015 %}
 {% set sgst = order.invoice.sub_total * 0.015 %}
 {% set gst_total = cgst + sgst %}
+{% set discount_amt = order.invoice.discount <= 10 ? (order.invoice.sub_total * order.invoice.discount / 100) : order.invoice.discount %}
 
 <div class="receipt-container {% if order.order_status_id == 7 %}cancelled-invoice{% endif %}">
    
@@ -313,7 +314,7 @@
         <div class="header-top text-center">INVOICE</div>
         <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:500; width:100%;">
             <div>
-                Invoice : {{ order.invoice_prefix ~ order.invoice_no }}
+                Invoice : {{ order.invoice_no ? order.invoice_prefix ~ order.invoice_no : order.order_id }}
             </div>
             <div>
                {{ "now"|date("d-m-Y h:i A", "Asia/Kolkata") }}
@@ -336,7 +337,7 @@
                     <div class="logo-main" style="margin-left:-25px;">
                         SALEEM GOLD COVERING
                     </div>
-                    <h6 style = "margin-right:20px;">WHOLESALE - +91 7337011206</h6>
+                    <h6 style = "margin-right:20px;">WHOLESALE</h6>
                     {#<div class="logo-tagline" style="margin-left:-25px;">#}
                     {#     WHOLESALE STORE#}
                     {#</div>#}
@@ -367,6 +368,10 @@
                 Name :
                 {% if order.payment_address %}
                     {{ order.payment_address | nl2br }}
+                {% elseif order.payment_firstname %}
+                    {{ order.payment_firstname }} {{ order.payment_lastname }}
+                {% else %}
+                    Walk in
                 {% endif %}
             </span>
 
@@ -434,16 +439,7 @@
            <div style="display:flex; justify-content:space-between; margin-bottom: 2px;">
     <span></span>
     <span style="font-weight:700;">
-        Discount Amt : 
-{% if order.invoice.discount <= 10 %}
-
-    {{ order.invoice.discount|number_format(2) }}%
-
-{% else %}
-
-    ₹{{ order.invoice.discount|number_format(2) }}
-
-{% endif %}/-
+        Discount Amt : ₹{{ discount_amt|number_format(2) }}/-
     </span>
 </div>
             {#<div style="display:flex; justify-content:space-between; margin-bottom: 2px;">#}
@@ -475,15 +471,7 @@
         <div class="line"></div>
 
         <div class="savings-line">
-            Total Amount Save On This Bills :{% if order.invoice.discount <= 10 %}
-
-    {{ order.invoice.discount|number_format(2) }}%
-
-{% else %}
-
-    ₹{{ order.invoice.discount|number_format(2) }}
-
-{% endif %}/-
+            Total Amount Save On This Bills : ₹{{ discount_amt|number_format(2) }}/-
         </div>
 
         <div class="line"></div>

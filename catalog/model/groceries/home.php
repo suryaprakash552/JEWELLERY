@@ -1300,25 +1300,8 @@ public function getQuoteTotalsByDateRange($from_date, $to_date, $agentId)
         FROM `" . DB_PREFIX . "quote_order` qo
         INNER JOIN `" . DB_PREFIX . "quote_invoice` qi
             ON qi.order_id = qo.order_id
-        WHERE DATE(qo.date_added) >= '" . $this->db->escape($from_date) . "'
-          AND DATE(qo.date_added) <= '" . $this->db->escape($to_date) . "'
-          AND qo.customer_group_id = '" . (int)$agentId . "'
-    ";
-
-    return $this->db->query($sql)->row;
-}                                                           public function getQuoteTotalsByDateRange($from_date, $to_date, $agentId)
-{
-    $sql = "
-        SELECT
-            COALESCE(SUM(qi.sub_total), 0)        AS total_subtotal,
-            COALESCE(SUM(qi.discount), 0)         AS total_discount,
-            COALESCE(SUM(qi.total_tax), 0)        AS total_tax,
-            COUNT(qo.order_id)                    AS total_quotes
-        FROM `" . DB_PREFIX . "quote_order` qo
-        INNER JOIN `" . DB_PREFIX . "quote_invoice` qi
-            ON qi.order_id = qo.order_id
-        WHERE DATE(qo.date_added) >= '" . $this->db->escape($from_date) . "'
-          AND DATE(qo.date_added) <= '" . $this->db->escape($to_date) . "'
+        WHERE qo.date_added >= '" . $this->db->escape($from_date) . " 00:00:00'
+          AND qo.date_added <= '" . $this->db->escape($to_date) . " 23:59:59'
           AND qo.customer_group_id = '" . (int)$agentId . "'
     ";
 

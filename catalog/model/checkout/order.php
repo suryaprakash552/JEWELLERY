@@ -833,11 +833,11 @@ public function walletTradeHistory($customerid,$raw=array())
        	$sql = "SELECT * FROM " . DB_PREFIX . "customer_transaction p WHERE p.customer_id = '" . (int)$customerid. "'";
 
 		if (!empty($raw['from_date'])) {
-			$sql .= " AND date(p.date_added) >= '".$this->db->escape($raw['from_date'])."'";
+			$sql .= " AND p.date_added >= '".$this->db->escape($raw['from_date'])." 00:00:00'";
 		}
 		
 		if (!empty($raw['to_date'])) {
-			$sql .= " AND date(p.date_added) <= '".$this->db->escape($raw['to_date'])."'";
+			$sql .= " AND p.date_added <= '".$this->db->escape($raw['to_date'])." 23:59:59'";
 		}
 		
 		if (!empty($raw['txtid'])) {
@@ -1016,9 +1016,9 @@ public function getOrdersByDateRange($agentId, $from_date = '', $to_date = '', $
     $sql = "SELECT o.order_id FROM `" . DB_PREFIX . "order` o WHERE o.customer_group_id = '" . (int)$agentId . "'";
     $isSearch = !empty($order_id) || !empty($mobile) || !empty($name);
 
-    if (!$isSearch && !empty($from_date) && !empty($to_date)) {
-        $sql .= " AND DATE(o.date_added) >= '" . $this->db->escape($from_date) . "'";
-        $sql .= " AND DATE(o.date_added) <= '" . $this->db->escape($to_date) . "'";
+    if (!empty($from_date) && !empty($to_date)) {
+        $sql .= " AND o.date_added >= '" . $this->db->escape($from_date) . " 00:00:00'";
+        $sql .= " AND o.date_added <= '" . $this->db->escape($to_date) . " 23:59:59'";
     }
 
     if (!empty($order_id)) {
@@ -1223,8 +1223,8 @@ FROM `" . DB_PREFIX . "order` o
 INNER JOIN `" . DB_PREFIX . "order_invoice` oi
 ON oi.order_id = o.order_id
 
-WHERE DATE(o.date_added) >= '" . $this->db->escape($from_date) . "'
-AND DATE(o.date_added) <= '" . $this->db->escape($to_date) . "'
+WHERE o.date_added >= '" . $this->db->escape($from_date) . " 00:00:00'
+AND o.date_added <= '" . $this->db->escape($to_date) . " 23:59:59'
 AND o.customer_group_id = '" . (int)$agentId . "'";
 
 return $this->db->query($sql)->row;
@@ -1285,9 +1285,9 @@ public function getQuotesByDateRange($agentId, $from_date = '', $to_date = '', $
 
     $isSearch = !empty($quote_id) || !empty($mobile) || !empty($name);
 
-    if (!$isSearch && !empty($from_date) && !empty($to_date)) {
-        $sql .= " AND DATE(qo.date_added) >= '" . $this->db->escape($from_date) . "'";
-        $sql .= " AND DATE(qo.date_added) <= '" . $this->db->escape($to_date) . "'";
+    if (!empty($from_date) && !empty($to_date)) {
+        $sql .= " AND qo.date_added >= '" . $this->db->escape($from_date) . " 00:00:00'";
+        $sql .= " AND qo.date_added <= '" . $this->db->escape($to_date) . " 23:59:59'";
     }
 
     if (!empty($quote_id)) {
@@ -1332,8 +1332,8 @@ public function getQuoteTotalsByDateRange($from_date, $to_date, $agentId)
         FROM `" . DB_PREFIX . "quote_order` qo
         INNER JOIN `" . DB_PREFIX . "quote_invoice` qi
             ON qi.order_id = qo.order_id
-        WHERE DATE(qo.date_added) >= '" . $this->db->escape($from_date) . "'
-          AND DATE(qo.date_added) <= '" . $this->db->escape($to_date) . "'
+        WHERE qo.date_added >= '" . $this->db->escape($from_date) . " 00:00:00'
+          AND qo.date_added <= '" . $this->db->escape($to_date) . " 23:59:59'
           AND qo.customer_group_id = '" . (int)$agentId . "'
     ";
 

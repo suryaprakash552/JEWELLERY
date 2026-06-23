@@ -13673,7 +13673,7 @@ if (data.upc && data.upc !== '') {
          const isEditable = EDITABLE_PRODUCT_IDS.includes(parseInt(product.product_id));
          const isCustomProduct = product.is_custom || false;
          let priceCellHtml;
-         if (isCustomProduct) {
+         if (true) {
              priceCellHtml =
                  '<div class="cart-cell single-qty" style="text-align: center;" data-product-id="' + product.product_id + '">' +
                   '<span class="qty-label">' + editableQuantity + 'x</span>' +
@@ -13681,10 +13681,6 @@ if (data.upc && data.upc !== '') {
                  'oninput="handleCartPriceChange(this, \'' + product.product_id + '\')" ' +
                  'style="width: 100px;border: 1px solid #ccc; padding: 4px; font-size: 14px; background: white; height:24px; width:93px; text-align:center;" />' +
                  '</div>';
-         } else {
-             priceCellHtml =
-                 '<div class="cart-cell single-qty" style="text-align: center;" data-product-id="' + product.product_id + '">' +
-                 editableQuantity + 'x ' + Math.round(product.price) + ' </div>';
          }
          const rowIndex = document.querySelectorAll('.cart-row').length + 1;
           let gstPercent = 0;
@@ -14586,7 +14582,7 @@ setTimeout(function () {
                  saveQuickAddProduct();
              }
          });
-         $('#quick_add_gst, #quick_add_price, #quick_add_quantity').on('keydown', function (e) {
+         $('#quick_add_xyz, #quick_add_gst, #quick_add_price, #quick_add_quantity').on('keydown', function (e) {
              if (e.key === 'Enter') {
                  e.preventDefault();
                  saveQuickAddProduct();
@@ -15034,18 +15030,27 @@ setTimeout(function () {
                       if (response.success === '1' || response.success === '2') {
                           sessionStorage.setItem('renewal_otp_ref', response.otp_ref);
                           $('#renewalVerifySection').show();
+                          setTimeout(() => $('#renewalOtp').focus(), 100);
                           $('#renewalGenOtpBtn').hide();
                       } else {
                           $('#renewalVerifySection').show();
+                           setTimeout(() => $('#renewalOtp').focus(), 100);
                           $('#renewalGenOtpBtn').hide();
                       }
                   },
                   error: function() {
                       $('#renewalVerifySection').show();
+                       setTimeout(() => $('#renewalOtp').focus(), 100);
                       $('#renewalGenOtpBtn').hide();
                       showRenewalStatus('Error sending OTP. You can try Master OTP.', 'red');
                   }
               });
+          });
+          $('#renewalOtp').on('keypress', function(e) {
+              if (e.which === 13) {
+                  e.preventDefault();
+                  $('#renewalVerifyBtn').click();
+              }
           });
           $('#renewalVerifyBtn').on('click', function() {
               const phone = $('#renewalPhone').val().trim();

@@ -1,0 +1,24 @@
+{
+    "name": "suryaprakash552/jewellery",
+    "description": "OpenCart-based Jewellery E-commerce Platform",
+    "type": "project",
+    "require-dev": {
+        "phpunit/phpunit": "^9.6"
+    },
+    "autoload": {
+        "classmap": [
+            "system/engine/",
+            "system/library/"
+        ],
+        "files": [
+            "system/helper/general.php",
+            "system/helper/filter.php",
+            "system/helper/validation.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    }
+}

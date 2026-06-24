@@ -653,9 +653,9 @@
         //print_r($url);
         $cURL = curl_init();
 
-        ini_set('display_errors', 1);
-        ini_set('display_startup_errors', 1);
-        error_reporting(E_ALL);
+        ini_set('display_errors', 0);
+        ini_set('display_startup_errors', 0);
+        error_reporting(0);
 
         // Set multiple options for a cURL transfer.
         curl_setopt_array(
@@ -666,8 +666,8 @@
                 CURLOPT_POST => true,
                 CURLOPT_RETURNTRANSFER => true,
                 
-                CURLOPT_SSL_VERIFYHOST => 0,
-                CURLOPT_SSL_VERIFYPEER => 0
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_SSL_VERIFYPEER => 1
             )
         );
 

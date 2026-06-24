@@ -70,13 +70,7 @@ class SalesByProduct extends \Opencart\System\Engine\Controller {
             )
         ]);
 
-        $data['results'] = sprintf(
-            $this->language->get('text_pagination'),
-            ($total_days) ? (($page - 1) * $limit) + 1 : 0,
-            ((($page - 1) * $limit) > ($total_days - $limit)) ? $total_days : ((($page - 1) * $limit) + $limit),
-            $total_days,
-            ceil($total_days / $limit)
-        );
+        $data['results'] = oc_pagination_text($this->language->get('text_pagination'), $total_days, $page, $limit);
 
         /* ===============================
            COMMON VIEW DATA

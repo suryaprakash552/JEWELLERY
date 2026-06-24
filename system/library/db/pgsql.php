@@ -37,6 +37,8 @@ class PgSQL {
 
 			// Sync PHP and DB time zones
 			pg_query($this->connection, "SET TIMEZONE = '" . $this->escape(date('P')) . "'");
+		} else {
+			throw new \Exception('Error: Could not make a database link using ' . $username . '@' . $hostname);
 		}
 	}
 

@@ -71,24 +71,25 @@ class Api {
 
 		$response = curl_exec($curl);
 
+		if ($response === false) {
+			$error = curl_error($curl);
+			curl_close($curl);
+			throw new \Exception('Error: API cURL request failed for route ' . $route . '! Message: ' . $error);
+		}
+
 		$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
 		curl_close($curl);
 
 		if ($status == 200) {
 			$response_info = json_decode($response, true);
+
+			if (json_last_error() !== JSON_ERROR_NONE) {
+				throw new \Exception('Error: Invalid JSON response from API route ' . $route . '! JSON error: ' . json_last_error_msg());
+			}
 		} else {
 			$response_info = [];
 		}
-
-		echo 'URL' . "\n";
-		echo $url . "\n";
-
-		echo 'STRING' . "\n";
-		echo $string . "\n";
-
-		echo 'RESPONSE' . "\n";
-		echo $response;
 
 		return $response_info;
 	}

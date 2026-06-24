@@ -97,12 +97,23 @@ class Fixer extends \Opencart\System\Engine\Controller {
 
 			$response = curl_exec($curl);
 
+			if ($response === false) {
+				error_log('Fixer currency fetch failed: ' . curl_error($curl));
+				curl_close($curl);
+				return;
+			}
+
 			$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
 			curl_close($curl);
 
 			if ($status == 200) {
 				$response_info = json_decode($response, true);
+
+				if (json_last_error() !== JSON_ERROR_NONE) {
+					error_log('Invalid JSON in Fixer response: ' . json_last_error_msg());
+					$response_info = [];
+				}
 			} else {
 				$response_info = [];
 			}

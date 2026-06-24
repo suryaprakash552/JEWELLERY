@@ -45,14 +45,25 @@ class Promotion extends \Opencart\System\Engine\Controller {
 
 			$response = curl_exec($curl);
 
-			$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-			curl_close($curl);
-
-			if ($status == 200) {
-				$promotion = json_decode($response, true);
-			} else {
+			if ($response === false) {
+				error_log('Promotion fetch failed: ' . curl_error($curl));
+				curl_close($curl);
 				$promotion = [];
+			} else {
+				$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+				curl_close($curl);
+
+				if ($status == 200) {
+					$promotion = json_decode($response, true);
+
+					if (json_last_error() !== JSON_ERROR_NONE) {
+						error_log('Invalid JSON in promotion response: ' . json_last_error_msg());
+						$promotion = [];
+					}
+				} else {
+					$promotion = [];
+				}
 			}
 
 			$this->cache->set('promotion.' . $type, $promotion, 3600 * 24);

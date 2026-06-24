@@ -26,9 +26,9 @@ define('DISPLAY_UPLOAD_PATH', HTTP_CATALOG . 'system/storagex8nclbm3t3z3/upload/
 
 define('DB_DRIVER', 'mysqli');
 define('DB_HOSTNAME', 'localhost');
-define('DB_USERNAME', 'root');
-define('DB_PASSWORD', 'Shaik@2002');
-define('DB_DATABASE', 'jws');
+define('DB_USERNAME', getenv('DB_USERNAME') ?: 'root');
+define('DB_PASSWORD', getenv('DB_PASSWORD') ?: '');
+define('DB_DATABASE', getenv('DB_DATABASE') ?: 'jws');
 define('DB_PREFIX', 'xwzk_');
 define('DB_PORT', '3306');
 

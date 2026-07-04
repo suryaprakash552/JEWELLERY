@@ -10177,8 +10177,8 @@ if (data.upc && data.upc !== '') {
               data.forEach(function (row, idx) {
                   var statusId = parseInt(row.order_info.order_status_id || 0, 10);
                   var isEdited = (statusId === 17); 
-                  var btnLabel = isEdited ? 'Edited' : 'Edit';
-                  var btnDisabledAttr = isEdited ? ' disabled' : '';
+                  var btnLabel = 'Edit';
+                  var btnDisabledAttr = '';
                   html += '<tr>'
                       + '  <td style="background-color: white;color: black;">' + (idx + 1) + '</td>'
                       + '  <td style="background-color: white;color: black;">' + row.order_info.order_id + '</td>'

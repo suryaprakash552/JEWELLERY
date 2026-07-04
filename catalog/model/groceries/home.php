@@ -1300,8 +1300,8 @@ public function getQuoteTotalsByDateRange($from_date, $to_date, $agentId)
         FROM `" . DB_PREFIX . "quote_order` qo
         INNER JOIN `" . DB_PREFIX . "quote_invoice` qi
             ON qi.order_id = qo.order_id
-        WHERE qo.date_added >= '" . $this->db->escape($from_date) . " 00:00:00'
-          AND qo.date_added <= '" . $this->db->escape($to_date) . " 23:59:59'
+        WHERE qo.date_added >= '" . $this->db->escape(date('Y-m-d', strtotime($from_date))) . " 00:00:00'
+          AND qo.date_added <= '" . $this->db->escape(date('Y-m-d', strtotime($to_date))) . " 23:59:59'
           AND qo.customer_group_id = '" . (int)$agentId . "'
     ";
 

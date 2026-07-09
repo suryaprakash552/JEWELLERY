@@ -6005,7 +6005,7 @@
             var orderData = values[0];
            if(orderData.status !='error'){
              $.ajax({
-               url: 'index.php?route=extension/purpletree_pos/pos/home|addorder',
+               url: 'index.php?route=extension/purpletree_pos/pos/home|addwholesaleorder',
          	  type: 'post',
                dataType: 'json',
          	  data: orderData, 
@@ -7609,13 +7609,19 @@ var discountFormatted = format(discountAmt, posData.currency_code);
       
       // Use AA Row
       html += '        <div style="position: relative;">';
-      html += '          <input type="number" id="advanceAmount" placeholder="Use AA" oninput="updateTotals()" disabled style="width: 100%; height: 42px; font-size: 18px; font-weight: 600; padding: 8px 40px 8px 12px; border: 1.5px solid #ccc; border-radius: 6px; color: #333; box-sizing: border-box;">';
-      html += '          <i class="fas fa-wallet" style="position: absolute; right: 12px; top: 11px; font-size: 20px; color: #333;"></i>';
+      html += '          <input type="number" id="advanceAmount" placeholder="Use AA" oninput="updateTotals()" disabled style="width: 100%; height: 42px; font-size: 18px; font-weight: 600; padding: 8px 65px 8px 12px; border: 1.5px solid #ccc; border-radius: 6px; color: #333; box-sizing: border-box;">';
+      html += '          <div style="position: absolute; right: 12px; top: 11px; display: flex; align-items: center; gap: 8px;">';
+      html += '            <input type="checkbox" id="useAACheckbox" onchange="window.toggleAAInput()" style="width: 18px; height: 18px; cursor: pointer;">';
+      html += '            <i class="fas fa-wallet" style="font-size: 20px; color: #333;"></i>';
+      html += '          </div>';
       html += '        </div>';
       // Due Amount Row
       html += '        <div style="position: relative;">';
-      html += '          <input type="number" id="dueAmountInput" placeholder="Due Amount" oninput="updateTotals()" disabled style="width: 100%; height: 42px; font-size: 18px; font-weight: 600; padding: 8px 40px 8px 12px; border: 1.5px solid #ccc; border-radius: 6px; color: #333; box-sizing: border-box;">';
-      html += '          <i class="fas fa-file-invoice-dollar" style="position: absolute; right: 12px; top: 11px; font-size: 20px; color: #333;"></i>';
+      html += '          <input type="number" id="dueAmountInput" placeholder="Due Amount" oninput="updateTotals()" disabled style="width: 100%; height: 42px; font-size: 18px; font-weight: 600; padding: 8px 65px 8px 12px; border: 1.5px solid #ccc; border-radius: 6px; color: #333; box-sizing: border-box;">';
+      html += '          <div style="position: absolute; right: 12px; top: 11px; display: flex; align-items: center; gap: 8px;">';
+      html += '            <input type="checkbox" id="useDueAmountCheckbox" onchange="window.toggleDueAmountInput()" style="width: 18px; height: 18px; cursor: pointer;">';
+      html += '            <i class="fas fa-file-invoice-dollar" style="font-size: 20px; color: #333;"></i>';
+      html += '          </div>';
       html += '        </div>';
       html += '      </div>';
       html += '    </div>';
@@ -7714,6 +7720,38 @@ var discountFormatted = format(discountAmt, posData.currency_code);
          $(document).on('hidden.bs.modal', '#modalXl', function () {
          });
 
+         window.toggleAAInput = function() {
+             var isChecked = document.getElementById('useAACheckbox').checked;
+             var advanceAmount = document.getElementById('advanceAmount');
+             if (advanceAmount) {
+                 advanceAmount.disabled = !isChecked;
+                 if (!isChecked) {
+                     advanceAmount.value = '';
+                     if (typeof updateTotals === 'function') updateTotals();
+                 } else {
+                     if (typeof globalAdvanceAmount !== 'undefined' && globalAdvanceAmount > 0) {
+                         advanceAmount.value = globalAdvanceAmount.toFixed(2);
+                     }
+                     advanceAmount.focus();
+                     if (typeof updateTotals === 'function') updateTotals();
+                 }
+             }
+         };
+
+         window.toggleDueAmountInput = function() {
+             var isChecked = document.getElementById('useDueAmountCheckbox').checked;
+             var dueAmountInput = document.getElementById('dueAmountInput');
+             if (dueAmountInput) {
+                 dueAmountInput.disabled = !isChecked;
+                 if (!isChecked) {
+                     dueAmountInput.value = '';
+                     if (typeof updateTotals === 'function') updateTotals();
+                 } else {
+                     dueAmountInput.focus();
+                 }
+             }
+         };
+
          window.clearCustomerSession = function() {
              sessionStorage.removeItem('currentCustomerData');
              sessionStorage.removeItem('customerSData');
@@ -7726,11 +7764,13 @@ var discountFormatted = format(discountAmt, posData.currency_code);
              if ($('#advancedAmountSpan').length) $('#advancedAmountSpan').text('0.00');
              if ($('#dueAmountSpan').length) $('#dueAmountSpan').text('0.00');
              
+             if ($('#useAACheckbox').length) $('#useAACheckbox').prop('checked', false);
              const advanceInput = document.getElementById('advanceAmount');
              if (advanceInput) {
                  advanceInput.value = '';
                  advanceInput.disabled = true; 
              }
+             if ($('#useDueAmountCheckbox').length) $('#useDueAmountCheckbox').prop('checked', false);
              const dueAmountInput = document.getElementById('dueAmountInput');
              if (dueAmountInput) {
                  dueAmountInput.value = '';
@@ -7973,7 +8013,7 @@ window.processOrderPayment = function(btn, shouldPrint) {
         console.log("order details", orderDetails);
         sessionStorage.setItem('paidOrderDetails', JSON.stringify(orderDetails));
         $.ajax({
-          url: 'index.php?route=extension/purpletree_pos/pos/home|addorder',
+          url: 'index.php?route=extension/purpletree_pos/pos/home|addwholesaleorder',
           type: 'POST',
           dataType: 'json',
           contentType: 'application/json',
@@ -11430,12 +11470,11 @@ if (data.upc && data.upc !== '') {
                         } else {
                             $('#lastOrderDisplay').hide();
                         }
-                          if (globalAdvanceAmount > 0) {
-                              $('#advanceAmount').prop('disabled', false);
-                          } else {
-                              $('#advanceAmount').prop('disabled', true).val('');
-                          }
-                          $('#dueAmountInput').prop('disabled', false);
+                          $('#useAACheckbox').prop('checked', false);
+                          $('#advanceAmount').prop('disabled', true).val('');
+                          
+                          $('#useDueAmountCheckbox').prop('checked', false);
+                          $('#dueAmountInput').prop('disabled', true).val('');
                           if (globalDueAmount > 0) {
                               $('#includeDAInTotal').prop('disabled', false);
                           } else {

@@ -1710,6 +1710,419 @@ return $this->response->setOutput(
         }
     }
     
+    public function addwholesaleorder()
+    {
+        $this->response->addHeader("Content-Type: application/json");
+
+        $post = $this->request->post;
+
+        $raw = file_get_contents("php://input");
+        if ($raw) {
+            $decoded = json_decode($raw, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $post = array_merge($post, $decoded);
+            }
+        }
+        $get = function ($arr, $key, $default = "") {
+            return isset($arr[$key]) ? $arr[$key] : $default;
+        };
+        $money = function ($v) {
+            return (float) preg_replace("/[^0-9.\-]/", "", (string) $v);
+        };
+
+        try {
+            $orderDetails = $get($post, "orderDetails", []);
+            $incoming_tax_details = $get($orderDetails, "taxDetails", []);
+            $previousOrderId = (int) $get($orderDetails, "previousOrderId", 0);
+            $activeQuoteId = (int) $get($orderDetails, "activeQuoteId", 0);
+            $editOrderId = (int) $get($orderDetails, "previourseditorderid", 0);
+            $customer_id = $get($orderDetails, "customerIdNumber", 0);
+            $agentId = $this->customer->getId();
+            $customer_name = $get($orderDetails, "CustomerName", "");
+            $email = $get($orderDetails, "Email", "");
+            $mobile = $get($orderDetails, "Mobile", "");
+            // $customer_group_id = (int) $get($orderDetails,"customer_group_id",0
+            // );
+
+            // if ($customer_group_id === 0 && $agentId) {
+            //     $this->load->model("account/customer");
+            //     $agent_info = $this->model_account_customer->getCustomer((int) $agentId);
+
+            //     if (!empty($agent_info["customer_group_id"])) {
+            //         $customer_group_id =(int) $agent_info["customer_group_id"];
+            //     }
+            // }
+
+            $invoiceInfo = $get($orderDetails, "InvoiceInfo", []);
+
+            $subtotal = $money($get($invoiceInfo, "SUBTotal", 0));
+            $discount = $money($get($invoiceInfo, "DiscountIncluded", 0));
+            $discountType = $get($invoiceInfo, "DiscountType", "");
+            $tax_included = $money($get($invoiceInfo, "TaxIncluded", 0));
+            $total_before_round = $money($get($invoiceInfo, "TotalBeforeRoundoff", 0));
+            $roundoff_amount = $money($get($invoiceInfo, "RoundOffAmount", 0));
+            $qty_total = (int) $get($invoiceInfo, "QuantityTotal", 0);
+            $items_count = (int) $get($invoiceInfo, "NumberOfItems", 0);
+            $credits_for_order = $money($get($invoiceInfo, "credits_for_order", 0));
+            $creditpointsused = $money($get($orderDetails, "CreditPointsUsed", 0));
+            $redeem_points_status = filter_var($get($orderDetails, "redeem_points_status", false),FILTER_VALIDATE_BOOLEAN);
+
+            $coupon = $get($invoiceInfo, "Coupon", "");
+            $coupon_amount = $money($get($invoiceInfo, "CouponAmount", 0));
+            $coupon_final = $coupon;
+            if (!empty($coupon) && $coupon_amount > 0) {
+                $coupon_final = $coupon . '-' . number_format($coupon_amount, 2, '.', '');
+            }
+            $total_tax = $money($get($invoiceInfo, "TotalTax", 0));
+
+            $full_invoice_number = $get($invoiceInfo, "InvoiceNumber", "");
+            // Reward calculation
+            $reward_points = 0;
+            
+            if ($subtotal >= 1000) {
+                $reward_points = floor($subtotal / 1000) * 5;
+            }
+
+
+            $invoice_prefix = '';
+            $invoice_no     = '';
+
+            if (!empty($full_invoice_number)) {
+                $parts = explode("-", $full_invoice_number, 2);
+                $invoice_prefix = isset($parts[0]) ? $parts[0] . "-" : "";
+                $invoice_no = $parts[1] ?? "";
+            }
+
+            $paymentThrough = $get($orderDetails, "PaymentThrough", "");
+            $cash_amount = $money($get($orderDetails, "CashAmount", 0));
+            $upi_amount = $money($get($orderDetails, "UPIAmount", 0));
+            $advance_used = $money($get($orderDetails, "AdvanceUsed", 0));
+            $total_received = $money(
+                $get($orderDetails, "TotalReceivedAmount", 0)
+            );
+            $pending_amount = $money($get($orderDetails, "PendingAmount", 0));
+            $return_balance = $money(
+                $get($orderDetails, "ReturnableBalance", 0)
+            );
+            $saveAdvance = (bool)$get($orderDetails, "SaveReturnableAsAdvance", false);
+
+            $dueAmountUsed  = (bool)$get($orderDetails, "DueAmountUsed", false);
+            $dueAmountValue = $money($get($orderDetails, "DueAmountValue", 0));
+
+            $note = $get($orderDetails, "Note", "");
+            $cart_products = $get($orderDetails, "CartProducts", []);
+            $order_data = [];
+            $order_data["invoice_prefix"] = $invoice_prefix;
+            $order_data["invoice_no"] = $invoice_no;
+
+            $order_data["customer_id"] = (int) $customer_id;
+            $order_data["customer_group_id"] = $agentId;
+            $order_data["sellerId"] = (int) $get($orderDetails, "SellerId", 0);
+            $order_data["quote_id"] = $activeQuoteId;
+            $order_data["pre_order_id"] = $previousOrderId;
+            //$order_data["pre_amount"] = $previousAmount;
+            $name_parts = explode(" ", $customer_name, 2);
+            $order_data["firstname"] = $name_parts[0] ?? "";
+            $order_data["lastname"] = $name_parts[1] ?? "";
+
+            $order_data["email"] = $email;
+            $order_data["telephone"] = $mobile;
+            $order_data["custom_field"] = [];
+            
+            $order_data["payment_method"] = [
+                "name" => $paymentThrough,
+                "code" => strtolower($paymentThrough),
+            ];
+
+            $order_data["total"] = $total_before_round;
+
+            $order_data["products"] = [];
+            foreach ($cart_products as $p) {
+                $order_data["products"][] = [
+                    "product_id" => (int) ($p["product_id"] ?? 0),
+                    "name" => $p["name"] ?? "",
+                    "model" => "",
+                    "option" => [],
+                    "quantity" => (int) ($p["quantity"] ?? 1),
+                    "price" => (float) ($p["price"] ?? 0),
+                    "total" => (float) ($p["total"] ?? 0),
+                    "gst" => (float) ($p["gst_percent"] ?? 0),
+                    "tax" => (float) ($p["row_gst"] ?? 0),
+                    "excluded"   => !empty($p["excluded"]) ? 1 : 0
+                ];
+            }
+
+            $order_data["comment"] = $note;
+            $invoice_extra = [
+                "customer_group_id" => $agentId,
+                "cash_amount" => $cash_amount,
+                "upi_amount" => $upi_amount,
+                "coupon" => $coupon_final,
+                "credit_points" => $reward_points,
+                "discount" => $discount,
+                "discount_type" => $discountType,
+                "number_of_items" => $items_count,
+                "quantity_of_items" => $qty_total,
+                "sub_total" => $subtotal,
+                "total_tax" => $total_tax,
+                "roundoff_amount" => $roundoff_amount,
+                "amount_through" => $paymentThrough,
+                "pending_amount" => $pending_amount,
+                "returnable_balance" => $return_balance,
+                "advance_used" => $advance_used,
+                "total_received" => $total_received,
+                "creditpointsused" => $creditpointsused,
+                "balance" => $dueAmountValue,
+                "save_advance" => $saveAdvance
+            ];
+            $order_data["custom_fields"] = [];
+            if (
+                !empty($incoming_tax_details) &&
+                is_array($incoming_tax_details)
+            ) {
+                foreach ($incoming_tax_details as $td) {
+                    if (!empty($td["name"])) {
+                        $order_data["custom_fields"][] = [
+                            "name" => (string) $td["name"],
+                            "value" => (float) ($td["value"] ?? 0),
+                        ];
+                    }
+                }
+            }
+
+            $this->load->model("checkout/order");
+            if ($editOrderId > 0) {
+                $this->model_checkout_order->editPreviousOrder($editOrderId, $order_data, $invoice_extra);
+                $order_id = $editOrderId;
+            } else {
+                $order_id = $this->model_checkout_order->addwholesaleorder($order_data, $invoice_extra);
+            }
+
+            if ($activeQuoteId > 0) {
+                $this->model_checkout_order->completeQuote($activeQuoteId);
+            }
+
+
+            if (!$order_id) {
+                throw new Exception("Order creation failed");
+            }
+
+            if ($editOrderId > 0) {
+
+                $this->model_checkout_order->addHistory(
+                    $order_id,
+                    17,
+                    "",
+                    false,
+                    true
+                );
+            
+            // 2️⃣ RETURN ORDER
+            } elseif ($previousOrderId > 0) {
+                // REVERSE OLD RETURN ORDER DUE TRANSACTION
+     $oldTransaction = $this->db->query("
+    SELECT amount, transactiontype
+    FROM `" . DB_PREFIX . "customer_transaction`
+    WHERE order_id = '" . (int)$previousOrderId . "'
+    AND transactionsubtype = 'AEPS'
+    ORDER BY customer_transaction_id DESC
+    LIMIT 1
+")->row;
+
+if ($oldTransaction) {
+
+    if ($oldTransaction['transactiontype'] == 'DEBIT') {
+
+        // Reverse old debit
+        $this->db->query("
+            UPDATE `" . DB_PREFIX . "manage_wallet`
+            SET aeps_amount = IFNULL(aeps_amount,0) + " . (float)$oldTransaction['amount'] . "
+            WHERE customerid = '" . (int)$customer_id . "'
+        ");
+
+    } else if ($oldTransaction['transactiontype'] == 'CREDIT') {
+
+        // Reverse old credit
+        $this->db->query("
+            UPDATE `" . DB_PREFIX . "manage_wallet`
+            SET aeps_amount = IFNULL(aeps_amount,0) - " . (float)$oldTransaction['amount'] . "
+            WHERE customerid = '" . (int)$customer_id . "'
+        ");
+
+    }
+
+    // DELETE OLD TRANSACTION
+    $this->db->query("
+        DELETE FROM `" . DB_PREFIX . "customer_transaction`
+        WHERE order_id = '" . (int)$previousOrderId . "'
+        AND transactionsubtype = 'AEPS'
+    ");
+}
+            
+                $this->model_checkout_order->addHistory(
+                    $previousOrderId,
+                    4,
+                    "",
+                    false,
+                    true
+                );
+            
+                $this->model_checkout_order->addHistory(
+                    $order_id,
+                    6, // Return Completed
+                    "",
+                    false,
+                    true
+                );
+            
+            } else {
+            
+                $this->model_checkout_order->addHistory(
+                    $order_id,
+                    5, // Complete
+                    "",
+                    false,
+                    true
+                );
+            }
+            
+        
+
+
+            $saveAdvance = (bool) $get($orderDetails, "SaveReturnableAsAdvance", false);
+            $dueAmountUsed  = (bool) $get($orderDetails, "DueAmountUsed", false);
+            $dueAmountValue = (float) preg_replace("/[^0-9.\-]/", "", (string) $get($orderDetails, "DueAmountValue", 0));
+            $includedDA = (bool)$get($orderDetails, "includedDA", false);
+            $includedDAAmount = $money($get($orderDetails, "includedDAAmount", 0));
+            
+            if ($customer_id > 0) {
+                
+                // Deduct advance when AA is used
+                if ($advance_used > 0) {
+                
+                    $debit = [
+                        "customerid" => $customer_id,
+                        "order_id" => $order_id,
+                        "amount" => $advance_used,
+                        "description" => "Advance used in order #" . $order_id,
+                        "transactiontype" => "DEBIT",
+                        "transactionsubtype" => "TRADE",
+                        "txtid" => $order_id,
+                    ];
+                
+                    $this->model_checkout_order->doWalletCredit($debit);
+                }
+            
+                if ($saveAdvance && $return_balance > 0) {
+            
+                    $credit = [
+                        "customerid" => $customer_id,
+                        "order_id" => $order_id,
+                        "amount" => $return_balance,
+                        "description" => "Returnable saved as advance - Order #" . $order_id,
+                        "transactiontype" => "CREDIT",
+                        "transactionsubtype" => "TRADE",
+                        "txtid" => $order_id,
+                    ];
+            
+                    $this->model_checkout_order->doWalletCredit($credit);
+                }
+            
+                // 2) Due -> manage_wallet.aeps_amount (AEPS)
+                if ($dueAmountUsed && $dueAmountValue > 0) {
+            
+                    $aepsCredit = [
+                        "customerid" => $customer_id,
+                        "order_id" => $order_id,
+                        "amount" => $dueAmountValue,
+                        "description" => "Due amount added - Order #" . $order_id,
+                        "transactiontype" => "CREDIT",
+                        "transactionsubtype" => "AEPS",
+                        "txtid" => $order_id,
+                    ];
+            
+                    // you must add this function in model_checkout_order
+                    $this->model_checkout_order->doWalletAepsCredit($aepsCredit);
+                }
+                
+                // Reduce AEPS amount if DA is used in order
+            if ($includedDA && $includedDAAmount > 0) {
+            
+                $aepsDebit = [
+                    "customerid" => $customer_id,
+                    "order_id" => $order_id,
+                    "amount" => $includedDAAmount,
+                    "description" => "Due amount used in order #" . $order_id,
+                    "transactiontype" => "DEBIT",
+                    "transactionsubtype" => "AEPS",
+                    "txtid" => $order_id,
+                ];
+            
+                $this->model_checkout_order->doWalletAepsCredit($aepsDebit);
+            }
+
+$this->load->model("account/reward");
+
+if ($customer_id > 0) {
+
+
+    if ($redeem_points_status) {
+
+        $this->model_account_reward->clearAllRewards($customer_id);
+    }
+
+    if ($reward_points > 0) {
+
+        $this->model_account_reward->addReward([
+            "customer_id" => $customer_id,
+            "order_id"    => $order_id,
+            "points"      => $reward_points,
+            "description" => "Reward earned for order #$order_id",
+            "status"      => "active",
+        ]);
+    }
+}
+
+
+        // if previous order_id is available remove the reward points for the order to the customer(cancelled order)
+        // if previous order_id is available remove the reward points for the previous order then insert new reward points to the customer(return and edit order)
+            }
+
+            $this->load->model("account/customer");
+
+           // Only run this for specific payment types, not all orders
+if (strtolower($paymentThrough) === 'advance') {
+    $credit = [
+        "customerid" => $customer_id,
+        "order_id"   => $order_id,
+        "amount"     => $subtotal,
+        "description" => $mobile,
+        "transactiontype"    => "CREDIT",
+        "transactionsubtype" => "TRADE",
+        "txtid" => $order_id,
+    ];
+    $walletUpdate = $this->model_checkout_order->doWalletCredit($credit);
+} else {
+    $walletUpdate = null;
+}
+
+return $this->response->setOutput(
+    json_encode([
+        "status"       => "success",
+        "order_id"     => $order_id,
+        "walletUpdate" => $walletUpdate,
+    ])
+);
+        } catch (Throwable $e) {
+            return $this->response->setOutput(
+                json_encode([
+                    "status" => "error",
+                    "message" => $e->getMessage(),
+                ])
+            );
+        }
+    }
+    
     
     public function addQuoteOrder()
 {

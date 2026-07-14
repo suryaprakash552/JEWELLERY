@@ -59,13 +59,7 @@ class SalesByTotalAmount extends \Opencart\System\Engine\Controller {
             )
         ]);
 
-        $data['results'] = sprintf(
-            $this->language->get('text_pagination'),
-            ($total) ? (($page - 1) * $limit) + 1 : 0,
-            ((($page - 1) * $limit) > ($total - $limit)) ? $total : ((($page - 1) * $limit) + $limit),
-            $total,
-            ceil($total / $limit)
-        );
+        $data['results'] = oc_pagination_text($this->language->get('text_pagination'), $total, $page, $limit);
 
         /* UI */
         $data['heading_title'] = $this->language->get('heading_title');

@@ -17,447 +17,134 @@ class History extends \Opencart\System\Engine\Controller {
 
 
 	protected function getList() {
-	    $this->load->model('dmt/history');
-	    
-		if (isset($this->request->get['filter_fdate'])) {
-			$filter_fdate = $this->request->get['filter_fdate'];
-		} else {
-            $filter_fdate = date('Y-m-d ');
-		}
-        if (isset($this->request->get['filter_tdate'])) {
-			$filter_tdate = $this->request->get['filter_tdate'];
-		} else {
-            $filter_tdate = date('Y-m-d ');
-		}
-        if (isset($this->request->get['filter_customerid'])) {
-			$filter_customerid = $this->request->get['filter_customerid'];
-		} else {
-			$filter_customerid = '';
-		}
-		
-		if (isset($this->request->get['filter_snumber'])) {
-			$filter_snumber = $this->request->get['filter_snumber'];
-		} else {
-			$filter_snumber = '';
-		}
+		$this->load->model('dmt/history');
 
-		if (isset($this->request->get['filter_ourrequestid'])) {
-			$filter_ourrequestid = $this->request->get['filter_ourrequestid'];
-		} else {
-			$filter_ourrequestid = '';
-		}
+		$get   = $this->request->get;
+		$today = date('Y-m-d ');
+		$limit = $this->config->get('config_pagination_admin');
 
-		if (isset($this->request->get['filter_yourrequestid'])) {
-			$filter_yourrequestid = $this->request->get['filter_yourrequestid'];
-		} else {
-			$filter_yourrequestid = '';
-		}
-		
-		if (isset($this->request->get['filter_apirequestid'])) {
-			$filter_apirequestid = $this->request->get['filter_apirequestid'];
-		} else {
-			$filter_apirequestid = '';
-		}
-		
-		if (isset($this->request->get['filter_accountnumber'])) {
-			$filter_accountnumber = $this->request->get['filter_accountnumber'];
-		} else {
-			$filter_accountnumber = '';
-		}
-		
-		if (isset($this->request->get['filter_ifsc'])) {
-			$filter_ifsc = $this->request->get['filter_ifsc'];
-		} else {
-			$filter_ifsc = '';
-		}
-		
-		if (isset($this->request->get['filter_type'])) {
-			$filter_type = $this->request->get['filter_type'];
-		} else {
-			$filter_type = '';
-		}
-		
-		if (isset($this->request->get['filter_rrn'])) {
-			$filter_rrn = $this->request->get['filter_rrn'];
-		} else {
-			$filter_rrn = '';
-		}
+		$filters = oc_extract_filters($get, [
+			'filter_fdate'         => $today,
+			'filter_tdate'         => $today,
+			'filter_customerid'    => '',
+			'filter_snumber'       => '',
+			'filter_ourrequestid'  => '',
+			'filter_yourrequestid' => '',
+			'filter_apirequestid'  => '',
+			'filter_accountnumber' => '',
+			'filter_ifsc'          => '',
+			'filter_type'          => '',
+			'filter_rrn'           => '',
+			'filter_status'        => '',
+		]);
 
-		if (isset($this->request->get['filter_status'])) {
-			$filter_status = $this->request->get['filter_status'];
-		} else {
-			$filter_status = '';
-		}
+		$sort  = $get['sort'] ?? 'p.date';
+		$order = $get['order'] ?? 'DESC';
+		$page  = (int)($get['page'] ?? 1);
 
-		if (isset($this->request->get['sort'])) {
-			$sort = $this->request->get['sort'];
-		} else {
-			$sort = 'p.date';
-		}
+		$filter_params  = array_keys($filters);
+		$date_fallbacks = ['filter_fdate' => $filters['filter_fdate'], 'filter_tdate' => $filters['filter_tdate']];
 
-		if (isset($this->request->get['order'])) {
-			$order = $this->request->get['order'];
-		} else {
-			$order = 'DESC';
-		}
-
-		if (isset($this->request->get['page'])) {
-			$page = (int)$this->request->get['page'];
-		} else {
-			$page = 1;
-		}
-
-		$url = '';
-        if (isset($this->request->get['filter_fdate'])) {
-			$url .= '&filter_fdate=' . urlencode(html_entity_decode($this->request->get['filter_fdate'], ENT_QUOTES, 'UTF-8'));
-		}else
-		    {
-		        $url .= '&filter_fdate=' . urlencode(html_entity_decode($filter_fdate, ENT_QUOTES, 'UTF-8'));
-		    }
-		if (isset($this->request->get['filter_tdate'])) {
-			$url .= '&filter_tdate=' . urlencode(html_entity_decode($this->request->get['filter_tdate'], ENT_QUOTES, 'UTF-8'));
-		}else
-		    {
-		        $url .= '&filter_tdate=' . urlencode(html_entity_decode($filter_tdate, ENT_QUOTES, 'UTF-8'));
-		    }
-		if (isset($this->request->get['filter_customerid'])) {
-			$url .= '&filter_customerid=' . urlencode(html_entity_decode($this->request->get['filter_customerid'], ENT_QUOTES, 'UTF-8'));
-		}
-		if (isset($this->request->get['filter_snumber'])) {
-			$url .= '&filter_snumber=' . urlencode(html_entity_decode($this->request->get['filter_snumber'], ENT_QUOTES, 'UTF-8'));
-		}
-
-		if (isset($this->request->get['filter_ourrequestid'])) {
-			$url .= '&filter_ourrequestid=' . $this->request->get['filter_ourrequestid'];
-		}
-
-		if (isset($this->request->get['filter_yourrequestid'])) {
-			$url .= '&filter_yourrequestid=' . $this->request->get['filter_yourrequestid'];
-		}
-
-		if (isset($this->request->get['filter_status'])) {
-			$url .= '&filter_status=' . $this->request->get['filter_status'];
-		}
-		
-		if (isset($this->request->get['filter_apirequestid'])) {
-			$url .= '&filter_apirequestid=' . $this->request->get['filter_apirequestid'];
-		}
-		
-		if (isset($this->request->get['filter_accountnumber'])) {
-			$url .= '&filter_accountnumber=' . $this->request->get['filter_accountnumber'];
-		}
-		
-		if (isset($this->request->get['filter_ifsc'])) {
-			$url .= '&filter_ifsc=' . $this->request->get['filter_ifsc'];
-		}
-		
-		if (isset($this->request->get['filter_type'])) {
-			$url .= '&filter_type=' . $this->request->get['filter_type'];
-		}
-		
-		if (isset($this->request->get['filter_rrn'])) {
-			$url .= '&filter_rrn=' . $this->request->get['filter_rrn'];
-		}
-
-		if (isset($this->request->get['order'])) {
-			$url .= '&order=' . $this->request->get['order'];
-		}
-
-		if (isset($this->request->get['page'])) {
-			$url .= '&page=' . $this->request->get['page'];
-		}
+		$url = oc_build_filter_url($get, $filter_params, $date_fallbacks);
+		if (isset($get['order'])) { $url .= '&order=' . $get['order']; }
+		if (isset($get['page']))  { $url .= '&page=' . $get['page']; }
 
 		$data['breadcrumbs'] = array();
-
 		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_home'),
 			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
 		);
-
 		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('heading_title'),
 			'href' => $this->url->link('dmt/history', 'user_token=' . $this->session->data['user_token'] . $url, true)
 		);
 
-		  $data['add'] = $this->url->link('catalog/product/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
-		//$data['copy'] = $this->url->link('dmt/history', 'user_token=' . $this->session->data['user_token'] . $url, true);
-	      $data['delete'] = $this->url->link('catalog/product/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
-		
+		$data['add']    = $this->url->link('catalog/product/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['delete'] = $this->url->link('catalog/product/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['export'] = $this->url->link('dmt/history/export', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
 		$data['products'] = array();
 
-		$filter_data = array(
-			'filter_customerid'	    =>$filter_customerid,
-			'filter_snumber'	    =>$filter_snumber,
-			'filter_ourrequestid'	=>$filter_ourrequestid,
-			'filter_yourrequestid'  =>$filter_yourrequestid,
-			'filter_apirequestid'   =>$filter_apirequestid,
-			'filter_accountnumber'  =>$filter_accountnumber,
-			'filter_ifsc'           =>$filter_ifsc,
-			'filter_type'           =>$filter_type,
-			'filter_rrn'            =>$filter_rrn,
-			'filter_status'         =>$filter_status,
-			'filter_fdate'          =>$filter_fdate,
-			'filter_tdate'          =>$filter_tdate,
-			'sort'                  =>$sort,
-			'order'                 =>$order,
-			'start'                 =>($page - 1) * $this->config->get('config_pagination_admin'),
-			'limit'                 =>$this->config->get('config_pagination_admin')
-		);
-		
+		$filter_data = $filters + [
+			'sort'  => $sort,
+			'order' => $order,
+			'start' => ($page - 1) * $limit,
+			'limit' => $limit,
+		];
+
 		$product_total = $this->model_dmt_history->getTotalProducts($filter_data);
-		$product_total_sale = $this->model_dmt_history->getTotalSales($filter_data);
-		$product_total_failed = $this->model_dmt_history->getTotalFailed($filter_data);
-		$product_total_pending = $this->model_dmt_history->getTotalPending($filter_data);
-		$product_total_success = $this->model_dmt_history->getTotalSuccess($filter_data);
-        $data['product_total_sale']=$product_total_sale;
-        $data['product_total_success']=$product_total_success;
-        $data['product_total_pending']=$product_total_pending;
-        $data['product_total_failed']=$product_total_failed;
-        
-        $product_total_adminprofit = $this->model_dmt_history->getTotalAdminProfit($filter_data);
-		$product_total_agentprofit = $this->model_dmt_history->getTotalAgentProfit($filter_data);
-		$product_total_surcharge = $this->model_dmt_history->getTotalAgentSurcharge($filter_data);
-		$product_total_upword = $this->model_dmt_history->getTotalUpwordProfit($filter_data);
-        $data['product_total_adminprofit']=$product_total_adminprofit;
-        $data['product_total_agentprofit']=$product_total_agentprofit;
-        $data['product_total_surcharge']=$product_total_surcharge;
-        $data['product_total_upword']=$product_total_upword;
-        
-        //echo $product_total;
+		$data += oc_transaction_summary($this->model_dmt_history, $filter_data);
+
 		$results = $this->model_dmt_history->getProducts($filter_data);
-		//print_r($results);
-        $i=1;
-		foreach ($results as $result) 
-		{
-            if ($result['status'] == 0) {
-                $status="Failed";
-            } elseif ($result['status'] == 1) {
-                $status="Success";
-            } elseif ($result['status'] == 2) {
-                $status="Pending";
-            }elseif($result['status']==4)
-                {
-                    $status="Refund";
-                }else
-                    {
-                        $status="UnKnown";
-                    }
-            //print_r($result);
+		$i = 1;
+
+		foreach ($results as $result) {
 			$data['products'][] = array(
-			    'srno'=>$i,
-			    'id'=>$result['id'],
-			    'customerid'=>$result['customerid'],
-			    'source'=>$result['source'],
-			    'number'=>$result['snumber'],
-			    'remitterid'=>$result['remitterid'],
-			    'ourrequestid'=>$result['ourrequestid'],
-			    'yourrequestid'=>$result['yourrequestid'],
-			    'apirequestid'=>$result['apirequestid'],
-			    'created'=>$result['created'],
-			    'accountnumber'=>$result['accountnumber'],
-			    'ifsc'=>$result['ifsc'],
-			    'bank'=>$result['bank'],
-			    'name'=>$result['name'],
-			    'amount'=>$result['amount'],
-			    'status'=>$status,
-			    'profit'=>$result['profit'],
-			    'dt'=>$result['dt'],
-			    'sd'=>$result['sd'],
-			    'wt'=>$result['wt'],
-			    'beforebal'=>$result['beforebal'],
-			    'admin'=>$result['admin'],
-			    'afterbal'=>$result['afterbal'],
-			    'type'=>$result['type'],
-			    'rrn'=>$result['rrn'],
-			    'message'=>$result['message'],
-				'edit'       => $this->url->link('dmt/history/edit', 'user_token=' . $this->session->data['user_token'] . '&id=' . $result['id'] . $url, true)
+				'srno'          => $i,
+				'id'            => $result['id'],
+				'customerid'    => $result['customerid'],
+				'source'        => $result['source'],
+				'number'        => $result['snumber'],
+				'remitterid'    => $result['remitterid'],
+				'ourrequestid'  => $result['ourrequestid'],
+				'yourrequestid' => $result['yourrequestid'],
+				'apirequestid'  => $result['apirequestid'],
+				'created'       => $result['created'],
+				'accountnumber' => $result['accountnumber'],
+				'ifsc'          => $result['ifsc'],
+				'bank'          => $result['bank'],
+				'name'          => $result['name'],
+				'amount'        => $result['amount'],
+				'status'        => oc_transaction_status_label((int)$result['status']),
+				'profit'        => $result['profit'],
+				'dt'            => $result['dt'],
+				'sd'            => $result['sd'],
+				'wt'            => $result['wt'],
+				'beforebal'     => $result['beforebal'],
+				'admin'         => $result['admin'],
+				'afterbal'      => $result['afterbal'],
+				'type'          => $result['type'],
+				'rrn'           => $result['rrn'],
+				'message'       => $result['message'],
+				'edit'          => $this->url->link('dmt/history/edit', 'user_token=' . $this->session->data['user_token'] . '&id=' . $result['id'] . $url, true)
 			);
-			$i=$i+1;
+			$i++;
 		}
-        //print_r($data);
+
 		$data['user_token'] = $this->session->data['user_token'];
+		$data += oc_flash_messages($this->error, $this->session->data);
 
-		if (isset($this->error['warning'])) {
-			$data['error_warning'] = $this->error['warning'];
-		} else {
-			$data['error_warning'] = '';
-		}
+		$sort_url = oc_build_filter_url($get, $filter_params, $date_fallbacks);
+		$sort_url .= '&order=' . ($order == 'ASC' ? 'DESC' : 'ASC');
+		if (isset($get['page'])) { $sort_url .= '&page=' . $get['page']; }
 
-		if (isset($this->session->data['success'])) {
-			$data['success'] = $this->session->data['success'];
+		$data['sort_custmerid'] = $this->url->link('dmt/history', 'user_token=' . $this->session->data['user_token'] . '&sort=p.customerid' . $sort_url, true);
+		$data['sort_number']    = $this->url->link('dmt/history', 'user_token=' . $this->session->data['user_token'] . '&sort=s.number' . $sort_url, true);
+		$data['sort_amount']    = $this->url->link('dmt/history', 'user_token=' . $this->session->data['user_token'] . '&sort=p.amount' . $sort_url, true);
+		$data['sort_created']   = $this->url->link('dmt/history', 'user_token=' . $this->session->data['user_token'] . '&sort=p.created' . $sort_url, true);
+		$data['sort_status']    = $this->url->link('dmt/history', 'user_token=' . $this->session->data['user_token'] . '&sort=p.status' . $sort_url, true);
+		$data['sort_order']     = $this->url->link('catalog/product', 'user_token=' . $this->session->data['user_token'] . '&sort=p.sort_order' . $sort_url, true);
 
-			unset($this->session->data['success']);
-		} else {
-			$data['success'] = '';
-		}
+		$page_url = oc_build_filter_url($get, $filter_params, $date_fallbacks);
+		if (isset($get['sort']))  { $page_url .= '&sort=' . $get['sort']; }
+		if (isset($get['order'])) { $page_url .= '&order=' . $get['order']; }
 
-		//if (isset($this->request->post['selected'])) {
-		//	$data['selected'] = (array)$this->request->post['selected'];
-		//} else {
-		//	$data['selected'] = array();
-		//}
-
-		$url = '';
-
-		if (isset($this->request->get['filter_fdate'])) {
-			$url .= '&filter_fdate=' . urlencode(html_entity_decode($this->request->get['filter_fdate'], ENT_QUOTES, 'UTF-8'));
-		}else
-		    {
-		        $url .= '&filter_fdate=' . urlencode(html_entity_decode($filter_fdate, ENT_QUOTES, 'UTF-8'));
-		    }
-		if (isset($this->request->get['filter_tdate'])) {
-			$url .= '&filter_tdate=' . urlencode(html_entity_decode($this->request->get['filter_tdate'], ENT_QUOTES, 'UTF-8'));
-		}else
-		    {
-		        $url .= '&filter_tdate=' . urlencode(html_entity_decode($filter_tdate, ENT_QUOTES, 'UTF-8'));
-		    }
-		if (isset($this->request->get['filter_customerid'])) {
-			$url .= '&filter_customerid=' . urlencode(html_entity_decode($this->request->get['filter_customerid'], ENT_QUOTES, 'UTF-8'));
-		}
-		if (isset($this->request->get['filter_snumber'])) {
-			$url .= '&filter_snumber=' . urlencode(html_entity_decode($this->request->get['filter_snumber'], ENT_QUOTES, 'UTF-8'));
-		}
-
-		if (isset($this->request->get['filter_ourrequestid'])) {
-			$url .= '&filter_ourrequestid=' . $this->request->get['filter_ourrequestid'];
-		}
-
-		if (isset($this->request->get['filter_yourrequestid'])) {
-			$url .= '&filter_yourrequestid=' . $this->request->get['filter_yourrequestid'];
-		}
-
-		if (isset($this->request->get['filter_status'])) {
-			$url .= '&filter_status=' . $this->request->get['filter_status'];
-		}
-		
-		if (isset($this->request->get['filter_apirequestid'])) {
-			$url .= '&filter_apirequestid=' . $this->request->get['filter_apirequestid'];
-		}
-		
-		if (isset($this->request->get['filter_accountnumber'])) {
-			$url .= '&filter_accountnumber=' . $this->request->get['filter_accountnumber'];
-		}
-		
-		if (isset($this->request->get['filter_ifsc'])) {
-			$url .= '&filter_ifsc=' . $this->request->get['filter_ifsc'];
-		}
-		
-		if (isset($this->request->get['filter_type'])) {
-			$url .= '&filter_type=' . $this->request->get['filter_type'];
-		}
-		
-		if (isset($this->request->get['filter_rrn'])) {
-			$url .= '&filter_rrn=' . $this->request->get['filter_rrn'];
-		}
-
-		if ($order == 'ASC') {
-			$url .= '&order=DESC';
-		} else {
-			$url .= '&order=ASC';
-		}
-
-		if (isset($this->request->get['page'])) {
-			$url .= '&page=' . $this->request->get['page'];
-		}
-
-		$data['sort_custmerid'] = $this->url->link('dmt/history', 'user_token=' . $this->session->data['user_token'] . '&sort=p.customerid' . $url, true);
-		$data['sort_number'] = $this->url->link('dmt/history', 'user_token=' . $this->session->data['user_token'] . '&sort=s.number' . $url, true);
-		$data['sort_amount'] = $this->url->link('dmt/history', 'user_token=' . $this->session->data['user_token'] . '&sort=p.amount' . $url, true);
-		$data['sort_created'] = $this->url->link('dmt/history', 'user_token=' . $this->session->data['user_token'] . '&sort=p.created' . $url, true);
-		$data['sort_status'] = $this->url->link('dmt/history', 'user_token=' . $this->session->data['user_token'] . '&sort=p.status' . $url, true);
-		$data['sort_order'] = $this->url->link('catalog/product', 'user_token=' . $this->session->data['user_token'] . '&sort=p.sort_order' . $url, true);
-
-		$url = '';
-    if (isset($this->request->get['filter_fdate'])) {
-			$url .= '&filter_fdate=' . urlencode(html_entity_decode($this->request->get['filter_fdate'], ENT_QUOTES, 'UTF-8'));
-		}else
-		    {
-		        $url .= '&filter_fdate=' . urlencode(html_entity_decode($filter_fdate, ENT_QUOTES, 'UTF-8'));
-		    }
-		if (isset($this->request->get['filter_tdate'])) {
-			$url .= '&filter_tdate=' . urlencode(html_entity_decode($this->request->get['filter_tdate'], ENT_QUOTES, 'UTF-8'));
-		}else
-		    {
-		        $url .= '&filter_tdate=' . urlencode(html_entity_decode($filter_tdate, ENT_QUOTES, 'UTF-8'));
-		    }
-		if (isset($this->request->get['filter_customerid'])) {
-			$url .= '&filter_customerid=' . urlencode(html_entity_decode($this->request->get['filter_customerid'], ENT_QUOTES, 'UTF-8'));
-		}
-		if (isset($this->request->get['filter_snumber'])) {
-			$url .= '&filter_snumber=' . urlencode(html_entity_decode($this->request->get['filter_snumber'], ENT_QUOTES, 'UTF-8'));
-		}
-
-		if (isset($this->request->get['filter_ourrequestid'])) {
-			$url .= '&filter_ourrequestid=' . $this->request->get['filter_ourrequestid'];
-		}
-
-		if (isset($this->request->get['filter_yourrequestid'])) {
-			$url .= '&filter_yourrequestid=' . $this->request->get['filter_yourrequestid'];
-		}
-
-		if (isset($this->request->get['filter_status'])) {
-			$url .= '&filter_status=' . $this->request->get['filter_status'];
-		}
-		
-		if (isset($this->request->get['filter_apirequestid'])) {
-			$url .= '&filter_apirequestid=' . $this->request->get['filter_apirequestid'];
-		}
-		
-		if (isset($this->request->get['filter_accountnumber'])) {
-			$url .= '&filter_accountnumber=' . $this->request->get['filter_accountnumber'];
-		}
-		
-		if (isset($this->request->get['filter_ifsc'])) {
-			$url .= '&filter_ifsc=' . $this->request->get['filter_ifsc'];
-		}
-		
-		if (isset($this->request->get['filter_type'])) {
-			$url .= '&filter_type=' . $this->request->get['filter_type'];
-		}
-		
-		if (isset($this->request->get['filter_rrn'])) {
-			$url .= '&filter_rrn=' . $this->request->get['filter_rrn'];
-		}
-
-		if (isset($this->request->get['sort'])) {
-			$url .= '&sort=' . $this->request->get['sort'];
-		}
-
-		if (isset($this->request->get['order'])) {
-			$url .= '&order=' . $this->request->get['order'];
-		}
-       $this->load->model('dmt/history');
-        $product_total = $this->model_dmt_history-> getTotalProducts($filter_data);
-        $data['pagination'] = $this->load->controller('common/pagination', [
+		$data['pagination'] = $this->load->controller('common/pagination', [
 			'total' => $product_total,
 			'page'  => $page,
-			'limit' => $this->config->get('config_pagination_admin'),
-			'url'   => $this->url->link('dmt/history', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}')
+			'limit' => $limit,
+			'url'   => $this->url->link('dmt/history', 'user_token=' . $this->session->data['user_token'] . $page_url . '&page={page}')
 		]);
-		
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($product_total) ? (($page - 1) * $this->config->get('config_pagination_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_pagination_admin')) > ($product_total - $this->config->get('config_pagination_admin'))) ? $product_total : ((($page - 1) * $this->config->get('config_pagination_admin')) + $this->config->get('config_pagination_admin')), $product_total, ceil($product_total / $this->config->get('config_pagination_admin')));
 
-		$data['filter_fdate']=$filter_fdate;
-        $data['filter_tdate']=$filter_tdate;
-        $data['filter_customerid']=$filter_customerid;
-        $data['filter_snumber']=$filter_snumber;
-        $data['filter_ourrequestid']=$filter_ourrequestid;
-        $data['filter_yourrequestid']=$filter_yourrequestid;
-        $data['filter_apirequestid']=$filter_apirequestid;
-        $data['filter_accountnumber']=$filter_accountnumber;
-        $data['filter_ifsc']=$filter_ifsc;
-        $data['filter_type']=$filter_type;
-        $data['filter_rrn']=$filter_rrn;
-        $data['filter_status']=$filter_status;
-        
-		$data['sort'] = $sort;
+		$data['results'] = oc_pagination_text($this->language->get('text_pagination'), $product_total, $page, $limit);
+
+		$data += $filters;
+		$data['sort']  = $sort;
 		$data['order'] = $order;
 
-		$data['header'] = $this->load->controller('common/header');
+		$data['header']      = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
-		$data['footer'] = $this->load->controller('common/footer');
+		$data['footer']      = $this->load->controller('common/footer');
 
 		$this->response->setOutput($this->load->view('dmt/transaction_list', $data));
 	}
@@ -575,20 +262,7 @@ class History extends \Opencart\System\Engine\Controller {
 			$data['store_url'] = 'Domain URL';//$order_info['store_url'];
 			$data['invoice_no'] = $order_info['id'];
             $data['amount']      = $this->currency->format($order_info['amount'], $this->config->get('config_currency'));
-            if ($order_info['status'] == 0) {
-                $status="Failed";
-            } elseif ($order_info['status'] == 1) {
-                $status="Success";
-            } elseif ($order_info['status'] == 2) {
-                $status="Pending";
-            }elseif($order_info['status']==4)
-                {
-                    $status="Refund";
-                }else
-                    {
-                        $status="UnKnown";
-                    }
-            $data['status'] = $status;
+            $data['status'] = oc_transaction_status_label((int)$order_info['status']);
             // API login
     		$data['catalog'] = $this->request->server['HTTPS'] ? HTTPS_CATALOG : HTTP_CATALOG;
     		
@@ -638,23 +312,9 @@ class History extends \Opencart\System\Engine\Controller {
 		$results = $this->model_dmt_history->getOrderHistories($this->request->get['transactionid'], ($page - 1) * 10, 10);
                     
 		foreach ($results as $result) {
-		            if ($result['order_status_id'] == 0) {
-                            $status="Failed";
-                        } elseif ($result['order_status_id'] == 1) {
-                            $status="Success";
-                        } elseif ($result['order_status_id'] == 2) {
-                            $status="Pending";
-                        }elseif($result['order_status_id']==4)
-                            {
-                                $status="Refund";
-                            }else
-                                {
-                                    $status="UnKnown";
-                                }
-                    
 			$data['histories'][] = array(
 				'notify'     => $result['notify'] ? $this->language->get('text_yes') : $this->language->get('text_no'),
-				'status'     => $status,
+				'status'     => oc_transaction_status_label((int)$result['order_status_id']),
 				'comment'    => nl2br($result['comment']),
 				//'date_added' => date($this->language->get('date_format_short'), strtotime($result['date_added']))
 				'date_added' => $result['date_added']
@@ -671,7 +331,7 @@ class History extends \Opencart\System\Engine\Controller {
 
 		$data['pagination'] = $pagination->render();
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($history_total) ? (($page - 1) * 10) + 1 : 0, ((($page - 1) * 10) > ($history_total - 10)) ? $history_total : ((($page - 1) * 10) + 10), $history_total, ceil($history_total / 10));
+		$data['results'] = oc_pagination_text($this->language->get('text_pagination'), $history_total, $page, 10);
 
 		$this->response->setOutput($this->load->view('recharge/order_history', $data));
 	}
@@ -680,104 +340,28 @@ class History extends \Opencart\System\Engine\Controller {
 	    
 	  $this->load->model('dmt/history');
 	   
-     if (isset($this->request->get['filter_fdate'])) {
-			$filter_fdate = $this->request->get['filter_fdate'];
-		} else {
-            $filter_fdate = '';
-		}
-        if (isset($this->request->get['filter_tdate'])) {
-			$filter_tdate = $this->request->get['filter_tdate'];
-		} else {
-			$filter_tdate = '';
-		}
-        if (isset($this->request->get['filter_customerid'])) {
-			$filter_customerid = $this->request->get['filter_customerid'];
-		} else {
-			$filter_customerid = '';
-		}
-		
-		if (isset($this->request->get['filter_snumber'])) {
-			$filter_snumber = $this->request->get['filter_snumber'];
-		} else {
-			$filter_snumber = '';
-		}
+     $export_filters = oc_extract_filters($this->request->get, [
+			'filter_fdate'         => '',
+			'filter_tdate'         => '',
+			'filter_customerid'    => '',
+			'filter_snumber'       => '',
+			'filter_ourrequestid'  => '',
+			'filter_yourrequestid' => '',
+			'filter_apirequestid'  => '',
+			'filter_accountnumber' => '',
+			'filter_ifsc'          => '',
+			'filter_type'          => '',
+			'filter_rrn'           => '',
+			'filter_status'        => '',
+		]);
 
-		if (isset($this->request->get['filter_ourrequestid'])) {
-			$filter_ourrequestid = $this->request->get['filter_ourrequestid'];
-		} else {
-			$filter_ourrequestid = '';
-		}
+		$sort  = $this->request->get['sort'] ?? 'p.date';
+		$order = $this->request->get['order'] ?? 'DESC';
 
-		if (isset($this->request->get['filter_yourrequestid'])) {
-			$filter_yourrequestid = $this->request->get['filter_yourrequestid'];
-		} else {
-			$filter_yourrequestid = '';
-		}
-		
-		if (isset($this->request->get['filter_apirequestid'])) {
-			$filter_apirequestid = $this->request->get['filter_apirequestid'];
-		} else {
-			$filter_apirequestid = '';
-		}
-		
-		if (isset($this->request->get['filter_accountnumber'])) {
-			$filter_accountnumber = $this->request->get['filter_accountnumber'];
-		} else {
-			$filter_accountnumber = '';
-		}
-		
-		if (isset($this->request->get['filter_ifsc'])) {
-			$filter_ifsc = $this->request->get['filter_ifsc'];
-		} else {
-			$filter_ifsc = '';
-		}
-		
-		if (isset($this->request->get['filter_type'])) {
-			$filter_type = $this->request->get['filter_type'];
-		} else {
-			$filter_type = '';
-		}
-		
-		if (isset($this->request->get['filter_rrn'])) {
-			$filter_rrn = $this->request->get['filter_rrn'];
-		} else {
-			$filter_rrn = '';
-		}
-
-		if (isset($this->request->get['filter_status'])) {
-			$filter_status = $this->request->get['filter_status'];
-		} else {
-			$filter_status = '';
-		}
-
-		if (isset($this->request->get['sort'])) {
-			$sort = $this->request->get['sort'];
-		} else {
-			$sort = 'p.date';
-		}
-
-		if (isset($this->request->get['order'])) {
-			$order = $this->request->get['order'];
-		} else {
-			$order = 'DESC';
-		}
-
-	 $filter_data = array(
-			'filter_customerid'	    =>$filter_customerid,
-			'filter_snumber'	    =>$filter_snumber,
-			'filter_ourrequestid'	=>$filter_ourrequestid,
-			'filter_yourrequestid'  =>$filter_yourrequestid,
-			'filter_apirequestid'   =>$filter_apirequestid,
-			'filter_accountnumber'  =>$filter_accountnumber,
-			'filter_ifsc'           =>$filter_ifsc,
-			'filter_type'           =>$filter_type,
-			'filter_rrn'            =>$filter_rrn,
-			'filter_status'         =>$filter_status,
-			'filter_fdate'          =>$filter_fdate,
-			'filter_tdate'          =>$filter_tdate,
-			'sort'                  =>$sort,
-			'order'                 =>$order,
-			);	
+	 $filter_data = $export_filters + [
+			'sort'  => $sort,
+			'order' => $order,
+		];
 
     $results = $this->model_dmt_history->getProducts($filter_data);
 //print_r($results);   
@@ -823,22 +407,9 @@ class History extends \Opencart\System\Engine\Controller {
         $html.="<tr>";
         foreach($data as $name=>$value)
           {
-			  if($name=="status" && $value=='1')
-			  {
-				  $value="Success";
+			  if($name=="status") {
+				  $value = oc_transaction_status_label((int)$value);
 			  }
-			  else if($name=="status" && $value=='2')
-			  {
-				  $value="Pending";
-				  }
-			  else if($name=="status" && $value=='0')
-				{
-				  $value="Failed";
-			   }
-			   else if($name=="status" && $value=='4')
-				{
-				  $value="Refund";
-			   }
 			   	
 			  
 			   $value=strtoupper($value);

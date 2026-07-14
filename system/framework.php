@@ -134,8 +134,13 @@ foreach ($config->get('response_header') as $header) {
 	$response->addHeader($header);
 }
 
-$response->addHeader('Access-Control-Allow-Origin: *');
-$response->addHeader('Access-Control-Allow-Credentials: true');
+// CORS: restrict to configured origin instead of wildcard
+$allowed_origin = getenv('CORS_ALLOWED_ORIGIN') ?: ($config->get('config_ssl') ? $config->get('config_ssl') : $config->get('config_url'));
+$allowed_origin = rtrim($allowed_origin, '/');
+if (!empty($_SERVER['HTTP_ORIGIN']) && $_SERVER['HTTP_ORIGIN'] === $allowed_origin) {
+	$response->addHeader('Access-Control-Allow-Origin: ' . $allowed_origin);
+	$response->addHeader('Access-Control-Allow-Credentials: true');
+}
 $response->addHeader('Access-Control-Max-Age: 1000');
 $response->addHeader('Access-Control-Allow-Headers: X-Requested-With, Content-Type, Origin, Cache-Control, Pragma, Authorization, Accept, Accept-Encoding');
 $response->addHeader('Access-Control-Allow-Methods: PUT, POST, GET, OPTIONS, DELETE');

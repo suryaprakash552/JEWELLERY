@@ -2940,7 +2940,7 @@ class ModelTransactionsCommon extends Model {
           CURLOPT_POSTFIELDS =>json_encode($input),
           CURLOPT_HTTPHEADER => array(
             'Content-Type: application/json',
-            'Cookie: OCSESSID=4b4be84e66a24e80305be5f82e; currency=INR; language=en-gb'
+            'Cookie: currency=INR; language=en-gb'
           ),
         ));
         

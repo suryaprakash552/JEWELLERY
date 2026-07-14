@@ -59,6 +59,10 @@ class Template {
 
 			if (is_file($file)) {
 				$code = file_get_contents($file);
+
+				if ($code === false) {
+					throw new \Exception('Error: Could not read template file ' . $file . '!');
+				}
 			} else {
 				throw new \Exception('Error: Could not load template ' . $filename . '!');
 			}
@@ -89,7 +93,11 @@ class Template {
 		$file = DIR_CACHE . 'template/' . hash('md5', $filename . $code) . '.php';
 
 		if (!is_file($file)) {
-			file_put_contents($file, $code, LOCK_EX);
+			$result = file_put_contents($file, $code, LOCK_EX);
+
+			if ($result === false) {
+				error_log('Failed to write compiled template: ' . $file);
+			}
 		}
 
 		return $file;

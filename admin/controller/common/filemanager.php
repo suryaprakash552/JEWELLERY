@@ -331,7 +331,9 @@ class FileManager extends \Opencart\System\Engine\Controller {
 				}
 
 				if (!$json) {
-					move_uploaded_file($file['tmp_name'], $directory . $filename);
+					if (!move_uploaded_file($file['tmp_name'], $directory . $filename)) {
+						$json['error'] = $this->language->get('error_upload');
+					}
 				}
 			}
 		}
@@ -388,13 +390,15 @@ class FileManager extends \Opencart\System\Engine\Controller {
 		}
 
 		if (!$json) {
-			mkdir($directory . $folder, 0777);
+			if (!mkdir($directory . $folder, 0777)) {
+				$json['error'] = $this->language->get('error_directory');
+			} else {
+				chmod($directory . $folder, 0777);
 
-			chmod($directory . $folder, 0777);
+				touch($directory . $folder . '/' . 'index.html');
 
-			@touch($directory . $folder . '/' . 'index.html');
-
-			$json['success'] = $this->language->get('text_directory');
+				$json['success'] = $this->language->get('text_directory');
+			}
 		}
 
 		$this->response->addHeader('Content-Type: application/json');

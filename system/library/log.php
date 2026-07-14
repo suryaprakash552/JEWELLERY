@@ -29,6 +29,10 @@ class Log {
 		if (!is_file($this->file)) {
 			$handle = fopen($this->file, 'w');
 
+			if ($handle === false) {
+				throw new \Exception('Error: Could not create log file ' . $this->file . '!');
+			}
+
 			fclose($handle);
 		}
 	}
@@ -41,6 +45,10 @@ class Log {
 	 * @return void
 	 */
 	public function write($message): void {
-		file_put_contents($this->file, date('Y-m-d H:i:s') . ' - ' . print_r($message, true) . "\n", FILE_APPEND);
+		$result = file_put_contents($this->file, date('Y-m-d H:i:s') . ' - ' . print_r($message, true) . "\n", FILE_APPEND);
+
+		if ($result === false) {
+			error_log('Failed to write to log file: ' . $this->file);
+		}
 	}
 }

@@ -20,6 +20,7 @@ function oc_db_create(string $db_driver, string $db_hostname, string $db_usernam
 		// Database
 		$db = new \Opencart\System\Library\DB($db_driver, $db_hostname, $db_username, $db_password, $db_database, $db_port, $db_ssl_key, $db_ssl_cert, $db_ssl_ca);
 	} catch (\Exception $e) {
+		error_log('DB schema creation failed: ' . $e->getMessage());
 		return false;
 	}
 

@@ -170,8 +170,9 @@
 
 <body>
 
-{% set cgst = cart.sub_total * 0.015 %}
-{% set sgst = cart.sub_total * 0.015 %}
+{% set total_tax = cart.total_tax is defined ? cart.total_tax : 0 %}
+{% set cgst = total_tax / 2 %}
+{% set sgst = total_tax / 2 %}
 {% set gst_total = cgst + sgst %}
 {% set discount_amt = cart.discount is defined and cart.discount <= 10 ? (cart.sub_total * cart.discount / 100) : (cart.discount is defined ? cart.discount : gst_total) %}
 

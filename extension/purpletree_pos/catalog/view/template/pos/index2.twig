@@ -1236,7 +1236,7 @@
          }
          .cart-row{
                 display: grid;
-    grid-template-columns: 71px 313px 2.2fr 101px 89px 145px 83px 140px 103px 77px 4px;
+    grid-template-columns: 71px 313px 2.2fr 182px 121px 98px 178px 74px 138px 77px 88px;
     align-items: center;
     font-size: 16px;
     padding: 4px 0px;
@@ -1688,7 +1688,7 @@
          }
          .cart-header-row{
          display:grid;
-          grid-template-columns: 71px 313px 2.2fr 101px 89px 145px 83px 140px 103px 77px 4px;  
+          grid-template-columns: 71px 313px 2.2fr 168px 89px 152px 142px 100px 128px 89px 77px 4px;  
          font-size:16px;
          color: black;
     background: #f6f6e9;
@@ -1875,6 +1875,34 @@
          box-shadow: 0 4px 8px rgba(0,0,0,0.4);
          }
          .merge-bill-btn:active {
+         transform: translateY(0);
+         box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+         }
+         .merge-bill-buttons-mtlr {
+         position: absolute;
+         bottom: 12px;
+         right: 20px;
+         display: flex;
+         gap: 10px;
+         }
+         .merge-bill-btn-mtlr {
+         background-color: #C9A24D;
+         color: white;
+         border: none;
+         padding: 10px 25px;
+         font-size: 14px;
+         font-weight: bold;
+         border-radius: 4px;
+         cursor: pointer;
+         transition: all 0.3s ease;
+         box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+         }
+         .merge-bill-btn-mtlr:hover {
+         background-color: #b8923d;
+         transform: translateY(-2px);
+         box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+         }
+         .merge-bill-btn-mtlr:active {
          transform: translateY(0);
          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
          }
@@ -2368,11 +2396,13 @@
                         <span>Product</span> 
                         <span>A.Qty</span>
                         <span>P.Qty</span> 
-                        <span>Disc</span> 
                         <span>Row.Price</span>
+                        <span>Disc</span> 
+                        <span>Disctd.Amt</span> 
+                        
                         <span>GST</span>
-                        <span>Row.GST</span>
-                        <span>Amount</span> 
+                        <span>GST Amount</span>
+                        <span>Total</span> 
                         <span>Action</span> 
                      </div>
                      <hr class="cart-hr">
@@ -2573,6 +2603,41 @@
                             </div>
                          </div>
                         <div id="invoiceResults"></div>
+                     </div>
+                     <div id="mtlrContent" style="display:none; padding: 10px; height: 884px;">
+                        <div class="row mb-2">
+                           <div class="col-12">
+                              <button class="btn btn-secondary backToCartBtn" style="background-color: #6c757d; color: white; font-weight: bold; padding: 8px 20px;">
+                              <i class="fas fa-arrow-left"></i> Back
+                              </button>
+                           </div>
+                        </div>
+                         <div class="row mb-3">
+                            <div class="col-2">
+                               <label style="color:black;">From Date</label>
+                               <input type="date" id="mtlr_from_date" class="form-control" style="color:black; font-size: 11px; padding: 4px;">
+                            </div>
+                            <div class="col-2">
+                               <label style="color:black;">To Date</label>
+                               <input type="date" id="mtlr_to_date" class="form-control" style="color:black; font-size: 11px; padding: 4px;">
+                            </div>
+                            <div class="col-2">
+                               <label style="color:black;">Order ID</label>
+                               <input type="text" id="mtlr_id_search" class="form-control" style="color:black; font-size: 11px; padding: 4px;" placeholder="ID">
+                            </div>
+                            <div class="col-2">
+                               <label style="color:black;">Mobile No</label>
+                               <input type="text" id="mtlr_mobile_search" class="form-control" style="color:black; font-size: 11px; padding: 4px;" placeholder="Mobile">
+                            </div>
+                            <div class="col-2">
+                               <label style="color:black;">Name</label>
+                               <input type="text" id="mtlr_name_search" class="form-control" style="color:black; font-size: 11px; padding: 4px;" placeholder="Name">
+                            </div>
+                            <div class="col-2 d-flex align-items-end">
+                               <button id="searchMTLRBtn" class="btn btn-success w-auto" style="font-size: 14px; padding: 6px 15px; flex-grow: 1;">Search</button>
+                            </div>
+                         </div>
+                        <div id="mtlrResults"></div>
                      </div>
                      <div id="mergeBillContent" style="display:none; padding: 10px; height: 870px;">
                         <div class="row mb-2">
@@ -2909,7 +2974,13 @@
                             <div class="summary-item">
                                <span class="summary-label">Item Discount:</span>
   <span class="summary-right">
-   <select id="discountMode" onchange="onDiscountModeChange()">
+<span id="totalDiscountedAmount">₹0.00</span>
+  </span>
+                            </div>
+                            <div class="summary-item">
+                               <span class="summary-label">Overall Discount:</span>
+  <span class="summary-right">
+<select id="discountMode" onchange="onDiscountModeChange()">
   <option value="flat">Flat (₹)</option>
   <option value="percent">Percent (%)</option>
 </select>
@@ -2953,6 +3024,7 @@
                   <div class="category-buttons" style="padding: 12px 25px 5px 0px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; background: black;">
                     <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="quotationHistoryBtn" onclick="openQuotationHistory()"><i class="fas fa-file-contract" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Quotations</button>
                      <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="invoiceHistoryBtn" onclick="openInvoiceHistory()"><i class="fas fa-file-invoice-dollar" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Invoice</button>
+                     <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="mtlrBtn" onclick="openMTLRHistory()"><i class="fas fa-boxes" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>MTLR</button>
                      <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="walletBtn" onclick="openCustomerPanel()"><i class="fas fa-users" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Customer</button>
                      <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="editOrderBtn" onclick="openEditOrderHistory()"><i class="fas fa-edit" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Edit</button>
                      <button class="action-grid-btn" style="background-color: #f6f6e9; font-weight: bold; color:#333; height: 65px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px;" id="cancelOrderBtn" onclick="openCancelOrderHistory()"><i class="fas fa-ban" style="font-size: 24px; margin-bottom: 4px; color: #333; border: 5px double #cfbd77; background: #edeaa1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"></i>Cancel</button>
@@ -4051,6 +4123,39 @@
             </div>
          </div>
       </div>
+      <div class="modal fade" id="mtlrDetailsModal" tabindex="-1">
+         <div class="modal-dialog modal-lg" style="max-width: 900px;">
+            <div class="modal-content" style="background:#f3f0e7;color:#1f1b16;border-radius:12px;border:1px solid #d2c7b8;box-shadow:0 12px 35px rgba(0,0,0,0.35);">
+               <div class="modal-header" style="border-radius: 12px 12px 0px 0px;background:#3c3226;color:#f7f4ec;border-bottom:1px solid #2b241a;padding:10px 17px;">
+                  <h5 class="modal-title" style="font-size:18px;font-weight:600;letter-spacing:0.5px;">MTLR Invoice Details</h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6));"></button>
+               </div>
+               <div class="modal-body" id="mtlrDetailsBody" style="padding:16px 20px;background:#f8f5ee;border-top:1px solid #e0d4c2;border-bottom:1px solid #e0d4c2;">
+               </div>
+               <div class="modal-footer" style="border-radius: 0px 0px 12px 12px;padding: 0px;background:#d6c9b5;border-top:1px solid #b7a890;display:flex;justify-content:flex-end;gap:10px;">
+                <button class="btn btn-success" onclick="printSmallMTLRInvoice()" style="color: white;font-size: 20px;min-width:90px;background:#6fae4f;border-color:#5e9843;font-weight:600;border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,0.35);">Small Print</button>
+                  <button id="printMTLRInvoiceBtn" class="btn btn-success" onclick="printMTLRInvoice()" style="color: white;font-size: 20px;min-width:90px;background:#6fae4f;border-color:#5e9843;font-weight:600;border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,0.35);">Bulk Print</button>
+                  <button class="btn btn-secondary" onclick="window.location.href='index.php?route=extension/purpletree_pos/pos/agentlogin'" style="font-size: 20px;min-width:90px;background:#e01010;border-color:#7f7362;color:#fff;font-weight:500;border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,0.25);">Close</button>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="modal fade" id="mtlrActionConfirmModal" tabindex="-1">
+         <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+            <div class="modal-content" style="background:#f3f0e7;color:#1f1b16;border-radius:12px;border:1px solid #d2c7b8;box-shadow:0 12px 35px rgba(0,0,0,0.35);">
+               <div class="modal-header" style="border-radius: 12px 12px 0px 0px;background:#3c3226;color:#f7f4ec;border-bottom:1px solid #2b241a;padding:10px 17px;">
+                  <h5 class="modal-title" style="font-size:18px;font-weight:600;letter-spacing:0.5px;">Confirm Action</h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6));"></button>
+               </div>
+               <div class="modal-body" id="mtlrActionConfirmBody" style="padding:16px 20px;background:#f8f5ee;border-top:1px solid #e0d4c2;border-bottom:1px solid #e0d4c2;color:#1f1b16;">
+               </div>
+               <div class="modal-footer" style="border-radius: 0px 0px 12px 12px;padding: 0px;background:#d6c9b5;border-top:1px solid #b7a890;display:flex;justify-content:flex-end;gap:10px;">
+                  <button class="btn btn-secondary" data-bs-dismiss="modal" style="font-size: 16px;min-width:80px;background:#6c757d;color:#fff;font-weight:500;border-radius:4px;">Cancel</button>
+                  <button id="mtlrActionConfirmBtn" class="btn btn-primary" style="font-size: 16px;min-width:80px;background:#007bff;color:#fff;font-weight:500;border-radius:4px;">Confirm</button>
+               </div>
+            </div>
+         </div>
+      </div>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
       <script src="{{ baseurl }}extension/purpletree_pos/catalog/view/javascript/purpletree/js/js-app.min.js"></script>
@@ -4409,6 +4514,7 @@
          		}
          }
          		function emptyCart(){
+                    window.isMTLROrder = false;
          			localStorage.removeItem('pos_cart');
          			sessionStorage.removeItem('custom_tax');
          			sessionStorage.removeItem('admin_tax');
@@ -6005,7 +6111,7 @@
             var orderData = values[0];
            if(orderData.status !='error'){
              $.ajax({
-               url: 'index.php?route=extension/purpletree_pos/pos/home|addwholesaleorder',
+               url: 'index.php?route=extension/purpletree_pos/pos/home|addorder',
          	  type: 'post',
                dataType: 'json',
          	  data: orderData, 
@@ -6967,29 +7073,30 @@
          	     $('#custmproderror').append('<span id="custompro-error" class="error_all">Please fill all fields</span>');
          	  }
          }
-	         function orderSummery() {
-	             var isReturnOrder = !!sessionStorage.getItem('currentReturnOrder');
-	             var returnAmountAsCashCheckbox = '';
-	             if (isReturnOrder) {
-	                 returnAmountAsCashCheckbox = `<div class="form-check mb-2" style="margin-left: 20px;"><input class="form-check-input" type="checkbox" id="returnAsCash" onchange="updateTotals()" style="background-color: black; border-color: #000;"><label class="form-check-label fw-bold" for="returnAsCash" style="color:black; font-size: 13px;">Return Amount as Cash</label></div>`;
-	             }
-	             let html = '';
-	                          let returnOrderId = 0;
-	              let customerMobile = "";
-	              let customerName = "";
-	              let customerEmail = "";
+         function orderSummery() {
+             console.log("orderSummery called");
+             var isReturnOrder = !!sessionStorage.getItem('currentReturnOrder');
+             var returnAmountAsCashCheckbox = '';
+             if (isReturnOrder) {
+                 returnAmountAsCashCheckbox = `<div class="form-check mb-2" style="margin-left: 20px;"><input class="form-check-input" type="checkbox" id="returnAsCash" onchange="updateTotals()" style="background-color: black; border-color: #000;"><label class="form-check-label fw-bold" for="returnAsCash" style="color:black; font-size: 13px;">Return Amount as Cash</label></div>`;
+             }
+             let html = '';
+             let returnOrderId = 0;
+             let customerMobile = "";
+             let customerName = "";
+             let customerEmail = "";
 
-	              const currentQuotationOrder = sessionStorage.getItem('currentQuotationOrder');
-	              if (currentQuotationOrder) {
-	                try {
-	                  const q = JSON.parse(currentQuotationOrder);
-	                  if (q && q.quote_info) {
-	                      customerMobile = q.quote_info.telephone || customerMobile;
-	                      customerName = (q.quote_info.firstname + ' ' + (q.quote_info.lastname || '')).trim() || customerName;
-	                      customerEmail = q.quote_info.email || customerEmail;
-	                  }
-	                } catch (e) {}
-	              }
+             const currentQuotationOrder = sessionStorage.getItem('currentQuotationOrder');
+             if (currentQuotationOrder) {
+               try {
+                 const q = JSON.parse(currentQuotationOrder);
+                 if (q && q.quote_info) {
+                     customerMobile = q.quote_info.telephone || customerMobile;
+                     customerName = (q.quote_info.firstname + ' ' + (q.quote_info.lastname || '') ).trim() || customerName;
+                     customerEmail = q.quote_info.email || customerEmail;
+                 }
+               } catch (e) {}
+             }
 
 	              const currentEditOrder = sessionStorage.getItem('currentEditOrder');
 	              if (currentEditOrder) {
@@ -7033,7 +7140,7 @@
 	                 }
 	             }
              var curCode = (typeof posData !== 'undefined' && posData.currency_code) ? posData.currency_code : 'INR';
-             var curSymbol = '₹';
+             console.log("After currency setup");
              if (typeof globalPOS !== 'undefined' && globalPOS.currency) {
                  var currencyObj = Object.values(globalPOS.currency).find(function(c) { return c.code === curCode; });
                  if (currencyObj) curSymbol = currencyObj.symbol_left || currencyObj.symbol_right || '₹';
@@ -7372,51 +7479,54 @@ if (!invoiceNumber) {
              html += '      </div>';
              
           var cartRows = document.querySelectorAll('.cart-row');
-      var subTotal = 0, discount = 0, totalTax = 0, quantity = 0, items = 0, credits = 0;
+      var subTotal = 0, productDiscount = 0, totalTax = 0, quantity = 0, items = 0, credits = 0;
       var taxSummary = {};
+      
+      // Calculate Sub Total (sum of original Row Prices) and Product Discount
       cartRows.forEach(function (row) {
           if (row.classList.contains('excluded-row')) {
               return;
           }
           var qtyInput     = row.querySelector('.qty-input');
-          var discountCell = row.querySelector('.cart-cell.discount');
-          var totalCell    = row.querySelector('.cart-cell.total');
-          if (!qtyInput || !totalCell) return;
+          var product      = decodeProduct(row.dataset.product);
+          if (!qtyInput || !product) return;
           var qty        = parseInt(qtyInput.value) || 1;
-          var rowTotal   = parseFloat(totalCell.textContent.replace(/[^\d.]/g, '')) || 0;
-          var discText   = discountCell ? discountCell.textContent.trim() : '0';
-          var rowDiscountPerUnit = parseFloat(discText.replace(/[^\d.]/g, '')) || 0;
+          var unitPrice = parseFloat(row.dataset.price) || 0;
+          var discountPercent = product.discount || 0;
           quantity += qty;
           items    += 1;
-          var rowDiscountTotal = rowDiscountPerUnit * qty;
-          subTotal += rowTotal + rowDiscountTotal;
-          discount += rowDiscountTotal;
+          var lineTotal = unitPrice * qty;
+          subTotal += lineTotal;
+          var productDiscountAmount = (discountPercent / 100) * lineTotal;
+          productDiscount += productDiscountAmount;
       });
-      var netTotalElement  = document.getElementById('subtotalValue'); 
-      var discountTotalElement  = document.getElementById('itemDiscountValue'); 
-      var taxTotalElement  = document.getElementById('gstTotalValue'); 
-      var grandTotalElement= document.getElementById('itemCountValue'); 
+      
+      // Get values from DOM (already calculated by updateSummary with correct logic)
+      var netTotalElement  = document.getElementById('subtotalValue');
+      var taxTotalElement  = document.getElementById('gstTotalValue');
+      var grandTotalElement= document.getElementById('itemCountValue');
       var netTotal = netTotalElement ? parseFloat(netTotalElement.textContent.replace(/[^\d.]/g, '')) || 0 : 0;
-     totalDiscount = discountTotalElement ? parseFloat(discountTotalElement.value) || 0 : 0;
       totalTax     = taxTotalElement ? parseFloat(taxTotalElement.textContent.replace(/[^\d.]/g, '')) || 0 : 0;
-     // WITH THIS:
-var dMode = document.getElementById('discountMode').value;
-var dInput = parseFloat(document.getElementById('itemDiscountValue').value) || 0;
-var actualDiscountAmt = dMode === 'flat' ? dInput : (dInput / 100) * subTotal;
-var totalBeforeRoundOff = subTotal + totalTax - actualDiscountAmt;
-      grandTotalAmount        = Math.round(totalBeforeRoundOff);    
+      grandTotalAmount = grandTotalElement ? parseFloat(grandTotalElement.textContent.replace(/[^\d.]/g, '')) || 0 : 0;
+      
+      // Get Overall Discount from cart-calculated values (read from sessionStorage)
+      var overallDiscount = parseFloat(sessionStorage.getItem('cartOverallDiscountAmount')) || 0;
+      
+      // Total discount for display = product-wise discount + overall discount
+      var totalDiscount = productDiscount + overallDiscount;
+      var actualDiscountAmt = overallDiscount; // Overall discount amount
+      
+      var totalBeforeRoundOff = netTotal + totalTax - totalDiscount;
       roundOffAmount          = grandTotalAmount - totalBeforeRoundOff;
       var customerData = JSON.parse(sessionStorage.getItem('currentCustomerData') || '{}');
       globalDueAmount = parseFloat(customerData.due_amount || 0);
       if (typeof getReward === 'function')           credits   = getReward();
       if (typeof getTotalProductQty === 'function')  quantity  = getTotalProductQty();
       if (typeof getTotalProducts === 'function')    items     = getCartTotalProduct();
-      var subTotalFormatted           = format(subTotal,              posData.currency_code);
-     var dMode = document.getElementById('discountMode').value;
-var dInput = parseFloat(document.getElementById('itemDiscountValue').value) || 0;
-var subtotal = getSubTotal();
-var discountAmt = dMode === 'flat' ? dInput : (dInput / 100) * subtotal;
-var discountFormatted = format(discountAmt, posData.currency_code);
+      var subTotalFormatted           = format(netTotal,              posData.currency_code);
+      var subtotal = getSubTotal();
+      var discountAmt = totalDiscount;
+      var discountFormatted = format(discountAmt, posData.currency_code);
       var taxFormatted                = format(totalTax,              posData.currency_code);
       var totalBeforeRoundOffFormatted= format(totalBeforeRoundOff,   posData.currency_code);
       var grandTotalFormatted         = format(grandTotalAmount,      posData.currency_code);
@@ -7686,8 +7796,8 @@ var discountFormatted = format(discountAmt, posData.currency_code);
       html += '    <div class="d-flex justify-content-between align-items-center" style="padding: 12px 0px; width: 279%; ">';
       html += '        <div id="lastOrderDisplay" style="color: #ff0000; font-weight: 700; font-size: 15px; white-space: nowrap; margin-bottom: 0;">' + lastOrderText + '</div>';
       html += '        <div class="d-flex align-items-center" style="gap: 12px;">';
-      html += '            <button type="button" class="btn" id="saveOrderBtn" onclick="window.processOrderPayment(this, false)" style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); color: #FFFFFF; font-size: 15px; font-weight: 600; padding: 12px 28px; border: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(66, 153, 225, 0.4); transition: all 0.3s ease; white-space: nowrap;" onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 7px 14px rgba(66, 153, 225, 0.5)\'; this.style.filter=\'brightness(110%)\';" onmouseout="this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 4px 6px rgba(66, 153, 225, 0.4)\'; this.style.filter=\'brightness(100%)\';">Save Order</button>';
-      html += '            <button type="button" class="btn" id="payNowBtn" onclick="window.processOrderPayment(this, true)" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: #FFFFFF; font-size: 15px; font-weight: 600; padding: 12px 28px; border: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(72, 187, 120, 0.4); transition: all 0.3s ease; white-space: nowrap;" onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 7px 14px rgba(72, 187, 120, 0.5)\'; this.style.filter=\'brightness(110%)\';" onmouseout="this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 4px 6px rgba(72, 187, 120, 0.4)\'; this.style.filter=\'brightness(100%)\';">Pay Now</button>';
+      html += '            <button type="button" class="btn" id="saveOrderBtn" onclick="window.processOrderPayment(this, false, \'addwholesaleorder\')" style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); color: #FFFFFF; font-size: 15px; font-weight: 600; padding: 12px 28px; border: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(66, 153, 225, 0.4); transition: all 0.3s ease; white-space: nowrap;" onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 7px 14px rgba(66, 153, 225, 0.5)\'; this.style.filter=\'brightness(110%)\';" onmouseout="this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 4px 6px rgba(66, 153, 225, 0.4)\'; this.style.filter=\'brightness(100%)\';">Save Order</button>';
+      html += '            <button type="button" class="btn" id="payNowBtn" onclick="window.processOrderPayment(this, true, \'addorder\')" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: #FFFFFF; font-size: 15px; font-weight: 600; padding: 12px 28px; border: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(72, 187, 120, 0.4); transition: all 0.3s ease; white-space: nowrap;" onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 7px 14px rgba(72, 187, 120, 0.5)\'; this.style.filter=\'brightness(110%)\';" onmouseout="this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 4px 6px rgba(72, 187, 120, 0.4)\'; this.style.filter=\'brightness(100%)\';">Pay Now</button>';
       html += '            <button type="button" class="btn" id="cancelPaymentBtn" data-bs-dismiss="modal" onclick="window.clearCustomerSession()" style="background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%); color: #2d3748; font-size: 15px; font-weight: 600; padding: 12px 28px; border: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(160, 174, 192, 0.4); transition: all 0.3s ease; white-space: nowrap;" onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 7px 14px rgba(160, 174, 192, 0.5)\'; this.style.filter=\'brightness(110%)\';" onmouseout="this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 4px 6px rgba(160, 174, 192, 0.4)\'; this.style.filter=\'brightness(100%)\';">Cancel</button>';
       html += '        </div>';
       html += '    </div>';
@@ -7714,6 +7824,39 @@ var discountFormatted = format(discountAmt, posData.currency_code);
                      saveAdvanceCheckbox.checked = false;
                  }
              }, 100);
+
+             setTimeout(function() {
+    var isEditOrReturn = !!sessionStorage.getItem('currentReturnOrder') ||
+                          !!sessionStorage.getItem('currentEditOrder');
+    var isWholesaleOrder = !!window.isMTLROrder;
+
+    var saveBtn = document.getElementById('saveOrderBtn');
+    var payBtn  = document.getElementById('payNowBtn');
+
+    // reset both first
+    [saveBtn, payBtn].forEach(function (btn) {
+        if (!btn) return;
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = 'auto';
+    });
+
+    if (isEditOrReturn && !isWholesaleOrder) {
+        // Editing/returning a RETAIL (addorder) record → block Save Order (wholesale endpoint)
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.style.opacity = '0.5';
+            saveBtn.style.pointerEvents = 'none';
+        }
+    } else if (isWholesaleOrder) {
+        // Editing/returning a WHOLESALE record → block Pay Now (retail endpoint)
+        if (payBtn) {
+            payBtn.disabled = true;
+            payBtn.style.opacity = '0.5';
+            payBtn.style.pointerEvents = 'none';
+        }
+    }
+}, 100);
 
 
 
@@ -7757,6 +7900,7 @@ var discountFormatted = format(discountAmt, posData.currency_code);
              sessionStorage.removeItem('customerSData');
              sessionStorage.removeItem('payment_address');
              sessionStorage.removeItem('shipping_address');
+             window.isMTLROrder = false;
              if ($('#customerNameInput').length) $('#customerNameInput').val('');
              if ($('#customerMobileInput').length) $('#customerMobileInput').val('');
              if ($('#customerEmailInput').length) $('#customerEmailInput').val('');
@@ -7863,7 +8007,9 @@ $('#modalXl').on('keydown', 'input', function (e) {
         $('#payNowBtn').trigger('click');  
     }
 });
-window.processOrderPayment = function(btn, shouldPrint) {
+window.processOrderPayment = function(btn, shouldPrint, apiEndpoint) {
+    apiEndpoint = apiEndpoint || 'addwholesaleorder';
+    console.log('processOrderPayment called - apiEndpoint:', apiEndpoint);
     if (btn.dataset.locked === '1') return;
     btn.dataset.locked = '1';
     btn.disabled = true;
@@ -7930,7 +8076,10 @@ window.processOrderPayment = function(btn, shouldPrint) {
       try {
         const e = JSON.parse(currentEditOrderSession);
         previourseditorderid = e?.order_info?.order_id || 0;
-      } catch (e) {}
+        console.log('Edit order session found, previourseditorderid:', previourseditorderid);
+      } catch (e) {
+        console.log('Error parsing edit order session:', e);
+      }
     }
     createNewCustomerIfNeeded()
       .then(function (customerId) {
@@ -7946,13 +8095,24 @@ window.processOrderPayment = function(btn, shouldPrint) {
             const gstPercent = parseFloat(p.gst_percent || 0);
             const linePrice = parseFloat(p.price || 0) * parseInt(p.quantity || 1);
             const rowGst = (gstPercent / 100) * linePrice;
-            const discountPercent = parseFloat(p.gst_percent || 0);
+            
+            // Get product discount type and value
+            const discountType = p.discount_type || 'percent'; // 'percent' or 'flat'
+            const discountValue = parseFloat(p.discount || 0);
+            
+            // Calculate discount percentage based on type
+            const discountPercent = discountType === 'flat' ? 0 : discountValue;
+            
             return {
               cartId: p.cart_id ?? null,
               product_id: p.product_id,
               name: p.name || p.heading_title || '',
               price: p.price ?? null,
               discount_percent: discountPercent,
+              discount_amount: (discountType === 'flat' ? discountValue : (discountValue / 100) * linePrice).toFixed(2),
+              discount_type: discountType,
+              discount: discountValue,
+              discount_input: discountValue,
               total: p.total ?? null,
               gst_percent: gstPercent,
               row_gst: parseFloat(rowGst.toFixed(2)),
@@ -7964,18 +8124,9 @@ window.processOrderPayment = function(btn, shouldPrint) {
           }),
           InvoiceInfo: {
             SUBTotal: getElementValue('subTotal'),
-           DiscountType: document.getElementById('discountMode').value,
-           
-
-     DiscountIncluded: (function() {
-
-        const dInput = parseFloat(
-            document.getElementById('itemDiscountValue').value
-        ) || 0;
-
-        return dInput;
-
-    })(),
+            DiscountIncluded: getElementValue('discountIncluded'),
+           OverallDiscount: getElementValue('itemDiscountValue'), 
+            OverallDiscountMode: getElementValue('discountMode'), 
             TaxIncluded: getElementValue('taxIncluded'),
             TotalBeforeRoundoff: getElementValue('totalBeforeRoundoff'),
             RoundOffAmount: getElementValue('roundOffAmount'),
@@ -8000,7 +8151,7 @@ window.processOrderPayment = function(btn, shouldPrint) {
           TotalReceivedAmount: getElementValue('totalReceived'),
           PendingAmount: getElementValue('pendingAmount'),
           ReturnableBalance: getElementValue('returnableBalance'),
-          DueAmountUsed: (parseFloat(getElementValue('dueAmountInput')) || 0) > 0,
+          DueAmountUsed: document.getElementById('dueAmountInvoice')?.checked || false,
           DueAmountValue: parseFloat(getElementValue('dueAmountInput')) || 0,
           includedDA: document.getElementById('includeDAInTotal')?.checked || false,
           includedDAAmount: parseFloat(getElementValue('includeDAAmount')) || 0,
@@ -8011,9 +8162,14 @@ window.processOrderPayment = function(btn, shouldPrint) {
           redeem_points_status: document.getElementById('creditLimitInvoice')?.checked || false
         };
         console.log("order details", orderDetails);
+        console.log("previourseditorderid:", previourseditorderid);
+        console.log("STEP 2 - Complete JSON payload:", JSON.stringify(orderDetails, null, 2));
+        console.log("STEP 2 - previourseditorderid:", previourseditorderid);
+        console.log("STEP 2 - CartProducts count:", orderDetails.CartProducts.length);
+        console.log("STEP 2 - CartProducts:", JSON.stringify(orderDetails.CartProducts, null, 2));
         sessionStorage.setItem('paidOrderDetails', JSON.stringify(orderDetails));
         $.ajax({
-          url: 'index.php?route=extension/purpletree_pos/pos/home|addwholesaleorder',
+          url: 'index.php?route=extension/purpletree_pos/pos/home|' + apiEndpoint,
           type: 'POST',
           dataType: 'json',
           contentType: 'application/json',
@@ -8025,7 +8181,9 @@ window.processOrderPayment = function(btn, shouldPrint) {
               sessionStorage.removeItem('paidOrderDetails');
               sessionStorage.removeItem('currentCustomerData');
               sessionStorage.removeItem('cartProductsData');
+              sessionStorage.removeItem('currentEditOrder');
               sessionStorage.clear();
+              window.isMTLROrder = false; // Reset MTLR flag after order completion
               $('#modalXl').modal('hide');
               localStorage.setItem('lastConfirmedOrder', JSON.stringify(orderDetails));
               if (typeof generateSuccessDQ12 === 'function') {
@@ -8056,10 +8214,12 @@ window.processOrderPayment = function(btn, shouldPrint) {
               sessionStorage.removeItem('currentEditOrder');
             } else {
               alert(json.message || "Order failed");
+              window.isMTLROrder = false; // Reset MTLR flag on error
               unlockPayBtn(btn);
             }
           },
           error: function () {
+            window.isMTLROrder = false; // Reset MTLR flag on error
             unlockPayBtn(btn);
           }
         });
@@ -8090,6 +8250,14 @@ window.disableFooterButtons = function(clickedId) {
          function getCartProductsFromDOMSync() {
               const rows = document.querySelectorAll('.cart-row[data-product]');
               const products = [];
+
+              console.log("FRONTEND DEBUG - getCartProductsFromDOMSync() called");
+              console.log("FRONTEND DEBUG - DOM rows found: " + rows.length);
+
+              const localStorageCart = JSON.parse(localStorage.getItem("pos_cart") || "[]");
+              console.log("FRONTEND DEBUG - localStorage pos_cart length: " + localStorageCart.length);
+              console.log("FRONTEND DEBUG - localStorage pos_cart product IDs: " + localStorageCart.map(p => p.product_id).join(", "));
+
               if (!rows.length) {
                 errorMessage('Cart is empty', 2000);
                 return null;
@@ -8103,10 +8271,15 @@ window.disableFooterButtons = function(clickedId) {
                   return null;
                 }
                 if (!validateCartProductSingle(product)) {
-                  return null; 
+                  return null;
                 }
                 products.push(product);
               }
+
+              console.log("FRONTEND DEBUG - DOM products length: " + products.length);
+              console.log("FRONTEND DEBUG - DOM products product IDs: " + products.map(p => p.product_id).join(", "));
+              console.log("FRONTEND DEBUG - Returning products from DOM");
+
               return products;
             }
          function createNewCustomerIfNeeded() {
@@ -8232,6 +8405,128 @@ window.disableFooterButtons = function(clickedId) {
         }
     });
 }
+function printSmallMTLRInvoice() {
+    let orderId = localStorage.getItem('last_order_id');
+    if (!orderId) return;
+    $.ajax({
+        url: "index.php?route=extension/purpletree_pos/pos/home|mtlrInvoice"
+            + "&order_id=" + encodeURIComponent(orderId)
+            + "&small_print=1",
+        type: "GET",
+        success: function (html) {
+            let iframe = document.createElement('iframe');
+            iframe.style.position = 'fixed';
+            iframe.style.right = '0';
+            iframe.style.bottom = '0';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = '0';
+            document.body.appendChild(iframe);
+            iframe.onload = function () {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                    window.location.href = 'index.php?route=extension/purpletree_pos/pos/agentlogin';
+                }, 1000);
+            };
+            iframe.contentDocument.open();
+            iframe.contentDocument.write(html);
+            iframe.contentDocument.close();
+            let rawPhone =
+                $('#customerMobileInput').val()?.trim() ||
+                (JSON.parse(sessionStorage.getItem('currentCustomerData') || '{}').telephone || '');
+            rawPhone = rawPhone.replace(/\s+/g, '').replace(/^\+/, '');
+            if (rawPhone.startsWith('0')) {
+                rawPhone = rawPhone.substring(1);
+            }
+            if (rawPhone && !rawPhone.startsWith('91')) {
+                rawPhone = '91' + rawPhone;
+            }
+            if (!rawPhone) {
+                console.warn('Customer phone not found, skipping WhatsApp');
+                return;
+            }
+            $.ajax({
+                url:
+                    "index.php?route=extension/purpletree_pos/pos/home|Order_sendwhatsapp"
+                    + "&order_id=" + encodeURIComponent(orderId)
+                    + "&phone=" + encodeURIComponent(rawPhone),
+                type: "GET",
+                dataType: "json",
+                success: function (res) {
+                    console.log('WhatsApp sent successfully');
+                },
+                error: function () {
+                    console.error('Failed to send WhatsApp');
+                }
+            });
+        },
+        error: function () {
+            console.error("Failed to load small MTLR invoice.");
+        }
+    });
+}
+function printMTLRInvoice() {
+    let orderId = localStorage.getItem('last_order_id');
+    if (!orderId) return;
+    $.ajax({
+        url: "index.php?route=extension/purpletree_pos/pos/home|mtlrInvoice&order_id=" + encodeURIComponent(orderId),
+        type: "GET",
+        success: function (html) {
+            let iframe = document.createElement('iframe');
+            iframe.style.position = 'fixed';
+            iframe.style.right = '0';
+            iframe.style.bottom = '0';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = '0';
+            document.body.appendChild(iframe);
+            iframe.onload = function () {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                    window.location.href = 'index.php?route=extension/purpletree_pos/pos/agentlogin';
+                }, 1000);
+            };
+            iframe.contentDocument.open();
+            iframe.contentDocument.write(html);
+            iframe.contentDocument.close();
+            let rawPhone =
+                $('#customerMobileInput').val()?.trim() ||
+                (JSON.parse(sessionStorage.getItem('currentCustomerData') || '{}').telephone || '');
+            rawPhone = rawPhone.replace(/\s+/g, '').replace(/^\+/, '');
+            if (rawPhone.startsWith('0')) {
+                rawPhone = rawPhone.substring(1);
+            }
+            if (rawPhone && !rawPhone.startsWith('91')) {
+                rawPhone = '91' + rawPhone;
+            }
+            if (!rawPhone) {
+                console.warn('Customer phone not found, skipping WhatsApp');
+                return;
+            }
+            $.ajax({
+                url:
+                    "index.php?route=extension/purpletree_pos/pos/home|Order_sendwhatsapp"
+                    + "&order_id=" + encodeURIComponent(orderId)
+                    + "&phone=" + encodeURIComponent(rawPhone),
+                type: "GET",
+                dataType: "json",
+                success: function (res) {
+                    console.log('WhatsApp sent successfully');
+                },
+                error: function () {
+                    console.error('Failed to send WhatsApp');
+                }
+            });
+        },
+        error: function () {
+            console.error("Failed to load MTLR invoice.");
+        }
+    });
+}
 function printMergeShortBill() {
     var selectedOrders = [];
     $('.merge-bill-checkbox:checked').each(function() {
@@ -8313,6 +8608,90 @@ function printMergeLongBill() {
         error: function () {
             console.error("Failed to load merged invoice.");
             toastr.error("Failed to load merged invoice.");
+        }
+    });
+}
+function printMergeShortBillMTLR() {
+    var selectedOrders = [];
+    $('.merge-bill-checkbox-mtlr:checked').each(function() {
+        selectedOrders.push($(this).data('order-id'));
+    });
+    if (selectedOrders.length === 0) {
+        toastr.warning('Please select at least one MTLR order to merge.');
+        return;
+    }
+    let orderIdStr = selectedOrders.join(',');
+    $.ajax({
+        url: "index.php?route=extension/purpletree_pos/pos/home|mergeBillMTLR"
+            + "&order_id=" + encodeURIComponent(orderIdStr)
+            + "&small_print=1",
+        type: "GET",
+        beforeSend: function() { showPremiumLoader(); },
+        complete: function() { hidePremiumLoader(); },
+        success: function (html) {
+            let iframe = document.createElement('iframe');
+            iframe.style.position = 'fixed';
+            iframe.style.right = '0';
+            iframe.style.bottom = '0';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = '0';
+            document.body.appendChild(iframe);
+            iframe.onload = function () {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                }, 1000);
+            };
+            iframe.contentDocument.open();
+            iframe.contentDocument.write(html);
+            iframe.contentDocument.close();
+        },
+        error: function () {
+            console.error("Failed to load merged small MTLR invoice.");
+            toastr.error("Failed to load merged small MTLR invoice.");
+        }
+    });
+}
+function printMergeLongBillMTLR() {
+    var selectedOrders = [];
+    $('.merge-bill-checkbox-mtlr:checked').each(function() {
+        selectedOrders.push($(this).data('order-id'));
+    });
+    if (selectedOrders.length === 0) {
+        toastr.warning('Please select at least one MTLR order to merge.');
+        return;
+    }
+    let orderIdStr = selectedOrders.join(',');
+    $.ajax({
+        url: "index.php?route=extension/purpletree_pos/pos/home|mergeBillMTLR&order_id=" + encodeURIComponent(orderIdStr),
+        type: "GET",
+        beforeSend: function() { showPremiumLoader(); },
+        complete: function() { hidePremiumLoader(); },
+        success: function (html) {
+            let iframe = document.createElement('iframe');
+            iframe.style.position = 'fixed';
+            iframe.style.right = '0';
+            iframe.style.bottom = '0';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = '0';
+            document.body.appendChild(iframe);
+            iframe.onload = function () {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                }, 1000);
+            };
+            iframe.contentDocument.open();
+            iframe.contentDocument.write(html);
+            iframe.contentDocument.close();
+        },
+        error: function () {
+            console.error("Failed to load merged MTLR invoice.");
+            toastr.error("Failed to load merged MTLR invoice.");
         }
     });
 }
@@ -8674,6 +9053,7 @@ function printMergeLongBill() {
              $('#mergebill_to_date').val(today);
          }
           var allInvoiceData = [];
+          var allMTLRData = [];
           function loadInvoiceData() {
               var from = $('#invoice1_from_date').val();
               var to   = $('#invoice1_to_date').val();
@@ -8842,6 +9222,228 @@ function printMergeLongBill() {
                   }
               });
           }
+          function loadMTLRData() {
+              var from = $('#mtlr_from_date').val();
+              var to   = $('#mtlr_to_date').val();
+              var orderId = $('#mtlr_id_search').val().trim().toLowerCase();
+              var mobile  = $('#mtlr_mobile_search').val().trim().toLowerCase();
+              var name    = $('#mtlr_name_search').val().trim().toLowerCase();
+              $.ajax({
+                  url: 'index.php?route=extension/purpletree_pos/pos/home|getWholesaleOrdersbyDate',
+                   beforeSend: function() { showPremiumLoader(); },
+                   complete: function() { hidePremiumLoader(); },
+                  type: 'GET',
+                  dataType: 'json',
+                  data: { from_date: from, to_date: to, order_id: orderId, mobile: mobile, name: name },
+                  success: function (res) {
+                      if (!res || !res.data || !res.data.length) {
+                          $('#mtlrResults').html('<p style="color:black; padding:10px;">No MTLR orders found.</p>');
+                          allMTLRData = [];
+                          return;
+                      }
+                      allMTLRData = res.data;
+                      window.mtlrApiTotals = res.totals || {};
+                      var filteredData = allMTLRData.filter(function(row) {
+                          var matchId     = orderId === '' || row.order_info.order_id.toString().toLowerCase().includes(orderId);
+                          var matchMobile = mobile  === '' || (row.order_info.telephone || '').toString().toLowerCase().includes(mobile);
+                          var fullName    = ((row.order_info.firstname || '') + ' ' + (row.order_info.lastname || '')).toLowerCase();
+                          var matchName   = name    === '' || fullName.includes(name);
+                          return matchId && matchMobile && matchName;
+                      });
+                      if (!filteredData.length) {
+                          $('#mtlrResults').html('<p style="color:black; padding:10px;">No results found matching your search.</p>');
+                          return;
+                      }
+                      const totals = (res && res.totals) ? res.totals : {};
+                      const completedTotals = {
+                          cash: parseFloat(totals.status5_cash || 0),
+                          upi: parseFloat(totals.status5_upi || 0),
+                          ra: parseFloat(totals.status5_returnable || 0),
+                          due: parseFloat(totals.status5_balance || 0),
+                          received: parseFloat(totals.status5_total_received || 0),
+                          total: parseFloat(totals.status5_subtotal || 0)
+                      };
+                      const returnCompletedTotals = {
+                          cash: parseFloat(totals.status6_cash || 0),
+                          upi: parseFloat(totals.status6_upi || 0),
+                          ra: parseFloat(totals.status6_returnable || 0),
+                          due: parseFloat(totals.status6_balance || 0),
+                          received: parseFloat(totals.status6_total_received || 0),
+                          total: parseFloat(totals.status6_subtotal || 0)
+                      };
+                      function formatAmt(v) {
+                          return '₹' + (parseFloat(v) || 0).toFixed(2);
+                      }
+                      var html = ''
+                          + '<table id="mtlrTable" class="table table-bordered table-dark mt-3">'
+                          + '  <thead>'
+                          + '    <tr>'
+                         + '      <th style="background-color: white;color: black;"><input type="checkbox" id="selectAllMergeBillMTLR" class="merge-bill-select-all-mtlr"></th>'
+                          + '      <th style="background-color: white;color: black; font-size:12px;">Sl.No</th>'
+                          + '      <th style="background-color: white;color: black; font-size:12px;">Order</th>'
+                          + '      <th style="background-color: white;color: black; font-size:12px;">Date</th>'
+                          + '      <th style="background-color: white;color: black; font-size:12px;">Mobile</th>'
+                          + '      <th style="background-color: white;color: black; font-size:12px;">Subtotal</th>'
+                          + '      <th style="background-color: white;color: black; font-size:12px;">Tax</th>'
+                          + '      <th style="background-color: white;color: black; font-size:12px;">Received</th>'
+                          + '      <th style="background-color: white;color: black; font-size:12px;">PaymentMethod</th>'
+                          + '      <th style="background-color: white;color: black; font-size:12px;">SellerId</th>'
+                          + '      <th style="background-color: white;color: black; font-size:12px;">Balance</th>'
+                          + '      <th style="background-color: white;color: black; font-size:12px;">Change</th>'
+                          + '      <th style="background-color: white;color: black; font-size:12px;">Status</th>'
+                          + '      <th style="background-color: white;color: black; font-size:12px;">Pre Order</th>'
+                          + '      <th style="background-color: white;color: black; font-size:12px;">Action</th>'
+                          + '    </tr>'
+                          + '  </thead>'
+                          + '  <tbody style="cursor: pointer;">';
+                      filteredData.forEach(function(row, idx) {
+                              let paymentHTML = "";
+                      let methods = (row.invoice.amount_through || "").split(',');
+                      methods.forEach(m => {
+                          m = m.trim().toUpperCase();
+                          if (m === "CASH") paymentHTML += `CASH: ₹ ${row.invoice.cash_amount} `;
+                          if (m === "UPI")  paymentHTML += `| UPI: ₹ ${row.invoice.upi_amount} `;
+                          if (m === "CARD") paymentHTML += `| CARD: ₹ ${row.invoice.card_amount || "0.00"} `;
+                      });
+                      var statusId = parseInt(row.order_info.order_status_id || row.order_info.order_status || 0, 10);
+                      var isCancelled = (statusId === 7);
+                      var btnDisabledAttr = isCancelled ? ' disabled' : '';
+                      var btnClass = isCancelled ? 'btn-secondary' : 'btn-danger';
+                      var cancelBtnLabel = isCancelled ? 'Cancelled' : 'Cancel';
+                          html += ''
+                              + '<tr class="mtlr-row" data-order-id="' + row.order_info.order_id + '">'
+                               + '  <td style="background-color: white;color: black;"><input type="checkbox" class="merge-bill-checkbox-mtlr" data-order-id="' + row.order_info.order_id + '"' + btnDisabledAttr + '></td>'
+                              + '  <td style="background-color: white;color: black; font-size:12px;">' + (idx + 1) + '</td>'
+                              + '  <td style="background-color: white;color: black; font-size:12px;">' + row.order_info.order_id + '</td>'
+                              + '  <td style="background-color: white;color: black; font-size:12px;">' + row.order_info.date_added + '</td>'
+                              + '  <td style="background-color: white;color: black; font-size:12px;">' + row.order_info.telephone + '</td>'
+                              + '  <td style="background-color: white;color: black; font-size:12px;">' + row.invoice.sub_total + '</td>'
+                              + '  <td style="background-color: white;color: black; font-size:12px;">' + row.invoice.total_tax + '</td>'
+                              + '  <td style="background-color: white;color: black; font-size:12px;">' + row.invoice.total_received + '</td>'
+                              + '  <td style="background-color: white;color: black; font-size:12px;">' + paymentHTML + '</td>'
+                              + '  <td style="background-color: white;color: black; font-size:12px;">' + row.order_info.sellerId + '</td>'
+                              + '  <td style="background-color: white;color: black; font-size:12px;">' + (row.invoice.balance || '0') + '</td>'
+                              + '  <td style="background-color: white;color: black; font-size:12px;">' + (row.invoice.returnable_balance || '0') + '</td>'
+                              + '  <td style="background-color: white;color: black; font-size:12px;">' + (row.order_info.order_status || 'null') + '</td>'
+                              + '  <td style="background-color: white;color: black; font-size:12px;">' + (row.order_info.pre_order_id || 'null') + '</td>'
+                              + '  <td style="background-color: white;color: black; font-size:12px;">'
+                              + '    <button class="btn btn-sm btn-primary mtlr-edit-btn" data-order-id="' + row.order_info.order_id + '"' + btnDisabledAttr + ' style="font-size:10px; padding:2px 8px; margin:2px;">Edit</button>'
+                              + '    <button class="btn btn-sm btn-warning mtlr-return-btn" data-order-id="' + row.order_info.order_id + '"' + btnDisabledAttr + ' style="font-size:10px; padding:2px 8px; margin:2px;">Return</button>'
+                              + '    <button class="btn btn-sm ' + btnClass + ' mtlr-cancel-btn" data-order-id="' + row.order_info.order_id + '"' + btnDisabledAttr + ' style="font-size:10px; padding:2px 8px; margin:2px;">' + cancelBtnLabel + '</button>'
+                              + '  </td>'
+                              + '</tr>';
+                      });
+                      html += '  </tbody></table>';
+                      html += '<div id="mtlrPager" style="margin-top: 15px; text-align:right;display: flex; justify-content: end;">'
+                           + '  <button type="button" id="mtlrFirst1" class="btn btn-sm btn-secondary me-1">Start</button>'
+                           + '  <button type="button" id="mtlrPrev1"  class="btn btn-sm btn-secondary me-1"> < </button>'
+                           + '  <button type="button" id="mtlrNext1"  class="btn btn-sm btn-secondary me-1"> > </button>'
+                           + '  <button type="button" id="mtlrLast1"  class="btn btn-sm btn-secondary">End</button>'
+                           + '</div>';
+                      html += '<div id="mtlrSummaryRow" style="margin-top:10px; color:white; font-size:18px; position: absolute; bottom: 70px;">'
+                           + '  <div style="min-width:320px; padding: 12px; background: rgba(255,255,255,0.06); border-radius: 10px; color: black; display: flex;">'
+                           + '    <h3 style="color: black;">  Completed </h3>'
+                           + '    <div style="font-size: 13px; padding: 0px 13px;">Cash: ' + formatAmt(completedTotals.cash) + '</div>'
+                           + '    <div style="font-size: 13px; padding: 0px 13px;">UPI: ' + formatAmt(completedTotals.upi) + '</div>'
+                           + '    <div style="font-size: 13px; padding: 0px 13px;">RA: ' + formatAmt(completedTotals.ra) + '</div>'
+                           + '    <div style="font-size: 13px; padding: 0px 13px;">Due: ' + formatAmt(completedTotals.due) + '</div>'
+                           + '    <div style="font-size: 13px; padding: 0px 13px;">Received: ' + formatAmt(completedTotals.received) + '</div>'
+                           + '    <div style="font-size: 13px; padding: 0px 13px;">Total: ' + formatAmt(completedTotals.total) + '</div>'
+                           + '  </div>'
+                           + '  <div style="min-width:320px; padding: 12px; background: rgba(255,255,255,0.06); border-radius: 10px; color: black; display: flex;">'
+                           + '    <h3 style="color: black;">R_Completed</h3>'
+                           + '    <div style="font-size: 13px; padding: 0px 13px;">Cash: ' + formatAmt(returnCompletedTotals.cash) + '</div>'
+                           + '    <div style="font-size: 13px; padding: 0px 13px;">UPI: ' + formatAmt(returnCompletedTotals.upi) + '</div>'
+                           + '    <div style="font-size: 13px; padding: 0px 13px;">RA: ' + formatAmt(returnCompletedTotals.ra) + '</div>'
+                           + '    <div style="font-size: 13px; padding: 0px 13px;">Due: ' + formatAmt(returnCompletedTotals.due) + '</div>'
+                           + '    <div style="font-size: 13px; padding: 0px 13px;">Received: ' + formatAmt(returnCompletedTotals.received) + '</div>'
+                           + '    <div style="font-size: 13px; padding: 0px 13px;">Total: ' + formatAmt(returnCompletedTotals.total) + '</div>'
+                           + '  </div>'
+                            + '<span style="width: 300px;"><button id="smallPrintBtnMTLR" class="btn btn-warning" style="font-size: 11px; padding: 4px;margin-left: 106%; font-size: 14px; padding: 4px; margin-top: -9%; width: 11%" onclick="triggerSmallPrintMTLR()">' 
+                            +   '<i class="fas fa-print"></i> Print'
+                             + '</button></span>'
+                               + '</div>'; 
+                     html += '<div class="merge-bill-buttons-mtlr">'
+                          + '  <button class="merge-bill-btn-mtlr" onclick="printMergeShortBillMTLR()">Short Bill</button>'
+                          + '  <button class="merge-bill-btn-mtlr" onclick="printMergeLongBillMTLR()">Long Bill</button>'
+                          + '</div>';
+                      $('#mtlrResults').html(html);
+                      var $rows      = $('#mtlrTable tbody tr');
+                      var perPage    = 10;
+                      var pageCount  = Math.ceil($rows.length / perPage);
+                      var current    = 1;
+                      function renderPage(page) {
+                          if (page < 1) page = 1;
+                          if (page > pageCount) page = pageCount;
+                          current = page;
+                          $rows.hide();
+                          var start = (page - 1) * perPage;
+                          var end   = start + perPage;
+                          $rows.slice(start, end).show();
+                      }
+                      renderPage(1);
+                      $('#mtlrFirst1').off('click').on('click', function () { renderPage(1); });
+                      $('#mtlrPrev1').off('click').on('click', function () { renderPage(current - 1); });
+                      $('#mtlrNext1').off('click').on('click', function () { renderPage(current + 1); });
+                      $('#mtlrLast1').off('click').on('click', function () { renderPage(pageCount); });
+                     $('#selectAllMergeBillMTLR').off('click').on('click', function() {
+                         var isChecked = $(this).prop('checked');
+                         $('.merge-bill-checkbox-mtlr').prop('checked', isChecked);
+                     });
+                     $(document).off('change', '.merge-bill-checkbox-mtlr').on('change', '.merge-bill-checkbox-mtlr', function() {
+                         var totalCheckboxes = $('.merge-bill-checkbox-mtlr').length;
+                         var checkedCheckboxes = $('.merge-bill-checkbox-mtlr:checked').length;
+                         $('#selectAllMergeBillMTLR').prop('checked', totalCheckboxes === checkedCheckboxes);
+                     });
+                     
+                     // MTLR Action button handlers
+                     var currentMTLRAction = null;
+                     var currentMTLROrderId = null;
+                     
+                     $(document).off('click', '.mtlr-edit-btn').on('click', '.mtlr-edit-btn', function(e) {
+                         e.stopPropagation();
+                         currentMTLROrderId = $(this).data('order-id');
+                         currentMTLRAction = 'edit';
+                         $('#mtlrActionConfirmBody').html('<p style="color:#1f1b16;">Are you sure you want to edit order #' + currentMTLROrderId + '?</p>');
+                         $('#mtlrActionConfirmModal').modal('show');
+                     });
+                     
+                     $(document).off('click', '.mtlr-return-btn').on('click', '.mtlr-return-btn', function(e) {
+                         e.stopPropagation();
+                         currentMTLROrderId = $(this).data('order-id');
+                         currentMTLRAction = 'return';
+                         $('#mtlrActionConfirmBody').html('<p style="color:#1f1b16;">Are you sure you want to return order #' + currentMTLROrderId + '?</p>');
+                         $('#mtlrActionConfirmModal').modal('show');
+                     });
+                     
+                     $(document).off('click', '.mtlr-cancel-btn').on('click', '.mtlr-cancel-btn', function(e) {
+                         e.stopPropagation();
+                         currentMTLROrderId = $(this).data('order-id');
+                         currentMTLRAction = 'cancel';
+                         $('#mtlrActionConfirmBody').html('<p style="color:#1f1b16;">Are you sure you want to cancel order #' + currentMTLROrderId + '?</p>');
+                         $('#mtlrActionConfirmModal').modal('show');
+                     });
+                     
+                     $('#mtlrActionConfirmBtn').off('click').on('click', function() {
+                         if (currentMTLRAction && currentMTLROrderId) {
+                             if (currentMTLRAction === 'edit') {
+                                 restoreMTLROrder(currentMTLROrderId);
+                             } else if (currentMTLRAction === 'return') {
+                                 restoreMTLRReturnOrder(currentMTLROrderId);
+                             } else if (currentMTLRAction === 'cancel') {
+                                 cancelMTLROrder(currentMTLROrderId);
+                             }
+                             $('#mtlrActionConfirmModal').modal('hide');
+                             currentMTLRAction = null;
+                             currentMTLROrderId = null;
+                         }
+                     });
+                  },
+                  error: function(xhr, status, err) {
+                      $('#mtlrResults').html('<p style="color:red; padding:10px;">Error loading MTLR orders.</p>');
+                  }
+              });
+          }
           function triggerSmallPrint() {
               if (typeof allInvoiceData === 'undefined' || !allInvoiceData || !allInvoiceData.length) {
                   toastr.warning('No invoice data available to print. Please search first.');
@@ -8881,6 +9483,77 @@ function printMergeLongBill() {
               };
               $.ajax({
                   url: 'index.php?route=extension/purpletree_pos/pos/home|processSmallPrint',
+                  type: 'POST',
+                  data: payload,
+                  beforeSend: function() {
+                       if (typeof showPremiumLoader === 'function') showPremiumLoader();
+                  },
+                  complete: function() {
+                       if (typeof hidePremiumLoader === 'function') hidePremiumLoader();
+                  },
+                  success: function (html) {
+                    let iframe = document.createElement('iframe');
+                    iframe.style.position = 'fixed';
+                    iframe.style.right = '0';
+                    iframe.style.bottom = '0';
+                    iframe.style.width = '0';
+                    iframe.style.height = '0';
+                    iframe.style.border = '0';
+                    iframe.srcdoc = html;
+                    document.body.appendChild(iframe);
+                    iframe.onload = function () {
+                        iframe.contentWindow.focus();
+                        iframe.contentWindow.print();
+                        setTimeout(() => {
+                            document.body.removeChild(iframe);
+                        }, 1000);
+                    };
+                    toastr.success('Small Print sent to printer!');
+                },
+                  error: function() {
+                      toastr.error('Error sending print request. Backend API might be missing.');
+                  }
+              });
+          }
+          function triggerSmallPrintMTLR() {
+              if (typeof allMTLRData === 'undefined' || !allMTLRData || !allMTLRData.length) {
+                  toastr.warning('No MTLR data available to print. Please search first.');
+                  return;
+              }
+              var orderId = $('#mtlr_id_search').val().trim().toLowerCase();
+              var mobile  = $('#mtlr_mobile_search').val().trim().toLowerCase();
+              var name    = $('#mtlr_name_search').val().trim().toLowerCase();
+              var filteredData = allMTLRData.filter(function(row) {
+                  var matchId     = orderId === '' || row.order_info.order_id.toString().toLowerCase().includes(orderId);
+                  var matchMobile = mobile  === '' || (row.order_info.telephone || '').toString().toLowerCase().includes(mobile);
+                  var fullName    = ((row.order_info.firstname || '') + ' ' + (row.order_info.lastname || '')).toLowerCase();
+                  var matchName   = name    === '' || fullName.includes(name);
+                  return matchId && matchMobile && matchName;
+              });
+              if (!filteredData.length) {
+                  toastr.warning('No matching records to print.');
+                  return;
+              }
+              const apiTotals = window.mtlrApiTotals || {};
+              const printTotals = {
+                  cash: parseFloat(apiTotals.status5_cash || 0),
+                  upi: parseFloat(apiTotals.status5_upi || 0),
+                  ra: parseFloat(apiTotals.status5_returnable || 0),
+                  due: parseFloat(apiTotals.status5_balance || 0),
+                  sbt: parseFloat(apiTotals.status5_subtotal || 0),
+                  rc: parseFloat(apiTotals.status5_total_received || 0),
+              };
+              var payload = {
+                  cash: printTotals.cash.toFixed(2),
+                  upi: printTotals.upi.toFixed(2),
+                  ra: printTotals.ra.toFixed(2),
+                  rc: printTotals.rc.toFixed(2),
+                  due: printTotals.due.toFixed(2),
+                  sbt: printTotals.sbt.toFixed(2),
+                  total_orders: filteredData.length,
+              };
+              $.ajax({
+                  url: 'index.php?route=extension/purpletree_pos/pos/home|processSmallPrintMTLR',
                   type: 'POST',
                   data: payload,
                   beforeSend: function() {
@@ -9329,7 +10002,9 @@ function printMergeLongBill() {
                      name       : p.name,
                      reward     : p.reward || 0,
                      excluded   : (p.excluded == 1 || String(p.excluded).toLowerCase() === 'true') ? 1 : 0,
-                     gst_percent: parseFloat(p.gst_percent || p.gst || 0) || 0
+                     gst_percent: parseFloat(p.gst_percent || p.gst || 0) || 0,
+                     discount   : parseFloat(p.discount || 0), // Original user input from order_product.discount
+                     discount_type: p.discount_type || 'percent' // Discount type from order_product
                  });
              });
              localStorage.setItem("pos_cart", JSON.stringify(cartProducts));
@@ -9345,6 +10020,87 @@ function printMergeLongBill() {
              $('.cart-header-row').show();
              $('.discount-row').show();
              $('.search-section').show();
+
+             // Restore Overall Discount from quotation
+             var overallDiscountInput =
+                 parseFloat(
+                     selectedOrder.invoice &&
+                     selectedOrder.invoice.overall_discount
+                 ) || 0;
+
+             var discountType =
+                 selectedOrder.invoice &&
+                 selectedOrder.invoice.discount_type
+                     ? selectedOrder.invoice.discount_type
+                     : 'flat';
+
+             setTimeout(function () {
+                 var discountModeEl =
+                     document.getElementById('discountMode');
+
+                 var discountInputEl =
+                     document.getElementById('itemDiscountValue');
+
+                 var discountPrefixEl =
+                     document.getElementById('discountPrefix');
+
+                 // Restore using discount_type and overall_discount (original user input)
+                 if (overallDiscountInput > 0) {
+                     // PERCENT MODE
+                     if (discountType === 'percent') {
+                         if (discountModeEl)
+                             discountModeEl.value = 'percent';
+
+                         if (discountPrefixEl)
+                             discountPrefixEl.textContent = '%';
+
+                         // SAVE restored percentage (original user input)
+                         window.discountPercent =
+                             parseFloat(overallDiscountInput) || 0;
+
+                         window.discountFlat = null;
+                         window.userEditedPercent = true;
+                     }
+                     // FLAT MODE
+                     else {
+                         if (discountModeEl)
+                             discountModeEl.value = 'flat';
+
+                         if (discountPrefixEl)
+                             discountPrefixEl.textContent = '₹';
+
+                         // SAVE restored flat (original user input)
+                         window.discountFlat =
+                             parseFloat(overallDiscountInput) || 0;
+
+                         window.discountPercent = null;
+                         window.userEditedFlat = true;
+                     }
+
+                     if (discountInputEl)
+                         discountInputEl.value = overallDiscountInput.toFixed(2);
+                 }
+
+                 // Restore product discounts for each cart row
+                 var cartRows = document.querySelectorAll('.cart-row');
+                 cartRows.forEach(function(row) {
+                     var productId = row.getAttribute('data-product-id');
+                     var productData = cartProducts.find(function(p) {
+                         return parseInt(p.product_id) === parseInt(productId);
+                     });
+                     if (productData && productData.discount !== undefined) {
+                         var discountInput = row.querySelector('.discount-input');
+                         if (discountInput) {
+                             discountInput.value = parseFloat(productData.discount).toFixed(2);
+                         }
+                     }
+                 });
+
+                 // Final recalculation
+                 updateSummary(false);
+
+             }, 300);
+
              successMessage("Quotation " + orderId + " pulled successfully.", 3000);
          }
           function loadReturnData() {
@@ -9405,6 +10161,7 @@ function restoreReturnOrder(orderId) {
 
                  return;
              }
+              window.isMTLROrder = false;
 
     sessionStorage.setItem(
         'currentReturnOrder',
@@ -9442,7 +10199,9 @@ function restoreReturnOrder(orderId) {
                      name        : p.name,
             reward      : p.reward,
             excluded    : p.excluded,
-            gst_percent : parseFloat(p.gst_percent || p.gst || 0) || 0
+            gst_percent : parseFloat(p.gst_percent || p.gst || 0) || 0,
+            discount    : parseFloat(p.discount || 0), // Original user input from order_product.discount
+            discount_type: p.discount_type || 'percent' // Discount type from order_product
                  };
 
                  cartProducts.push(cartItem);
@@ -9458,7 +10217,9 @@ function restoreReturnOrder(orderId) {
             name        : item.name,
             reward      : item.reward,
             excluded    : item.excluded,
-            gst_percent : parseFloat(item.gst_percent || item.gst || 0) || 0
+            gst_percent : parseFloat(item.gst_percent || item.gst || 0) || 0,
+            discount    : item.discount || 0,
+            discount_type: item.discount_type || 'percent'
                  };
 
              });
@@ -9482,7 +10243,9 @@ function restoreReturnOrder(orderId) {
             name        : p.name,
             reward      : p.reward,
             excluded    : p.excluded,
-            gst_percent : parseFloat(p.gst_percent || p.gst || 0) || 0
+            gst_percent : parseFloat(p.gst_percent || p.gst || 0) || 0,
+            discount    : p.discount || 0,
+            discount_type: p.discount_type || 'percent'
                  };
 
                  addProductRowToCartArea(productForUI);
@@ -9531,11 +10294,11 @@ function restoreReturnOrder(orderId) {
 
              $('.search-section').show();
 
-    // ── Restore Discount LAST ──────────────────────────────────────────────
-    var discountAmount =
+    // ── Restore Overall Discount LAST ──────────────────────────────────────────────
+    var overallDiscountInput =
         parseFloat(
             selectedOrder.invoice &&
-            selectedOrder.invoice.discount
+            selectedOrder.invoice.overall_discount
         ) || 0;
 
     var discountType =
@@ -9555,8 +10318,8 @@ function restoreReturnOrder(orderId) {
         var discountPrefixEl =
             document.getElementById('discountPrefix');
 
-        // Restore using discount_type
-        if (discountAmount > 0) {
+        // Restore using discount_type and overall_discount (original user input)
+        if (overallDiscountInput > 0) {
 
             // PERCENT MODE
             if (discountType === 'percent') {
@@ -9567,6 +10330,12 @@ function restoreReturnOrder(orderId) {
                 if (discountPrefixEl)
                     discountPrefixEl.textContent = '%';
 
+                // SAVE restored percentage (original user input)
+                window.discountPercent =
+                    parseFloat(overallDiscountInput) || 0;
+
+                window.discountFlat = null;
+                window.userEditedPercent = true;
             }
 
             // FLAT MODE
@@ -9577,11 +10346,18 @@ function restoreReturnOrder(orderId) {
 
                 if (discountPrefixEl)
                     discountPrefixEl.textContent = '₹';
+
+                // SAVE restored flat (original user input)
+                window.discountFlat =
+                    parseFloat(overallDiscountInput) || 0;
+
+                window.discountPercent = null;
+                window.userEditedFlat = true;
             }
 
           if (discountInputEl)
     discountInputEl.value =
-        discountAmount.toFixed(2);        }
+        overallDiscountInput.toFixed(2);        }
 
         // Default GST
         else {
@@ -9598,6 +10374,21 @@ function restoreReturnOrder(orderId) {
                         ? posCartForGrid[0].gst_percent
                         : 0).toFixed(2);
         }
+
+        // Restore product discounts for each cart row
+        var cartRows = document.querySelectorAll('.cart-row');
+        cartRows.forEach(function(row) {
+            var productId = row.getAttribute('data-product-id');
+            var productData = posCartForGrid.find(function(p) {
+                return parseInt(p.product_id) === parseInt(productId);
+            });
+            if (productData && productData.discount !== undefined) {
+                var discountInput = row.querySelector('.discount-input');
+                if (discountInput) {
+                    discountInput.value = parseFloat(productData.discount).toFixed(2);
+                }
+            }
+        });
 
         // ✅ Final Recalculation
         updateSummary(false);
@@ -9715,6 +10506,7 @@ function restoreReturnOrder(orderId) {
             $('#returnContent').hide();
             $('#walletHistoryContent').hide();
             $('#editOrderHistoryContent').hide();
+            $('#mtlrContent').hide();
             $('#quotationHistoryContent').hide();
             $('#cartArea').hide();
             $('.cart-header-row').hide();
@@ -9730,14 +10522,14 @@ function restoreReturnOrder(orderId) {
         }
         function openPNamePage() {
             $('#pNameContent').show();
-            $('#manageProductContent, #quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #cartArea').hide();
+            $('#manageProductContent, #quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #cartArea, #mtlrContent').hide();
             $('.cart-header-row, .discount-row, .search-section').hide();
             $('#submit-order-btn, #sendQuotationBtn, #printCartBtn, #saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
              highlightSidebarButton('pNameBtn');
         }
         function openManageProduct() {
             $('#manageProductContent').show();
-            $('#quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #cartArea, #pNameContent').hide();
+            $('#quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #cartArea, #pNameContent, #mtlrContent').hide();
             $('.cart-header-row, .discount-row, .search-section').hide();
             $('#submit-order-btn, #sendQuotationBtn, #printCartBtn, #saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
              highlightSidebarButton('manageProductBtn');
@@ -10049,6 +10841,94 @@ if (data.upc && data.upc !== '') {
                 }
             });
         });
+        $(document).on('click', '.mtlr-row', function () {
+            let orderId = $(this).data('order-id');
+            $.ajax({
+                url: 'index.php?route=extension/purpletree_pos/pos/home|getWholesaleOrdersbyId',
+                type: 'GET',
+                dataType: 'json',
+                data: { order_id: orderId },
+                success: function (res) {
+                     localStorage.setItem('last_order_id',orderId);
+                    if (res.status !== 'success') {
+                        return;
+                    }
+                    let d = res.data;
+                    let productHTML = `
+                        <table class="table table-bordered table-dark mt-3">
+                            <thead>
+                                <tr>
+                                    <th>Sl.No</th>
+                                    <th>Product</th>
+                                    <th>Qty</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                         `;
+                    var i = 1; 
+                    d.products.forEach(p => {
+                        const lineTotal = (parseFloat(p.quantity) || 0) * (parseFloat(p.price) || 0);
+                        const rowClass = p.excluded == 1 ? 'excluded-item' : '';
+                       productHTML += `
+                           <tr class="${rowClass}">
+                               <td> ${ i++ } </td>
+                               <td>${p.name}</td>
+                               <td>${p.quantity}</td>
+                               <td>₹ ${p.price}</td>
+                               <td>₹ ${lineTotal.toFixed(2)}</td>
+                           </tr>
+                       `;
+                    });
+                    productHTML += `</tbody></table>`;
+                    let taxHTML = "";
+                    d.tax_details.forEach(t => {
+                        taxHTML += `<div>${t.name}: ₹ ${t.value}</div>`;
+                    });
+                    let paymentHTML = "";
+                    let methods = (d.invoice.amount_through || "").split(',');
+                    methods.forEach(m => {
+                        m = m.trim().toUpperCase();
+                        if (m === "CASH") {
+                            paymentHTML += `CASH: ₹ ${d.invoice.cash_amount} `;
+                        }
+                        if (m === "UPI") {
+                            paymentHTML += `| UPI: ₹ ${d.invoice.upi_amount} `;
+                        }
+                        if (m === "CARD") {
+                            paymentHTML += `| CARD: ₹ ${d.invoice.card_amount || "0.00"} `;
+                        }
+                    });
+                    let html = `
+                        <div style="display:flex; justify-content:space-between; gap:24px; align-items:flex-start;">
+          <div>
+            <div><strong>Order ID:</strong> ${d.order_info.order_id}</div>
+            <div><strong>Name:</strong> ${d.order_info.firstname} ${d.order_info.lastname}</div>
+          </div>
+          <div style="text-align:right;">
+            <div><strong>Date:</strong> ${d.order_info.date_added}</div>
+            <div><strong>Payment Method:</strong> ${paymentHTML}</div>
+          </div>
+        </div>
+                        <hr>
+                        <h5 style="color: black; font-size: 18px;">Products</h5>
+                        ${productHTML}
+                        <hr>
+                        <div style="display:flex; justify-content:space-between; gap:24px; align-items:flex-start;">
+          <div style="text-align:right; padding-left: 82%;">
+                        <div><strong>Subtotal:</strong> ₹ ${d.invoice.sub_total}</div>
+                        <div><strong>Tax:</strong> ₹ ${d.invoice.total_tax}</div>
+                        <div><strong>Total:</strong> ₹ ${d.invoice.total_received}</strong></div>
+          </div>
+        </div>
+                    `;
+                    $("#mtlrDetailsBody").html(html);
+                    window._invoicePrintHtml = html;
+                    $("#mtlrDetailsModal").modal('show');
+                }
+            });
+        });
          $(document).off('click', '#searchReturnBtn').on('click', '#searchReturnBtn', function () {
              loadReturnData();
          });
@@ -10066,6 +10946,7 @@ if (data.upc && data.upc !== '') {
               $('#loadWalletContent').hide();
               $('#manageProductContent, #pNameContent').hide();
               $('#invoiceContent').hide();
+              $('#mtlrContent').hide();
               $('#returnContent').hide();
               $('#walletHistoryContent').hide();
               $('#editOrderHistoryContent').hide();
@@ -10084,6 +10965,7 @@ if (data.upc && data.upc !== '') {
               $('#quotationHistoryContent').hide();
               $('#loadWalletContent').hide();
               $('#manageProductContent, #pNameContent').hide();
+              $('#mtlrContent').hide();
               $('#returnContent').hide();
               $('#walletHistoryContent').hide();
               $('#editOrderHistoryContent').hide();
@@ -10099,11 +10981,26 @@ if (data.upc && data.upc !== '') {
               $('#invoice1_to_date').val(today);
               loadInvoiceData();
           }
+          function openMTLRHistory() {
+              $('#mtlrContent').show();
+              $('#quotationHistoryContent, #invoiceContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent, #returnContent').hide();
+              $('#cartArea').hide();
+              $('.cart-header-row').hide();
+              $('.discount-row').hide();
+              $('.search-section').hide();
+              $('#submit-order-btn, #sendQuotationBtn, #printCartBtn, #saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
+              highlightSidebarButton('mtlrBtn');
+              const today = new Date().toISOString().split('T')[0];
+              $('#mtlr_from_date').val(today);
+              $('#mtlr_to_date').val(today);
+              loadMTLRData();
+          }
           function openCustomerPanel() {
               $('#loadWalletContent').show();
               $('#walletHistoryContent').hide();
               $('#quotationHistoryContent').hide();
               $('#invoiceContent').hide();
+              $('#mtlrContent').hide();
               $('#returnContent').hide();
               $('#editOrderHistoryContent').hide();
               $('#cancelOrderContent').hide();
@@ -10121,6 +11018,7 @@ if (data.upc && data.upc !== '') {
               $('#invoiceContent').hide();
               $('#loadWalletContent').hide();
               $('#manageProductContent, #pNameContent').hide();
+              $('#mtlrContent').hide();
               $('#walletHistoryContent').hide();
               $('#editOrderHistoryContent').hide();
               $('#cancelOrderContent').hide();
@@ -10147,6 +11045,7 @@ if (data.upc && data.upc !== '') {
               $('#invoiceContent').hide();
               $('#walletHistoryContent').hide();
               $('#cancelOrderContent').hide();
+              $('#mtlrContent').hide();
               $('#editOrderHistoryContent').show();
               $('#submit-order-btn, #sendQuotationBtn, #printCartBtn, #saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
               highlightSidebarButton('editOrderBtn');
@@ -10337,6 +11236,7 @@ if (data.upc && data.upc !== '') {
               }
 
               window.alreadyPaidAmount = 0;
+              window.isMTLROrder = false; 
 
     sessionStorage.setItem(
         'currentEditOrder',
@@ -10359,7 +11259,9 @@ if (data.upc && data.upc !== '') {
                       name       : p.name,
                       reward     : p.reward || 0,
                       excluded   : p.excluded || 0,
-                      gst_percent: parseFloat(p.gst_percent || p.gst || 0) || 0
+                      gst_percent: parseFloat(p.gst_percent || p.gst || 0) || 0,
+                      discount   : parseFloat(p.discount || 0), // Original user input from order_product.discount
+                      discount_type: p.discount_type || 'percent' // Discount type from order_product
                   });
 
               });
@@ -10401,11 +11303,11 @@ if (data.upc && data.upc !== '') {
 
     updateInvoiceRightColumn();
 
-    // ── Restore Discount LAST ─────────────────────────────────────────────────
-    var discountAmount =
+    // ── Restore Overall Discount LAST ─────────────────────────────────────────────────
+    var overallDiscountInput =
         parseFloat(
             selectedOrder.invoice &&
-            selectedOrder.invoice.discount
+            selectedOrder.invoice.overall_discount
         ) || 0;
 
     var discountType =
@@ -10428,8 +11330,8 @@ if (data.upc && data.upc !== '') {
     // LOCK restored discount
     window.discountLocked = true;
 
-    // Restore using discount_type
-    if (discountAmount > 0) {
+    // Restore using discount_type and overall_discount (original user input)
+    if (overallDiscountInput > 0) {
 
         // PERCENT MODE
         if (
@@ -10443,11 +11345,12 @@ if (data.upc && data.upc !== '') {
             if (discountPrefixEl)
                 discountPrefixEl.textContent = '%';
 
-            // SAVE restored percentage
+            // SAVE restored percentage (original user input)
             window.discountPercent =
-                parseFloat(discountAmount) || 0;
+                parseFloat(overallDiscountInput) || 0;
 
             window.discountFlat = null;
+            window.userEditedPercent = true;
         }
 
         // FLAT MODE
@@ -10459,16 +11362,17 @@ if (data.upc && data.upc !== '') {
             if (discountPrefixEl)
                 discountPrefixEl.textContent = '₹';
 
-            // SAVE restored flat
+            // SAVE restored flat (original user input)
             window.discountFlat =
-                parseFloat(discountAmount) || 0;
+                parseFloat(overallDiscountInput) || 0;
 
             window.discountPercent = null;
+            window.userEditedFlat = true;
         }
 
         if (discountInputEl)
             discountInputEl.value =
-                parseFloat(discountAmount).toFixed(2);
+                parseFloat(overallDiscountInput).toFixed(2);
     }
 
     // Default GST
@@ -10489,6 +11393,21 @@ if (data.upc && data.upc !== '') {
                     : 0).toFixed(2);
     }
 
+    // Restore product discounts for each cart row
+    var cartRows = document.querySelectorAll('.cart-row');
+    cartRows.forEach(function(row) {
+        var productId = row.getAttribute('data-product-id');
+        var productData = cartProducts.find(function(p) {
+            return parseInt(p.product_id) === parseInt(productId);
+        });
+        if (productData && productData.discount !== undefined) {
+            var discountInput = row.querySelector('.discount-input');
+            if (discountInput) {
+                discountInput.value = parseFloat(productData.discount).toFixed(2);
+            }
+        }
+    });
+
     // FINAL RECALCULATION
     updateSummary(false);
 
@@ -10499,8 +11418,454 @@ if (data.upc && data.upc !== '') {
         3000
     );
           }
+          function restoreMTLROrder(orderId) {
+              var selectedOrder = allMTLRData.find(function (row) {
+                  return row &&
+                         row.order_info &&
+                         row.order_info.order_id.toString() === orderId.toString();
+              });
+
+              if (!selectedOrder) {
+                  errorMessage("MTLR Order not found for editing.", 2000);
+                  return;
+              }
+
+              window.alreadyPaidAmount = 0;
+
+              sessionStorage.setItem(
+                  'currentEditOrder',
+                  JSON.stringify(selectedOrder)
+              );
+
+              sessionStorage.removeItem('currentReturnOrder');
+              sessionStorage.removeItem('currentQuotationOrder');
+
+              // Set flag to use wholesale order API for MTLR orders
+              window.isMTLROrder = true;
+
+              console.log('MTLR Order loaded for editing:', selectedOrder);
+              console.log('Order ID:', selectedOrder.order_info.order_id);
+
+              // Products
+              var orderProducts = selectedOrder.products || [];
+              var cartProducts  = [];
+
+              orderProducts.forEach(function (p) {
+                  cartProducts.push({
+                      product_id : p.product_id,
+                      quantity   : parseInt(p.quantity) || 1,
+                      price      : parseFloat(p.price) || 0,
+                      name       : p.name,
+                      reward     : p.reward || 0,
+                      excluded   : p.excluded || 0,
+                      gst_percent: parseFloat(p.gst_percent || p.gst || 0) || 0,
+                      discount   : parseFloat(p.discount || 0), // Original user input from order_product.discount
+                      discount_type: p.discount_type || 'percent' // Discount type from order_product
+                  });
+              });
+
+              localStorage.setItem(
+                  "pos_cart",
+                  JSON.stringify(cartProducts)
+              );
+
+              var cartArea = document.getElementById('cartArea');
+
+              if (cartArea)
+                  cartArea.innerHTML = '';
+
+              cartProducts.forEach(function (p) {
+                  addProductRowToCartArea(p);
+              });
+
+              // Set default discount values from total GST
+              if (cartProducts.length > 0) {
+                  window.discountPercentDefault = getDefaultDiscountPercent();
+                  window.discountFlatDefault = getDefaultDiscountFlat();
+              }
+
+              // UI Visibility
+              $('#mtlrContent').hide();
+
+              $('#cartArea').show();
+
+              $('.cart-header-row').show();
+
+              $('.discount-row').show();
+
+              $('.search-section').show();
+
+              // Run default totals first
+              updateCartTotals();
+
+              updateInvoiceRightColumn();
+
+              // Restore Overall Discount LAST
+              var overallDiscountInput =
+                  parseFloat(
+                      selectedOrder.invoice &&
+                      selectedOrder.invoice.overall_discount
+                  ) || 0;
+
+              var discountType =
+                  selectedOrder.invoice &&
+                  selectedOrder.invoice.discount_type
+                      ? selectedOrder.invoice.discount_type
+                      : 'flat';
+
+              setTimeout(function () {
+                  var discountModeEl =
+                      document.getElementById('discountMode');
+
+                  var discountInputEl =
+                      document.getElementById('itemDiscountValue');
+
+                  var discountPrefixEl =
+                      document.getElementById('discountPrefix');
+
+                  // LOCK restored discount
+                  window.discountLocked = true;
+
+                  // Restore using discount_type and overall_discount (original user input)
+                  if (overallDiscountInput > 0) {
+                      // PERCENT MODE
+                      if (
+                          discountType === 'percent' ||
+                          discountType === 'percentage'
+                      ) {
+                          if (discountModeEl)
+                              discountModeEl.value = 'percent';
+
+                          if (discountPrefixEl)
+                              discountPrefixEl.textContent = '%';
+
+                          // SAVE restored percentage (original user input)
+                          window.discountPercent =
+                              parseFloat(overallDiscountInput) || 0;
+
+                          window.discountFlat = null;
+                          window.userEditedPercent = true;
+                      }
+                      // FLAT MODE
+                      else {
+                          if (discountModeEl)
+                              discountModeEl.value = 'flat';
+
+                          if (discountPrefixEl)
+                              discountPrefixEl.textContent = '₹';
+
+                          // SAVE restored flat (original user input)
+                          window.discountFlat =
+                              parseFloat(overallDiscountInput) || 0;
+
+                          window.discountPercent = null;
+                          window.userEditedFlat = true;
+                      }
+
+                      if (discountInputEl)
+                          discountInputEl.value =
+                              parseFloat(overallDiscountInput).toFixed(2);
+                  }
+                  // Default GST
+                  else {
+                      window.discountLocked = false;
+
+                      if (discountModeEl)
+                          discountModeEl.value = 'percent';
+
+                      if (discountPrefixEl)
+                          discountPrefixEl.textContent = '%';
+
+                      if (discountInputEl)
+                          discountInputEl.value =
+                              (cartProducts.length > 0
+                                  ? cartProducts[0].gst_percent
+                                  : 0).toFixed(2);
+                  }
+
+                  // Restore product discounts for each cart row
+                  var cartRows = document.querySelectorAll('.cart-row');
+                  cartRows.forEach(function(row) {
+                      var productId = row.getAttribute('data-product-id');
+                      var productData = cartProducts.find(function(p) {
+                          return parseInt(p.product_id) === parseInt(productId);
+                      });
+                      if (productData && productData.discount !== undefined) {
+                          var discountInput = row.querySelector('.discount-input');
+                          if (discountInput) {
+                              discountInput.value = parseFloat(productData.discount).toFixed(2);
+                          }
+                      }
+                  });
+
+                  // FINAL RECALCULATION
+                  updateSummary(false);
+
+              }, 300);
+
+              successMessage(
+                  "MTLR Order " + orderId + " loaded for editing.",
+                  3000
+              );
+          }
+
+          function restoreMTLRReturnOrder(orderId) {
+              var selectedOrder = allMTLRData.find(function (row) {
+                  return row &&
+                         row.order_info &&
+                         row.order_info.order_id.toString() === orderId.toString();
+              });
+
+              if (!selectedOrder) {
+                  errorMessage("MTLR Order not found for return.", 2000);
+                  return;
+              }
+
+              sessionStorage.setItem(
+                  'currentReturnOrder',
+                  JSON.stringify(selectedOrder)
+              );
+
+              sessionStorage.removeItem('currentEditOrder');
+              sessionStorage.removeItem('currentQuotationOrder');
+
+              // Set flag to use wholesale order API for MTLR orders
+              window.isMTLROrder = true;
+
+              console.log('MTLR Order loaded for return:', selectedOrder);
+              console.log('Order ID:', selectedOrder.order_info.order_id);
+
+              // Products
+              var orderProducts = selectedOrder.products || [];
+              var cartProducts = [];
+
+              orderProducts.forEach(function (p, index) {
+                  var qty = parseInt(p.quantity || 1, 10);
+                  var price = parseFloat(p.price || (p.total ? p.total / qty : 0));
+
+                  var cartItem = {
+                      cartid      : 'mtlr_return_' + orderId + '_' + (p.product_id || p.order_product_id || index),
+                      customerid  : 0,
+                      product_id  : p.product_id,
+                      recurringid : 0,
+                      option      : [],
+                      quantity    : qty,
+                      price       : price,
+                      name        : p.name,
+                      reward      : p.reward,
+                      excluded    : p.excluded,
+                      gst_percent : parseFloat(p.gst_percent || p.gst || 0) || 0,
+                      discount    : parseFloat(p.discount || 0), // Original user input from order_product.discount
+                      discount_type: p.discount_type || 'percent' // Discount type from order_product
+                  };
+
+                  cartProducts.push(cartItem);
+              });
+
+              var posCartForGrid = cartProducts.map(function (item) {
+                  return {
+                      product_id  : item.product_id,
+                      quantity    : item.quantity,
+                      price       : item.price,
+                      name        : item.name,
+                      reward      : item.reward,
+                      excluded    : item.excluded,
+                      gst_percent : parseFloat(item.gst_percent || item.gst || 0) || 0,
+                      discount    : item.discount || 0,
+                      discount_type: item.discount_type || 'percent'
+                  };
+              });
+
+              localStorage.setItem(
+                  "pos_cart",
+                  JSON.stringify(posCartForGrid)
+              );
+
+              var cartArea = document.getElementById('cartArea');
+
+              if (cartArea)
+                  cartArea.innerHTML = '';
+
+              posCartForGrid.forEach(function (p) {
+                  var productForUI = {
+                      product_id  : p.product_id,
+                      quantity    : p.quantity,
+                      price       : p.price,
+                      name        : p.name,
+                      reward      : p.reward,
+                      excluded    : p.excluded,
+                      gst_percent : parseFloat(p.gst_percent || p.gst || 0) || 0,
+                      discount    : p.discount || 0,
+                      discount_type: p.discount_type || 'percent'
+                  };
+
+                  addProductRowToCartArea(productForUI);
+              });
+
+              if (posCartForGrid.length > 0) {
+                  window.discountPercentDefault = getDefaultDiscountPercent();
+                  window.discountFlatDefault = getDefaultDiscountFlat();
+              }
+
+              window.alreadyPaidAmount = 0;
+
+              if (
+                  selectedOrder &&
+                  selectedOrder.invoice &&
+                  selectedOrder.invoice.total_received
+              ) {
+                  window.alreadyPaidAmount =
+                      parseFloat(selectedOrder.invoice.total_received) || 0;
+              }
+
+              if (typeof updateCartTotals === "function")
+                  updateCartTotals();
+
+              if (typeof updateInvoiceRightColumn === "function")
+                  updateInvoiceRightColumn();
+
+              if (typeof updateTaxDisplay === "function")
+                  updateTaxDisplay();
+
+              if (typeof setOrderItems === "function")
+                  setOrderItems();
+
+              $('#mtlrContent').hide();
+              $('#invoiceContent').hide();
+              $('#cancelOrderContent').hide();
+
+              $('#cartArea').show();
+
+              $('.cart-header-row').show();
+
+              $('.discount-row').show();
+
+              $('.search-section').show();
+
+              // Restore Overall Discount LAST
+              var overallDiscountInput =
+                  parseFloat(
+                      selectedOrder.invoice &&
+                      selectedOrder.invoice.overall_discount
+                  ) || 0;
+
+              var discountType =
+                  selectedOrder.invoice &&
+                  selectedOrder.invoice.discount_type
+                      ? selectedOrder.invoice.discount_type
+                      : 'flat';
+
+              setTimeout(function () {
+                  var discountModeEl =
+                      document.getElementById('discountMode');
+
+                  var discountInputEl =
+                      document.getElementById('itemDiscountValue');
+
+                  var discountPrefixEl =
+                      document.getElementById('discountPrefix');
+
+                  // Restore using discount_type and overall_discount (original user input)
+                  if (overallDiscountInput > 0) {
+                      // PERCENT MODE
+                      if (discountType === 'percent') {
+                          if (discountModeEl)
+                              discountModeEl.value = 'percent';
+
+                          if (discountPrefixEl)
+                              discountPrefixEl.textContent = '%';
+
+                          // SAVE restored percentage (original user input)
+                          window.discountPercent =
+                              parseFloat(overallDiscountInput) || 0;
+
+                          window.discountFlat = null;
+                          window.userEditedPercent = true;
+                      }
+                      // FLAT MODE
+                      else {
+                          if (discountModeEl)
+                              discountModeEl.value = 'flat';
+
+                          if (discountPrefixEl)
+                              discountPrefixEl.textContent = '₹';
+
+                          // SAVE restored flat (original user input)
+                          window.discountFlat =
+                              parseFloat(overallDiscountInput) || 0;
+
+                          window.discountPercent = null;
+                          window.userEditedFlat = true;
+                      }
+
+                      if (discountInputEl)
+                          discountInputEl.value = overallDiscountInput.toFixed(2);
+                  }
+
+                  // Restore product discounts for each cart row
+                  var cartRows = document.querySelectorAll('.cart-row');
+                  cartRows.forEach(function(row) {
+                      var productId = row.getAttribute('data-product-id');
+                      var productData = posCartForGrid.find(function(p) {
+                          return parseInt(p.product_id) === parseInt(productId);
+                      });
+                      if (productData && productData.discount !== undefined) {
+                          var discountInput = row.querySelector('.discount-input');
+                          if (discountInput) {
+                              discountInput.value = parseFloat(productData.discount).toFixed(2);
+                          }
+                      }
+                  });
+
+                  // Default GST
+                  var defaultGst = 0;
+                  if (selectedOrder.invoice && selectedOrder.invoice.total_tax) {
+                      defaultGst = parseFloat(selectedOrder.invoice.total_tax);
+                  }
+
+                  if (typeof setDefaultGst === "function") {
+                      setDefaultGst(defaultGst);
+                  }
+
+                  // Update totals after restoration
+                  if (typeof updateCartTotals === "function")
+                      updateCartTotals();
+
+                  if (typeof updateInvoiceRightColumn === "function")
+                      updateInvoiceRightColumn();
+
+              }, 100);
+
+              var saveBtn = document.getElementById('saveSaleBtn');
+              if (saveBtn) {
+                  saveBtn.style.pointerEvents = 'none';
+                  saveBtn.style.opacity = '0.5';
+                  saveBtn.innerHTML = 'Return Processing...';
+                  saveBtn.onclick = null;
+              }
+          }
+
+          function cancelMTLROrder(orderId) {
+              console.log("cancelMTLROrder - Starting cancellation for order_id: " + orderId);
+              $.ajax({
+                  url: 'index.php?route=extension/purpletree_pos/pos/home|cancelWholesaleOrder',
+                  type: 'POST',
+                  data: { order_id: orderId },
+                  success: function(res) {
+                      console.log("cancelMTLROrder - Success response:", res);
+                      $('#mtlrActionConfirmModal').modal('hide');
+                      successMessage("MTLR Order " + orderId + " cancelled successfully.", 3000);
+                      loadMTLRData();
+                  },
+                  error: function(err) {
+                      console.error("cancelMTLROrder - Error:", err);
+                      $('#mtlrActionConfirmModal').modal('hide');
+                      errorMessage("Error cancelling MTLR order", 2000);
+                  }
+              });
+          }
          $(document).on('click', '#invoiceHistoryBtn', function () {
-             $('#quotationHistoryContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent').hide();
+             $('#quotationHistoryContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent, #mtlrContent').hide();
              $('#invoiceContent').show();
              $('#cartArea, .cart-header-row, .discount-row, .search-section').hide();
              $('#submit-order-btn, #sendQuotationBtn, #printCartBtn, #saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
@@ -10508,8 +11873,19 @@ if (data.upc && data.upc !== '') {
              setTodayDates();
              loadInvoiceData();
          });
+         $(document).on('click', '#mtlrBtn', function () {
+             $('#quotationHistoryContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent, #invoiceContent').hide();
+             $('#mtlrContent').show();
+             $('#cartArea, .cart-header-row, .discount-row, .search-section').hide();
+             $('#submit-order-btn, #sendQuotationBtn, #printCartBtn, #saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
+             highlightSidebarButton('mtlrBtn');
+             const today = new Date().toISOString().split('T')[0];
+             $('#mtlr_from_date').val(today);
+             $('#mtlr_to_date').val(today);
+             loadMTLRData();
+         });
          $(document).on('click', '#returnBtn', function () {
-             $('#quotationHistoryContent, #invoiceContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent').hide();
+             $('#quotationHistoryContent, #invoiceContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent, #mtlrContent').hide();
              $('#returnContent').show();
              $('#cartArea, .cart-header-row, .discount-row, .search-section').hide();
              $('#submit-order-btn, #sendQuotationBtn, #printCartBtn, #saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
@@ -10518,7 +11894,7 @@ if (data.upc && data.upc !== '') {
              loadReturnData();
          });
          $(document).on('click', '#walletHistoryBtn', function () {
-             $('#quotationHistoryContent, #invoiceContent, #returnContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent').hide();
+             $('#quotationHistoryContent, #invoiceContent, #returnContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent, #mtlrContent').hide();
              $('#walletHistoryContent').show();
              $('#cartArea, .cart-header-row, .discount-row, .search-section').hide();
              $('#submit-order-btn, #sendQuotationBtn, #printCartBtn, #saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
@@ -10527,7 +11903,7 @@ if (data.upc && data.upc !== '') {
              loadWalletHistoryData();
          });
          $(document).on('click', '#walletBtn', function () {
-             $('#quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #cancelOrderContent, #manageProductContent, #pNameContent').hide();
+             $('#quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #cancelOrderContent, #manageProductContent, #pNameContent, #mtlrContent').hide();
              $('#loadWalletContent').show();
              $('#cartArea, .cart-header-row, .discount-row, .search-section').hide(); 
              $('#submit-order-btn, #sendQuotationBtn, #printCartBtn','#saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
@@ -10539,7 +11915,7 @@ if (data.upc && data.upc !== '') {
              highlightSidebarButton('walletBtn');
          });
          $(document).on('click', '.backToCartBtn', function () {
-             $('#invoiceContent, #returnContent, #walletHistoryContent, #quotationHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent').hide();
+             $('#invoiceContent, #returnContent, #walletHistoryContent, #quotationHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent, #mtlrContent').hide();
              $('#cartArea').show();
              $('.cart-header-row').show();
              $('.discount-row').show();
@@ -10701,7 +12077,7 @@ if (data.upc && data.upc !== '') {
               $('#gstCalculationModal').modal('hide');
           }
           $(document).on('click', '#walletBtn', function () {
-              $('#quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent').hide();
+              $('#quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent, #mtlrContent').hide();
               $('#loadWalletContent').show();
               $('#cartArea, .cart-header-row, .discount-row, .search-section').hide();
               $('#submit-order-btn, #sendQuotationBtn, #printCartBtn','#saveSaleBtn').addClass('disabled').css('pointer-events', 'none');
@@ -10710,7 +12086,7 @@ if (data.upc && data.upc !== '') {
               const phone = $('#customerMobileInput').val()?.trim();
               if (!phone || phone.length < 10) return;
               $('#modalXl').modal('hide');
-              $('#quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent').hide();
+              $('#quotationHistoryContent, #invoiceContent, #returnContent, #walletHistoryContent, #editOrderHistoryContent, #loadWalletContent, #cancelOrderContent, #manageProductContent, #pNameContent, #mtlrContent').hide();
               $('#loadWalletContent').show();
               $('#cartArea, .cart-header-row, .discount-row, .search-sectio').hide();
               $('#wallet_phone_search').val(phone);
@@ -11205,6 +12581,9 @@ if (data.upc && data.upc !== '') {
          $(document).on('click', '#searchInvoiceBtn', function() {
              loadInvoiceData();
          });
+         $(document).on('click', '#searchMTLRBtn', function() {
+             loadMTLRData();
+         });
          $(document).on('click', '#exportInvoiceBtn', function() {
              exportInvoiceToExcel();
          });
@@ -11559,43 +12938,175 @@ if (data.upc && data.upc !== '') {
         function applyCouponDiscount(coupon, couponCode) {
             const couponInput = document.getElementById('couponCodeInvoice');
             const couponBtn   = document.getElementById('couponBtnInvoice');
-            let grandTotal = grandTotalAmount || 0;
-             if (!sessionStorage.getItem('originalGrandTotal')) {
-                 sessionStorage.setItem('originalGrandTotal', grandTotal.toFixed(2));
-             }
-             let discount = 0;
-             if (coupon.type === 'P') {
-                 discount = (grandTotal * parseFloat(coupon.discount)) / 100;
-             } else if (coupon.type === 'F') {
-                 discount = parseFloat(coupon.discount);
-             }
-             const maxAllowed = parseFloat(coupon.total) || 0;
-             if (maxAllowed > 0) {
-                 discount = Math.min(discount, maxAllowed);
-             }
-             discount = Math.min(discount, grandTotal);
-             const newGrandTotal = Math.max(grandTotal - discount, 0);
-             document.getElementById('grandTotal').value =
-                 format(newGrandTotal, posData.currency_code);
-             grandTotalAmount = newGrandTotal;
-             sessionStorage.setItem('couponApplied', JSON.stringify({
-                 coupon_id: coupon.coupon_id,
-                 code: couponCode,
-                 discount: discount,
-                 type: coupon.type,
-                 max_limit: maxAllowed,
-                 originalTotal: grandTotal
-             }));
-             couponBtn.textContent = 'Remove';
-             couponBtn.classList.add('remove');
-             couponInput.disabled = true;
-             updateTotalsWithCoupon(discount, couponCode);
-             updateTotals();
-             showCouponMessage(
-                 `Coupon applied. You saved ₹ ${discount.toFixed(2)}`,
-                 'success'
-             );
+            
+            // Get current cart values (do NOT modify cart)
+            let cartGrandTotal = grandTotalAmount || 0;
+            
+            // Calculate coupon discount amount
+            let discount = 0;
+            if (coupon.type === 'P') {
+                discount = (cartGrandTotal * parseFloat(coupon.discount)) / 100;
+            } else if (coupon.type === 'F') {
+                discount = parseFloat(coupon.discount);
+            }
+            const maxAllowed = parseFloat(coupon.total) || 0;
+            if (maxAllowed > 0) {
+                discount = Math.min(discount, maxAllowed);
+            }
+            discount = Math.min(discount, cartGrandTotal);
+            
+            // Store coupon info for order submission
+            sessionStorage.setItem('couponApplied', JSON.stringify({
+                coupon_id: coupon.coupon_id,
+                code: couponCode,
+                discount: discount,
+                type: coupon.type,
+                max_limit: maxAllowed,
+                originalTotal: cartGrandTotal
+            }));
+            
+            couponBtn.textContent = 'Remove';
+            couponBtn.classList.add('remove');
+            couponInput.disabled = true;
+            
+            // Update ONLY Payment Popup values
+            updatePaymentPopupWithCoupon(discount);
+            
+            showCouponMessage(
+                `Coupon applied. You saved ₹ ${discount.toFixed(2)}`,
+                'success'
+            );
          }
+         
+        function updatePaymentPopupWithCoupon(couponDiscount) {
+            // Get current cart values from Payment Popup
+            const subTotalEl = document.getElementById('subTotal');
+            const discountEl = document.getElementById('discountIncluded');
+            const taxEl = document.getElementById('taxIncluded');
+            
+            if (!subTotalEl || !discountEl || !taxEl) return;
+            
+            // Parse current values from Payment Popup
+            const subTotal = parseFloat(subTotalEl.textContent.replace(/[^\d.]/g, '')) || 0;
+            const currentDiscount = parseFloat(discountEl.textContent.replace(/[^\d.]/g, '')) || 0;
+            const currentTax = parseFloat(taxEl.textContent.replace(/[^\d.]/g, '')) || 0;
+            
+            // Read cart product data to apply coupon proportionally
+            const cartRows = document.querySelectorAll('.cart-row');
+            let totalTaxableAmount = 0;
+            let productData = [];
+            
+            cartRows.forEach(function(row) {
+                if (row.classList.contains('excluded-row')) {
+                    return;
+                }
+                const qtyInput = row.querySelector('.qty-input');
+                const product = decodeProduct(row.dataset.product);
+                if (!qtyInput || !product) return;
+                
+                const quantity = parseInt(qtyInput.value) || 0;
+                const unitPrice = parseFloat(row.dataset.price) || 0;
+                const discountPercent = product.discount || 0;
+                const gstPercent = product.gst_percent || 0;
+                
+                // Calculate current taxable amount (after product discount)
+                const lineTotal = unitPrice * quantity;
+                const productDiscountAmount = (discountPercent / 100) * lineTotal;
+                const discountedAmount = lineTotal - productDiscountAmount;
+                
+                // Apply overall discount proportionally (if exists)
+                let finalTaxableAmount = discountedAmount;
+                const cartOverallDiscountAmount = parseFloat(sessionStorage.getItem('cartOverallDiscountAmount')) || 0;
+                
+                if (cartOverallDiscountAmount > 0) {
+                    // Get total discounted amount across all products
+                    let totalDiscountedAmount = 0;
+                    cartRows.forEach(function(r) {
+                        if (r.classList.contains('excluded-row')) return;
+                        const p = decodeProduct(r.dataset.product);
+                        const q = parseInt(r.querySelector('.qty-input').value) || 0;
+                        const up = parseFloat(r.dataset.price) || 0;
+                        const dp = p.discount || 0;
+                        const lt = up * q;
+                        const pda = (dp / 100) * lt;
+                        totalDiscountedAmount += (lt - pda);
+                    });
+                    
+                    // Use the cart-calculated overall discount amount (read from sessionStorage)
+                    const discountShare = discountedAmount / totalDiscountedAmount;
+                    finalTaxableAmount = discountedAmount - (cartOverallDiscountAmount * discountShare);
+                }
+                
+                productData.push({
+                    taxableAmount: finalTaxableAmount,
+                    gstPercent: gstPercent
+                });
+                
+                totalTaxableAmount += finalTaxableAmount;
+            });
+            
+            // Apply coupon discount proportionally to each product's taxable amount
+            let newTotalGST = 0;
+            let newGrandTotal = 0;
+            
+            productData.forEach(function(item) {
+                let finalTaxableAmount = item.taxableAmount;
+                
+                if (couponDiscount > 0 && totalTaxableAmount > 0) {
+                    const couponShare = item.taxableAmount / totalTaxableAmount;
+                    const productCouponDiscount = couponDiscount * couponShare;
+                    finalTaxableAmount = item.taxableAmount - productCouponDiscount;
+                }
+                
+                // Recalculate GST on new taxable amount
+                const gstAmount = (item.gstPercent / 100) * finalTaxableAmount;
+                newTotalGST += gstAmount;
+                
+                // Product total = taxable amount + GST
+                newGrandTotal += finalTaxableAmount + gstAmount;
+            });
+            
+            // Update Payment Popup values only
+            discountEl.textContent = format(currentDiscount + couponDiscount, posData.currency_code);
+            taxEl.textContent = format(newTotalGST, posData.currency_code);
+            
+            // Round the grand total to nearest whole rupee
+            const roundedGrandTotal = Math.round(newGrandTotal);
+            
+            // Update the global grandTotalAmount variable so updateTotals() uses the rounded value
+            grandTotalAmount = roundedGrandTotal;
+            
+            // Update the Payment Summary Total (grandTotal) specifically with rounded value
+            const grandTotalEl = document.getElementById('grandTotal');
+            if (grandTotalEl) {
+                grandTotalEl.value = format(roundedGrandTotal, posData.currency_code);
+            }
+            
+            // Update all total displays in Payment Popup with rounded value
+            const totalElements = document.querySelectorAll('[id*="total"], [id*="Total"], [id*="TOTAL"]');
+            totalElements.forEach(function(el) {
+                if (el.id && (el.id.includes('pending') || el.id.includes('Pending') || 
+                              el.id.includes('payable') || el.id.includes('Payable') ||
+                              el.id.includes('amount') || el.id.includes('Amount'))) {
+                    // Update payable amounts with rounded grand total
+                    el.textContent = format(roundedGrandTotal, posData.currency_code);
+                }
+            });
+            
+            // Update QR placeholder if exists with rounded value
+            const qrPlaceholder = document.getElementById('upiQrAmountPlaceholder');
+            if (qrPlaceholder) {
+                qrPlaceholder.textContent = roundedGrandTotal.toFixed(2);
+            }
+            
+            // Store the rounded final total for order submission
+            sessionStorage.setItem('paymentPopupTotal', roundedGrandTotal.toFixed(2));
+            
+            // Recalculate all payment fields using the master updateTotals() function
+            if (typeof updateTotals === 'function') {
+                updateTotals();
+            }
+        }
          function showCouponMessage(msg, type = 'error') {
              const box = document.getElementById('couponMessage');
              if (!box) return;
@@ -11647,36 +13158,144 @@ if (data.upc && data.upc !== '') {
              if (couponMsgEl) {
                  couponMsgEl.textContent = '';
              }
+             
              const couponApplied = JSON.parse(sessionStorage.getItem('couponApplied'));
              if (couponApplied) {
-                 const originalTotal =
-                     parseFloat(sessionStorage.getItem('originalGrandTotal')) ||
-                     couponApplied.originalTotal;
-                 if (originalTotal) {
-                     document.getElementById('grandTotal').value =
-                         format(originalTotal, posData.currency_code);
-                     grandTotalAmount = originalTotal;
-                 }
-                 let totals = JSON.parse(sessionStorage.getItem("totals")) || [];
-                 totals = totals.filter(item => item.code !== 'coupon');
-                 const grandTotalItem = totals.find(item => item.code === 'total');
-                 if (grandTotalItem) {
-                     grandTotalItem.value = originalTotal;
-                 }
-                 sessionStorage.setItem("totals", JSON.stringify(totals));
-                 sessionStorage.setItem("grand_total", JSON.stringify({
-                     'code': 'total',
-                     'title': 'Total',
-                     'value': originalTotal,
-                     'sort_order': 9
-                 }));
+                 const couponDiscount = parseFloat(couponApplied.discount) || 0;
+                 
+                 // Remove coupon from sessionStorage
                  sessionStorage.removeItem('couponApplied');
                  sessionStorage.removeItem('originalGrandTotal');
-                 getCartProductHTML();
-                 updateTotals();
+                 
+                 // Restore Payment Popup values to original cart values
+                 restorePaymentPopupWithoutCoupon(couponDiscount);
+                 
                  successMessage('Coupon removed successfully', 2000);
              }
          }
+         
+        function restorePaymentPopupWithoutCoupon(couponDiscount) {
+            // Read cart product data to restore original values (without coupon)
+            const cartRows = document.querySelectorAll('.cart-row');
+            let totalTaxableAmount = 0;
+            let productData = [];
+            
+            cartRows.forEach(function(row) {
+                if (row.classList.contains('excluded-row')) {
+                    return;
+                }
+                const qtyInput = row.querySelector('.qty-input');
+                const product = decodeProduct(row.dataset.product);
+                if (!qtyInput || !product) return;
+                
+                const quantity = parseInt(qtyInput.value) || 0;
+                const unitPrice = parseFloat(row.dataset.price) || 0;
+                const discountPercent = product.discount || 0;
+                const gstPercent = product.gst_percent || 0;
+                
+                // Calculate current taxable amount (after product discount)
+                const lineTotal = unitPrice * quantity;
+                const productDiscountAmount = (discountPercent / 100) * lineTotal;
+                const discountedAmount = lineTotal - productDiscountAmount;
+                
+                // Apply overall discount proportionally (if exists)
+                let finalTaxableAmount = discountedAmount;
+                const cartOverallDiscountAmount = parseFloat(sessionStorage.getItem('cartOverallDiscountAmount')) || 0;
+                
+                if (cartOverallDiscountAmount > 0) {
+                    // Get total discounted amount across all products
+                    let totalDiscountedAmount = 0;
+                    cartRows.forEach(function(r) {
+                        if (r.classList.contains('excluded-row')) return;
+                        const p = decodeProduct(r.dataset.product);
+                        const q = parseInt(r.querySelector('.qty-input').value) || 0;
+                        const up = parseFloat(r.dataset.price) || 0;
+                        const dp = p.discount || 0;
+                        const lt = up * q;
+                        const pda = (dp / 100) * lt;
+                        totalDiscountedAmount += (lt - pda);
+                    });
+                    
+                    // Use the cart-calculated overall discount amount (read from sessionStorage)
+                    const discountShare = discountedAmount / totalDiscountedAmount;
+                    finalTaxableAmount = discountedAmount - (cartOverallDiscountAmount * discountShare);
+                }
+                
+                productData.push({
+                    taxableAmount: finalTaxableAmount,
+                    gstPercent: gstPercent
+                });
+                
+                totalTaxableAmount += finalTaxableAmount;
+            });
+            
+            // Recalculate GST on original taxable amounts (without coupon)
+            let originalTotalGST = 0;
+            let originalGrandTotal = 0;
+            
+            productData.forEach(function(item) {
+                // Recalculate GST on original taxable amount
+                const gstAmount = (item.gstPercent / 100) * item.taxableAmount;
+                originalTotalGST += gstAmount;
+                
+                // Product total = taxable amount + GST
+                originalGrandTotal += item.taxableAmount + gstAmount;
+            });
+            
+            // Get Payment Popup elements
+            const subTotalEl = document.getElementById('subTotal');
+            const discountEl = document.getElementById('discountIncluded');
+            const taxEl = document.getElementById('taxIncluded');
+            
+            if (!subTotalEl || !discountEl || !taxEl) return;
+            
+            // Parse current discount
+            const currentDiscount = parseFloat(discountEl.textContent.replace(/[^\d.]/g, '')) || 0;
+            
+            // Restore discount to original (remove coupon discount)
+            const originalDiscount = currentDiscount - couponDiscount;
+            
+            // Restore Payment Popup values
+            discountEl.textContent = format(originalDiscount, posData.currency_code);
+            taxEl.textContent = format(originalTotalGST, posData.currency_code);
+            
+            // Round the original grand total to nearest whole rupee
+            const roundedOriginalGrandTotal = Math.round(originalGrandTotal);
+            
+            // Restore the global grandTotalAmount variable so updateTotals() uses the rounded value
+            grandTotalAmount = roundedOriginalGrandTotal;
+            
+            // Restore the Payment Summary Total (grandTotal) specifically with rounded value
+            const grandTotalEl = document.getElementById('grandTotal');
+            if (grandTotalEl) {
+                grandTotalEl.value = format(roundedOriginalGrandTotal, posData.currency_code);
+            }
+            
+            // Restore all total displays in Payment Popup with rounded value
+            const totalElements = document.querySelectorAll('[id*="total"], [id*="Total"], [id*="TOTAL"]');
+            totalElements.forEach(function(el) {
+                if (el.id && (el.id.includes('pending') || el.id.includes('Pending') || 
+                              el.id.includes('payable') || el.id.includes('Payable') ||
+                              el.id.includes('amount') || el.id.includes('Amount'))) {
+                    // Restore payable amounts with rounded grand total
+                    el.textContent = format(roundedOriginalGrandTotal, posData.currency_code);
+                }
+            });
+            
+            // Restore QR placeholder if exists with rounded value
+            const qrPlaceholder = document.getElementById('upiQrAmountPlaceholder');
+            if (qrPlaceholder) {
+                qrPlaceholder.textContent = roundedOriginalGrandTotal.toFixed(2);
+            }
+            
+            // Clear the payment popup total
+            sessionStorage.removeItem('paymentPopupTotal');
+            
+            // Recalculate all payment fields using the master updateTotals() function
+            if (typeof updateTotals === 'function') {
+                updateTotals();
+            }
+        }
          function initializeCouponFunctionality() {
              const creditLimitCheckbox = document.getElementById('creditLimitInvoice');
              const useCouponCheckbox = document.getElementById('useCouponInvoice');
@@ -12868,8 +14487,10 @@ if (data.upc && data.upc !== '') {
              }
              let discount      = Math.min(creditPoints, grandTotal);
              let newGrandTotal = Math.max(grandTotal - discount, 0);
-             document.getElementById('grandTotal').value = format(newGrandTotal, posData.currency_code);
-             grandTotalAmount = newGrandTotal;
+             // Round to nearest whole rupee
+             let roundedGrandTotal = Math.round(newGrandTotal);
+             document.getElementById('grandTotal').value = format(roundedGrandTotal, posData.currency_code);
+             grandTotalAmount = roundedGrandTotal;
              sessionStorage.setItem('credit_points_used', JSON.stringify(discount));
              let totals = JSON.parse(sessionStorage.getItem("totals")) || [];
              totals = totals.filter(item => item.code !== 'credit_points');
@@ -12885,7 +14506,7 @@ if (data.upc && data.upc !== '') {
              };
              if (grandTotalIndex > -1) {
                  totals.splice(grandTotalIndex, 0, creditItem);
-                 totals[grandTotalIndex + 1].value = newGrandTotal;
+                 totals[grandTotalIndex + 1].value = roundedGrandTotal;
              } else {
                  totals.push(creditItem);
              }
@@ -12893,7 +14514,7 @@ if (data.upc && data.upc !== '') {
              sessionStorage.setItem("grand_total", JSON.stringify({
                  'code':       'total',
                  'title':      'Total',
-                 'value':      newGrandTotal,
+                 'value':      roundedGrandTotal,
                  'sort_order': 9
              }));
              getCartProductHTML();
@@ -12902,20 +14523,22 @@ if (data.upc && data.upc !== '') {
              let originalGrandTotal = sessionStorage.getItem('originalGrandTotal');
              if (originalGrandTotal) {
                  const original = parseFloat(originalGrandTotal);
+                 // Round to nearest whole rupee
+                 const roundedOriginal = Math.round(original);
                  document.getElementById('grandTotal').value =
-                     format(original, posData.currency_code);
-                 grandTotalAmount = original;
+                     format(roundedOriginal, posData.currency_code);
+                 grandTotalAmount = roundedOriginal;
                  let totals = JSON.parse(sessionStorage.getItem("totals")) || [];
                  totals = totals.filter(item => item.code !== 'credit_points');
                  const grandTotalItem = totals.find(item => item.code === 'total');
                  if (grandTotalItem) {
-                     grandTotalItem.value = original;
+                     grandTotalItem.value = roundedOriginal;
                  }
                  sessionStorage.setItem("totals", JSON.stringify(totals));
                  sessionStorage.setItem("grand_total", JSON.stringify({
                      'code': 'total',
                      'title': 'Total',
-                     'value': original,
+                     'value': roundedOriginal,
                      'sort_order': 9
                  }));
                  sessionStorage.removeItem('credit_points_used');
@@ -13294,11 +14917,13 @@ if (data.upc && data.upc !== '') {
                  event.preventDefault();
                  const selectedItem = getSelectedAutocompleteItem();
                  if (selectedItem) {
-                     selectSearchAutocompleteProduct(selectedItem.dataset.productId);
+                     hideSearchAutocomplete();
+                    selectSearchAutocompleteProduct(selectedItem.dataset.productId);
                      return;
                  }
                  const firstItem = document.querySelector('#main_search_autocomplete_list li[data-product-id]');
                  if (firstItem) {
+                    hideSearchAutocomplete();
                      selectSearchAutocompleteProduct(firstItem.dataset.productId);
                      return;
                  }
@@ -13396,6 +15021,7 @@ if (data.upc && data.upc !== '') {
                      '<span class="cell price" title="' + formattedPrice + '">' + formattedPrice + '</span>';
                  if (productQuantity > 0) {
                      item.addEventListener('click', function() {
+                         hideSearchAutocomplete();
                          selectSearchAutocompleteProduct(productId);
                      });
                  }
@@ -13608,6 +15234,7 @@ if (data.upc && data.upc !== '') {
                      '<span class="cell price" title="' + formattedPrice + '">' + formattedPrice + '</span>';
                  if (productQuantity > 0) {
                      item.addEventListener('click', function() {
+                         hideSearchAutocomplete();
                          selectSearchAutocompleteProduct(productId);
                      });
                  }
@@ -13736,12 +15363,29 @@ if (data.upc && data.upc !== '') {
                   }
               });
           }
-          let rowGst = (gstPercent / 100) * (product.price * editableQuantity);
+          let discountPercent = product.discount || 0;
+          let discountedPrice = product.price * (1 - discountPercent / 100);
+          let discountedAmount = discountedPrice * editableQuantity;
+          let formattedDiscountedAmount = discountedAmount;
+          if (typeof format === 'function' && typeof posData !== 'undefined') {
+              formattedDiscountedAmount = format(discountedAmount, posData.currency_code || 'INR', '', true, 0);
+          } else {
+              formattedDiscountedAmount = '₹' + Math.round(discountedAmount);
+          }
+          let rowGst = (gstPercent / 100) * discountedAmount;
           let formattedRowGst = rowGst;
           if (typeof format === 'function' && typeof posData !== 'undefined') {
-              formattedRowGst = format(rowGst, posData.currency_code || 'INR', '', true, 0);
+              formattedRowGst = format(rowGst, posData.currency_code || 'INR', '', true, 2);
           } else {
-              formattedRowGst = '₹' + Math.round(rowGst);
+              formattedRowGst = '₹' + rowGst.toFixed(2);
+          }
+          // Update formattedTotal to include GST
+          let totalPriceWithGst = (discountedPrice * editableQuantity) + rowGst;
+          formattedTotal = totalPriceWithGst;
+          if (typeof format === 'function' && typeof posData !== 'undefined') {
+              formattedTotal = format(totalPriceWithGst, posData.currency_code || 'INR', '', true, 0);
+          } else {
+              formattedTotal = '₹' + Math.round(totalPriceWithGst);
           }
           const productObj = {
                product_id: product.product_id,
@@ -13751,9 +15395,11 @@ if (data.upc && data.upc !== '') {
                reward: product.reward ?? 0,
                quantity: editableQuantity,
                pos_quantity: product.pos_quantity ?? product.posquantity ?? 0,
-               total: Number(product.price) * editableQuantity,
+               total: discountedPrice * editableQuantity,
                excluded: product.excluded || false,
-               gst_percent: gstPercent
+               gst_percent: gstPercent,
+               discount: product.discount || 0,
+               discount_type: product.discount_type || 'percent'
              };
           const cartRowHTML =
           '<div data-product="' + encodeProduct(productObj) + '" class="cart-row" data-product-id="' + product.product_id + '" data-price="' + product.price + '">' +
@@ -13762,8 +15408,10 @@ if (data.upc && data.upc !== '') {
           '<div class="cart-cell">' + (product.name || product.heading_title) + '</div>' +
           '<div class="cart-cell actual-qty" style="color:blue;" data-initial-stock="' + stockQuantity + '">' + actualQuantity + '</div>' +
           '<div class="cart-cell amount" style="text-align: center;"><input type="number" class="qty-input" value="' + editableQuantity + '" min="1" onchange="handleManualQuantityEntry(this, \'' + product.product_id + '\')" style="width: 60px; height:24px; text-align: center; font-size:14px;"></div>' +
-          '<div class="cart-cell discount" style="text-align: center;">0 %</div>' +
           priceCellHtml +
+          '<div class="cart-cell discount" style="text-align: center;"><input type="number" class="discount-input" value="' + (product.discount || 0) + '" min="0" max="100" step="0.01" onchange="handleManualDiscountEntry(this, \'' + product.product_id + '\')" style="width: 60px; height:24px; text-align: center; font-size:14px;"> %</div>' +
+          '<div class="cart-cell discounted-amount" style="text-align: center;" data-product-id="' + product.product_id + '">' + formattedDiscountedAmount + '</div>' +
+          
           '<div class="cart-cell gst-percent" style="text-align: center; color: #856404;" data-product-id="' + product.product_id + '">' + gstPercent + ' %</div>' +
           '<div class="cart-cell row-gst" style="text-align: center; color: #856404;" data-product-id="' + product.product_id + '">' + formattedRowGst + '</div>' +
           '<div class="cart-cell total" data-product-id="' + product.product_id + '">' + formattedTotal + '</div>' +
@@ -13862,15 +15510,49 @@ setTimeout(function () {
               const price = parseFloat(row.dataset.price) || 0;
               const product = decodeProduct(row.dataset.product);
               const gstPercent = product ? (product.gst_percent || 0) : 0;
+              const discountPercent = product ? (product.discount || 0) : 0;
               const totalCell = row.querySelector('.cart-cell.total');
               const totalSingleCell = row.querySelector('.cart-cell.single-qty');
               const rowGstCell = row.querySelector('.cart-cell.row-gst');
+              const discountedAmountCell = row.querySelector('.cart-cell.discounted-amount');
+
+              console.log('updateRowTotal - price:', price, 'quantity:', quantity, 'discountPercent:', discountPercent, 'gstPercent:', gstPercent);
+
+              // Calculate discounted price
+              const discountedPrice = price * (1 - discountPercent / 100);
+              const baseTotal = discountedPrice * quantity;
+
+              // Calculate GST on discounted amount
+              const gstAmount = (baseTotal * gstPercent) / 100;
+
+              // Total including GST for display
+              const totalPriceWithGst = baseTotal + gstAmount;
+
+              console.log('updateRowTotal - discountedPrice:', discountedPrice, 'baseTotal:', baseTotal, 'gstAmount:', gstAmount, 'totalPriceWithGst:', totalPriceWithGst);
+
               if (totalCell) {
-                  let totalPrice = price * quantity;
                    if (typeof format === 'function' && typeof posData !== 'undefined') {
-                       totalCell.textContent = format(totalPrice, posData.currency_code || 'INR', '', true, 0);
+                       totalCell.textContent = format(totalPriceWithGst, posData.currency_code || 'INR', '', true, 0);
                    } else {
-                       totalCell.textContent = '₹' + Math.round(totalPrice);
+                       totalCell.textContent = '₹' + Math.round(totalPriceWithGst);
+                   }
+              }
+
+              // Update row GST cell
+              if (rowGstCell) {
+                   if (typeof format === 'function' && typeof posData !== 'undefined') {
+                       rowGstCell.textContent = format(gstAmount, posData.currency_code || 'INR', '', true, 2);
+                   } else {
+                       rowGstCell.textContent = '₹' + gstAmount.toFixed(2);
+                   }
+              }
+
+              // Update discounted amount cell (without GST)
+              if (discountedAmountCell) {
+                   if (typeof format === 'function' && typeof posData !== 'undefined') {
+                       discountedAmountCell.textContent = format(baseTotal, posData.currency_code || 'INR', '', true, 0);
+                   } else {
+                       discountedAmountCell.textContent = '₹' + Math.round(baseTotal);
                    }
               }
               const qtyInput = row.querySelector('.qty-input');
@@ -13888,14 +15570,6 @@ setTimeout(function () {
                    } else {
                        totalSingleCell.textContent = `${quantity}x ${Math.round(price)}`;
                    }
-              }
-              if (rowGstCell) {
-                  let rowGst = (gstPercent / 100) * (price * quantity);
-                  if (typeof format === 'function' && typeof posData !== 'undefined') {
-                      rowGstCell.textContent = format(rowGst, posData.currency_code || 'INR', '', true, 0);
-                  } else {
-                      rowGstCell.textContent = '₹' + Math.round(rowGst);
-                  }
               }
           }
          function increaseQuantity(productId) {
@@ -13976,14 +15650,14 @@ setTimeout(function () {
              if (!product) return;
              const actualQtySpan = row.querySelector('.actual-qty');
              let cartQty = parseInt(product.quantity) || 0;
-             let totalAvailable = actualQtySpan.hasAttribute('data-initial-stock') 
-                ? parseInt(actualQtySpan.getAttribute('data-initial-stock')) 
+             let totalAvailable = actualQtySpan.hasAttribute('data-initial-stock')
+                ? parseInt(actualQtySpan.getAttribute('data-initial-stock'))
                 : (parseInt(actualQtySpan.textContent) + cartQty);
              if (!actualQtySpan.hasAttribute('data-initial-stock')) {
                 actualQtySpan.setAttribute('data-initial-stock', totalAvailable);
              }
              let newQty = parseInt(input.value);
-             if (isNaN(newQty)) return; 
+             if (isNaN(newQty)) return;
              if (newQty < 1) newQty = 1;
              input.value = newQty;
              actualQtySpan.textContent = totalAvailable - newQty;
@@ -13992,12 +15666,32 @@ setTimeout(function () {
              row.dataset.product = encodeProduct(product);
              updateLocalStorageQuantity(productId, newQty);
              updateRowTotal(row, newQty);
-             updateCartTotals(); 
+             updateCartTotals();
              const badge = document.getElementById('pos-cart-badge');
              if (badge) {
                  const numItems = document.querySelectorAll('.cart-row').length;
                  badge.textContent = numItems;
              }
+          }
+
+          function handleManualDiscountEntry(input, productId) {
+             const row = document.querySelector('.cart-row[data-product-id="' + productId + '"]');
+             if (!row) return;
+             let product = decodeProduct(row.dataset.product);
+             if (!product) return;
+
+             let newDiscount = parseFloat(input.value);
+             if (isNaN(newDiscount)) newDiscount = 0;
+             if (newDiscount < 0) newDiscount = 0;
+             if (newDiscount > 100) newDiscount = 100;
+             input.value = newDiscount;
+
+             product.discount = newDiscount;
+             const discountedPrice = product.price * (1 - newDiscount / 100);
+             product.total = discountedPrice * product.quantity;
+             row.dataset.product = encodeProduct(product);
+             updateRowTotal(row, product.quantity);
+             updateCartTotals();
           }
          function updateLocalStorageQuantity(productId, newQuantity) {
              let posCart = JSON.parse(localStorage.getItem("pos_cart") || "[]");
@@ -14162,36 +15856,20 @@ setTimeout(function () {
              }
          }
           function updateCartTotals() {
-              let netTotal = 0;
-              let totalTax = 0;
-              let totalDiscount = 0;
-              const cartRows = document.querySelectorAll('.cart-row');
-              cartRows.forEach(function (row) {
-                  if (row.classList.contains('excluded-row')) {
-                      return;
-                  }
-                  const qtyInput   = row.querySelector('.qty-input');
-                  const product      = decodeProduct(row.dataset.product);
-                  if (!qtyInput || !product) return;
-                  const quantity = parseInt(qtyInput.value) || 0;
-                  const unitPrice = parseFloat(row.dataset.price) || 0;
-                  const gstPercent = product.gst_percent || 0;
-                  let lineTotal = unitPrice * quantity;
-                  netTotal += lineTotal;
-                  let lineGst = (gstPercent / 100) * lineTotal;
-                  totalTax += lineGst;
-              });
-              totalDiscount = totalTax;
-              const grandTotal = netTotal;
-              updateTotalsDisplay(netTotal, totalTax, grandTotal, totalDiscount);
+              // Delegate to updateSummary which implements the correct independent discount logic
+              if (typeof updateSummary === 'function') {
+                  updateSummary(false);
+              }
+              
               updateInvoiceRightColumn();
 
-              // Refresh discount input when cart changes
-              window.userEditedFlat = false;
-              window.userEditedPercent = false;
-              if (typeof onDiscountModeChange === 'function') {
-                  onDiscountModeChange();
-              }
+              // DO NOT reset Overall Discount when cart changes
+              // Only reset when user explicitly clears the field
+              // window.userEditedFlat = false;
+              // window.userEditedPercent = false;
+              // if (typeof onDiscountModeChange === 'function') {
+              //     onDiscountModeChange();
+              // }
           }
           function updateTotalsDisplay(netTotal, totalTax, grandTotal, totalDiscount) {
               let formattedNetTotal, formattedTotalTax, formattedGrandTotal, formattedTotalDiscount;
@@ -14215,17 +15893,14 @@ setTimeout(function () {
               if (totalTaxSpan) totalTaxSpan.textContent = formattedTotalTax;
               if (grandTotalSpan) grandTotalSpan.textContent = formattedGrandTotal;
               
-              // Update footer subtotal display
-              const footerSubtotalSpan = document.getElementById('footerSubtotalValue');
-              if (footerSubtotalSpan) footerSubtotalSpan.textContent = formattedGrandTotal;
-              
               // Update new summary display elements
               const subtotalSpan = document.getElementById('subtotalValue');
               const itemDiscountSpan = document.getElementById('itemDiscountValue');
               const gstTotalSpan = document.getElementById('gstTotalValue');
               const itemCountSpan = document.getElementById('itemCountValue');
               
-              if (subtotalSpan) subtotalSpan.textContent = formattedNetTotal;
+              // subtotalValue: show grand total (what itemCountValue previously showed)
+              if (subtotalSpan) subtotalSpan.textContent = formattedGrandTotal;
             if (itemDiscountSpan) itemDiscountSpan.value = parseFloat(formattedTotalDiscount.replace(/[^\d.]/g, '')).toFixed(2);
               
               // GST Total: show number of items (count) + GST amount on same row
@@ -14234,7 +15909,7 @@ setTimeout(function () {
               if (gstCountSpan) gstCountSpan.textContent = cartRows.length;
               if (gstTotalSpan) gstTotalSpan.textContent = formattedTotalTax;
               
-              // Item Count: show quantity total and grand total amount
+              // Item Count: show quantity total and sum of net total + GST
               let qtyTotal = 0;
               cartRows.forEach(function(row) {
                   const qtyInput = row.querySelector('.qty-input');
@@ -14247,7 +15922,41 @@ setTimeout(function () {
               });
               const itemQtySpan = document.getElementById('itemQtyValue');
               if (itemQtySpan) itemQtySpan.textContent = qtyTotal;
-              if (itemCountSpan) itemCountSpan.textContent = formattedGrandTotal;
+              // itemCountValue: show sum of all cart-cell total values
+              let cartCellTotalSum = 0;
+              let totalDiscountedAmount = 0;
+              cartRows.forEach(function(row) {
+                  const totalCell = row.querySelector('.cart-cell.total');
+                  if (totalCell) {
+                      const totalValue = parseFloat(totalCell.textContent.replace(/[^\d.]/g, '')) || 0;
+                      cartCellTotalSum += totalValue;
+                  }
+                  const discountedAmountCell = row.querySelector('.cart-cell.discounted-amount');
+                  if (discountedAmountCell) {
+                      const discountedAmountValue = parseFloat(discountedAmountCell.textContent.replace(/[^\d.]/g, '')) || 0;
+                      totalDiscountedAmount += discountedAmountValue;
+                  }
+              });
+              let formattedCartCellTotalSum;
+              if (typeof format === 'function' && typeof posData !== 'undefined') {
+                  formattedCartCellTotalSum = format(cartCellTotalSum, posData.currency_code || 'INR', '', true, 0);
+              } else {
+                  formattedCartCellTotalSum = '₹' + Math.round(cartCellTotalSum);
+              }
+              if (itemCountSpan) itemCountSpan.textContent = formattedCartCellTotalSum;
+              // Footer subtotal is now updated by updateSummary function with Grand Total
+              // Update totalDiscountedAmount display
+              const totalDiscountedAmountSpan = document.getElementById('totalDiscountedAmount');
+              if (totalDiscountedAmountSpan) {
+                  // Get subtotalValue and calculate difference
+                  const subtotalValueSpan = document.getElementById('subtotalValue');
+                  let difference = 0;
+                  if (subtotalValueSpan) {
+                      const subtotalValue = parseFloat(subtotalValueSpan.textContent.replace(/[^\d.]/g, '')) || 0;
+                      difference = subtotalValue - totalDiscountedAmount;
+                  }
+                  totalDiscountedAmountSpan.textContent = 'disctd: ₹' + Math.round(totalDiscountedAmount) + '  disc: (₹' + Math.round(difference) + ')';
+              }
           }
          const style = document.createElement('style');
          style.textContent = '@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } } @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }';
@@ -15145,6 +16854,7 @@ setTimeout(function () {
               'taxExemptBtn',
               'gstCalculationBtn',
               'invoiceHistoryBtn',
+              'mtlrBtn',
               'editOrderBtn',
               'cancelOrderBtn',
               'returnBtn',
@@ -15876,13 +17586,11 @@ window.discountPercentDefault = 0;
 window.discountFlatDefault = 0;
 
 function getDefaultDiscountPercent() {
-    const subtotal = getSubtotal();
-    const gstAmt = getGST();
-    return subtotal > 0 ? (gstAmt / subtotal) * 100 : 0;
+    return 0;
 }
 
 function getDefaultDiscountFlat() {
-    return getGST();
+    return 0;
 }
 
 
@@ -15902,7 +17610,8 @@ window.userEditedPercent = false;
 
 function onDiscountModeChange() {
 
-    const dMode = document.getElementById('discountMode').value;
+    const dModeEl = document.getElementById('discountMode');
+    const dMode = dModeEl ? dModeEl.value : 'flat';
 
     const input = document.getElementById('itemDiscountValue');
 
@@ -15947,18 +17656,64 @@ function onDiscountModeChange() {
 
 function updateSummary(userEdited = true) {
 
-    const subtotal = getSubtotal();
-    const gstAmt   = getGST();
-
-    const dMode = document.getElementById('discountMode').value;
-
-    const dInput = parseFloat(
-        document.getElementById('itemDiscountValue').value
-    ) || 0;
-
-
+    // Step 1: Calculate Sub Total (sum of original Row Prices, never changes)
+    let subTotal = 0;
+    let totalDiscountedAmount = 0;
+    let totalGST = 0;
+    let grandTotal = 0;
     
-
+    // Count products with GST > 0 and total item quantity
+    let gstProductCount = 0;
+    let totalItemQuantity = 0;
+    
+    // Store product data for proportional distribution and GST recalculation
+    let productData = [];
+    const cartRows = document.querySelectorAll('.cart-row');
+    
+    cartRows.forEach(function (row) {
+        if (row.classList.contains('excluded-row')) {
+            return;
+        }
+        const qtyInput   = row.querySelector('.qty-input');
+        const product      = decodeProduct(row.dataset.product);
+        if (!qtyInput || !product) return;
+        const quantity = parseInt(qtyInput.value) || 0;
+        const unitPrice = parseFloat(row.dataset.price) || 0;
+        const gstPercent = product.gst_percent || 0;
+        const discountPercent = product.discount || 0;
+        
+        // Sub Total = Row Price × Quantity (original, before any discounts)
+        const lineTotal = unitPrice * quantity;
+        subTotal += lineTotal;
+        
+        // Product Discount calculations
+        const productDiscountAmount = (discountPercent / 100) * lineTotal;
+        const discountedAmount = lineTotal - productDiscountAmount;
+        totalDiscountedAmount += discountedAmount;
+        
+        // Count products with GST > 0
+        if (gstPercent > 0) {
+            gstProductCount++;
+        }
+        
+        // Count total item quantity
+        totalItemQuantity += quantity;
+        
+        // Store product data for later processing
+        productData.push({
+            row: row,
+            discountedAmount: discountedAmount,
+            gstPercent: gstPercent
+        });
+    });
+    
+    // Step 2: Get Overall Discount from input (only if user manually entered a value)
+    const dModeEl = document.getElementById('discountMode');
+    const dMode = dModeEl ? dModeEl.value : 'flat';
+    const dInputEl = document.getElementById('itemDiscountValue');
+    const dInput = dInputEl ? parseFloat(dInputEl.value) || 0 : 0;
+    
+    // Track user edits for Overall Discount only
     if (dMode === 'flat') {
         if (userEdited) {
             window.discountFlat = dInput;
@@ -15970,75 +17725,125 @@ function updateSummary(userEdited = true) {
             window.userEditedPercent = true;
         }
     }
-
-
     
-
     const defaultFlat = getDefaultDiscountFlat();
     const defaultPercent = getDefaultDiscountPercent();
-
+    
     let flatAmt    = defaultFlat;
     let percentAmt = defaultPercent;
-
+    
     if (dMode === 'flat') {
-
-        flatAmt = window.discountFlat !== null
-            ? window.discountFlat
-            : defaultFlat;
-
+        flatAmt = window.discountFlat !== null ? window.discountFlat : defaultFlat;
     } else {
-
-        percentAmt = window.discountPercent !== null
-            ? window.discountPercent
-            : defaultPercent;
+        percentAmt = window.discountPercent !== null ? window.discountPercent : defaultPercent;
     }
-
-
     
-
-    let totalDiscount = 0;
-
-    // FLAT MODE
-    if (dMode === 'flat') {
-
-        totalDiscount = flatAmt;
-
+    // Step 3: Apply Overall Discount ONLY if user explicitly entered a value > 0
+    // Overall Discount reduces TAXABLE AMOUNT first, then GST is recalculated
+    let overallDiscountAmount = 0;
+    
+    // Check if user has manually entered a value (not default)
+    const userHasEnteredOverallDiscount = (dMode === 'flat' && window.userEditedFlat && flatAmt > 0) ||
+                                           (dMode === 'percent' && window.userEditedPercent && percentAmt > 0);
+    
+    if (userHasEnteredOverallDiscount) {
+        if (dMode === 'flat') {
+            overallDiscountAmount = flatAmt;
+        } else {
+            overallDiscountAmount = (percentAmt / 100) * totalDiscountedAmount;
+        }
     }
-
-    // PERCENT MODE
-    else {
-
-        totalDiscount =
-            (percentAmt / 100) * subtotal;
-    }
-
-
     
-
-    const totalBeforeRoundOff =
-        subtotal + gstAmt - totalDiscount;
-
-    const grandTotal =
-        Math.round(totalBeforeRoundOff);
-
-
-   
-
-    document.getElementById('itemCountValue').textContent =
-        '₹' + grandTotal.toFixed(2);
-
-
-    
-
-    console.log({
-        subtotal,
-        gstAmt,
-        dMode,
-        flatAmt,
-        percentAmt,
-        totalDiscount,
-        grandTotal
+    // Step 4: Calculate GST based on final taxable amount
+    // If Overall Discount > 0, reduce taxable amount first, then recalculate GST
+    productData.forEach(function(item) {
+        let finalTaxableAmount = item.discountedAmount;
+        
+        if (userHasEnteredOverallDiscount && overallDiscountAmount > 0 && totalDiscountedAmount > 0) {
+            // Distribute overall discount proportionally based on discounted amount
+            const discountShare = item.discountedAmount / totalDiscountedAmount;
+            const productDiscount = overallDiscountAmount * discountShare;
+            finalTaxableAmount = item.discountedAmount - productDiscount;
+        }
+        
+        // Recalculate GST based on final taxable amount
+        const gstAmount = (item.gstPercent / 100) * finalTaxableAmount;
+        totalGST += gstAmount;
+        
+        // Product Total = Final Taxable Amount + GST
+        const productTotal = finalTaxableAmount + gstAmount;
+        grandTotal += productTotal;
+        
+        // Update row display
+        const totalCell = item.row.querySelector('.cart-cell.total');
+        if (totalCell) {
+            totalCell.textContent = '₹' + productTotal.toFixed(2);
+        }
+        
+        // Update GST amount cell
+        const gstAmountCell = item.row.querySelector('.cart-cell.gst-amount');
+        if (gstAmountCell) {
+            gstAmountCell.textContent = '₹' + gstAmount.toFixed(2);
+        }
     });
+    
+    // Step 5: Update summary display
+    // Sub Total: always original sum of Row Prices
+    const subtotalValueEl = document.getElementById('subtotalValue');
+    if (subtotalValueEl) {
+        subtotalValueEl.textContent = '₹' + subTotal.toFixed(2);
+    }
+    
+    // Footer Sub Total: display Grand Total (Final Payable Amount)
+    const footerSubtotalValueEl = document.getElementById('footerSubtotalValue');
+    if (footerSubtotalValueEl) {
+        footerSubtotalValueEl.textContent = '₹' + grandTotal.toFixed(2);
+    }
+    
+    // GST Total (recalculated after overall discount)
+    const gstTotalValueEl = document.getElementById('gstTotalValue');
+    if (gstTotalValueEl) {
+        gstTotalValueEl.textContent = '₹' + totalGST.toFixed(2);
+    }
+    
+    // GST Count: count of products with GST > 0
+    const gstCountValueEl = document.getElementById('gstCountValue');
+    if (gstCountValueEl) {
+        gstCountValueEl.textContent = gstProductCount.toString();
+    }
+    
+    // Grand Total
+    const itemCountValueEl = document.getElementById('itemCountValue');
+    if (itemCountValueEl) {
+        itemCountValueEl.textContent = '₹' + Math.round(grandTotal);
+    }
+    
+    // Item Quantity: total quantity of all products
+    const itemQtyValueEl = document.getElementById('itemQtyValue');
+    if (itemQtyValueEl) {
+        itemQtyValueEl.textContent = totalItemQuantity.toString();
+    }
+    
+    // Item Discount display (product-wise discount)
+    const totalDiscountedAmountEl = document.getElementById('totalDiscountedAmount');
+    if (totalDiscountedAmountEl) {
+        const productDiscountTotal = subTotal - totalDiscountedAmount;
+        totalDiscountedAmountEl.textContent = 'disctd: ₹' + Math.round(totalDiscountedAmount) + '  disc: (₹' + Math.round(productDiscountTotal) + ')';
+    }
+    
+    // Store Overall Discount Amount in sessionStorage for Payment Popup to read
+    sessionStorage.setItem('cartOverallDiscountAmount', overallDiscountAmount.toFixed(2));
+    
+    // Store original user input for Overall Discount (percentage or flat amount)
+    if (userHasEnteredOverallDiscount) {
+        if (dMode === 'flat') {
+            sessionStorage.setItem('cartOverallDiscountInput', flatAmt.toFixed(2));
+        } else {
+            sessionStorage.setItem('cartOverallDiscountInput', percentAmt.toFixed(2));
+        }
+    } else {
+        sessionStorage.setItem('cartOverallDiscountInput', '0');
+    }
 }
       </script>
       
@@ -16060,13 +17865,12 @@ function calculatePriceFromXYZ(val) {
         return;
     }
     
-    // Base wholesale calculation
-    let wholesalePrice = xytAmt / 5;
-    
     // Determine final price based on business class
-    let finalPrice = wholesalePrice;
+    let finalPrice;
     if (typeof AGENT_BUSINESS_CLASS !== 'undefined' && AGENT_BUSINESS_CLASS === 'RETAIL') {
-        finalPrice = wholesalePrice + (wholesalePrice * 25 / 100);
+        finalPrice = xytAmt / 4;
+    } else {
+        finalPrice = xytAmt / 5;
     }
     
     document.getElementById('quick_add_price').value = finalPrice.toFixed(2);

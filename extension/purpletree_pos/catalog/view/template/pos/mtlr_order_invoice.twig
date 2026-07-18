@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Saleem Gold Covering Receipt</title>
+    <title>Saleem Gold Covering MTLR Receipt</title>
     <base href="{{ base }}"/>
     <link href="{{ bootstrap_css }}" type="text/css" rel="stylesheet"/>
     <link href="{{ icons }}" type="text/css" rel="stylesheet"/>
@@ -176,11 +176,10 @@
             background-color: #fafafa;
         }
         .items-table tbody td {
-    text-align: center !important;   /* Horizontal center */
-    vertical-align: top !important;  /* Vertical top */
+    text-align: center !important;   
+    vertical-align: top !important;  
 }
 
-/* First column (Item Name) left aligned */
 .items-table tbody td:first-child {
     text-align: left !important;
 }
@@ -220,7 +219,6 @@
             }
         }
         
-        /* Watermark styling - mostly black but details visible */
         .watermark {
             position: absolute;
             top: 45%;
@@ -238,14 +236,12 @@
             height: auto;
             display: block;
             border-radius: 50%;
-            /* ~90% black, 10% light details visible */
            image-rendering: pixelated;
            image-rendering: crisp-edges;
         }
         
         
 
-        /* Content wrapper to ensure it's above watermark */
         .content-wrapper {
             position: relative;
             z-index: 1;
@@ -271,6 +267,27 @@
     opacity: 0.6;
 }
 
+.cancelled-invoice {
+    position: relative;
+}
+
+.cancelled-invoice::after {
+    content: "CANCELLED";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-35deg);
+    font-size: 60px;
+    font-weight: 900;
+    color: rgba(255, 0, 0, 0.25);
+    z-index: 999;
+    pointer-events: none;
+}
+
+.cancelled-invoice {
+    opacity: 0.7;
+}
+
 
     </style>
 </head>
@@ -283,15 +300,10 @@
 {% set gst_total = cgst + sgst %}
 {% set discount_amt = order.invoice.discount <= 10 ? (order.invoice.sub_total * order.invoice.discount / 100) : order.invoice.discount %}
 
-<div class="receipt-container">
+<div class="receipt-container {% if order.order_status_id == 7 %}cancelled-invoice{% endif %}">
    
-    <!-- Watermark -->
-    {#<div class="watermark">#}
-    {#    <img src="/MTL/image/saleem_logo.jpg" alt="Watermark">#}
-    {#</div>#}
-
     <div class="content-wrapper">
-        <div class="header-top text-center">DRAFT INVOICE</div>
+        <div class="header-top text-center">MTLR INVOICE</div>
         <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:500; width:100%;">
             <div>
                 Invoice : {{ order.invoice_no ? order.invoice_prefix ~ order.invoice_no : order.order_id }}
@@ -305,7 +317,6 @@
 
         <div class="logo-section">
             <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                <!-- MAIN LOGO: 90% black, 10% detail -->
                 <img src="https://myteknoland.com/MTL/image/saleem_logo.jpg"
                      alt="Logo"
                      style="
@@ -318,9 +329,6 @@
                         SALEEM GOLD COVERING
                     </div>
                     <h6 style = "margin-right:20px;">WHOLESALE</h6>
-                    {#<div class="logo-tagline" style="margin-left:-25px;">#}
-                    {#     WHOLESALE STORE#}
-                    {#</div>#}
                 </div>
             </div>
         </div>
@@ -329,7 +337,7 @@
 
         <div class="store-info">
             38/109-B-4,Chittor Road, Rayachoty,Annamayya Dist,<br>
-            Andhra Pradesh - 516269.Phone : +917330611206<br>
+            Andhra Pradesh - 516269.<br>
         </div>
 
         <div class="line"></div>
@@ -345,7 +353,14 @@
              style="display:flex; justify-content:space-between; align-items:center; width:100%;">
 
             <span style="white-space:nowrap; margin-right:20px;">
-                Name :&nbsp{% if order.firstname %}{{order.firstname ~ ' ' ~ order.lastname}}{% else %}Walk in{% endif %}
+                Name :
+                {% if order.payment_address %}
+                    {{ order.payment_address | nl2br }}
+                {% elseif order.payment_firstname %}
+                    {{ order.payment_firstname }} {{ order.payment_lastname }}
+                {% else %}
+                    Walk in
+                {% endif %}
             </span>
 
             <span style="white-space:nowrap; margin-right:20px;">
@@ -355,59 +370,65 @@
 
         <div class="line"></div>
 
-        <table class="items-table">
-            <thead>
-                <tr>
-                    <th width="35%">Sl. Item Name</th>
-                    <th width="12%">Qty</th>
-                    {#<th width="18%">Rate</th>#}
-                    <th width="18%">MRP</th>
-                    <th width="17%">AMT</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for product in order.product %}
-                
-                <tr class="item-name-row {% if product.excluded %}excluded-item{% endif %}">
-                    <td style="margin-left:15px;">{{ loop.index }} &nbsp; {{ product.name }}</td>
-                    <td>{{ product.quantity }}</td>
-                    <td>{{ product.price|replace({'₹': '', 'Rs.': '', 'Rs': ''})|split('.')|first }}</td>
-                    <td>{{ product.total|replace({'₹': '', 'Rs.': '', 'Rs': ''}) }}</td>
-                </tr>
-            
-                {% endfor %}
-            </tbody>
+        {% if not small_print %}
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th width="35%">Sl. Item Name</th>
+                <th width="12%">Qty</th>
+                <th width="18%">MRP</th>
+                <th width="17%">AMT</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in order.product %}
+            <tr class="item-name-row {% if product.excluded %}excluded-item{% endif %}">
+                <td style="margin-left:15px;">{{ loop.index }} &nbsp; {{ product.name }}</td>
+                <td>{{ product.quantity }}</td>
+                <td>{{ product.price|replace({'₹': '', 'Rs.': '', 'Rs': ''})|split('.')|first }}</td>
+                <td>{{ product.total|replace({'₹': '', 'Rs.': '', 'Rs': ''}) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-        </table>
+    <div class="total-qty-bar">
+        {% set total_items = 0 %}
+        {% set total_qty = 0 %}
 
-        <div class="total-qty-bar">
-    {% set total_items = 0 %}
-    {% set total_qty = 0 %}
+        {% for product in order.product %}
+            {% if not product.excluded %}
+                {% set total_items = total_items + 1 %}
+                {% set total_qty = total_qty + product.quantity %}
+            {% endif %}
+        {% endfor %}
 
-    {% for product in order.product %}
-        {% if not product.excluded %}
-            {% set total_items = total_items + 1 %}
-            {% set total_qty = total_qty + product.quantity %}
-        {% endif %}
-    {% endfor %}
+        <span>Total Item : ( {{ total_items }} )</span>
+        <span>Total Qty : ( {{ total_qty }} )</span>
+    </div>
+{% endif %}
 
-    <span>Total Item : ( {{ total_items }} )</span>
-    <span>
-        Total Qty : ( {{ total_qty }} )
-    </span>
-</div>
 
 
         <div class="summary-table">
             <div style="display:flex; justify-content:space-between; margin-bottom: 2px;">
-                <span></span><span>Bill Amount : {{ order.invoice.sub_total }}</span>
+                <span></span><span>Bill Amount : ₹{{ order.invoice.sub_total|number_format(2) }}</span>
             </div>
+            {% if order.invoice.coupon %}
+            {% set coupon_parts = order.invoice.coupon|split('-') %}
+            {% set coupon_name = coupon_parts[0] ?? '' %}
+            {% set coupon_amt = coupon_parts[1] ?? '' %}
+        
             <div style="display:flex; justify-content:space-between; margin-bottom: 2px;">
-                <span></span><span style="font-weight:700;">Discount Amt : ₹{{ discount_amt|number_format(2) }}/-</span>
+                <span></span><span>COUPON ({{ coupon_name }}) : {{ coupon_amt }}</span>
             </div>
-            {#<div style="display:flex; justify-content:space-between; margin-bottom: 2px;">#}
-            {#    <span></span><span>Round Off : 0.00</span>#}
-            {#</div>#}
+        {% endif %}
+           <div style="display:flex; justify-content:space-between; margin-bottom: 2px;">
+    <span></span>
+    <span style="font-weight:700;">
+        Discount Amt : ₹{{ discount_amt|number_format(2) }}
+    </span>
+</div>
         </div>
 
         <div class="line"></div>
@@ -427,7 +448,7 @@
         <div style="display:flex; justify-content:space-between; padding: 5px 0;" class="bold">
             <span></span>
             <span style="font-size:18px;font-weight: 700;">
-                Net Payable : {{ order.invoice.sub_total }}
+                Net Payable : {{ order.invoice.total_received }}
             </span>
         </div>
 
@@ -439,7 +460,7 @@
 
         <div class="line"></div>
 
-        {#<div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700;">
+        <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700;">
             <span>CASH RECEIVED</span><span>{{ order.invoice.cash_amount }}</span>
         </div>
 
@@ -447,10 +468,18 @@
         <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; margin-top: 3px;">
             <span>UPI RECEIVED</span><span>{{ order.invoice.upi_amount }}</span>
         </div> 
-        {% endif %}#}
+        {% endif %}
+        {% if order.invoice.advance_used > 0 %}
+ <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; margin-top: 3px;">
+            <span>ADVANCE USED</span><span>{{ order.invoice.advance_used }}</span>
+        </div> 
+{% endif %}
+
+        {% if order.invoice.due_amount > 0 %}
         <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; margin-top: 3px; color: red;">
-            <span>DUE AMOUNT</span><span>{{ order.invoice.sub_total }}</span>
+            <span>DUE AMOUNT</span><span>{{ order.invoice.due_amount }}</span>
         </div>
+        {% endif %}
 
         <div class="line"></div>
 
@@ -464,7 +493,7 @@
         <div class="line"></div>
 
         <div class="text-center" style="font-weight: 500; font-size: 12px;">
-            “Your next visit deserves something special. Come back and enjoy exclusive in-store benefits!”
+            "Your next visit deserves something special. Come back and enjoy exclusive in-store benefits!"
         </div>
     </div>
 </div>

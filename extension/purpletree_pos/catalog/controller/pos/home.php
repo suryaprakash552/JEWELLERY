@@ -1323,9 +1323,6 @@ class Home extends \Opencart\System\Engine\Controller
             $previousOrderId = (int) $get($orderDetails, "previousOrderId", 0);
             $activeQuoteId = (int) $get($orderDetails, "activeQuoteId", 0);
             $editOrderId = (int) $get($orderDetails, "previourseditorderid", 0);
-            // STEP 4: Log incoming payload
-            error_log("DEBUG addorder - editOrderId: " . $editOrderId);
-            error_log("DEBUG addorder - Full orderDetails: " . json_encode($orderDetails));
             $customer_id = $get($orderDetails, "customerIdNumber", 0);
             $agentId = $this->customer->getId();
             $customer_name = $get($orderDetails, "CustomerName", "");
@@ -1418,10 +1415,6 @@ class Home extends \Opencart\System\Engine\Controller
 
             $note = $get($orderDetails, "Note", "");
             $cart_products = $get($orderDetails, "CartProducts", []);
-            // STEP 1: Log incoming cart data
-            error_log("DEBUG addorder - Incoming CartProducts count: " . count($cart_products));
-            error_log("DEBUG addorder - Incoming CartProducts product IDs: " . implode(", ", array_column($cart_products, 'product_id')));
-            error_log("DEBUG addorder - Full incoming CartProducts: " . json_encode($cart_products));
             $order_data = [];
             $order_data["invoice_prefix"] = $invoice_prefix;
             $order_data["invoice_no"] = $invoice_no;
@@ -1519,22 +1512,11 @@ class Home extends \Opencart\System\Engine\Controller
             }
 
             $this->load->model("checkout/order");
-            error_log("STEP 3 - addorder - editOrderId: " . $editOrderId);
-            error_log("STEP 3 - addorder - Number of products received: " . count($order_data["products"]));
-            error_log("STEP 3 - addorder - Product IDs received: " . json_encode(array_column($order_data["products"], "product_id")));
-            error_log("STEP 3 - addorder - Complete order_data: " . json_encode($order_data));
-            error_log("STEP 3 - addorder - Complete invoice_extra: " . json_encode($invoice_extra));
             if ($editOrderId > 0) {
-                error_log("STEP 3 - addorder - editOrderId > 0 is TRUE, calling editPreviousOrder");
-                error_log("STEP 3 - addorder - Calling editPreviousOrder with editOrderId: " . $editOrderId);
                 $this->model_checkout_order->editPreviousOrder($editOrderId, $order_data, $invoice_extra);
                 $order_id = $editOrderId;
-                error_log("STEP 3 - addorder - editPreviousOrder completed, order_id: " . $order_id);
             } else {
-                error_log("STEP 3 - addorder - editOrderId > 0 is FALSE, calling addOrder");
-                error_log("STEP 3 - addorder - Calling addOrder (new order)");
                 $order_id = $this->model_checkout_order->addOrder($order_data, $invoice_extra);
-                error_log("STEP 3 - addorder - addOrder completed, order_id: " . $order_id);
             }
 
             if ($activeQuoteId > 0) {
@@ -1788,20 +1770,11 @@ return $this->response->setOutput(
             $previousOrderId = (int) $get($orderDetails, "previousOrderId", 0);
             $activeQuoteId = (int) $get($orderDetails, "activeQuoteId", 0);
             $editOrderId = (int) $get($orderDetails, "previourseditorderid", 0);
-
-            // STEP 4: Log incoming payload
-            error_log("DEBUG addwholesaleorder - editOrderId: " . $editOrderId);
-            error_log("DEBUG addwholesaleorder - Full orderDetails: " . json_encode($orderDetails));
-
             $customer_id = $get($orderDetails, "customerIdNumber", 0);
             $agentId = $this->customer->getId();
             $customer_name = $get($orderDetails, "CustomerName", "");
             $email = $get($orderDetails, "Email", "");
             $mobile = $get($orderDetails, "Mobile", "");
-            
-            // Debug logging
-            error_log("addwholesaleorder - editOrderId: " . $editOrderId);
-            error_log("addwholesaleorder - orderDetails: " . json_encode($orderDetails));
             // $customer_group_id = (int) $get($orderDetails,"customer_group_id",0
             // );
 
@@ -1889,10 +1862,6 @@ return $this->response->setOutput(
 
             $note = $get($orderDetails, "Note", "");
             $cart_products = $get($orderDetails, "CartProducts", []);
-            // STEP 1: Log incoming cart data
-            error_log("DEBUG addwholesaleorder - Incoming CartProducts count: " . count($cart_products));
-            error_log("DEBUG addwholesaleorder - Incoming CartProducts product IDs: " . implode(", ", array_column($cart_products, 'product_id')));
-            error_log("DEBUG addwholesaleorder - Full incoming CartProducts: " . json_encode($cart_products));
             $order_data = [];
             $order_data["invoice_prefix"] = $invoice_prefix;
             $order_data["invoice_no"] = $invoice_no;
@@ -1991,15 +1960,10 @@ return $this->response->setOutput(
 
             $this->load->model("checkout/order");
             if ($editOrderId > 0) {
-                error_log("addwholesaleorder - Calling editWholesaleOrder with editOrderId: " . $editOrderId);
-                error_log("addwholesaleorder - order_data: " . json_encode($order_data));
-                $this->model_checkout_order->editWholesaleOrder($editOrderId, $order_data, $invoice_extra);
+                $this->model_checkout_order->editPreviousOrder($editOrderId, $order_data, $invoice_extra);
                 $order_id = $editOrderId;
-                error_log("addwholesaleorder - editWholesaleOrder completed, order_id: " . $order_id);
             } else {
-                error_log("addwholesaleorder - Calling addwholesaleorder (new order)");
                 $order_id = $this->model_checkout_order->addwholesaleorder($order_data, $invoice_extra);
-                error_log("addwholesaleorder - addwholesaleorder completed, order_id: " . $order_id);
             }
 
             if ($activeQuoteId > 0) {
@@ -2202,7 +2166,6 @@ if (strtolower($paymentThrough) === 'advance') {
     $walletUpdate = null;
 }
 
-error_log("addwholesaleorder - About to return success with order_id: " . $order_id);
 return $this->response->setOutput(
     json_encode([
         "status"       => "success",
@@ -2211,8 +2174,6 @@ return $this->response->setOutput(
     ])
 );
         } catch (Throwable $e) {
-            error_log("addwholesaleorder - Exception caught: " . $e->getMessage());
-            error_log("addwholesaleorder - Exception trace: " . $e->getTraceAsString());
             return $this->response->setOutput(
                 json_encode([
                     "status" => "error",
@@ -3176,7 +3137,6 @@ public function adjustDue() {
 
     public function invoice(): void
     {
-        error_log("STEP 6 - invoice() called - fetching fresh data from database");
         $this->load->language("sale/order");
 
         $data["title"] = $this->language->get("text_invoice");
@@ -4581,8 +4541,13 @@ $this->load->view(
    
       $templateId = ($quote_id > 0) ? $quote_id : $order_id;
 
+        $cleanPhone = preg_replace('/\D/', '', $phone);
+        // Strip a leading 91 if already present, then re-add it once
+        if (strlen($cleanPhone) > 10 && substr($cleanPhone, 0, 2) === '91') {
+            $cleanPhone = substr($cleanPhone, 2);
+        }
         $payload = [
-            "to" => "91" . preg_replace('/\D/', '', $phone),
+            "to" => "91" . $cleanPhone,           
             "accountId" => "6a5a19f675c23683cb18cff9",
             "templateName" => "order_invoice1",
             "languageCode" => "en",
@@ -4740,8 +4705,13 @@ $this->load->view(
 
         $templateId = $quote_id;
 
-$payload = [
-    "to" => "91" . preg_replace('/\D/', '', $phone),
+$cleanPhone = preg_replace('/\D/', '', $phone);
+        // Strip a leading 91 if already present, then re-add it once
+        if (strlen($cleanPhone) > 10 && substr($cleanPhone, 0, 2) === '91') {
+            $cleanPhone = substr($cleanPhone, 2);
+        }
+        $payload = [ 
+            "to" => "91" . $cleanPhone, 
     "accountId" => "6a5a19f675c23683cb18cff9",
     "templateName" => "quote_invoice_order1",
     "languageCode" => "en_US",

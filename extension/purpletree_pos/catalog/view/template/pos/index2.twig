@@ -8194,8 +8194,10 @@ window.processOrderPayment = function(btn, shouldPrint, apiEndpoint) {
                   emptyCart();
                   refreshPage();
               } else {
-                  sendWhatsAppOnly(json.order_id);
-                  emptyCart();
+                  if (apiEndpoint === 'addorder') {
+                        sendWhatsAppOnly(json.order_id);
+                    }
+                    emptyCart();
               }
               if (sessionStorage.getItem('currentholdkey') !== null) {
                 const key = sessionStorage.getItem('currentholdkey');
@@ -8433,34 +8435,6 @@ function printSmallMTLRInvoice() {
             iframe.contentDocument.open();
             iframe.contentDocument.write(html);
             iframe.contentDocument.close();
-            let rawPhone =
-                $('#customerMobileInput').val()?.trim() ||
-                (JSON.parse(sessionStorage.getItem('currentCustomerData') || '{}').telephone || '');
-            rawPhone = rawPhone.replace(/\s+/g, '').replace(/^\+/, '');
-            if (rawPhone.startsWith('0')) {
-                rawPhone = rawPhone.substring(1);
-            }
-            if (rawPhone && !rawPhone.startsWith('91')) {
-                rawPhone = '91' + rawPhone;
-            }
-            if (!rawPhone) {
-                console.warn('Customer phone not found, skipping WhatsApp');
-                return;
-            }
-            $.ajax({
-                url:
-                    "index.php?route=extension/purpletree_pos/pos/home|Order_sendwhatsapp"
-                    + "&order_id=" + encodeURIComponent(orderId)
-                    + "&phone=" + encodeURIComponent(rawPhone),
-                type: "GET",
-                dataType: "json",
-                success: function (res) {
-                    console.log('WhatsApp sent successfully');
-                },
-                error: function () {
-                    console.error('Failed to send WhatsApp');
-                }
-            });
         },
         error: function () {
             console.error("Failed to load small MTLR invoice.");
@@ -8493,34 +8467,6 @@ function printMTLRInvoice() {
             iframe.contentDocument.open();
             iframe.contentDocument.write(html);
             iframe.contentDocument.close();
-            let rawPhone =
-                $('#customerMobileInput').val()?.trim() ||
-                (JSON.parse(sessionStorage.getItem('currentCustomerData') || '{}').telephone || '');
-            rawPhone = rawPhone.replace(/\s+/g, '').replace(/^\+/, '');
-            if (rawPhone.startsWith('0')) {
-                rawPhone = rawPhone.substring(1);
-            }
-            if (rawPhone && !rawPhone.startsWith('91')) {
-                rawPhone = '91' + rawPhone;
-            }
-            if (!rawPhone) {
-                console.warn('Customer phone not found, skipping WhatsApp');
-                return;
-            }
-            $.ajax({
-                url:
-                    "index.php?route=extension/purpletree_pos/pos/home|Order_sendwhatsapp"
-                    + "&order_id=" + encodeURIComponent(orderId)
-                    + "&phone=" + encodeURIComponent(rawPhone),
-                type: "GET",
-                dataType: "json",
-                success: function (res) {
-                    console.log('WhatsApp sent successfully');
-                },
-                error: function () {
-                    console.error('Failed to send WhatsApp');
-                }
-            });
         },
         error: function () {
             console.error("Failed to load MTLR invoice.");
@@ -17865,12 +17811,14 @@ function calculatePriceFromXYZ(val) {
         return;
     }
     
+    
+    // Base wholesale calculation
+    let wholesalePrice = xytAmt / 5;
+    
     // Determine final price based on business class
-    let finalPrice;
+    let finalPrice = wholesalePrice;
     if (typeof AGENT_BUSINESS_CLASS !== 'undefined' && AGENT_BUSINESS_CLASS === 'RETAIL') {
-        finalPrice = xytAmt / 4;
-    } else {
-        finalPrice = xytAmt / 4;
+        finalPrice = wholesalePrice + (wholesalePrice * 25 / 100);
     }
     
     document.getElementById('quick_add_price').value = finalPrice.toFixed(2);

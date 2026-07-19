@@ -17870,7 +17870,7 @@ function calculatePriceFromXYZ(val) {
     if (typeof AGENT_BUSINESS_CLASS !== 'undefined' && AGENT_BUSINESS_CLASS === 'RETAIL') {
         finalPrice = xytAmt / 4;
     } else {
-        finalPrice = xytAmt / 5;
+        finalPrice = xytAmt / 4;
     }
     
     document.getElementById('quick_add_price').value = finalPrice.toFixed(2);

@@ -298,8 +298,9 @@
 <body>
 
 {% for order in orders %}
-{% set cgst = order.invoice.sub_total * 0.015 %}
-{% set sgst = order.invoice.sub_total * 0.015 %}
+{% set total_tax = order.invoice.total_tax is defined ? order.invoice.total_tax : 0 %}
+{% set cgst = total_tax / 2 %}
+{% set sgst = total_tax / 2 %}
 {% set gst_total = cgst + sgst %}
 {% set discount_amt = order.invoice.discount <= 10 ? (order.invoice.sub_total * order.invoice.discount / 100) : order.invoice.discount %}
 

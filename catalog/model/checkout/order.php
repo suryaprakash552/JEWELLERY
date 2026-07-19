@@ -280,6 +280,7 @@ foreach ($posQtyMap as $product_id => $qty) {
                                                     `quantity`   = '" . (int)($product['quantity'] ?? 1) . "',
                                                     `price`      = '" . (float)($product['price'] ?? 0) . "',
                                                     `total`      = '" . (float)($product['total'] ?? 0) . "',
+                                                    `discount`   = '" . (float)($product['discount'] ?? 0) . "',
                                                     `gst` = '" . (float)($product['gst'] ?? 0) . "',
                                                     `tax` = '" . (float)($product['tax'] ?? 0) . "',
                                                     `excluded`   = '" . (int)$excluded . "'";
@@ -314,6 +315,7 @@ foreach ($posQtyMap as $product_id => $qty) {
                                                                         `rewards`      = '" . (float)$invoice_extra['creditpointsused'] . "',
                                                                         `discount`           = '" . (float)$invoice_extra['discount'] . "',
                                                                         `discount_type`      = '" . $this->db->escape($invoice_extra['discount_type'] ?? '') . "',
+                                                                        `overall_discount`   = '" . (float)($invoice_extra['overall_discount'] ?? 0) . "',
                                                                         `number_of_items`    = '" . (int)$invoice_extra['number_of_items'] . "',
                                                                         `quantity_of_items`  = '" . (int)$invoice_extra['quantity_of_items'] . "',
                                                                         `sub_total`          = '" . (float)$invoice_extra['sub_total'] . "',
@@ -397,6 +399,7 @@ public function addwholesaleorder(array $data, array $invoice_extra = []): int {
         `payment_method`    = '" . $this->db->escape(json_encode($def('payment_method', []))) . "',
         `comment`           = '" . $this->db->escape($def('comment')) . "',
         `total`             = '" . (float)$def('total', 0) . "',
+        `order_status_id`   = 5,
         `language_id`       = 1,
         `currency_id`       = 1,
         `currency_code`     = 'INR',
@@ -469,6 +472,7 @@ public function addwholesaleorder(array $data, array $invoice_extra = []): int {
                 `quantity`   = '" . (int)($product['quantity'] ?? 1) . "',
                 `price`      = '" . (float)($product['price'] ?? 0) . "',
                 `total`      = '" . (float)($product['total'] ?? 0) . "',
+                `discount`   = '" . (float)($product['discount'] ?? 0) . "',
                 `gst` = '" . (float)($product['gst'] ?? 0) . "',
                 `tax` = '" . (float)($product['tax'] ?? 0) . "',
                 `excluded`   = '" . (int)$excluded . "'";
@@ -500,6 +504,7 @@ public function addwholesaleorder(array $data, array $invoice_extra = []): int {
             `rewards`      = '" . (float)$invoice_extra['creditpointsused'] . "',
             `discount`           = '" . (float)$invoice_extra['discount'] . "',
             `discount_type`      = '" . $this->db->escape($invoice_extra['discount_type'] ?? '') . "',
+            `overall_discount`   = '" . (float)($invoice_extra['overall_discount'] ?? 0) . "',
             `number_of_items`    = '" . (int)$invoice_extra['number_of_items'] . "',
             `quantity_of_items`  = '" . (int)$invoice_extra['quantity_of_items'] . "',
             `sub_total`          = '" . (float)$invoice_extra['sub_total'] . "',
@@ -657,6 +662,8 @@ $this->db->query("
                                 credit_points      = '" . (float)$invoice_extra['credit_points'] . "',
                                 rewards            = '" . (float)$invoice_extra['creditpointsused'] . "',
                                 discount           = '" . (float)$invoice_extra['discount'] . "',
+                                discount_type      = '" . $this->db->escape($invoice_extra['discount_type'] ?? '') . "',
+                                overall_discount   = '" . (float)($invoice_extra['overall_discount'] ?? 0) . "',
                                 number_of_items    = '" . (int)$invoice_extra['number_of_items'] . "',
                                 quantity_of_items  = '" . (int)$invoice_extra['quantity_of_items'] . "',
                                 sub_total          = '" . (float)$invoice_extra['sub_total'] . "',
@@ -669,7 +676,7 @@ $this->db->query("
                                 total_received     = '" . (float)$invoice_extra['total_received'] . "',
                                 balance            = '" . (float)$invoice_extra['balance'] . "',
                                 date_added         = NOW()
-                        ");  
+                        ");
 
 
         if (!empty($data['custom_fields'])) {
@@ -1186,7 +1193,386 @@ public function getFullOrderDetails(int $order_id) {
     ];
 }
 
+public function getFullWholesaleOrderDetails(int $order_id) {
 
+    $order = $this->db->query("
+        SELECT
+            wo.*,
+            os.name AS order_status
+        FROM `" . DB_PREFIX . "wholesale_order` wo
+        LEFT JOIN `" . DB_PREFIX . "order_status` os
+            ON os.order_status_id = wo.order_status_id
+            AND os.language_id = '" . (int)$this->config->get('config_language_id') . "'
+        WHERE wo.order_id = '" . (int)$order_id . "'
+    ")->row;
+
+    if (!$order) {
+        return false;
+    }
+
+    // Products
+    $products = $this->db->query("
+        SELECT *
+        FROM `" . DB_PREFIX . "wholesale_order_product`
+        WHERE order_id = '" . (int)$order_id . "'
+    ")->rows;
+
+    // Totals
+    $totals = $this->db->query("
+        SELECT *
+        FROM `" . DB_PREFIX . "wholesale_order_total`
+        WHERE order_id = '" . (int)$order_id . "'
+        ORDER BY sort_order
+    ")->rows;
+
+    // Invoice
+    $invoice = $this->db->query("
+        SELECT *
+        FROM `" . DB_PREFIX . "wholesale_order_invoice`
+        WHERE order_id = '" . (int)$order_id . "'
+    ")->row;
+
+    // Tax
+    $tax = $this->db->query("
+        SELECT *
+        FROM `" . DB_PREFIX . "wholesale_order_tax_details`
+        WHERE order_id = '" . (int)$order_id . "'
+    ")->rows;
+
+    return [
+        'order_info'  => $order,
+        'products'    => $products,
+        'totals'      => $totals,
+        'invoice'     => $invoice,
+        'tax_details' => $tax
+    ];
+}
+
+public function getWholesaleOrdersByDateRange($agentId, $from_date = '', $to_date = '', $order_id = '', $mobile = '', $name = '') {
+
+    $sql = "SELECT wo.order_id FROM `" . DB_PREFIX . "wholesale_order` wo WHERE wo.customer_group_id = '" . (int)$agentId . "'";
+    $isSearch = !empty($order_id) || !empty($mobile) || !empty($name);
+
+    if (!empty($from_date) && !empty($to_date)) {
+        $from_db = date('Y-m-d', strtotime($from_date));
+        $to_db = date('Y-m-d', strtotime($to_date));
+        $sql .= " AND wo.date_added >= '" . $this->db->escape($from_db) . " 00:00:00'";
+        $sql .= " AND wo.date_added <= '" . $this->db->escape($to_db) . " 23:59:59'";
+    }
+
+    if (!empty($order_id)) {
+        $sql .= " AND wo.order_id LIKE '%" . $this->db->escape($order_id) . "%'";
+    }
+
+    if (!empty($mobile)) {
+        $sql .= " AND wo.telephone LIKE '%" . $this->db->escape($mobile) . "%'";
+    }
+    if (!empty($name)) {
+        $sql .= " AND (
+            wo.firstname LIKE '%" . $this->db->escape($name) . "%'
+            OR wo.lastname LIKE '%" . $this->db->escape($name) . "%'
+            OR CONCAT(wo.firstname,' ',wo.lastname) LIKE '%" . $this->db->escape($name) . "%'
+        )";
+    }
+
+    $sql .= " ORDER BY wo.order_id DESC";
+
+    $orders = $this->db->query($sql)->rows;
+
+    $full = [];
+
+    foreach ($orders as $order) {
+        $full[] = $this->getFullWholesaleOrderDetails((int)$order['order_id']);
+    }
+
+    return $full;
+}
+
+public function getWholesaleOrderTotalsByDateRange($from_date, $to_date, $agentId) {
+
+$sql = "SELECT
+
+/* STATUS 5 CASH */
+(
+    COALESCE(SUM(
+        CASE
+            WHEN wo.order_status_id IN (5,17)
+            THEN woi.cash_amount
+            ELSE 0
+        END
+    ),0)
+    -
+    COALESCE(SUM(
+        CASE
+            WHEN wo.order_status_id IN (5,17)
+            AND woi.cash_amount > 0
+            AND woi.upi_amount = 0
+            THEN woi.returnable_balance
+            ELSE 0
+        END
+    ),0)
+) AS status5_cash,
+
+
+/* STATUS 5 UPI */
+(
+    COALESCE(SUM(
+        CASE
+            WHEN wo.order_status_id IN (5,17)
+            THEN woi.upi_amount
+            ELSE 0
+        END
+    ),0)
+    -
+    COALESCE(SUM(
+        CASE
+            WHEN wo.order_status_id IN (5,17)
+            AND woi.upi_amount > 0
+            AND woi.cash_amount = 0
+            THEN woi.returnable_balance
+            ELSE 0
+        END
+    ),0)
+) AS status5_upi,
+
+
+/* STATUS 6 CASH */
+(
+    COALESCE(SUM(
+        CASE
+            WHEN wo.order_status_id = 6
+            THEN woi.cash_amount
+            ELSE 0
+        END
+    ),0)
+    -
+    COALESCE(SUM(
+        CASE
+            WHEN wo.order_status_id = 6
+            AND woi.cash_amount > 0
+            AND woi.upi_amount = 0
+            THEN woi.returnable_balance
+            ELSE 0
+        END
+    ),0)
+) AS status6_cash,
+
+
+/* STATUS 6 UPI */
+(
+    COALESCE(SUM(
+        CASE
+            WHEN wo.order_status_id = 6
+            THEN woi.upi_amount
+            ELSE 0
+        END
+    ),0)
+    -
+    COALESCE(SUM(
+        CASE
+            WHEN wo.order_status_id = 6
+            AND woi.upi_amount > 0
+            AND woi.cash_amount = 0
+            THEN woi.returnable_balance
+            ELSE 0
+        END
+    ),0)
+) AS status6_upi,
+
+
+/* STATUS 7 CASH */
+(
+    COALESCE(SUM(
+        CASE
+            WHEN wo.order_status_id = 7
+            THEN woi.cash_amount
+            ELSE 0
+        END
+    ),0)
+    -
+    COALESCE(SUM(
+        CASE
+            WHEN wo.order_status_id = 7
+            AND woi.cash_amount > 0
+            AND woi.upi_amount = 0
+            THEN woi.returnable_balance
+            ELSE 0
+        END
+    ),0)
+) AS status7_cash,
+
+
+/* STATUS 7 UPI */
+(
+    COALESCE(SUM(
+        CASE
+            WHEN wo.order_status_id = 7
+            THEN woi.upi_amount
+            ELSE 0
+        END
+    ),0)
+    -
+    COALESCE(SUM(
+        CASE
+            WHEN wo.order_status_id = 7
+            AND woi.upi_amount > 0
+            AND woi.cash_amount = 0
+            THEN woi.returnable_balance
+            ELSE 0
+        END
+    ),0)
+) AS status7_upi
+
+
+FROM `" . DB_PREFIX . "wholesale_order` wo
+LEFT JOIN `" . DB_PREFIX . "wholesale_order_invoice` woi ON woi.order_id = wo.order_id
+WHERE wo.customer_group_id = '" . (int)$agentId . "'";
+
+    if (!empty($from_date) && !empty($to_date)) {
+        $from_db = date('Y-m-d', strtotime($from_date));
+        $to_db = date('Y-m-d', strtotime($to_date));
+        $sql .= " AND wo.date_added >= '" . $this->db->escape($from_db) . " 00:00:00'";
+        $sql .= " AND wo.date_added <= '" . $this->db->escape($to_db) . " 23:59:59'";
+    }
+
+    $query = $this->db->query($sql);
+    return $query->row;
+}
+
+public function editWholesaleOrder(int $order_id, array $data, array $invoice_extra = []): bool
+{
+    if ($order_id <= 0) return false;
+
+    $this->db->query("START TRANSACTION");
+
+    try {
+        // Get old products to restore quantities
+        $oldProducts = $this->db->query("
+            SELECT product_id, quantity
+            FROM `" . DB_PREFIX . "wholesale_order_product`
+            WHERE order_id = '" . (int)$order_id . "'
+        ")->rows;
+
+        foreach ($oldProducts as $old) {
+            $product_id = (int)$old['product_id'];
+            $qty = (int)$old['quantity'];
+            if ($product_id <= 0 || $qty <= 0) continue;
+
+            $this->db->query("
+                UPDATE `" . DB_PREFIX . "pts_pos_product`
+                SET pos_quentity = pos_quentity + $qty
+                WHERE product_id = '" . (int)$product_id . "'
+            ");
+        }
+
+        // Update wholesale order
+        $this->db->query("
+            UPDATE `" . DB_PREFIX . "wholesale_order` SET
+                customer_id        = '" . (int)$data['customer_id'] . "',
+                customer_group_id  = '" . (int)$data['customer_group_id'] . "',
+                sellerId           = '" . (int)$data['sellerId'] . "',
+                firstname          = '" . $this->db->escape($data['firstname']) . "',
+                lastname           = '" . $this->db->escape($data['lastname']) . "',
+                email              = '" . $this->db->escape($data['email']) . "',
+                telephone          = '" . $this->db->escape($data['telephone']) . "',
+                payment_method     = '" . $this->db->escape(json_encode($data['payment_method'])) . "',
+                comment             = '" . $this->db->escape($data['comment']) . "',
+                total               = '" . (float)$data['total'] . "',
+                order_status_id     = 17,
+                date_modified       = NOW()
+            WHERE order_id = '" . (int)$order_id . "'
+        ");
+
+        // Delete old data
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "wholesale_order_product` WHERE order_id = '" . (int)$order_id . "'");
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "wholesale_order_total` WHERE order_id = '" . (int)$order_id . "'");
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "wholesale_order_invoice` WHERE order_id = '" . (int)$order_id . "'");
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "wholesale_order_tax_details` WHERE order_id = '" . (int)$order_id . "'");
+
+        // Insert new products
+        if (!empty($data['products'])) {
+            foreach ($data['products'] as $product) {
+                $excluded = !empty($product['excluded']) ? 1 : 0;
+                $sql = "INSERT INTO `" . DB_PREFIX . "wholesale_order_product` SET
+                    `order_id`   = '" . (int)$order_id . "',
+                    `product_id` = '" . (int)($product['product_id'] ?? 0) . "',
+                    `name`       = '" . $this->db->escape($product['name'] ?? '') . "',
+                    `model`      = '',
+                    `quantity`   = '" . (int)($product['quantity'] ?? 1) . "',
+                    `price`      = '" . (float)($product['price'] ?? 0) . "',
+                    `total`      = '" . (float)($product['total'] ?? 0) . "',
+                    `discount`   = '" . (float)($product['discount'] ?? 0) . "',
+                    `gst` = '" . (float)($product['gst'] ?? 0) . "',
+                    `tax` = '" . (float)($product['tax'] ?? 0) . "',
+                    `excluded`   = '" . (int)$excluded . "'";
+                $this->db->query($sql);
+            }
+        }
+
+        // Insert new totals
+        if (!empty($data['totals'])) {
+            foreach ($data['totals'] as $total) {
+                $this->db->query("INSERT INTO `" . DB_PREFIX . "wholesale_order_total` SET
+                    `order_id`   = '" . (int)$order_id . "',
+                    `code`       = '" . $this->db->escape($total['code']) . "',
+                    `title`      = '" . $this->db->escape($total['title']) . "',
+                    `value`      = '" . (float)$total['value'] . "',
+                    `sort_order` = '" . (int)$total['sort_order'] . "'");
+            }
+        }
+
+        $returnable_balance = (float)($invoice_extra['returnable_balance'] ?? 0);
+
+        // Insert new invoice
+        if (!empty($invoice_extra)) {
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "wholesale_order_invoice` SET
+                `order_id`           = '" . (int)$order_id . "',
+                `customer_group_id`  = '" . (int)($invoice_extra['customer_group_id'] ?? 0) . "',
+                `cash_amount`        = '" . (float)$invoice_extra['cash_amount'] . "',
+                `upi_amount`         = '" . (float)$invoice_extra['upi_amount'] . "',
+                `coupon`             = '" . $this->db->escape($invoice_extra['coupon']) . "',
+                `credit_points`      = '" . (float)$invoice_extra['credit_points'] . "',
+                `rewards`            = '" . (float)$invoice_extra['creditpointsused'] . "',
+                `discount`           = '" . (float)$invoice_extra['discount'] . "',
+                `discount_type`      = '" . $this->db->escape($invoice_extra['discount_type'] ?? '') . "',
+                `overall_discount`   = '" . (float)($invoice_extra['overall_discount'] ?? 0) . "',
+                `number_of_items`    = '" . (int)$invoice_extra['number_of_items'] . "',
+                `quantity_of_items`  = '" . (int)$invoice_extra['quantity_of_items'] . "',
+                `sub_total`          = '" . (float)$invoice_extra['sub_total'] . "',
+                `total_tax`          = '" . (float)$invoice_extra['total_tax'] . "',
+                `roundoff_amount`    = '" . (float)$invoice_extra['roundoff_amount'] . "',
+                `amount_through`     = '" . $this->db->escape($invoice_extra['amount_through']) . "',
+                `pending_amount`     = '" . (float)$invoice_extra['pending_amount'] . "',
+                `returnable_balance` = '" . $returnable_balance . "',
+                `advance_used`       = '" . (float)($invoice_extra['advance_used'] ?? 0) . "',
+                `total_received`     = '" . (float)$invoice_extra['total_received'] . "',
+                `balance`            = '" . (float)$invoice_extra['balance'] . "',
+                `date_added`         = NOW()");
+        }
+
+        // Insert custom fields
+        if (!empty($data['custom_fields'])) {
+            foreach ($data['custom_fields'] as $field) {
+                $name = $this->db->escape($field['name'] ?? '');
+                $value = (float)($field['value'] ?? 0);
+                if ($name === '') continue;
+                $sql = "INSERT INTO `" . DB_PREFIX . "wholesale_order_tax_details` SET
+                    `order_id` = '" . (int)$order_id . "',
+                    `name`     = '" . $name . "',
+                    `value`    = '" . $value . "'";
+                $this->db->query($sql);
+            }
+        }
+
+        $this->db->query("COMMIT");
+        return true;
+
+    } catch (\Throwable $e) {
+        $this->db->query("ROLLBACK");
+        error_log("editWholesaleOrder - Error: " . $e->getMessage());
+        throw $e;
+    }
+}
 
 public function getOrdersByDateRange($agentId, $from_date = '', $to_date = '', $order_id = '', $mobile = '', $name = '') {
 
@@ -3344,6 +3730,21 @@ public function addProduct(int $order_id, array $data): int {
 			$this->cache->delete('product');
 		}
 	}
+
+	public function addWholesaleHistory(int $order_id, int $order_status_id, string $comment = ''): void {
+    // Update the actual order status
+    $this->db->query("UPDATE `" . DB_PREFIX . "wholesale_order` 
+        SET `order_status_id` = '" . (int)$order_status_id . "', 
+            `date_modified` = NOW() 
+        WHERE `order_id` = '" . (int)$order_id . "'");
+
+    // Log the history entry
+    $this->db->query("INSERT INTO `" . DB_PREFIX . "wholesale_order_history` SET 
+        `order_id` = '" . (int)$order_id . "', 
+        `order_status_id` = '" . (int)$order_status_id . "', 
+        `comment` = '" . $this->db->escape($comment) . "', 
+        `date_added` = NOW()");
+}
 
 	/**
 	 * Delete Order Histories

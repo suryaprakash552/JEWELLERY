@@ -2246,6 +2246,8 @@ return $this->response->setOutput(
                 "quantity"   => (int)($p['quantity'] ?? 1),
                 "price"      => (float)($p['price'] ?? 0),
                 "total"      => (float)($p['total'] ?? 0),
+                "discount"   => (float)($p['discount'] ?? 0),
+                "gst_percent" => (float)($p['gst_percent'] ?? 0),
                 "excluded"   => !empty($p['excluded']) ? 1 : 0
             ];
         }
@@ -2274,6 +2276,8 @@ return $this->response->setOutput(
         $invoice_extra = [
             "customer_group_id" => $agentId,
             "discount"          => $money($q['discount'] ?? 0),
+            "overall_discount"  => $money($q['overall_discount'] ?? 0),
+            "discount_type"     => trim($q['discount_type'] ?? 'flat'),
             "number_of_items"   => count($products),
             "quantity_of_items" => array_sum(array_column($products, 'quantity')),
             "sub_total"         => $money($q['net_total'] ?? 0),

@@ -4289,7 +4289,9 @@
           						'recurring'       : false,
           						'pos_quantity'    : cart.pos_quantity || 0,
           						'excluded'        : typeof cart.excluded !== 'undefined' ? cart.excluded : false,
-          						'gst_percent'     : cart.gst_percent || 0
+          						'gst_percent'     : cart.gst_percent || 0,
+                                'discount'    : cart.discount || 0,
+'discount_type' : cart.discount_type || 'percent'
           						});
           					}
           				});
@@ -4532,6 +4534,7 @@
          			sessionStorage.removeItem('sub_total');
          			localStorage.removeItem('custom_product');
          			sessionStorage.removeItem('currentReturnOrder');
+                    resetDiscountUI(); 
          		}
          		function removeProductFromCart(cart_id){
          		 let updateCartProduct = JSON.parse(sessionStorage.getItem("updateCartProduct"));
@@ -4748,23 +4751,80 @@
                  pos_cart.push(posCartData);    
              }
              localStorage.setItem("pos_cart", JSON.stringify(pos_cart));
-             autoSaveCartToDefault();
              return JSON.parse(localStorage.getItem("pos_cart"));
          }
          function autoSaveCartToDefault() {
-              var posCart = JSON.parse(localStorage.getItem("pos_cart") || "[]");
-              if (!posCart || posCart.length === 0) return; 
-              var allHolds = JSON.parse(localStorage.getItem("allcartholddata") || "[]");
-              var defaultHoldIndex = allHolds.findIndex(function(h) { return h.description === "Running Cart" || h.description === "Default"; });
-              if (defaultHoldIndex !== -1) {
-                  allHolds[defaultHoldIndex].cart = posCart;
-                  allHolds[defaultHoldIndex].description = "Running Cart";
-              } else {
-                  allHolds.push({ id: Date.now(), description: "Running Cart", cart: posCart });
-              }
-              localStorage.setItem("allcartholddata", JSON.stringify(allHolds));
-              if (typeof renderHoldCartList === "function") renderHoldCartList();
-          }
+            var posCart = JSON.parse(localStorage.getItem("pos_cart") || "[]");
+            if (!posCart || posCart.length === 0) return;
+            var allHolds = JSON.parse(localStorage.getItem("allcartholddata") || "[]");
+            var defaultHoldIndex = allHolds.findIndex(function(h) { return h.description === "Running Cart" || h.description === "Default"; });
+
+            // Capture current invoice-level discount UI state
+            var discountModeEl = document.getElementById('discountMode');
+            var itemDiscountValueEl = document.getElementById('itemDiscountValue');
+
+            console.log('[AUTO SAVE] Before save - UI values:', {
+                itemDiscountValue: itemDiscountValueEl ? itemDiscountValueEl.value : 'N/A',
+                discountMode: discountModeEl ? discountModeEl.value : 'N/A'
+            });
+            console.log('[AUTO SAVE] Before save - Window variables:', {
+                discountFlat: window.discountFlat,
+                discountPercent: window.discountPercent,
+                userEditedFlat: window.userEditedFlat,
+                userEditedPercent: window.userEditedPercent,
+                discountLocked: window.discountLocked,
+                discountPercentDefault: window.discountPercentDefault,
+                discountFlatDefault: window.discountFlatDefault
+            });
+
+            // Use shared helper to capture discount state (same as Hold Cart)
+            var discountSnapshot = captureDiscountState();
+
+            console.log('[AUTO SAVE] Discount snapshot to save:', discountSnapshot);
+
+            // Protection: Don't overwrite valid saved discount with empty/default values
+            if (defaultHoldIndex !== -1) {
+                var existingHold = allHolds[defaultHoldIndex];
+                var hasValidSavedDiscount = (
+                    (existingHold.discountFlat !== null && existingHold.discountFlat !== 0) ||
+                    (existingHold.discountPercent !== null && existingHold.discountPercent !== 0) ||
+                    (existingHold.itemDiscountValue && parseFloat(existingHold.itemDiscountValue) > 0)
+                );
+                var currentDiscountIsEmpty = (
+                    (discountSnapshot.discountFlat === null || discountSnapshot.discountFlat === 0) &&
+                    (discountSnapshot.discountPercent === null || discountSnapshot.discountPercent === 0) &&
+                    (!discountSnapshot.itemDiscountValue || parseFloat(discountSnapshot.itemDiscountValue) === 0)
+                );
+
+                if (hasValidSavedDiscount && currentDiscountIsEmpty) {
+                    console.log('[AUTO SAVE] Preserving existing valid discount, not overwriting with empty values');
+                    // Keep existing discount values
+                    discountSnapshot.discountMode = existingHold.discountMode;
+                    discountSnapshot.itemDiscountValue = existingHold.itemDiscountValue;
+                    discountSnapshot.discountFlat = existingHold.discountFlat;
+                    discountSnapshot.discountPercent = existingHold.discountPercent;
+                    discountSnapshot.userEditedFlat = existingHold.userEditedFlat;
+                    discountSnapshot.userEditedPercent = existingHold.userEditedPercent;
+                    discountSnapshot.discountLocked = existingHold.discountLocked;
+                }
+            }
+
+            if (defaultHoldIndex !== -1) {
+                allHolds[defaultHoldIndex].cart = posCart;
+                allHolds[defaultHoldIndex].description = "Running Cart";
+                Object.assign(allHolds[defaultHoldIndex], discountSnapshot);
+            } else {
+                allHolds.push(Object.assign({ id: Date.now(), description: "Running Cart", cart: posCart }, discountSnapshot));
+            }
+            localStorage.setItem("allcartholddata", JSON.stringify(allHolds));
+
+            // Verify what was saved
+            var savedAllHolds = JSON.parse(localStorage.getItem("allcartholddata") || "[]");
+            var savedRunningCart = savedAllHolds.find(function(h) { return h.description === "Running Cart" || h.description === "Default"; });
+            console.log('[AUTO SAVE] After save - Running Cart from localStorage:', savedRunningCart);
+
+            if (typeof renderHoldCartList === "function") renderHoldCartList();
+        }
           function clearAutoSaveBackup() {
               var allHolds = JSON.parse(localStorage.getItem("allcartholddata") || "[]");
               var filtered = allHolds.filter(function(h) { return h.description !== "Running Cart" && h.description !== "Default"; });
@@ -4773,15 +4833,6 @@
                   if (typeof renderHoldCartList === "function") renderHoldCartList();
               }
           }
-          (function() {
-              var originalSetItem = localStorage.setItem;
-              localStorage.setItem = function(key, value) {
-                  originalSetItem.apply(this, arguments);
-                  if (key === 'pos_cart' && typeof autoSaveCartToDefault === 'function') {
-                      autoSaveCartToDefault();
-                  }
-              };
-          })();
          function getOrderPrepareData(){
          return new Promise((resolve, reject) => {
          Promise.all([CartObj.hasShipping()]).then(function(values){
@@ -8383,24 +8434,31 @@ window.disableFooterButtons = function(clickedId) {
                 setTimeout(() => { location.reload(); }, 500);
                 return;
             }
-            $.ajax({
-                url:
-                    "index.php?route=extension/purpletree_pos/pos/home|Order_sendwhatsapp"
-                    + "&order_id=" + encodeURIComponent(orderId)
-                    + "&phone=" + encodeURIComponent(rawPhone),
-                type: "GET",
-                dataType: "json",
-                success: function (res) {
-                    setTimeout(() => {
-                        location.reload();
-                    }, 500);
-                },
-                error: function () {
-                    setTimeout(() => {
-                        location.reload();
-                    }, 500);
-                }
-            });
+
+            const ownerPhone = "7337011206";
+                    const customerRequest = $.ajax({
+            url:
+                "index.php?route=extension/purpletree_pos/pos/home|Order_sendwhatsapp"
+                + "&order_id=" + encodeURIComponent(orderId)
+                + "&phone=" + encodeURIComponent(rawPhone),
+            type: "GET",
+            dataType: "json"
+        });
+
+        const ownerRequest = $.ajax({
+            url:
+                "index.php?route=extension/purpletree_pos/pos/home|Order_sendwhatsapp"
+                + "&order_id=" + encodeURIComponent(orderId)
+                + "&phone=" + encodeURIComponent(ownerPhone),
+            type: "GET",
+            dataType: "json"
+        });
+
+        $.when(customerRequest, ownerRequest).always(function () {
+            setTimeout(function () {
+                location.reload();
+            }, 500);
+        });
         },
         error: function () {
             console.error("Failed to load small invoice.");
@@ -8660,24 +8718,30 @@ function printMergeLongBillMTLR() {
                  }, 500);
                  return;
              }
-             $.ajax({
-                 url: "index.php?route=extension/purpletree_pos/pos/home|Order_sendwhatsapp"
-                     + "&order_id=" + encodeURIComponent(orderId)
-                     + "&phone=" + encodeURIComponent(rawPhone),
-                 type: "GET",
-                 dataType: "json",
-                 success: function (res) {
-                     setTimeout(() => {
-                         location.reload();
-                     }, 500);
-                 },
-                 error: function (xhr, status, error) {
-                     console.error('sendwhatsapp error:', status, error);
-                     setTimeout(() => {
-                         location.reload();
-                     }, 500);
-                 }
-             });
+             const ownerPhone = "7337011206";
+                    const customerRequest = $.ajax({
+            url:
+                "index.php?route=extension/purpletree_pos/pos/home|Order_sendwhatsapp"
+                + "&order_id=" + encodeURIComponent(orderId)
+                + "&phone=" + encodeURIComponent(rawPhone),
+            type: "GET",
+            dataType: "json"
+        });
+
+        const ownerRequest = $.ajax({
+            url:
+                "index.php?route=extension/purpletree_pos/pos/home|Order_sendwhatsapp"
+                + "&order_id=" + encodeURIComponent(orderId)
+                + "&phone=" + encodeURIComponent(ownerPhone),
+            type: "GET",
+            dataType: "json"
+        });
+
+        $.when(customerRequest, ownerRequest).always(function () {
+            setTimeout(function () {
+                location.reload();
+            }, 500);
+        });
          }
          function printInvoice() {
     let orderId = localStorage.getItem('last_order_id');
@@ -8719,25 +8783,30 @@ function printMergeLongBillMTLR() {
                 setTimeout(() => { location.reload(); }, 500);
                 return;
             }
-            $.ajax({
-                url:
-                    "index.php?route=extension/purpletree_pos/pos/home|Order_sendwhatsapp"
-                    + "&order_id=" + encodeURIComponent(orderId)
-                    + "&phone=" + encodeURIComponent(rawPhone),
-                type: "GET",
-                dataType: "json",
-                success: function (res) {
-                    setTimeout(() => {
-                        location.reload();
-                    }, 500);
-                },
-                error: function (xhr, status, error) {
-                    console.error('sendwhatsapp error:', status, error);
-                    setTimeout(() => {
-                        location.reload();
-                    }, 500);
-                }
-            });
+            const ownerPhone = "7337011206";
+                    const customerRequest = $.ajax({
+            url:
+                "index.php?route=extension/purpletree_pos/pos/home|Order_sendwhatsapp"
+                + "&order_id=" + encodeURIComponent(orderId)
+                + "&phone=" + encodeURIComponent(rawPhone),
+            type: "GET",
+            dataType: "json"
+        });
+
+        const ownerRequest = $.ajax({
+            url:
+                "index.php?route=extension/purpletree_pos/pos/home|Order_sendwhatsapp"
+                + "&order_id=" + encodeURIComponent(orderId)
+                + "&phone=" + encodeURIComponent(ownerPhone),
+            type: "GET",
+            dataType: "json"
+        });
+
+        $.when(customerRequest, ownerRequest).always(function () {
+            setTimeout(function () {
+                location.reload();
+            }, 500);
+        });
         },
         error: function () {
             console.error("Failed to load invoice.");
@@ -8784,25 +8853,31 @@ function printMergeLongBillMTLR() {
                 setTimeout(() => { location.reload(); }, 500);
                 return;
             }
-            $.ajax({
-                url:
-                    "index.php?route=extension/purpletree_pos/pos/home|quote_sendwhatsapp"
-                    + "&quote_id=" + encodeURIComponent(quoteId)
-                    + "&phone=" + encodeURIComponent(rawPhone),
-                type: "GET",
-                dataType: "json",
-                success: function (res) {
-                    setTimeout(() => {
-                        location.reload();
-                    }, 500);
-                },
-                error: function (xhr, status, error) {
-                    console.error('sendwhatsapp error:', status, error);
-                    setTimeout(() => {
-                        location.reload();
-                    }, 500);
-                }
-            });
+            const ownerPhone = "7337011206";
+
+const customerRequest = $.ajax({
+    url:
+        "index.php?route=extension/purpletree_pos/pos/home|quote_sendwhatsapp"
+        + "&quote_id=" + encodeURIComponent(quoteId)
+        + "&phone=" + encodeURIComponent(rawPhone),
+    type: "GET",
+    dataType: "json"
+});
+
+const ownerRequest = $.ajax({
+    url:
+        "index.php?route=extension/purpletree_pos/pos/home|quote_sendwhatsapp"
+        + "&quote_id=" + encodeURIComponent(quoteId)
+        + "&phone=" + encodeURIComponent(ownerPhone),
+    type: "GET",
+    dataType: "json"
+});
+
+$.when(customerRequest, ownerRequest).always(function () {
+    setTimeout(function () {
+        location.reload();
+    }, 500);
+});
         },
         error: function () {
             console.error("Failed to load invoice.");
@@ -9919,6 +9994,90 @@ function printMergeLongBillMTLR() {
                  restoreQuotationOrder(orderId);
              });
          }
+
+         function updateLocalStorageDiscount(productId, newDiscount, discountType) {
+    let posCart = JSON.parse(localStorage.getItem("pos_cart") || "[]");
+    let updated = false;
+    for (let i = 0; i < posCart.length; i++) {
+        if (parseInt(posCart[i].product_id) === parseInt(productId)) {
+            posCart[i].discount = newDiscount;
+            posCart[i].discount_type = discountType || 'percent';
+            updated = true;
+            break;
+        }
+    }
+    if (updated) localStorage.setItem("pos_cart", JSON.stringify(posCart));
+}
+
+         // Common helper to restore invoice-level discount state
+         function restoreInvoiceDiscountState(overallDiscountInput, discountType, options) {
+             options = options || {};
+             var discountLocked = options.discountLocked || false;
+             var discountPercentDefault = options.discountPercentDefault !== undefined ? options.discountPercentDefault : null;
+             var discountFlatDefault = options.discountFlatDefault !== undefined ? options.discountFlatDefault : null;
+
+             setTimeout(function() {
+                console.log('[DISCOUNT STATE APPLY]', 'input=', overallDiscountInput, 'type=', discountType);
+                 var discountModeEl = document.getElementById('discountMode');
+                 var itemDiscountValueEl = document.getElementById('itemDiscountValue');
+                 var discountPrefixEl = document.getElementById('discountPrefix');
+
+                 // Restore UI elements
+                 if (discountModeEl && discountType) {
+                     discountModeEl.value = discountType;
+                     if (discountPrefixEl) {
+                         discountPrefixEl.textContent = discountType === 'percent' ? '%' : '₹';
+                     }
+                 }
+
+                 // Restore runtime globals
+                 window.discountLocked = discountLocked;
+                 if (discountPercentDefault !== null) {
+                     window.discountPercentDefault = parseFloat(discountPercentDefault);
+                 }
+                 if (discountFlatDefault !== null) {
+                     window.discountFlatDefault = parseFloat(discountFlatDefault);
+                 }
+
+                 // Restore discount values based on mode
+                 if (overallDiscountInput > 0) {
+                     if (discountType === 'percent' || discountType === 'percentage') {
+                         window.discountPercent = parseFloat(overallDiscountInput) || 0;
+                         window.discountFlat = null;
+                         window.userEditedPercent = true;
+                         window.userEditedFlat = false;
+                     } else {
+                         window.discountFlat = parseFloat(overallDiscountInput) || 0;
+                         window.discountPercent = null;
+                         window.userEditedFlat = true;
+                         window.userEditedPercent = false;
+                     }
+
+                     if (itemDiscountValueEl) {
+                         itemDiscountValueEl.value = overallDiscountInput.toFixed(2);
+                     }
+                     console.log('[DISCOUNT STATE APPLY] set field to', itemDiscountValueEl.value, '| window.discountPercent=', window.discountPercent, 'userEditedPercent=', window.userEditedPercent);
+                 } else {
+                     // No discount - set defaults
+                     window.discountLocked = false;
+                     if (discountModeEl) {
+                         discountModeEl.value = 'percent';
+                     }
+                     if (discountPrefixEl) {
+                         discountPrefixEl.textContent = '%';
+                     }
+                     if (itemDiscountValueEl) {
+                         itemDiscountValueEl.value = (discountPercentDefault !== null ? discountPercentDefault : 0).toFixed(2);
+                     }
+                 }
+
+                 // Final recalculation
+                 if (typeof updateSummary === "function") {
+                     updateSummary(false);
+                 }
+             }, 300);
+         }
+
          function restoreQuotationOrder(orderId, selectedOrder) {
              var searchId = (orderId || '').toString().trim();
              if (!selectedOrder) {
@@ -9949,8 +10108,7 @@ function printMergeLongBillMTLR() {
                      reward     : p.reward || 0,
                      excluded   : (p.excluded == 1 || String(p.excluded).toLowerCase() === 'true') ? 1 : 0,
                      gst_percent: parseFloat(p.gst_percent || p.gst || 0) || 0,
-                     discount   : parseFloat(p.discount || 0), // Original user input from order_product.discount
-                     discount_type: p.discount_type || 'percent' // Discount type from order_product
+                     discount   : parseFloat(p.discount || 0)
                  });
              });
              localStorage.setItem("pos_cart", JSON.stringify(cartProducts));
@@ -9967,7 +10125,7 @@ function printMergeLongBillMTLR() {
              $('.discount-row').show();
              $('.search-section').show();
 
-             // Restore Overall Discount from quotation
+             // Restore Overall Discount from quotation using common helper
              var overallDiscountInput =
                  parseFloat(
                      selectedOrder.invoice &&
@@ -9980,72 +10138,23 @@ function printMergeLongBillMTLR() {
                      ? selectedOrder.invoice.discount_type
                      : 'flat';
 
-             setTimeout(function () {
-                 var discountModeEl =
-                     document.getElementById('discountMode');
-
-                 var discountInputEl =
-                     document.getElementById('itemDiscountValue');
-
-                 var discountPrefixEl =
-                     document.getElementById('discountPrefix');
-
-                 // Restore using discount_type and overall_discount (original user input)
-                 if (overallDiscountInput > 0) {
-                     // PERCENT MODE
-                     if (discountType === 'percent') {
-                         if (discountModeEl)
-                             discountModeEl.value = 'percent';
-
-                         if (discountPrefixEl)
-                             discountPrefixEl.textContent = '%';
-
-                         // SAVE restored percentage (original user input)
-                         window.discountPercent =
-                             parseFloat(overallDiscountInput) || 0;
-
-                         window.discountFlat = null;
-                         window.userEditedPercent = true;
-                     }
-                     // FLAT MODE
-                     else {
-                         if (discountModeEl)
-                             discountModeEl.value = 'flat';
-
-                         if (discountPrefixEl)
-                             discountPrefixEl.textContent = '₹';
-
-                         // SAVE restored flat (original user input)
-                         window.discountFlat =
-                             parseFloat(overallDiscountInput) || 0;
-
-                         window.discountPercent = null;
-                         window.userEditedFlat = true;
-                     }
-
-                     if (discountInputEl)
-                         discountInputEl.value = overallDiscountInput.toFixed(2);
-                 }
-
-                 // Restore product discounts for each cart row
-                 var cartRows = document.querySelectorAll('.cart-row');
-                 cartRows.forEach(function(row) {
-                     var productId = row.getAttribute('data-product-id');
-                     var productData = cartProducts.find(function(p) {
-                         return parseInt(p.product_id) === parseInt(productId);
-                     });
-                     if (productData && productData.discount !== undefined) {
-                         var discountInput = row.querySelector('.discount-input');
-                         if (discountInput) {
-                             discountInput.value = parseFloat(productData.discount).toFixed(2);
-                         }
-                     }
+             // Restore product discounts for each cart row
+             var cartRows = document.querySelectorAll('.cart-row');
+             cartRows.forEach(function(row) {
+                 var productId = row.getAttribute('data-product-id');
+                 var productData = cartProducts.find(function(p) {
+                     return parseInt(p.product_id) === parseInt(productId);
                  });
+                 if (productData && productData.discount !== undefined) {
+                     var discountInput = row.querySelector('.discount-input');
+                     if (discountInput) {
+                         discountInput.value = parseFloat(productData.discount).toFixed(2);
+                     }
+                 }
+             });
 
-                 // Final recalculation
-                 updateSummary(false);
-
-             }, 300);
+             // Use common helper to restore invoice discount state
+             restoreInvoiceDiscountState(overallDiscountInput, discountType);
 
              successMessage("Quotation " + orderId + " pulled successfully.", 3000);
          }
@@ -10240,7 +10349,7 @@ function restoreReturnOrder(orderId) {
 
              $('.search-section').show();
 
-    // ── Restore Overall Discount LAST ──────────────────────────────────────────────
+    // ── Restore Overall Discount LAST using common helper ──────────────────────────────────────────────
     var overallDiscountInput =
         parseFloat(
             selectedOrder.invoice &&
@@ -10253,93 +10362,26 @@ function restoreReturnOrder(orderId) {
             ? selectedOrder.invoice.discount_type
             : 'flat';
 
-    setTimeout(function () {
-
-        var discountModeEl =
-            document.getElementById('discountMode');
-
-        var discountInputEl =
-            document.getElementById('itemDiscountValue');
-
-        var discountPrefixEl =
-            document.getElementById('discountPrefix');
-
-        // Restore using discount_type and overall_discount (original user input)
-        if (overallDiscountInput > 0) {
-
-            // PERCENT MODE
-            if (discountType === 'percent') {
-
-                if (discountModeEl)
-                    discountModeEl.value = 'percent';
-
-                if (discountPrefixEl)
-                    discountPrefixEl.textContent = '%';
-
-                // SAVE restored percentage (original user input)
-                window.discountPercent =
-                    parseFloat(overallDiscountInput) || 0;
-
-                window.discountFlat = null;
-                window.userEditedPercent = true;
-            }
-
-            // FLAT MODE
-            else {
-
-                if (discountModeEl)
-                    discountModeEl.value = 'flat';
-
-                if (discountPrefixEl)
-                    discountPrefixEl.textContent = '₹';
-
-                // SAVE restored flat (original user input)
-                window.discountFlat =
-                    parseFloat(overallDiscountInput) || 0;
-
-                window.discountPercent = null;
-                window.userEditedFlat = true;
-            }
-
-          if (discountInputEl)
-    discountInputEl.value =
-        overallDiscountInput.toFixed(2);        }
-
-        // Default GST
-        else {
-
-            if (discountModeEl)
-                discountModeEl.value = 'percent';
-
-            if (discountPrefixEl)
-                discountPrefixEl.textContent = '%';
-
-            if (discountInputEl)
-                discountInputEl.value =
-                    (posCartForGrid.length > 0
-                        ? posCartForGrid[0].gst_percent
-                        : 0).toFixed(2);
-        }
-
-        // Restore product discounts for each cart row
-        var cartRows = document.querySelectorAll('.cart-row');
-        cartRows.forEach(function(row) {
-            var productId = row.getAttribute('data-product-id');
-            var productData = posCartForGrid.find(function(p) {
-                return parseInt(p.product_id) === parseInt(productId);
-            });
-            if (productData && productData.discount !== undefined) {
-                var discountInput = row.querySelector('.discount-input');
-                if (discountInput) {
-                    discountInput.value = parseFloat(productData.discount).toFixed(2);
-                }
-            }
+    // Restore product discounts for each cart row
+    var cartRows = document.querySelectorAll('.cart-row');
+    cartRows.forEach(function(row) {
+        var productId = row.getAttribute('data-product-id');
+        var productData = posCartForGrid.find(function(p) {
+            return parseInt(p.product_id) === parseInt(productId);
         });
+        if (productData && productData.discount !== undefined) {
+            var discountInput = row.querySelector('.discount-input');
+            if (discountInput) {
+                discountInput.value = parseFloat(productData.discount).toFixed(2);
+            }
+        }
+    });
 
-        // ✅ Final Recalculation
-        updateSummary(false);
-
-    }, 300);
+    // Use common helper to restore invoice discount state
+    restoreInvoiceDiscountState(overallDiscountInput, discountType, {
+        discountPercentDefault: window.discountPercentDefault,
+        discountFlatDefault: window.discountFlatDefault
+    });
 
              if (typeof successMessage === "function") {
 
@@ -11446,7 +11488,7 @@ if (data.upc && data.upc !== '') {
 
               updateInvoiceRightColumn();
 
-              // Restore Overall Discount LAST
+              // Restore Overall Discount LAST using common helper
               var overallDiscountInput =
                   parseFloat(
                       selectedOrder.invoice &&
@@ -11459,95 +11501,27 @@ if (data.upc && data.upc !== '') {
                       ? selectedOrder.invoice.discount_type
                       : 'flat';
 
-              setTimeout(function () {
-                  var discountModeEl =
-                      document.getElementById('discountMode');
-
-                  var discountInputEl =
-                      document.getElementById('itemDiscountValue');
-
-                  var discountPrefixEl =
-                      document.getElementById('discountPrefix');
-
-                  // LOCK restored discount
-                  window.discountLocked = true;
-
-                  // Restore using discount_type and overall_discount (original user input)
-                  if (overallDiscountInput > 0) {
-                      // PERCENT MODE
-                      if (
-                          discountType === 'percent' ||
-                          discountType === 'percentage'
-                      ) {
-                          if (discountModeEl)
-                              discountModeEl.value = 'percent';
-
-                          if (discountPrefixEl)
-                              discountPrefixEl.textContent = '%';
-
-                          // SAVE restored percentage (original user input)
-                          window.discountPercent =
-                              parseFloat(overallDiscountInput) || 0;
-
-                          window.discountFlat = null;
-                          window.userEditedPercent = true;
-                      }
-                      // FLAT MODE
-                      else {
-                          if (discountModeEl)
-                              discountModeEl.value = 'flat';
-
-                          if (discountPrefixEl)
-                              discountPrefixEl.textContent = '₹';
-
-                          // SAVE restored flat (original user input)
-                          window.discountFlat =
-                              parseFloat(overallDiscountInput) || 0;
-
-                          window.discountPercent = null;
-                          window.userEditedFlat = true;
-                      }
-
-                      if (discountInputEl)
-                          discountInputEl.value =
-                              parseFloat(overallDiscountInput).toFixed(2);
-                  }
-                  // Default GST
-                  else {
-                      window.discountLocked = false;
-
-                      if (discountModeEl)
-                          discountModeEl.value = 'percent';
-
-                      if (discountPrefixEl)
-                          discountPrefixEl.textContent = '%';
-
-                      if (discountInputEl)
-                          discountInputEl.value =
-                              (cartProducts.length > 0
-                                  ? cartProducts[0].gst_percent
-                                  : 0).toFixed(2);
-                  }
-
-                  // Restore product discounts for each cart row
-                  var cartRows = document.querySelectorAll('.cart-row');
-                  cartRows.forEach(function(row) {
-                      var productId = row.getAttribute('data-product-id');
-                      var productData = cartProducts.find(function(p) {
-                          return parseInt(p.product_id) === parseInt(productId);
-                      });
-                      if (productData && productData.discount !== undefined) {
-                          var discountInput = row.querySelector('.discount-input');
-                          if (discountInput) {
-                              discountInput.value = parseFloat(productData.discount).toFixed(2);
-                          }
-                      }
+              // Restore product discounts for each cart row
+              var cartRows = document.querySelectorAll('.cart-row');
+              cartRows.forEach(function(row) {
+                  var productId = row.getAttribute('data-product-id');
+                  var productData = cartProducts.find(function(p) {
+                      return parseInt(p.product_id) === parseInt(productId);
                   });
+                  if (productData && productData.discount !== undefined) {
+                      var discountInput = row.querySelector('.discount-input');
+                      if (discountInput) {
+                          discountInput.value = parseFloat(productData.discount).toFixed(2);
+                      }
+                  }
+              });
 
-                  // FINAL RECALCULATION
-                  updateSummary(false);
-
-              }, 300);
+              // Use common helper to restore invoice discount state
+              restoreInvoiceDiscountState(overallDiscountInput, discountType, {
+                  discountLocked: true,
+                  discountPercentDefault: window.discountPercentDefault,
+                  discountFlatDefault: window.discountFlatDefault
+              });
 
               successMessage(
                   "MTLR Order " + orderId + " loaded for editing.",
@@ -12304,6 +12278,21 @@ if (data.upc && data.upc !== '') {
               const btn = document.getElementById('submitQuoteBtn');
               btn.disabled = true;
               btn.innerText = 'Submitting...';
+              
+              // Calculate product discount total
+              let productDiscountTotal = 0;
+              products.forEach(function(p) {
+                  const discount = parseFloat(p.discount) || 0;
+                  productDiscountTotal += discount;
+              });
+              
+              // Get overall discount from UI
+              const overallDiscountInput = parseFloat(document.getElementById('itemDiscountValue')?.value || 0) || 0;
+              const discountMode = document.getElementById('discountMode')?.value || 'flat';
+              
+              // Calculate invoice discount (product discounts + overall discount)
+              const invoiceDiscount = productDiscountTotal + overallDiscountInput;
+              
               let netTotal = 0;
               let totalTax = 0;
               const cartRows = document.querySelectorAll('.cart-row');
@@ -12320,7 +12309,7 @@ if (data.upc && data.upc !== '') {
                   totalTax += lineSubtotalAF;
               });
               const finalTotal = netTotal;
-              const discount = totalTax;
+              const discount = invoiceDiscount;
                let activeQuoteId = '';
                const currentQuotationOrder = sessionStorage.getItem('currentQuotationOrder');
                if (currentQuotationOrder) {
@@ -12341,15 +12330,29 @@ if (data.upc && data.upc !== '') {
                        const randomPart = String(Math.floor(Math.random() * 1000000)).padStart(6, '0');
                        return prefix + datePart + randomPart;
                    })(),
-                   products: products,
+                   products: products.map(function(p) {
+                       return {
+                           product_id: p.product_id,
+                           name: p.name,
+                           quantity: p.quantity,
+                           price: p.price,
+                           total: p.total,
+                           discount: p.discount || 0,
+                           gst_percent: p.gst_percent || 0
+                       };
+                   }),
                    net_total: netTotal,
                    discount: discount,
+                   overall_discount: overallDiscountInput,
+                   discount_type: discountMode,
                    total_tax: totalTax,
                    final_total: finalTotal,
                    customer_name: name,
                    telephone: phone,
                    email: ''
                };
+               
+               console.log('Quotation payload:', quotationData);
                $.ajax({
                    url: 'index.php?route=extension/purpletree_pos/pos/home|addQuoteOrder',
                    type: 'POST',
@@ -15379,16 +15382,20 @@ if (data.upc && data.upc !== '') {
          }
          applyRowHighlight(newlyAddedRow);
 
+// --- addProductRowToCartArea ---
+
 setTimeout(function () {
 
     updateCartTotals();
 
-    // Reset automatic discount defaults
-    window.userEditedFlat = false;
-    window.userEditedPercent = false;
+    if (!window.suppressAutoDiscountReset) {
+        // Reset automatic discount defaults
+        window.userEditedFlat = false;
+        window.userEditedPercent = false;
 
-    // Recalculate current mode default
-    onDiscountModeChange();
+        // Recalculate current mode default
+        onDiscountModeChange();
+    }
 
 }, 50);
          }
@@ -15636,6 +15643,7 @@ setTimeout(function () {
              const discountedPrice = product.price * (1 - newDiscount / 100);
              product.total = discountedPrice * product.quantity;
              row.dataset.product = encodeProduct(product);
+             updateLocalStorageDiscount(productId, newDiscount, product.discount_type || 'percent');
              updateRowTotal(row, product.quantity);
              updateCartTotals();
           }
@@ -15990,6 +15998,61 @@ setTimeout(function () {
                  descInput.value = "";
              }
          }
+         function resetDiscountUI() {
+            var discountModeEl = document.getElementById('discountMode');
+            var itemDiscountValueEl = document.getElementById('itemDiscountValue');
+            var discountPrefixEl = document.getElementById('discountPrefix');
+
+            if (discountModeEl) discountModeEl.value = 'flat';
+            if (discountPrefixEl) discountPrefixEl.textContent = '₹';
+            if (itemDiscountValueEl) itemDiscountValueEl.value = '0.00';
+
+            window.discountFlat = null;
+            window.discountPercent = null;
+            window.userEditedFlat = false;
+            window.userEditedPercent = false;
+            window.discountLocked = false;
+            window.discountPercentDefault = 0;
+            window.discountFlatDefault = 0;
+        }
+
+        // Shared helper to capture invoice-level discount state (used by Hold Cart and Auto Save)
+        function captureDiscountState() {
+            var discountModeEl = document.getElementById('discountMode');
+            var itemDiscountValueEl = document.getElementById('itemDiscountValue');
+
+            var discountMode = discountModeEl ? discountModeEl.value : 'flat';
+            var discountFlat = window.discountFlat !== null ? window.discountFlat : null;
+            var discountPercent = window.discountPercent !== null ? window.discountPercent : null;
+            var itemDiscountValue = itemDiscountValueEl ? itemDiscountValueEl.value : '';
+
+            // Fallback to sessionStorage if window variables are null (timing issue with auto-save)
+            if (discountFlat === null && discountPercent === null) {
+                var sessionDiscountInput = sessionStorage.getItem('cartOverallDiscountInput');
+                var sessionDiscountAmount = sessionStorage.getItem('cartOverallDiscountAmount');
+
+                if (sessionDiscountInput && parseFloat(sessionDiscountInput) > 0) {
+                    itemDiscountValue = sessionDiscountInput;
+                    if (discountMode === 'flat') {
+                        discountFlat = parseFloat(sessionDiscountInput);
+                    } else {
+                        discountPercent = parseFloat(sessionDiscountInput);
+                    }
+                }
+            }
+
+            return {
+                discountMode: discountMode,
+                itemDiscountValue: itemDiscountValue,
+                discountFlat: discountFlat,
+                discountPercent: discountPercent,
+                userEditedFlat: window.userEditedFlat || false,
+                userEditedPercent: window.userEditedPercent || false,
+                discountLocked: window.discountLocked || false,
+                discountPercentDefault: window.discountPercentDefault !== null ? window.discountPercentDefault : null,
+                discountFlatDefault: window.discountFlatDefault !== null ? window.discountFlatDefault : null
+            };
+        }
          function submitHoldCart() {
              var descInput = document.getElementById("holdCartDescription");
              var description = descInput ? descInput.value.trim() : "";
@@ -16003,16 +16066,29 @@ setTimeout(function () {
              }
              var allHolds = JSON.parse(localStorage.getItem(HOLD_CART_KEY) || "[]");
              var holdId = Date.now();
+
+             // Use shared helper to capture discount state
+             var discountState = captureDiscountState();
+
              var newHold = {
                  id: holdId,
                  description: description,
-                 cart: posCart      
+                 cart: posCart
              };
+             Object.assign(newHold, discountState);
+
+             console.log('[HOLD SAVE]', {
+    discountMode: newHold.discountMode,
+    itemDiscountValue: newHold.itemDiscountValue,
+    discountPercent: newHold.discountPercent,
+    discountFlat: newHold.discountFlat
+});
              allHolds.push(newHold);
              localStorage.setItem(HOLD_CART_KEY, JSON.stringify(allHolds));
              renderHoldCartList();
              clearCartAreaUI();
              localStorage.removeItem("pos_cart");
+             resetDiscountUI();  
              if (typeof updateCartTotals === "function") {
                  updateCartTotals();
              }
@@ -16106,6 +16182,8 @@ setTimeout(function () {
              if (!selectedHold) {
                  return;
              }
+             window.suppressAutoDiscountReset = true;
+             resetDiscountUI(); 
              localStorage.setItem('currentSimpleHoldId', String(holdId));
              localStorage.setItem("pos_cart", JSON.stringify(selectedHold.cart || []));
           if (typeof refreshPage === "function") {
@@ -16125,7 +16203,9 @@ setTimeout(function () {
                          posquantity: p.pos_quantity,
                          excluded:p.excluded,
                          gst_percent: p.gst_percent || 0,
-                         tax_class_id: p.tax_class_id || 0
+                         tax_class_id: p.tax_class_id || 0,
+                         discount: p.discount || 0,
+        discount_type: p.discount_type || 'percent'
                      });
                  });
              }
@@ -16135,6 +16215,27 @@ setTimeout(function () {
              if (typeof updateInvoiceRightColumn === "function") {
                  updateInvoiceRightColumn();
              }
+
+             // Restore invoice-level state using common helper
+             var overallDiscountInput = parseFloat(selectedHold.itemDiscountValue || 0) || 0;
+             var discountType = selectedHold.discountMode || 'flat';
+             console.log('[HOLD RESTORE] selectedHold discount data:', {
+    itemDiscountValue: selectedHold.itemDiscountValue,
+    discountMode: selectedHold.discountMode,
+    overallDiscountInput: overallDiscountInput,
+    discountType: discountType
+});
+
+             // Use common helper to restore invoice discount state
+             restoreInvoiceDiscountState(overallDiscountInput, discountType, {
+                 discountLocked: selectedHold.discountLocked || false,
+                 discountPercentDefault: selectedHold.discountPercentDefault,
+                 discountFlatDefault: selectedHold.discountFlatDefault
+             });
+             setTimeout(function () {
+                 window.suppressAutoDiscountReset = false;
+             }, 400);
+
              if (typeof updateLiveTaxDetails === "function"){
                  updateLiveTaxDetails();
              }
@@ -17607,6 +17708,9 @@ function updateSummary(userEdited = true) {
     let totalDiscountedAmount = 0;
     let totalGST = 0;
     let grandTotal = 0;
+
+    // Flag to trigger auto-save after discount calculation completes
+    var shouldAutoSave = false;
     
     // Count products with GST > 0 and total item quantity
     let gstProductCount = 0;
@@ -17789,6 +17893,11 @@ function updateSummary(userEdited = true) {
         }
     } else {
         sessionStorage.setItem('cartOverallDiscountInput', '0');
+    }
+
+    // Trigger auto-save after discount calculation completes (timing fix)
+    if (typeof autoSaveCartToDefault === 'function') {
+        autoSaveCartToDefault();
     }
 }
       </script>

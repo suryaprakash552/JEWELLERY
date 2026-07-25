@@ -791,6 +791,8 @@ $this->doWalletAepsCredit($credit);
                                                                                 quantity   = '" . (int)$p['quantity'] . "',
                                                                                 price      = '" . (float)$p['price'] . "',
                                                                                 total      = '" . (float)$p['total'] . "',
+                                                                                discount   = '" . (float)($p['discount'] ?? 0) . "',
+                                                                                gst = '" . (float)($p['gst_percent'] ?? 0) . "',
                                                                                 excluded   = '" . (!empty($p['excluded']) ? 1 : 0) . "'
                                                                         ");
             }
@@ -799,6 +801,8 @@ $this->doWalletAepsCredit($credit);
                                                                             order_id          = '" . (int)$quote_id . "',
                                                                             customer_group_id = '" . (int)$invoice_extra['customer_group_id'] . "',
                                                                             discount          = '" . (float)$invoice_extra['discount'] . "',
+                                                                            overall_discount  = '" . (float)($invoice_extra['overall_discount'] ?? 0) . "',
+                                                                            discount_type     = '" . $this->db->escape($invoice_extra['discount_type'] ?? 'flat') . "',
                                                                             number_of_items   = '" . (int)$invoice_extra['number_of_items'] . "',
                                                                             quantity_of_items = '" . (int)$invoice_extra['quantity_of_items'] . "',
                                                                             sub_total         = '" . (float)$invoice_extra['sub_total'] . "',

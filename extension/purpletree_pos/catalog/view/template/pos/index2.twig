@@ -8154,6 +8154,10 @@ window.processOrderPayment = function(btn, shouldPrint, apiEndpoint) {
             // Calculate discount percentage based on type
             const discountPercent = discountType === 'flat' ? 0 : discountValue;
             
+            // Use final values from updateSummary() if available (with overall discount), otherwise fallback to calculated values
+            const finalTotal = p.final_total ?? p.total ?? null;
+            const finalRowGst = p.final_gst_amount ?? parseFloat(rowGst.toFixed(2));
+            
             return {
               cartId: p.cart_id ?? null,
               product_id: p.product_id,
@@ -8164,9 +8168,9 @@ window.processOrderPayment = function(btn, shouldPrint, apiEndpoint) {
               discount_type: discountType,
               discount: discountValue,
               discount_input: discountValue,
-              total: p.total ?? null,
+              total: finalTotal,
               gst_percent: gstPercent,
-              row_gst: parseFloat(rowGst.toFixed(2)),
+              row_gst: finalRowGst,
               reward: p.reward ?? 0,
               quantity: p.quantity ?? 1,
               pos_quantity: p.pos_quantity ?? 0,
@@ -8241,15 +8245,25 @@ window.processOrderPayment = function(btn, shouldPrint, apiEndpoint) {
                 generateSuccessDQ12();
               }
               if (shouldPrint) {
-                  printInvoice();
-                  emptyCart();
-                  refreshPage();
-              } else {
-                  if (apiEndpoint === 'addorder') {
-                        sendWhatsAppOnly(json.order_id);
-                    }
-                    emptyCart();
-              }
+            printInvoice();
+            emptyCart();
+            refreshPage();
+            } else {
+
+                if (apiEndpoint === 'addorder') {
+
+                    // Normal Order
+                    sendWhatsAppOnly(json.order_id);
+
+                } else if (apiEndpoint === 'addwholesaleorder') {
+
+                    // Wholesale Order
+                    sendWholesaleWhatsAppOnly(json.order_id);
+
+                }
+
+                emptyCart();
+            }
               if (sessionStorage.getItem('currentholdkey') !== null) {
                 const key = sessionStorage.getItem('currentholdkey');
                 if (typeof holdCartDeleteonReload === 'function') {
@@ -8743,6 +8757,47 @@ function printMergeLongBillMTLR() {
             }, 500);
         });
          }
+
+         function sendWholesaleWhatsAppOnly(orderId) {
+
+    let rawPhone =
+        $('#customerMobileInput').val()?.trim() ||
+        (JSON.parse(sessionStorage.getItem('currentCustomerData') || '{}').telephone || '');
+
+    rawPhone = rawPhone.replace(/\s+/g, '').replace(/^\+/, '');
+
+    if (rawPhone.startsWith('0')) {
+        rawPhone = rawPhone.substring(1);
+    }
+
+    if (rawPhone && !rawPhone.startsWith('91')) {
+        rawPhone = '91' + rawPhone;
+    }
+
+    if (!rawPhone) {
+        console.warn('Customer phone not found');
+        return;
+    }
+
+    const ownerPhone = "7337011206";
+
+    $.ajax({
+        url:
+            "index.php?route=extension/purpletree_pos/pos/home|WholesaleOrder_sendwhatsapp"
+            + "&order_id=" + encodeURIComponent(orderId)
+            + "&phone=" + encodeURIComponent(rawPhone),
+        type: "GET"
+    });
+
+    $.ajax({
+        url:
+            "index.php?route=extension/purpletree_pos/pos/home|WholesaleOrder_sendwhatsapp"
+            + "&order_id=" + encodeURIComponent(orderId)
+            + "&phone=" + encodeURIComponent(ownerPhone),
+        type: "GET"
+    });
+
+}
          function printInvoice() {
     let orderId = localStorage.getItem('last_order_id');
     if (!orderId) return;

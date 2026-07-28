@@ -1960,7 +1960,7 @@ return $this->response->setOutput(
 
             $this->load->model("checkout/order");
             if ($editOrderId > 0) {
-                $this->model_checkout_order->editPreviousOrder($editOrderId, $order_data, $invoice_extra);
+                $this->model_checkout_order->editWholesalePreviousOrder($editOrderId, $order_data, $invoice_extra);
                 $order_id = $editOrderId;
             } else {
                 $order_id = $this->model_checkout_order->addwholesaleorder($order_data, $invoice_extra);
@@ -4247,6 +4247,28 @@ public function publicInvoice(): void
     $this->invoice();
 }
 
+public function publicWholesaleInvoice(): void
+{
+    $order_id = (int)($this->request->get['order_id'] ?? 0);
+
+    if (!$order_id) {
+        echo 'Invalid order';
+        return;
+    }
+
+    $this->load->model('checkout/order');
+
+    $order_info = $this->model_checkout_order->getFullWholesaleOrderDetails($order_id);
+    if (!$order_info) {
+        echo 'Order not found';
+        return;
+    }
+
+
+    $this->request->get['order_id'] = $order_id;
+    $this->mtlrInvoice();
+}
+
 public function publicQuoteInvoice(): void
 {
     $quote_id = (int)($this->request->get['quote_id'] ?? 0);
@@ -4554,6 +4576,168 @@ $this->load->view(
             "to" => "91" . $cleanPhone,           
             "accountId" => "6a5a19f675c23683cb18cff9",
             "templateName" => "order_invoice1",
+            "languageCode" => "en",
+            "components" => [
+                [
+                    "type" => "body",
+                    "parameters" => [
+                        [
+                            "type" => "text",
+                            "text" => $customer_name
+                        ],
+                        [
+                            "type" => "text",
+                            "text" => "Saleem Gold Covering"
+                        ],
+                        [
+                            "type" => "text",
+                            "text" => $invoice_no
+                        ],
+                        [
+                            "type" => "text",
+                            "text" => $amount
+                        ],
+                        [
+                            "type" => "text",
+                            "text" => date('d-m-Y', strtotime($date))
+                        ],
+                        [
+                            "type" => "text",
+                            "text" => (string)$items_count
+                        ]
+                    ]
+                ],
+                [
+                    "type" => "button",
+                    "sub_type" => "url",
+                    "index" => "0",
+                    "parameters" => [
+                        [
+                            "type" => "text",
+                            "text" => (string)$templateId
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        $ch = curl_init();
+
+        curl_setopt_array($ch, [
+            CURLOPT_URL => "https://api-nexmsg.myteknoland.com/api/send/template",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_HTTPHEADER => [
+                "Content-Type: application/json",
+                "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTQ2MTk2NGJlYmNlN2E4NTk4YWM2ZDMiLCJlbWFpbCI6ImdhbmdhYmFsYWppOTE1QGdtYWlsLmNvbSIsInJvbGUiOiJjbGllbnQiLCJzdGF0dXMiOiJhY3RpdmUiLCJpYXQiOjE3ODQzNTgzOTUsImV4cCI6MTc4NDQ0NDc5NX0.y02CFMXH9mdmboy-kt4DPFkuRrE1yf6WOAdX_rlMspU"
+            ],
+        ]);
+
+        $response = curl_exec($ch);
+
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if (curl_errno($ch)) {
+            $response = curl_error($ch);
+        }
+
+        curl_close($ch);
+
+        $this->response->addHeader("Content-Type: application/json");
+        $this->response->setOutput(json_encode([
+            "status"   => $httpCode,
+            "response" => json_decode($response, true) ?: $response
+        ]));
+        
+    }
+
+     public function WholesaleOrder_sendwhatsapp(): void
+    {
+         $order_id = (int)($this->request->get['order_id'] ?? 0);
+    $quote_id = (int)($this->request->get['quote_id'] ?? 0);
+    $phone    = trim($this->request->get['phone'] ?? '');
+
+    if ((!$order_id && !$quote_id) || !$phone) {
+        $this->response->addHeader("Content-Type: application/json");
+        $this->response->setOutput(json_encode([
+            "status" => "error",
+            "message" => "order_id or quote_id and phone required",
+        ]));
+        return;
+    }
+
+    $this->load->model("checkout/order");
+
+    // -----------------------------
+    // LOAD DATA BASED ON TYPE
+    // -----------------------------
+    if ($quote_id > 0) {
+        // QUOTATION
+        $order = $this->model_checkout_order->getQuoteOrderdetails($quote_id);
+        if (!$order) {
+            $this->response->setOutput(json_encode([
+                "status" => "error",
+                "message" => "Quotation not found",
+            ]));
+            return;
+        }
+
+        $products = $this->model_checkout_order->getQuoteProducts($quote_id);
+
+        $invoice_no = 'Q-' . $quote_id;
+        $download_link = HTTP_SERVER
+            . 'index.php?route=extension/purpletree_pos/pos/home|quoteInvoice'
+            . '&quote_id=' . $quote_id;
+
+    } else {
+        // ORDER
+        $order = $this->model_checkout_order->getWholesaleOrder($order_id);
+        if (!$order) {
+            $this->response->setOutput(json_encode([
+                "status" => "error",
+                "message" => "Order not found",
+            ]));
+            return;
+        }
+
+        $products = $order['products'] ?? [];
+
+        $invoice_no = (string)$order_id;
+        $download_link = HTTP_SERVER
+            . 'index.php?route=extension/purpletree_pos/pos/home|publicWholesaleInvoice'
+            . '&order_id=' . $order_id;
+        $download_invoice = HTTP_SERVER
+            . 'index.php?route=extension/purpletree_pos/pos/home|publicWholesaleInvoice'
+            . '&order_id=' . $order_id;
+    }
+        $link = 'https://myteknoland.com/';
+    // -----------------------------
+    // COMMON TEMPLATE VALUES
+    // -----------------------------
+    $customer_name = trim(($order['firstname'] ?? '') . ' ' . ($order['lastname'] ?? ''));
+    $store_name    = 'Saleem Gold Covering - Wholesale';
+
+    $items_count = (string) max(1, count($products));
+    $amount      = number_format((float)($order['total'] ?? 0), 2, '.', '');
+    $date        = substr((string)($order['date_added'] ?? date('Y-m-d')), 0, 10);
+   
+      $templateId = ($quote_id > 0) ? $quote_id : $order_id;
+
+        $cleanPhone = preg_replace('/\D/', '', $phone);
+        // Strip a leading 91 if already present, then re-add it once
+        if (strlen($cleanPhone) > 10 && substr($cleanPhone, 0, 2) === '91') {
+            $cleanPhone = substr($cleanPhone, 2);
+        }
+        $payload = [
+            "to" => "91" . $cleanPhone,           
+            "accountId" => "6a5a19f675c23683cb18cff9",
+            "templateName" => "order_invoice_rel",
             "languageCode" => "en",
             "components" => [
                 [

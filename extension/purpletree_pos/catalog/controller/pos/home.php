@@ -4737,8 +4737,8 @@ $this->load->view(
         $payload = [
             "to" => "91" . $cleanPhone,           
             "accountId" => "6a5a19f675c23683cb18cff9",
-            "templateName" => "order_invoice_rel",
-            "languageCode" => "en",
+            "templateName" => "order_invoice_rel1",
+            "languageCode" => "en_US",
             "components" => [
                 [
                     "type" => "body",

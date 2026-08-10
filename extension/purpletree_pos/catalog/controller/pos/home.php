@@ -1343,8 +1343,25 @@ class Home extends \Opencart\System\Engine\Controller
             $invoiceInfo = $get($orderDetails, "InvoiceInfo", []);
 
             $subtotal = $money($get($invoiceInfo, "SUBTotal", 0));
-            $discount = $money($get($invoiceInfo, "DiscountIncluded", 0));
-            $discountType = $get($invoiceInfo, "DiscountType", "");
+            // Product Discount: Total product-wise discount amount
+            $productDiscount = $money($get($invoiceInfo, "DiscountIncluded", 0));
+            // Overall Discount: Original user input (percentage or flat amount)
+            $overallDiscountInput = $money($get($invoiceInfo, "OverallDiscount", 0));
+            // Overall Discount Mode: 'flat' or 'percent'
+            $overallDiscountMode = $get($invoiceInfo, "OverallDiscountMode", "flat");
+            
+            // Calculate overall discount amount based on type
+            if ($overallDiscountMode === 'percent') {
+                // If percent, calculate the discount amount from percentage
+                $overallDiscountAmount = ($overallDiscountInput / 100) * $subtotal;
+            } else {
+                // If flat, the input is already the amount
+                $overallDiscountAmount = $overallDiscountInput;
+            }
+            
+            // Total Discount = Product Discount + Overall Discount Amount
+            $discount = $productDiscount + $overallDiscountAmount;
+            $discountType = $overallDiscountMode; // Use overall discount mode as discount type
             $tax_included = $money($get($invoiceInfo, "TaxIncluded", 0));
             $total_before_round = $money($get($invoiceInfo, "TotalBeforeRoundoff", 0));
             $roundoff_amount = $money($get($invoiceInfo, "RoundOffAmount", 0));
@@ -1425,6 +1442,19 @@ class Home extends \Opencart\System\Engine\Controller
 
             $order_data["products"] = [];
             foreach ($cart_products as $p) {
+                // Get discount type and original user input
+                $discountType = $p["discount_type"] ?? 'percent';
+                $discountInput = (float) ($p["discount_input"] ?? 0);
+                
+                // Store original user input based on discount type
+                if ($discountType === 'flat') {
+                    // For flat discount, store the flat amount
+                    $discountToStore = $discountInput;
+                } else {
+                    // For percent discount, store the percentage
+                    $discountToStore = $discountInput;
+                }
+                
                 $order_data["products"][] = [
                     "product_id" => (int) ($p["product_id"] ?? 0),
                     "name" => $p["name"] ?? "",
@@ -1435,7 +1465,10 @@ class Home extends \Opencart\System\Engine\Controller
                     "total" => (float) ($p["total"] ?? 0),
                     "gst" => (float) ($p["gst_percent"] ?? 0),
                     "tax" => (float) ($p["row_gst"] ?? 0),
-                    "excluded"   => !empty($p["excluded"]) ? 1 : 0
+                    "excluded"   => !empty($p["excluded"]) ? 1 : 0,
+                    "discount_amount" => (float) ($p["discount_amount"] ?? 0), // Product discount amount for calculations
+                    "discount" => $discountToStore, // Original user input (percentage or flat amount)
+                    "discount_type" => $discountType // Discount type ('percent' or 'flat')
                 ];
             }
 
@@ -1448,6 +1481,7 @@ class Home extends \Opencart\System\Engine\Controller
                 "credit_points" => $reward_points,
                 "discount" => $discount,
                 "discount_type" => $discountType,
+                "overall_discount" => $overallDiscountInput, // Original user input (percentage or flat amount)
                 "number_of_items" => $items_count,
                 "quantity_of_items" => $qty_total,
                 "sub_total" => $subtotal,
@@ -1710,6 +1744,445 @@ return $this->response->setOutput(
         }
     }
     
+    public function addwholesaleorder()
+    {
+        $this->response->addHeader("Content-Type: application/json");
+
+        $post = $this->request->post;
+
+        $raw = file_get_contents("php://input");
+        if ($raw) {
+            $decoded = json_decode($raw, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $post = array_merge($post, $decoded);
+            }
+        }
+        $get = function ($arr, $key, $default = "") {
+            return isset($arr[$key]) ? $arr[$key] : $default;
+        };
+        $money = function ($v) {
+            return (float) preg_replace("/[^0-9.\-]/", "", (string) $v);
+        };
+
+        try {
+            $orderDetails = $get($post, "orderDetails", []);
+            $incoming_tax_details = $get($orderDetails, "taxDetails", []);
+            $previousOrderId = (int) $get($orderDetails, "previousOrderId", 0);
+            $activeQuoteId = (int) $get($orderDetails, "activeQuoteId", 0);
+            $editOrderId = (int) $get($orderDetails, "previourseditorderid", 0);
+            $customer_id = $get($orderDetails, "customerIdNumber", 0);
+            $agentId = $this->customer->getId();
+            $customer_name = $get($orderDetails, "CustomerName", "");
+            $email = $get($orderDetails, "Email", "");
+            $mobile = $get($orderDetails, "Mobile", "");
+            // $customer_group_id = (int) $get($orderDetails,"customer_group_id",0
+            // );
+
+            // if ($customer_group_id === 0 && $agentId) {
+            //     $this->load->model("account/customer");
+            //     $agent_info = $this->model_account_customer->getCustomer((int) $agentId);
+
+            //     if (!empty($agent_info["customer_group_id"])) {
+            //         $customer_group_id =(int) $agent_info["customer_group_id"];
+            //     }
+            // }
+
+            $invoiceInfo = $get($orderDetails, "InvoiceInfo", []);
+
+            $subtotal = $money($get($invoiceInfo, "SUBTotal", 0));
+            // Product Discount: Total product-wise discount amount
+            $productDiscount = $money($get($invoiceInfo, "DiscountIncluded", 0));
+            // Overall Discount: Original user input (percentage or flat amount)
+            $overallDiscountInput = $money($get($invoiceInfo, "OverallDiscount", 0));
+            // Overall Discount Mode: 'flat' or 'percent'
+            $overallDiscountMode = $get($invoiceInfo, "OverallDiscountMode", "flat");
+            
+            // Calculate overall discount amount based on type
+            if ($overallDiscountMode === 'percent') {
+                // If percent, calculate the discount amount from percentage
+                $overallDiscountAmount = ($overallDiscountInput / 100) * $subtotal;
+            } else {
+                // If flat, the input is already the amount
+                $overallDiscountAmount = $overallDiscountInput;
+            }
+            
+            // Total Discount = Product Discount + Overall Discount Amount
+            $discount = $productDiscount + $overallDiscountAmount;
+            $discountType = $overallDiscountMode; // Use overall discount mode as discount type
+            $tax_included = $money($get($invoiceInfo, "TaxIncluded", 0));
+            $total_before_round = $money($get($invoiceInfo, "TotalBeforeRoundoff", 0));
+            $roundoff_amount = $money($get($invoiceInfo, "RoundOffAmount", 0));
+            $qty_total = (int) $get($invoiceInfo, "QuantityTotal", 0);
+            $items_count = (int) $get($invoiceInfo, "NumberOfItems", 0);
+            $credits_for_order = $money($get($invoiceInfo, "credits_for_order", 0));
+            $creditpointsused = $money($get($orderDetails, "CreditPointsUsed", 0));
+            $redeem_points_status = filter_var($get($orderDetails, "redeem_points_status", false),FILTER_VALIDATE_BOOLEAN);
+
+            $coupon = $get($invoiceInfo, "Coupon", "");
+            $coupon_amount = $money($get($invoiceInfo, "CouponAmount", 0));
+            $coupon_final = $coupon;
+            if (!empty($coupon) && $coupon_amount > 0) {
+                $coupon_final = $coupon . '-' . number_format($coupon_amount, 2, '.', '');
+            }
+            $total_tax = $money($get($invoiceInfo, "TotalTax", 0));
+
+            $full_invoice_number = $get($invoiceInfo, "InvoiceNumber", "");
+            // Reward calculation
+            $reward_points = 0;
+            
+            if ($subtotal >= 1000) {
+                $reward_points = floor($subtotal / 1000) * 5;
+            }
+
+
+            $invoice_prefix = '';
+            $invoice_no     = '';
+
+            if (!empty($full_invoice_number)) {
+                $parts = explode("-", $full_invoice_number, 2);
+                $invoice_prefix = isset($parts[0]) ? $parts[0] . "-" : "";
+                $invoice_no = $parts[1] ?? "";
+            }
+
+            $paymentThrough = $get($orderDetails, "PaymentThrough", "");
+            $cash_amount = $money($get($orderDetails, "CashAmount", 0));
+            $upi_amount = $money($get($orderDetails, "UPIAmount", 0));
+            $advance_used = $money($get($orderDetails, "AdvanceUsed", 0));
+            $total_received = $money(
+                $get($orderDetails, "TotalReceivedAmount", 0)
+            );
+            $pending_amount = $money($get($orderDetails, "PendingAmount", 0));
+            $return_balance = $money(
+                $get($orderDetails, "ReturnableBalance", 0)
+            );
+            $saveAdvance = (bool)$get($orderDetails, "SaveReturnableAsAdvance", false);
+
+            $dueAmountUsed  = (bool)$get($orderDetails, "DueAmountUsed", false);
+            $dueAmountValue = $money($get($orderDetails, "DueAmountValue", 0));
+
+            $note = $get($orderDetails, "Note", "");
+            $cart_products = $get($orderDetails, "CartProducts", []);
+            $order_data = [];
+            $order_data["invoice_prefix"] = $invoice_prefix;
+            $order_data["invoice_no"] = $invoice_no;
+
+            $order_data["customer_id"] = (int) $customer_id;
+            $order_data["customer_group_id"] = $agentId;
+            $order_data["sellerId"] = (int) $get($orderDetails, "SellerId", 0);
+            $order_data["quote_id"] = $activeQuoteId;
+            $order_data["pre_order_id"] = $previousOrderId;
+            //$order_data["pre_amount"] = $previousAmount;
+            $name_parts = explode(" ", $customer_name, 2);
+            $order_data["firstname"] = $name_parts[0] ?? "";
+            $order_data["lastname"] = $name_parts[1] ?? "";
+
+            $order_data["email"] = $email;
+            $order_data["telephone"] = $mobile;
+            $order_data["custom_field"] = [];
+            
+            $order_data["payment_method"] = [
+                "name" => $paymentThrough,
+                "code" => strtolower($paymentThrough),
+            ];
+
+            $order_data["total"] = $total_before_round;
+
+            $order_data["products"] = [];
+            foreach ($cart_products as $p) {
+                // Get discount type and original user input
+                $discountType = $p["discount_type"] ?? 'percent';
+                $discountInput = (float) ($p["discount_input"] ?? 0);
+                
+                // Store original user input based on discount type
+                if ($discountType === 'flat') {
+                    // For flat discount, store the flat amount
+                    $discountToStore = $discountInput;
+                } else {
+                    // For percent discount, store the percentage
+                    $discountToStore = $discountInput;
+                }
+                
+                $order_data["products"][] = [
+                    "product_id" => (int) ($p["product_id"] ?? 0),
+                    "name" => $p["name"] ?? "",
+                    "model" => "",
+                    "option" => [],
+                    "quantity" => (int) ($p["quantity"] ?? 1),
+                    "price" => (float) ($p["price"] ?? 0),
+                    "total" => (float) ($p["total"] ?? 0),
+                    "gst" => (float) ($p["gst_percent"] ?? 0),
+                    "tax" => (float) ($p["row_gst"] ?? 0),
+                    "excluded"   => !empty($p["excluded"]) ? 1 : 0,
+                    "discount_amount" => (float) ($p["discount_amount"] ?? 0), // Product discount amount for calculations
+                    "discount" => $discountToStore, // Original user input (percentage or flat amount)
+                    "discount_type" => $discountType // Discount type ('percent' or 'flat')
+                ];
+            }
+
+            $order_data["comment"] = $note;
+            $invoice_extra = [
+                "customer_group_id" => $agentId,
+                "cash_amount" => $cash_amount,
+                "upi_amount" => $upi_amount,
+                "coupon" => $coupon_final,
+                "credit_points" => $reward_points,
+                "discount" => $discount,
+                "discount_type" => $discountType,
+                "overall_discount" => $overallDiscountInput, // Original user input (percentage or flat amount)
+                "number_of_items" => $items_count,
+                "quantity_of_items" => $qty_total,
+                "sub_total" => $subtotal,
+                "total_tax" => $total_tax,
+                "roundoff_amount" => $roundoff_amount,
+                "amount_through" => $paymentThrough,
+                "pending_amount" => $pending_amount,
+                "returnable_balance" => $return_balance,
+                "advance_used" => $advance_used,
+                "total_received" => $total_received,
+                "creditpointsused" => $creditpointsused,
+                "balance" => $dueAmountValue,
+                "save_advance" => $saveAdvance
+            ];
+            $order_data["custom_fields"] = [];
+            if (
+                !empty($incoming_tax_details) &&
+                is_array($incoming_tax_details)
+            ) {
+                foreach ($incoming_tax_details as $td) {
+                    if (!empty($td["name"])) {
+                        $order_data["custom_fields"][] = [
+                            "name" => (string) $td["name"],
+                            "value" => (float) ($td["value"] ?? 0),
+                        ];
+                    }
+                }
+            }
+
+            $this->load->model("checkout/order");
+            if ($editOrderId > 0) {
+                $this->model_checkout_order->editWholesalePreviousOrder($editOrderId, $order_data, $invoice_extra);
+                $order_id = $editOrderId;
+            } else {
+                $order_id = $this->model_checkout_order->addwholesaleorder($order_data, $invoice_extra);
+            }
+
+            if ($activeQuoteId > 0) {
+                $this->model_checkout_order->completeQuote($activeQuoteId);
+            }
+
+
+            if (!$order_id) {
+                throw new Exception("Order creation failed");
+            }
+
+            if ($editOrderId > 0) {
+
+                $this->model_checkout_order->addWholesaleHistory(
+                    $order_id,
+                    17,
+                    ""
+                );
+            
+            // 2️⃣ RETURN ORDER
+            } elseif ($previousOrderId > 0) {
+                // REVERSE OLD RETURN ORDER DUE TRANSACTION
+     $oldTransaction = $this->db->query("
+    SELECT amount, transactiontype
+    FROM `" . DB_PREFIX . "customer_transaction`
+    WHERE order_id = '" . (int)$previousOrderId . "'
+    AND transactionsubtype = 'AEPS'
+    ORDER BY customer_transaction_id DESC
+    LIMIT 1
+")->row;
+
+if ($oldTransaction) {
+
+    if ($oldTransaction['transactiontype'] == 'DEBIT') {
+
+        // Reverse old debit
+        $this->db->query("
+            UPDATE `" . DB_PREFIX . "manage_wallet`
+            SET aeps_amount = IFNULL(aeps_amount,0) + " . (float)$oldTransaction['amount'] . "
+            WHERE customerid = '" . (int)$customer_id . "'
+        ");
+
+    } else if ($oldTransaction['transactiontype'] == 'CREDIT') {
+
+        // Reverse old credit
+        $this->db->query("
+            UPDATE `" . DB_PREFIX . "manage_wallet`
+            SET aeps_amount = IFNULL(aeps_amount,0) - " . (float)$oldTransaction['amount'] . "
+            WHERE customerid = '" . (int)$customer_id . "'
+        ");
+
+    }
+
+    // DELETE OLD TRANSACTION
+    $this->db->query("
+        DELETE FROM `" . DB_PREFIX . "customer_transaction`
+        WHERE order_id = '" . (int)$previousOrderId . "'
+        AND transactionsubtype = 'AEPS'
+    ");
+}
+            
+                $this->model_checkout_order->addWholesaleHistory(
+                    $previousOrderId,
+                    4,
+                    ""
+                );
+            
+                $this->model_checkout_order->addWholesaleHistory(
+                    $order_id,
+                    6, // Return Completed
+                    ""
+                );
+            
+            } else {
+            
+                $this->model_checkout_order->addWholesaleHistory(
+                    $order_id,
+                    5, // Complete
+                    ""
+                );
+            }
+            
+        
+
+
+            $saveAdvance = (bool) $get($orderDetails, "SaveReturnableAsAdvance", false);
+            $dueAmountUsed  = (bool) $get($orderDetails, "DueAmountUsed", false);
+            $dueAmountValue = (float) preg_replace("/[^0-9.\-]/", "", (string) $get($orderDetails, "DueAmountValue", 0));
+            $includedDA = (bool)$get($orderDetails, "includedDA", false);
+            $includedDAAmount = $money($get($orderDetails, "includedDAAmount", 0));
+            
+            if ($customer_id > 0) {
+                
+                // Deduct advance when AA is used
+                if ($advance_used > 0) {
+                
+                    $debit = [
+                        "customerid" => $customer_id,
+                        "order_id" => $order_id,
+                        "amount" => $advance_used,
+                        "description" => "Advance used in order #" . $order_id,
+                        "transactiontype" => "DEBIT",
+                        "transactionsubtype" => "TRADE",
+                        "txtid" => $order_id,
+                    ];
+                
+                    $this->model_checkout_order->doWalletCredit($debit);
+                }
+            
+                if ($saveAdvance && $return_balance > 0) {
+            
+                    $credit = [
+                        "customerid" => $customer_id,
+                        "order_id" => $order_id,
+                        "amount" => $return_balance,
+                        "description" => "Returnable saved as advance - Order #" . $order_id,
+                        "transactiontype" => "CREDIT",
+                        "transactionsubtype" => "TRADE",
+                        "txtid" => $order_id,
+                    ];
+            
+                    $this->model_checkout_order->doWalletCredit($credit);
+                }
+            
+                // 2) Due -> manage_wallet.aeps_amount (AEPS)
+                if ($dueAmountUsed && $dueAmountValue > 0) {
+            
+                    $aepsCredit = [
+                        "customerid" => $customer_id,
+                        "order_id" => $order_id,
+                        "amount" => $dueAmountValue,
+                        "description" => "Due amount added - Order #" . $order_id,
+                        "transactiontype" => "CREDIT",
+                        "transactionsubtype" => "AEPS",
+                        "txtid" => $order_id,
+                    ];
+            
+                    // you must add this function in model_checkout_order
+                    $this->model_checkout_order->doWalletAepsCredit($aepsCredit);
+                }
+                
+                // Reduce AEPS amount if DA is used in order
+            if ($includedDA && $includedDAAmount > 0) {
+            
+                $aepsDebit = [
+                    "customerid" => $customer_id,
+                    "order_id" => $order_id,
+                    "amount" => $includedDAAmount,
+                    "description" => "Due amount used in order #" . $order_id,
+                    "transactiontype" => "DEBIT",
+                    "transactionsubtype" => "AEPS",
+                    "txtid" => $order_id,
+                ];
+            
+                $this->model_checkout_order->doWalletAepsCredit($aepsDebit);
+            }
+
+$this->load->model("account/reward");
+
+if ($customer_id > 0) {
+
+
+    if ($redeem_points_status) {
+
+        $this->model_account_reward->clearAllRewards($customer_id);
+    }
+
+    if ($reward_points > 0) {
+
+        $this->model_account_reward->addReward([
+            "customer_id" => $customer_id,
+            "order_id"    => $order_id,
+            "points"      => $reward_points,
+            "description" => "Reward earned for order #$order_id",
+            "status"      => "active",
+        ]);
+    }
+}
+
+
+        // if previous order_id is available remove the reward points for the order to the customer(cancelled order)
+        // if previous order_id is available remove the reward points for the previous order then insert new reward points to the customer(return and edit order)
+            }
+
+            $this->load->model("account/customer");
+
+           // Only run this for specific payment types, not all orders
+if (strtolower($paymentThrough) === 'advance') {
+    $credit = [
+        "customerid" => $customer_id,
+        "order_id"   => $order_id,
+        "amount"     => $subtotal,
+        "description" => $mobile,
+        "transactiontype"    => "CREDIT",
+        "transactionsubtype" => "TRADE",
+        "txtid" => $order_id,
+    ];
+    $walletUpdate = $this->model_checkout_order->doWalletCredit($credit);
+} else {
+    $walletUpdate = null;
+}
+
+return $this->response->setOutput(
+    json_encode([
+        "status"       => "success",
+        "order_id"     => $order_id,
+        "walletUpdate" => $walletUpdate,
+    ])
+);
+        } catch (Throwable $e) {
+            return $this->response->setOutput(
+                json_encode([
+                    "status" => "error",
+                    "message" => $e->getMessage(),
+                ])
+            );
+        }
+    }
+    
     
     public function addQuoteOrder()
 {
@@ -1773,6 +2246,8 @@ return $this->response->setOutput(
                 "quantity"   => (int)($p['quantity'] ?? 1),
                 "price"      => (float)($p['price'] ?? 0),
                 "total"      => (float)($p['total'] ?? 0),
+                "discount"   => (float)($p['discount'] ?? 0),
+                "gst_percent" => (float)($p['gst_percent'] ?? 0),
                 "excluded"   => !empty($p['excluded']) ? 1 : 0
             ];
         }
@@ -1801,6 +2276,8 @@ return $this->response->setOutput(
         $invoice_extra = [
             "customer_group_id" => $agentId,
             "discount"          => $money($q['discount'] ?? 0),
+            "overall_discount"  => $money($q['overall_discount'] ?? 0),
+            "discount_type"     => trim($q['discount_type'] ?? 'flat'),
             "number_of_items"   => count($products),
             "quantity_of_items" => array_sum(array_column($products, 'quantity')),
             "sub_total"         => $money($q['net_total'] ?? 0),
@@ -1881,6 +2358,43 @@ return $this->response->setOutput(
             'status' => 'success'
         ]));
     } catch (Throwable $e) {
+        $this->response->setOutput(json_encode([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ]));
+    }
+}
+
+public function cancelWholesaleOrder()
+{
+    $this->response->addHeader('Content-Type: application/json');
+
+    try {
+        $order_id = (int)($this->request->post['order_id'] ?? 0);
+
+        error_log("cancelWholesaleOrder - order_id: " . $order_id);
+
+        if ($order_id <= 0) {
+            throw new Exception('Invalid order id');
+        }
+
+        $this->load->model('checkout/order');
+
+        error_log("cancelWholesaleOrder - Checking if order already cancelled");
+        if ($this->model_checkout_order->isWholesaleOrderCancelled($order_id)) {
+            throw new Exception('Order already cancelled');
+        }
+
+        error_log("cancelWholesaleOrder - Calling cancelWholesaleOrderFull");
+        $this->model_checkout_order->cancelWholesaleOrderFull($order_id);
+
+        error_log("cancelWholesaleOrder - Successfully cancelled order: " . $order_id);
+
+        $this->response->setOutput(json_encode([
+            'status' => 'success'
+        ]));
+    } catch (Throwable $e) {
+        error_log("cancelWholesaleOrder - Error: " . $e->getMessage());
         $this->response->setOutput(json_encode([
             'status' => 'error',
             'message' => $e->getMessage()
@@ -2101,6 +2615,42 @@ public function cancelQuoteOrder()
         );
     }
 
+    public function getWholesaleOrdersbyId()
+    {
+        $this->response->addHeader("Content-Type: application/json");
+
+        $order_id = $this->request->get["order_id"] ?? 0;
+
+        if (!$order_id) {
+            return $this->response->setOutput(
+                json_encode([
+                    "status" => "error",
+                    "message" => "Order ID missing",
+                ])
+            );
+        }
+
+        $this->load->model("checkout/order");
+
+        $details = $this->model_checkout_order->getFullWholesaleOrderDetails($order_id);
+
+        if (!$details) {
+            return $this->response->setOutput(
+                json_encode([
+                    "status" => "error",
+                    "message" => "Order not found",
+                ])
+            );
+        }
+
+        return $this->response->setOutput(
+            json_encode([
+                "status" => "success",
+                "data" => $details,
+            ])
+        );
+    }
+
     public function getOrdersbyDate()
 {
     $this->response->addHeader("Content-Type: application/json");
@@ -2124,6 +2674,41 @@ public function cancelQuoteOrder()
     $orders = $this->model_checkout_order->getOrdersByDateRange($agentId,$from_date,$to_date,$order_id,$mobile,$name);
 
     $totals = $this->model_checkout_order->getOrderTotalsByDateRange($from_date,$to_date,$agentId);
+
+    return $this->response->setOutput(json_encode([
+        "status"       => "success",
+        "total_orders" => count($orders),
+        "totals"       => $totals,
+        "data"         => $orders
+    ]));
+}
+
+
+
+
+public function getWholesaleOrdersbyDate()
+{
+    $this->response->addHeader("Content-Type: application/json");
+
+    $from_date = $this->request->get["from_date"] ?? "";
+    $to_date   = $this->request->get["to_date"] ?? "";
+
+    $order_id  = $this->request->get["order_id"] ?? "";
+    $mobile    = $this->request->get["mobile"] ?? "";
+    $name      = $this->request->get["name"] ?? "";
+
+    if (empty($from_date) || empty($to_date)) {
+        $today = date("Y-m-d");
+        $from_date = $today;
+        $to_date = $today;
+    }
+
+    $agentId = (int)$this->customer->getId();
+    $this->load->model("checkout/order");
+
+    $orders = $this->model_checkout_order->getWholesaleOrdersByDateRange($agentId,$from_date,$to_date,$order_id,$mobile,$name);
+
+    $totals = $this->model_checkout_order->getWholesaleOrderTotalsByDateRange($from_date,$to_date,$agentId);
 
     return $this->response->setOutput(json_encode([
         "status"       => "success",
@@ -2619,13 +3204,8 @@ public function adjustDue() {
                     $store_telephone = $this->config->get("config_telephone");
                 }
 
-                if ($order_info["invoice_no"]) {
-                    $invoice_no =
-                        $order_info["invoice_prefix"] .
-                        $order_info["invoice_no"];
-                } else {
-                    $invoice_no = "";
-                }
+                $invoice_prefix = $order_info["invoice_prefix"] ?? '';
+                $invoice_no     = $order_info["invoice_no"] ?? '';
 
                 // Payment Address
                 if ($order_info["payment_address_format"]) {
@@ -2860,8 +3440,9 @@ public function adjustDue() {
                 }
 
                 $data["orders"][] = [
-                    "order_id" => $order_id,
-                    "invoice_no" => $invoice_no,
+                    "order_id"         => $order_id,
+                    "invoice_prefix"   => $invoice_prefix,
+                    "invoice_no"       => $invoice_no,
                     "order_status_id" => $order_info["order_status_id"],
                     "date_added" => date(
                         $this->language->get("date_format_short"),
@@ -2906,6 +3487,229 @@ public function adjustDue() {
         $data['small_print'] = !empty($this->request->get['small_print']);
 
         $this->response->setOutput($this->load->view("extension/purpletree_pos/pos/order_invoice",$data));
+    }
+
+    public function mtlrInvoice(): void
+    {
+        $this->load->language("sale/order");
+
+        $data["title"] = $this->language->get("text_invoice");
+
+        $data["base"] = HTTP_SERVER;
+        $data["direction"] = $this->language->get("direction");
+        $data["lang"] = $this->language->get("code");
+
+        // Hard coding css paths so that they can be replaced via the event's system.
+        $data["bootstrap_css"] = "view/stylesheet/bootstrap.css";
+        $data["icons"] = "view/stylesheet/fonts/fontawesome/css/all.min.css";
+        $data["stylesheet"] = "view/stylesheet/stylesheet.css";
+
+        // Hard coding scripts so they can be replaced via the events system.
+        $data["jquery"] = "view/javascript/jquery/jquery-3.7.1.min.js";
+        $data["bootstrap_js"] =
+            "view/javascript/bootstrap/js/bootstrap.bundle.min.js";
+
+        // Order
+        $this->load->model("checkout/order");
+
+        // Setting
+        $this->load->model("setting/setting");
+
+        // Upload
+        $this->load->model("tool/upload");
+
+        $data["orders"] = [];
+
+        $orders = [];
+
+        if (isset($this->request->post["selected"])) {
+            $orders = (array) $this->request->post["selected"];
+        }
+
+        if (isset($this->request->get["order_id"])) {
+            $orders[] = (int) $this->request->get["order_id"];
+        }
+
+        foreach ($orders as $order_id) {
+            $order_info = $this->model_checkout_order->getFullWholesaleOrderDetails($order_id);
+
+            if ($order_info) {
+                $order_data = $order_info['order_info'];
+                $store_info = $this->model_setting_setting->getSetting(
+                    "config",
+                    $order_data["store_id"] ?? 0
+                );
+
+                if ($store_info) {
+                    $store_address = $store_info["config_address"];
+                    $store_email = $store_info["config_email"];
+                    $store_telephone = $store_info["config_telephone"];
+                } else {
+                    $store_address = $this->config->get("config_address");
+                    $store_email = $this->config->get("config_email");
+                    $store_telephone = $this->config->get("config_telephone");
+                }
+
+                $invoice_prefix = $order_data["invoice_prefix"] ?? '';
+                $invoice_no     = $order_data["invoice_no"] ?? '';
+
+                // Payment Address - simplified for MTLR
+                $payment_address = ($order_data["payment_firstname"] ?? '') . ' ' . ($order_data["payment_lastname"] ?? '');
+                if (!empty($order_data["payment_address_1"])) {
+                    $payment_address .= '<br/>' . $order_data["payment_address_1"];
+                }
+                if (!empty($order_data["payment_city"])) {
+                    $payment_address .= '<br/>' . $order_data["payment_city"];
+                }
+                if (!empty($order_data["payment_postcode"])) {
+                    $payment_address .= ' ' . $order_data["payment_postcode"];
+                }
+
+                // Shipping Address - empty for MTLR
+                $shipping_address = "";
+                $shipping_method = "";
+
+                $product_data = [];
+                $products = $order_info['products'];
+
+                foreach ($products as $product) {
+                    $option_data = [];
+
+                    // Try to get options if available
+                    if (isset($product["order_product_id"])) {
+                        $options = $this->model_checkout_order->getOptions(
+                            $order_id,
+                            $product["order_product_id"]
+                        );
+
+                        foreach ($options as $option) {
+                            if ($option["type"] != "file") {
+                                $value = $option["value"];
+                            } else {
+                                $upload_info = $this->model_tool_upload->getUploadByCode(
+                                    $option["value"]
+                                );
+
+                                if ($upload_info) {
+                                    $value = $upload_info["name"];
+                                } else {
+                                    $value = "";
+                                }
+                            }
+
+                            $option_data[] = ["value" => $value] + $option;
+                        }
+                    }
+
+                    $product_data[] = [
+                        "name" => $product["name"],
+                        "model" => $product["model"],
+                        "option" => $option_data,
+                        "subscription" => "",
+                        "quantity" => $product["quantity"],
+                        "price" => $product["price"],
+                        "total" => $product["price"] * $product["quantity"],
+                        "excluded" => !empty($product["excluded"]) ? 1 : 0
+                    ];
+                }
+
+                $total_data = [];
+                $invoice = $order_info['invoice'] ?? [];
+
+                // Build total_data from invoice information with currency formatting
+                $currency_code = $order_data["currency_code"] ?? "INR";
+                $currency_value = $order_data["currency_value"] ?? 1.0;
+
+                if (!empty($invoice)) {
+                    $total_data[] = [
+                        "code" => "sub_total",
+                        "title" => "Sub Total",
+                        "value" => $invoice["sub_total"] ?? 0,
+                        "text" => $this->currency->format(
+                            $invoice["sub_total"] ?? 0,
+                            $currency_code,
+                            $currency_value
+                        )
+                    ];
+                    $total_data[] = [
+                        "code" => "discount",
+                        "title" => "Discount",
+                        "value" => $invoice["discount"] ?? 0,
+                        "text" => $this->currency->format(
+                            $invoice["discount"] ?? 0,
+                            $currency_code,
+                            $currency_value
+                        )
+                    ];
+                    $total_data[] = [
+                        "code" => "tax",
+                        "title" => "Tax",
+                        "value" => $invoice["total_tax"] ?? 0,
+                        "text" => $this->currency->format(
+                            $invoice["total_tax"] ?? 0,
+                            $currency_code,
+                            $currency_value
+                        )
+                    ];
+                    $total_data[] = [
+                        "code" => "total",
+                        "title" => "Total",
+                        "value" => $invoice["total_received"] ?? 0,
+                        "text" => $this->currency->format(
+                            $invoice["total_received"] ?? 0,
+                            $currency_code,
+                            $currency_value
+                        )
+                    ];
+                }
+
+                $data["orders"][] = [
+                    "order_id"         => $order_id,
+                    "invoice_prefix"   => $invoice_prefix,
+                    "invoice_no"       => $invoice_no,
+                    "order_status_id" => $order_data["order_status_id"] ?? 0,
+                    "date_added" => date(
+                        $this->language->get("date_format_short"),
+                        strtotime($order_data["date_added"])
+                    ),
+                    "store_name" => $order_data["store_name"] ?? "",
+                    "store_address" => nl2br($store_address),
+                    "store_email" => $store_email,
+                    "store_telephone" => $store_telephone,
+                    "email" => $order_data["email"] ?? "",
+                    "telephone" => $order_data["telephone"] ?? "",
+                    "shipping_address" => $shipping_address,
+                    "shipping_method" => $shipping_method,
+                    "payment_address" => $payment_address,
+                    "payment_method" => $order_data["payment_method"] ?? "",
+                    "payment_firstname" => $order_data["payment_firstname"] ?? "",
+                    "payment_lastname" => $order_data["payment_lastname"] ?? "",
+                    "product" => $product_data,
+                    "total" => $total_data,
+                    "comment" => nl2br($order_data["comment"] ?? ""),
+                    "invoice" => [
+                        "sub_total" => $invoice["sub_total"] ?? 0,
+                        "discount" => $invoice["discount"] ?? 0,
+                        "total_tax" => $invoice["total_tax"] ?? 0,
+                        "roundoff_amount" => $invoice["roundoff_amount"] ?? 0,
+                        "coupon" => $invoice["coupon"] ?? "",
+                        "total_received" => $invoice["total_received"] ?? 0,
+                        "cash_amount" => $invoice["cash_amount"] ?? 0,
+                        "upi_amount" => $invoice["upi_amount"] ?? 0,
+                        "card_amount" => $invoice["card_amount"] ?? 0,
+                        "pending_amount" => $invoice["pending_amount"] ?? 0,
+                        "advance_used" => $invoice["advance_used"] ?? 0,
+                        "due_amount" => $invoice["balance"] ?? 0,
+                        "returnable_balance" => $invoice["returnable_balance"] ?? 0,
+                        "amount_through" => $invoice["amount_through"] ?? "",
+                    ],
+                ];
+            }
+        }
+
+        $data['small_print'] = !empty($this->request->get['small_print']);
+
+        $this->response->setOutput($this->load->view("extension/purpletree_pos/pos/mtlr_order_invoice",$data));
     }
 
 public function mergeBill(): void
@@ -3014,9 +3818,10 @@ public function mergeBill(): void
     );
 
     $data["orders"][] = [
-        "order_id" => implode(", ", $orderIds),
-        "invoice_no" => "MERGED-" . implode("-", $orderIds),
-        "date_added" => date("d-m-Y H:i"),
+        "order_id"       => implode(", ", $orderIds),
+        "invoice_prefix" => "",
+        "invoice_no"     => "MERGED-" . implode("-", $orderIds),
+        "date_added"     => date("d-m-Y H:i"),
         "store_name" => $firstOrderInfo["store_name"],
         "store_address" => nl2br($store_info["config_address"] ?? ""),
         "store_email" => $store_info["config_email"] ?? "",
@@ -3037,6 +3842,140 @@ public function mergeBill(): void
 
     $this->response->setOutput(
         $this->load->view("extension/purpletree_pos/pos/order_invoice", $data)
+    );
+}
+
+public function mergeBillMTLR(): void
+{
+    $this->load->language("sale/order");
+
+    $data["title"] = "Merged MTLR Invoice";
+    $data["base"] = HTTP_SERVER;
+    $data["direction"] = $this->language->get("direction");
+    $data["lang"] = $this->language->get("code");
+
+    $data["bootstrap_css"] = "view/stylesheet/bootstrap.css";
+    $data["icons"] = "view/stylesheet/fonts/fontawesome/css/all.min.css";
+    $data["stylesheet"] = "view/stylesheet/stylesheet.css";
+    $data["jquery"] = "view/javascript/jquery/jquery-3.7.1.min.js";
+    $data["bootstrap_js"] = "view/javascript/bootstrap/js/bootstrap.bundle.min.js";
+
+    $this->load->model("checkout/order");
+    $this->load->model("setting/setting");
+
+    $data["orders"] = [];
+
+    // ---------------------------
+    // Parse order IDs
+    // ---------------------------
+    if (empty($this->request->get["order_id"])) {
+        return;
+    }
+
+    $orderIds = array_filter(
+        array_map("intval", explode(",", $this->request->get["order_id"]))
+    );
+
+    if (!$orderIds) {
+        return;
+    }
+
+    // ---------------------------
+    // Accumulators
+    // ---------------------------
+    $mergedProducts = [];
+    $mergedTotals = [
+        "sub_total" => 0,
+        "discount" => 0,
+        "total_tax" => 0,
+        "roundoff_amount" => 0,
+        "total_received" => 0,
+        "cash_amount" => 0,
+        "upi_amount" => 0,
+        "pending_amount" => 0,
+        "due_amount" => 0,
+        "returnable_balance" => 0,
+    ];
+
+    $firstOrderInfo = null;
+
+    foreach ($orderIds as $order_id) {
+
+        $order_info = $this->model_checkout_order->getFullWholesaleOrderDetails($order_id);
+        if (!$order_info) continue;
+
+        if (!$firstOrderInfo) {
+            $firstOrderInfo = $order_info['order_info'];
+        }
+
+        // ---------------------------
+        // Products
+        // ---------------------------
+        $products = $order_info['products'];
+        foreach ($products as $p) {
+            $mergedProducts[] = [
+                "name" => $p["name"],
+                "model" => $p["model"],
+                "option" => [],
+                "subscription" => "",
+                "quantity" => $p["quantity"],
+                "price" => $p["price"],
+                "total" => $p["price"] * $p["quantity"],
+                "excluded" => !empty($p["excluded"]) ? 1 : 0
+            ];
+        }
+
+        // ---------------------------
+        // Totals
+        // ---------------------------
+        $invoice = $order_info['invoice'] ?? [];
+        $mergedTotals["sub_total"] += (float)($invoice["sub_total"] ?? 0);
+        $mergedTotals["discount"] += (float)($invoice["discount"] ?? 0);
+        $mergedTotals["total_tax"] += (float)($invoice["total_tax"] ?? 0);
+        $mergedTotals["roundoff_amount"] += (float)($invoice["roundoff_amount"] ?? 0);
+        $mergedTotals["total_received"] += (float)($invoice["total_received"] ?? 0);
+        $mergedTotals["cash_amount"] += (float)($invoice["cash_amount"] ?? 0);
+        $mergedTotals["upi_amount"] += (float)($invoice["upi_amount"] ?? 0);
+        $mergedTotals["pending_amount"] += (float)($invoice["pending_amount"] ?? 0);
+        $mergedTotals["due_amount"] += (float)($invoice["balance"] ?? 0);
+        $mergedTotals["returnable_balance"] += (float)($invoice["returnable_balance"] ?? 0);
+    }
+
+    if (!$firstOrderInfo) return;
+
+    // ---------------------------
+    // Store info (from first order)
+    // ---------------------------
+    $store_info = $this->model_setting_setting->getSetting(
+        "config",
+        $firstOrderInfo["store_id"] ?? 0
+    );
+
+    $data["orders"][] = [
+        "order_id"       => implode(", ", $orderIds),
+        "invoice_prefix" => "",
+        "invoice_no"     => "MERGED-MTLR-" . implode("-", $orderIds),
+        "date_added"     => date("d-m-Y H:i"),
+        "store_name" => $firstOrderInfo["store_name"] ?? "",
+        "store_address" => nl2br($store_info["config_address"] ?? ""),
+        "store_email" => $store_info["config_email"] ?? "",
+        "store_telephone" => $store_info["config_telephone"] ?? "",
+        "email" => $firstOrderInfo["email"] ?? "",
+        "telephone" => $firstOrderInfo["telephone"] ?? "",
+        "shipping_address" => "",
+        "shipping_method" => "Merged MTLR Bill",
+        "payment_address" => "",
+        "payment_method" => "Merged",
+        "product" => $mergedProducts,
+        "total" => [],
+        "comment" => "Merged MTLR Bill",
+        "invoice" => $mergedTotals,
+    ];
+
+    $data['small_print'] = !empty($this->request->get['small_print']);
+
+    $this->response->setOutput(
+        $this->load->view("extension/purpletree_pos/pos/mtlr_order_invoice", $data)
     );
 }
 
@@ -3230,6 +4169,35 @@ public function mergeBill(): void
     );
 }
 
+    public function processSmallPrintMTLR() {
+
+        $this->load->language("sale/order");
+
+        $data["title"] = "MTLR Invoice";
+
+        $data["base"] = HTTP_SERVER;
+        $data["direction"] = $this->language->get("direction");
+        $data["lang"] = $this->language->get("code");
+
+        $data["bootstrap_css"] = "view/stylesheet/bootstrap.css";
+        $data["icons"] = "view/stylesheet/fonts/fontawesome/css/all.min.css";
+        $data["stylesheet"] = "view/stylesheet/stylesheet.css";
+
+        $data["jquery"] = "view/javascript/jquery/jquery-3.7.1.min.js";
+        $data["bootstrap_js"] = "view/javascript/bootstrap/js/bootstrap.bundle.min.js";
+
+        $data['cash']         = $this->request->post['cash'] ?? '0.00';
+        $data['upi']          = $this->request->post['upi'] ?? '0.00';
+        $data['ra']           = $this->request->post['ra'] ?? '0.00';
+        $data['rc']           = $this->request->post['rc'] ?? '0.00';
+        $data['due']          = $this->request->post['due'] ?? '0.00';
+        $data['sbt']          = $this->request->post['sbt'] ?? '0.00';
+        $data['total_orders'] = $this->request->post['total_orders'] ?? 0;
+
+    $this->response->setOutput($this->load->view("extension/purpletree_pos/pos/smallprint_mtlr_invoice",$data)
+    );
+}
+
 
     public function addProductName() {
         $json = array();
@@ -3277,6 +4245,28 @@ public function publicInvoice(): void
 
     $this->request->get['order_id'] = $order_id;
     $this->invoice();
+}
+
+public function publicWholesaleInvoice(): void
+{
+    $order_id = (int)($this->request->get['order_id'] ?? 0);
+
+    if (!$order_id) {
+        echo 'Invalid order';
+        return;
+    }
+
+    $this->load->model('checkout/order');
+
+    $order_info = $this->model_checkout_order->getFullWholesaleOrderDetails($order_id);
+    if (!$order_info) {
+        echo 'Order not found';
+        return;
+    }
+
+
+    $this->request->get['order_id'] = $order_id;
+    $this->mtlrInvoice();
 }
 
 public function publicQuoteInvoice(): void
@@ -3383,7 +4373,7 @@ public function generateUpiQr1() {
             throw new \Exception('Invalid amount');
         }
 
-        $upi_id = "7337011206-2@axl";
+        $upi_id = "7207207664.1@hdfc";
         $name   = "Saleem Gold Covering";
 
         $upi_url = "upi://pay?pa=" . $upi_id .
@@ -3575,73 +4565,66 @@ $this->load->view(
     $amount      = number_format((float)($order['total'] ?? 0), 2, '.', '');
     $date        = substr((string)($order['date_added'] ?? date('Y-m-d')), 0, 10);
    
-        // Build MSG91 payload for template "order_success"
-        $payload = [
-            "integrated_number" => "918341711206",
-            "content_type" => "template",
-            "payload" => [
-                "messaging_product" => "whatsapp",
-                "type" => "template",
-                "template" => [
-                    "name" => "download_invoce_order_success",
-                    "language" => [
-                        "code" => "en",
-                        "policy" => "deterministic",
-                    ],
-                    "namespace" => "f18a3096_c1f2_4aae_8001_f7020abc1c5b",
-                    "to_and_components" => [
-                        [
-                            "to" => [$phone, 917337011206],
-                            "components" => [
-                                
-                                 "header_1"=> [
-                            "filename"=> " SGC Invoice",
-                            "type"=> "document",
-                            "value"=> $download_link
-                        ],
-                                "body_1" => [
-                                    "type" => "text",
-                                    "value" => $customer_name,
-                                ],
-                                "body_2" => [
-                                    "type" => "text",
-                                    "value" => $store_name,
-                                ],
-                                "body_3" => [
-                                    "type" => "text",
-                                    "value" => $invoice_no,
-                                ],
-                                "body_4" => [
-                                    "type" => "text",
-                                    "value" => $amount ,
-                                ],
-                                "body_5" => [
-                                    "type" => "text",
-                                    "value" => $date ,
-                                ],
-                                "body_6" => [
-                                    "type" => "text",
-                                    "value" => (string) $items_count,
-                                ],
-                                "button_1" => [
-                                "subtype" => "url",
+      $templateId = ($quote_id > 0) ? $quote_id : $order_id;
 
-                                    "type" => "text",
-                                    "value" => $download_invoice
-                                ]
-                                
-                                
-                            ],
+        $cleanPhone = preg_replace('/\D/', '', $phone);
+        // Strip a leading 91 if already present, then re-add it once
+        if (strlen($cleanPhone) > 10 && substr($cleanPhone, 0, 2) === '91') {
+            $cleanPhone = substr($cleanPhone, 2);
+        }
+        $payload = [
+            "to" => "91" . $cleanPhone,           
+            "accountId" => "6a5a19f675c23683cb18cff9",
+            "templateName" => "order_invoice1",
+            "languageCode" => "en",
+            "components" => [
+                [
+                    "type" => "body",
+                    "parameters" => [
+                        [
+                            "type" => "text",
+                            "text" => $customer_name
                         ],
-                    ],
+                        [
+                            "type" => "text",
+                            "text" => "Saleem Gold Covering"
+                        ],
+                        [
+                            "type" => "text",
+                            "text" => $invoice_no
+                        ],
+                        [
+                            "type" => "text",
+                            "text" => $amount
+                        ],
+                        [
+                            "type" => "text",
+                            "text" => date('d-m-Y', strtotime($date))
+                        ],
+                        [
+                            "type" => "text",
+                            "text" => (string)$items_count
+                        ]
+                    ]
                 ],
-            ],
+                [
+                    "type" => "button",
+                    "sub_type" => "url",
+                    "index" => "0",
+                    "parameters" => [
+                        [
+                            "type" => "text",
+                            "text" => (string)$templateId
+                        ]
+                    ]
+                ]
+            ]
         ];
 
-        $ch = curl_init(
-            "https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/"	
-        );
+        $ch = curl_init();
+
         curl_setopt_array($ch, [
+            CURLOPT_URL => "https://api-nexmsg.myteknoland.com/api/send/template",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
@@ -3652,21 +4635,187 @@ $this->load->view(
             CURLOPT_POSTFIELDS => json_encode($payload),
             CURLOPT_HTTPHEADER => [
                 "Content-Type: application/json",
-                "authkey: 471465A6FulqId269201b0eP1",
+                "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTQ2MTk2NGJlYmNlN2E4NTk4YWM2ZDMiLCJlbWFpbCI6ImdhbmdhYmFsYWppOTE1QGdtYWlsLmNvbSIsInJvbGUiOiJjbGllbnQiLCJzdGF0dXMiOiJhY3RpdmUiLCJpYXQiOjE3ODQzNTgzOTUsImV4cCI6MTc4NDQ0NDc5NX0.y02CFMXH9mdmboy-kt4DPFkuRrE1yf6WOAdX_rlMspU"
             ],
         ]);
 
         $response = curl_exec($ch);
+
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if (curl_errno($ch)) {
+            $response = curl_error($ch);
+        }
+
         curl_close($ch);
 
         $this->response->addHeader("Content-Type: application/json");
-        $this->response->setOutput(
-            json_encode([
-                "status" => $httpCode,
-                "response" => $response,
-            ])
-        );
+        $this->response->setOutput(json_encode([
+            "status"   => $httpCode,
+            "response" => json_decode($response, true) ?: $response
+        ]));
+        
+    }
+
+     public function WholesaleOrder_sendwhatsapp(): void
+    {
+         $order_id = (int)($this->request->get['order_id'] ?? 0);
+    $quote_id = (int)($this->request->get['quote_id'] ?? 0);
+    $phone    = trim($this->request->get['phone'] ?? '');
+
+    if ((!$order_id && !$quote_id) || !$phone) {
+        $this->response->addHeader("Content-Type: application/json");
+        $this->response->setOutput(json_encode([
+            "status" => "error",
+            "message" => "order_id or quote_id and phone required",
+        ]));
+        return;
+    }
+
+    $this->load->model("checkout/order");
+
+    // -----------------------------
+    // LOAD DATA BASED ON TYPE
+    // -----------------------------
+    if ($quote_id > 0) {
+        // QUOTATION
+        $order = $this->model_checkout_order->getQuoteOrderdetails($quote_id);
+        if (!$order) {
+            $this->response->setOutput(json_encode([
+                "status" => "error",
+                "message" => "Quotation not found",
+            ]));
+            return;
+        }
+
+        $products = $this->model_checkout_order->getQuoteProducts($quote_id);
+
+        $invoice_no = 'Q-' . $quote_id;
+        $download_link = HTTP_SERVER
+            . 'index.php?route=extension/purpletree_pos/pos/home|quoteInvoice'
+            . '&quote_id=' . $quote_id;
+
+    } else {
+        // ORDER
+        $order = $this->model_checkout_order->getWholesaleOrder($order_id);
+        if (!$order) {
+            $this->response->setOutput(json_encode([
+                "status" => "error",
+                "message" => "Order not found",
+            ]));
+            return;
+        }
+
+        $products = $order['products'] ?? [];
+
+        $invoice_no = (string)$order_id;
+        $download_link = HTTP_SERVER
+            . 'index.php?route=extension/purpletree_pos/pos/home|publicWholesaleInvoice'
+            . '&order_id=' . $order_id;
+        $download_invoice = HTTP_SERVER
+            . 'index.php?route=extension/purpletree_pos/pos/home|publicWholesaleInvoice'
+            . '&order_id=' . $order_id;
+    }
+        $link = 'https://myteknoland.com/';
+    // -----------------------------
+    // COMMON TEMPLATE VALUES
+    // -----------------------------
+    $customer_name = trim(($order['firstname'] ?? '') . ' ' . ($order['lastname'] ?? ''));
+    $store_name    = 'Saleem Gold Covering - Wholesale';
+
+    $items_count = (string) max(1, count($products));
+    $amount      = number_format((float)($order['total'] ?? 0), 2, '.', '');
+    $date        = substr((string)($order['date_added'] ?? date('Y-m-d')), 0, 10);
+   
+      $templateId = ($quote_id > 0) ? $quote_id : $order_id;
+
+        $cleanPhone = preg_replace('/\D/', '', $phone);
+        // Strip a leading 91 if already present, then re-add it once
+        if (strlen($cleanPhone) > 10 && substr($cleanPhone, 0, 2) === '91') {
+            $cleanPhone = substr($cleanPhone, 2);
+        }
+        $payload = [
+            "to" => "91" . $cleanPhone,           
+            "accountId" => "6a5a19f675c23683cb18cff9",
+            "templateName" => "order_invoice_rel1",
+            "languageCode" => "en_US",
+            "components" => [
+                [
+                    "type" => "body",
+                    "parameters" => [
+                        [
+                            "type" => "text",
+                            "text" => $customer_name
+                        ],
+                        [
+                            "type" => "text",
+                            "text" => "Saleem Gold Covering"
+                        ],
+                        [
+                            "type" => "text",
+                            "text" => $invoice_no
+                        ],
+                        [
+                            "type" => "text",
+                            "text" => $amount
+                        ],
+                        [
+                            "type" => "text",
+                            "text" => date('d-m-Y', strtotime($date))
+                        ],
+                        [
+                            "type" => "text",
+                            "text" => (string)$items_count
+                        ]
+                    ]
+                ],
+                [
+                    "type" => "button",
+                    "sub_type" => "url",
+                    "index" => "0",
+                    "parameters" => [
+                        [
+                            "type" => "text",
+                            "text" => (string)$templateId
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        $ch = curl_init();
+
+        curl_setopt_array($ch, [
+            CURLOPT_URL => "https://api-nexmsg.myteknoland.com/api/send/template",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_HTTPHEADER => [
+                "Content-Type: application/json",
+                "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTQ2MTk2NGJlYmNlN2E4NTk4YWM2ZDMiLCJlbWFpbCI6ImdhbmdhYmFsYWppOTE1QGdtYWlsLmNvbSIsInJvbGUiOiJjbGllbnQiLCJzdGF0dXMiOiJhY3RpdmUiLCJpYXQiOjE3ODQzNTgzOTUsImV4cCI6MTc4NDQ0NDc5NX0.y02CFMXH9mdmboy-kt4DPFkuRrE1yf6WOAdX_rlMspU"
+            ],
+        ]);
+
+        $response = curl_exec($ch);
+
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if (curl_errno($ch)) {
+            $response = curl_error($ch);
+        }
+
+        curl_close($ch);
+
+        $this->response->addHeader("Content-Type: application/json");
+        $this->response->setOutput(json_encode([
+            "status"   => $httpCode,
+            "response" => json_decode($response, true) ?: $response
+        ]));
         
     }
     
@@ -3742,73 +4891,66 @@ $this->load->view(
     $amount      = number_format((float)($order['total'] ?? 0), 2, '.', '');
     $date        = substr((string)($order['date_added'] ?? date('Y-m-d')), 0, 10);
 
-        // Build MSG91 payload for template "order_success"
-        $payload = [
-            "integrated_number" => "918341711206",
-            "content_type" => "template",
-            "payload" => [
-                "messaging_product" => "whatsapp",
-                "type" => "template",
-                "template" => [
-                    "name" => "download_invoce_quote_success",
-                    "language" => [
-                        "code" => "en",
-                        "policy" => "deterministic",
-                    ],
-                    "namespace" => "f18a3096_c1f2_4aae_8001_f7020abc1c5b",
-                    "to_and_components" => [
-                        [
-                            "to" => [$phone,'917337011206'],
-                            "components" => [
-                                
-                                 "header_1"=> [
-                            "filename"=> " SGC Invoice",
-                            "type"=> "document",
-                            "value"=> $download_link
-                        ],
-                                "body_1" => [
-                                    "type" => "text",
-                                    "value" => $customer_name,
-                                ],
-                                "body_2" => [
-                                    "type" => "text",
-                                    "value" => $store_name,
-                                ],
-                                "body_3" => [
-                                    "type" => "text",
-                                    "value" => $invoice_no,
-                                ],
-                                "body_4" => [
-                                    "type" => "text",
-                                    "value" => $amount ,
-                                ],
-                                "body_5" => [
-                                    "type" => "text",
-                                    "value" => $date ,
-                                ],
-                                "body_6" => [
-                                    "type" => "text",
-                                    "value" => (string) $items_count,
-                                ],
-                                "button_1" => [
-                                "subtype" => "url",
+        $templateId = $quote_id;
 
-                                    "type" => "text",
-                                    "value" => $download_invoice
-                                ]
-                                
-                                
-                            ],
-                        ],
-                    ],
+$cleanPhone = preg_replace('/\D/', '', $phone);
+        // Strip a leading 91 if already present, then re-add it once
+        if (strlen($cleanPhone) > 10 && substr($cleanPhone, 0, 2) === '91') {
+            $cleanPhone = substr($cleanPhone, 2);
+        }
+        $payload = [ 
+            "to" => "91" . $cleanPhone, 
+    "accountId" => "6a5a19f675c23683cb18cff9",
+    "templateName" => "quote_invoice_order1",
+    "languageCode" => "en_US",
+    "components" => [
+        [
+            "type" => "body",
+            "parameters" => [
+                [
+                    "type" => "text",
+                    "text" => $customer_name
                 ],
-            ],
-        ];
+                [
+                    "type" => "text",
+                    "text" => "Saleem Gold Covering"
+                ],
+                [
+                    "type" => "text",
+                    "text" => $invoice_no
+                ],
+                [
+                    "type" => "text",
+                    "text" => $amount
+                ],
+                [
+                    "type" => "text",
+                    "text" => date('d-m-Y', strtotime($date))
+                ],
+                [
+                    "type" => "text",
+                    "text" => (string)$items_count
+                ]
+            ]
+        ],
+        [
+            "type" => "button",
+            "sub_type" => "url",
+            "index" => "0",
+            "parameters" => [
+                [
+                    "type" => "text",
+                    "text" => (string)$templateId
+                ]
+            ]
+        ]
+    ]
+];
 
-        $ch = curl_init(
-            "https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/"	
-        );
+        $ch = curl_init();
+
         curl_setopt_array($ch, [
+            CURLOPT_URL => "https://api-nexmsg.myteknoland.com/api/send/template",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
@@ -3819,21 +4961,25 @@ $this->load->view(
             CURLOPT_POSTFIELDS => json_encode($payload),
             CURLOPT_HTTPHEADER => [
                 "Content-Type: application/json",
-                "authkey: 471465A6FulqId269201b0eP1",
+                "Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTQ2MTk2NGJlYmNlN2E4NTk4YWM2ZDMiLCJlbWFpbCI6ImdhbmdhYmFsYWppOTE1QGdtYWlsLmNvbSIsInJvbGUiOiJjbGllbnQiLCJzdGF0dXMiOiJhY3RpdmUiLCJpYXQiOjE3ODQzNTgzOTUsImV4cCI6MTc4NDQ0NDc5NX0.y02CFMXH9mdmboy-kt4DPFkuRrE1yf6WOAdX_rlMspU"
             ],
         ]);
 
         $response = curl_exec($ch);
+
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if (curl_errno($ch)) {
+            $response = curl_error($ch);
+        }
+
         curl_close($ch);
 
         $this->response->addHeader("Content-Type: application/json");
-        $this->response->setOutput(
-            json_encode([
-                "status" => $httpCode,
-                "response" => $response,
-            ])
-        );
+        $this->response->setOutput(json_encode([
+            "status" => $httpCode,
+            "response" => json_decode($response, true) ?: $response
+        ]));
         
     }
 

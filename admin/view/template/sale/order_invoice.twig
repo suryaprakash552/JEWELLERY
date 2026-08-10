@@ -313,7 +313,7 @@
         <div class="header-top text-center">INVOICE</div>
         <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:500; width:100%;">
             <div>
-                Invoice : {{ order.invoice_prefix ~ order.invoice_no }}
+                Invoice : {{ order.invoice_no ? order.invoice_prefix ~ order.invoice_no : order.order_id }}
             </div>
             <div>
               {{ order.date_added }}

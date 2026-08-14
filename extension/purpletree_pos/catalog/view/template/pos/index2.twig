@@ -2217,7 +2217,7 @@
       <div id="app" class="app app-content-full-height app-without-sidebar app-without-header" style="display: flex; flex-direction: column; height: 100vh; overflow: hidden;">
          <div class="header-bar">
             <div class="logo">
-               <img src="https://myteknoland.com/MTL/image/saleem_logo2.jpg"
+               <img src="https://myteknoland.com/MTL/image/mtl.jpg"
                   alt="Logo"
                   style="
                   width: 70px;
@@ -2227,7 +2227,7 @@
             <div class="time-block">
                <div class="store-header" style="width: 36%; margin-left: -23%;">
                   <div class="store-header-inner" style="text-align: center;">
-                     <h4 style="color: #C9A227; margin: 0;">SGC POS</h4>
+                     <h4 style="color: #C9A227; margin: 0;">MTL POS</h4>
                      <p style="color: #C9A227; margin: 0;"> {{ agentBusinessClass }} BRANCH</p>
                   </div>
                </div>
@@ -2407,7 +2407,7 @@
                      </div>
                      <hr class="cart-hr">
                      <div class="watermark">
-                        <img src="https://myteknoland.com/MTL/image/saleem_logo2.jpg" alt="Watermark">
+                        <img src="https://myteknoland.com/MTL/image/mtl.jpg" alt="Watermark">
                      </div>
                     
                      <div class="cart-area" id="cartArea" style="overflow-y: auto; scrollbar-width: none;">
@@ -7444,7 +7444,7 @@
              
              // Invoice number
              function generateInvoiceNumber() {
-    const prefix = 'SGC-';
+    const prefix = 'MTL-';
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -8449,7 +8449,7 @@ window.disableFooterButtons = function(clickedId) {
                 return;
             }
 
-            const ownerPhone = "7337011206";
+            const ownerPhone = "7032783283";
                     const customerRequest = $.ajax({
             url:
                 "index.php?route=extension/purpletree_pos/pos/home|Order_sendwhatsapp"
@@ -8732,7 +8732,7 @@ function printMergeLongBillMTLR() {
                  }, 500);
                  return;
              }
-             const ownerPhone = "7337011206";
+             const ownerPhone = "7032783283";
                     const customerRequest = $.ajax({
             url:
                 "index.php?route=extension/purpletree_pos/pos/home|Order_sendwhatsapp"
@@ -8779,7 +8779,7 @@ function printMergeLongBillMTLR() {
         return;
     }
 
-    const ownerPhone = "7337011206";
+    const ownerPhone = "7032783283";
 
     $.ajax({
         url:
@@ -8838,7 +8838,7 @@ function printMergeLongBillMTLR() {
                 setTimeout(() => { location.reload(); }, 500);
                 return;
             }
-            const ownerPhone = "7337011206";
+            const ownerPhone = "7032783283";
                     const customerRequest = $.ajax({
             url:
                 "index.php?route=extension/purpletree_pos/pos/home|Order_sendwhatsapp"
@@ -8908,7 +8908,7 @@ function printMergeLongBillMTLR() {
                 setTimeout(() => { location.reload(); }, 500);
                 return;
             }
-            const ownerPhone = "7337011206";
+            const ownerPhone = "7032783283";
 
 const customerRequest = $.ajax({
     url:
@@ -12376,7 +12376,7 @@ if (data.upc && data.upc !== '') {
                const quotationData = {
                    quote_id: activeQuoteId,
                    invoice_number: (function() {
-                       const prefix = 'SGC-';
+                       const prefix = 'MTL-';
                        const today = new Date();
                        const year = today.getFullYear();
                        const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -16409,7 +16409,7 @@ setTimeout(function () {
              }
          }
           function openQuickAddModal() {
-    $('#quick_add_name').val('SGC Product');
+    $('#quick_add_name').val('MTL Product');
     $('#quick_add_quantity').val('1');
     $('#quick_add_price').val('');
     $('#quick_add_gst').val('3');
@@ -16654,7 +16654,7 @@ setTimeout(function () {
              $('#category_autocomplete_list').hide();
          }
          function saveQuickAddProduct() {
-             const name = $('#quick_add_name').val().trim() || 'SGC Product';
+             const name = $('#quick_add_name').val().trim() || 'MTL Product';
              const quantity = parseInt($('#quick_add_quantity').val()) || 1;
              const priceStr = $('#quick_add_price').val().trim();
              if (!priceStr || isNaN(parseFloat(priceStr))) {
@@ -16672,7 +16672,7 @@ setTimeout(function () {
              const productId = hour + minute + second + randomDigits;
              
              // Save P.Name to database
-             if (name !== 'SGC Product') {
+             if (name !== 'MTL Product') {
                  $.ajax({
                      url: 'index.php?route=extension/purpletree_pos/pos/home|addPname',
                      type: 'post',

@@ -2202,7 +2202,7 @@ return $this->response->setOutput(
         
         $full_invoice_number = trim($q['invoice_number'] ?? '');
         
-        $invoice_prefix = 'SGC-';
+        $invoice_prefix = 'MTL-';
         $invoice_no     = '';
         
         if ($full_invoice_number !== '') {
@@ -4307,7 +4307,7 @@ public function generateUpiQr() {
         }
 
         $upi_id = "7337011206-2@axl";
-        $name   = "Saleem Gold Covering";
+        $name   = "My Teknoland";
 
         $upi_url = "upi://pay?pa=" . $upi_id .
                    "&pn=" . urlencode($name) .
@@ -4374,7 +4374,7 @@ public function generateUpiQr1() {
         }
 
         $upi_id = "7207207664.1@hdfc";
-        $name   = "Saleem Gold Covering";
+        $name   = "My Teknoland";
 
         $upi_url = "upi://pay?pa=" . $upi_id .
                    "&pn=" . urlencode($name) .
@@ -4559,7 +4559,7 @@ $this->load->view(
     // COMMON TEMPLATE VALUES
     // -----------------------------
     $customer_name = trim(($order['firstname'] ?? '') . ' ' . ($order['lastname'] ?? ''));
-    $store_name    = 'Saleem Gold Covering - Wholesale';
+    $store_name    = 'My Teknoland';
 
     $items_count = (string) max(1, count($products));
     $amount      = number_format((float)($order['total'] ?? 0), 2, '.', '');
@@ -4587,7 +4587,7 @@ $this->load->view(
                         ],
                         [
                             "type" => "text",
-                            "text" => "Saleem Gold Covering"
+                            "text" => "My Teknoland"
                         ],
                         [
                             "type" => "text",
@@ -4721,7 +4721,7 @@ $this->load->view(
     // COMMON TEMPLATE VALUES
     // -----------------------------
     $customer_name = trim(($order['firstname'] ?? '') . ' ' . ($order['lastname'] ?? ''));
-    $store_name    = 'Saleem Gold Covering - Wholesale';
+    $store_name    = 'My Teknoland';
 
     $items_count = (string) max(1, count($products));
     $amount      = number_format((float)($order['total'] ?? 0), 2, '.', '');
@@ -4749,7 +4749,7 @@ $this->load->view(
                         ],
                         [
                             "type" => "text",
-                            "text" => "Saleem Gold Covering"
+                            "text" => "My Teknoland"
                         ],
                         [
                             "type" => "text",
@@ -4885,7 +4885,7 @@ $this->load->view(
     // COMMON TEMPLATE VALUES
     // -----------------------------
     $customer_name = trim(($order['firstname'] ?? '') . ' ' . ($order['lastname'] ?? ''));
-    $store_name    = 'Saleem Gold Covering - Wholesale';
+    $store_name    = 'My Teknoland';
 
     $items_count = (string) max(1, count($products));
     $amount      = number_format((float)($order['total'] ?? 0), 2, '.', '');
@@ -4913,7 +4913,7 @@ $cleanPhone = preg_replace('/\D/', '', $phone);
                 ],
                 [
                     "type" => "text",
-                    "text" => "Saleem Gold Covering"
+                    "text" => "My Teknoland"
                 ],
                 [
                     "type" => "text",

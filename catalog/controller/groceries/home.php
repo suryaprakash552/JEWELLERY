@@ -770,7 +770,7 @@ public function addQuoteOrder()
         
         $full_invoice_number = trim($q['invoice_number'] ?? '');
         
-        $invoice_prefix = 'SGC-';
+        $invoice_prefix = 'MTL-';
         $invoice_no     = date('YmdHis');
         
         if ($full_invoice_number !== '') {

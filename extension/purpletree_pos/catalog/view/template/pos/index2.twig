@@ -8206,7 +8206,7 @@ window.processOrderPayment = function(btn, shouldPrint, apiEndpoint) {
           TotalReceivedAmount: getElementValue('totalReceived'),
           PendingAmount: getElementValue('pendingAmount'),
           ReturnableBalance: getElementValue('returnableBalance'),
-          DueAmountUsed: document.getElementById('dueAmountInvoice')?.checked || false,
+          DueAmountUsed: document.getElementById('useDueAmountCheckbox')?.checked || false,
           DueAmountValue: parseFloat(getElementValue('dueAmountInput')) || 0,
           includedDA: document.getElementById('includeDAInTotal')?.checked || false,
           includedDAAmount: parseFloat(getElementValue('includeDAAmount')) || 0,

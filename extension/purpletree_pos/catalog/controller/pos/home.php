@@ -4574,7 +4574,7 @@ $this->load->view(
         }
         $payload = [
             "to" => "91" . $cleanPhone,           
-            "accountId" => "6a5a19f675c23683cb18cff9",
+            "accountId" => "6a475d96f6286cfd5aa377b8",
             "templateName" => "order_invoice1",
             "languageCode" => "en",
             "components" => [
@@ -4736,7 +4736,7 @@ $this->load->view(
         }
         $payload = [
             "to" => "91" . $cleanPhone,           
-            "accountId" => "6a5a19f675c23683cb18cff9",
+            "accountId" => "6a475d96f6286cfd5aa377b8",
             "templateName" => "order_invoice_rel1",
             "languageCode" => "en_US",
             "components" => [
@@ -4900,9 +4900,9 @@ $cleanPhone = preg_replace('/\D/', '', $phone);
         }
         $payload = [ 
             "to" => "91" . $cleanPhone, 
-    "accountId" => "6a5a19f675c23683cb18cff9",
+    "accountId" => "6a475d96f6286cfd5aa377b8",
     "templateName" => "quote_invoice_order1",
-    "languageCode" => "en_US",
+    "languageCode" => "en",
     "components" => [
         [
             "type" => "body",

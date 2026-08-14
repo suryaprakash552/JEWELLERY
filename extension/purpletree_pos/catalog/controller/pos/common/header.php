@@ -31,7 +31,7 @@ class Header extends \Opencart\System\Engine\Controller {
 		$data['keywords'] = $this->document->getKeywords();
 		$data['links'] = $this->document->getLinks();
 		$data['heading_title1'] = $this->document->getTitle();
-		$data['seller_logo'] = '/admin/view/image/logo.png';
+		$data['seller_logo'] = '/admin/view/image/logo1.png';
 		
 		$this->load->language('extension/module/purpletree_sellerpanel');  
 		$this->load->language('extension/purpletree_pos/pos/header');  

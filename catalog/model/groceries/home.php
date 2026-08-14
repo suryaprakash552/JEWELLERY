@@ -1141,7 +1141,7 @@ public function getCustomerByMobile($mobile) {
             else {
     
                 $this->db->query("INSERT INTO `" . DB_PREFIX . "quote_order` SET
-                                                                            invoice_prefix    = '" . $this->db->escape($def('invoice_prefix', 'SGC-')) . "',
+                                                                            invoice_prefix    = '" . $this->db->escape($def('invoice_prefix', 'MTL-')) . "',
                                                                             invoice_no        = '" . $this->db->escape($def('invoice_no', '')) . "',
                                                                             customer_id       = 0,
                                                                             pre_order_id      = 0,

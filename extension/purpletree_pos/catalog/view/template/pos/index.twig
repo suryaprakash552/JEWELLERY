@@ -5923,6 +5923,8 @@
              if(localStorage.getItem("pos_cart") != null){
                  pos_cart = JSON.parse(localStorage.getItem("pos_cart"))
              }
+             console.log("FRONTEND DEBUG - addToCart: Before add, pos_cart length: " + pos_cart.length);
+             console.log("FRONTEND DEBUG - addToCart: Adding product_id: " + productData.product_id);
              if(pos_cart.length){
                  $.each(pos_cart,function(key,val){
                      if((parseInt(val.product_id)==parseInt(productData.product_id)) && (JSON.stringify(val.option) == JSON.stringify(options))){
@@ -5940,12 +5942,14 @@
                      }
                  });
                  if(!duplicate_check){
-                     pos_cart.push(posCartData);    
+                     pos_cart.push(posCartData);
                  }
              } else {
-                 pos_cart.push(posCartData);    
+                 pos_cart.push(posCartData);
              }
              localStorage.setItem("pos_cart", JSON.stringify(pos_cart));
+             console.log("FRONTEND DEBUG - addToCart: After add, pos_cart length: " + pos_cart.length);
+             console.log("FRONTEND DEBUG - addToCart: pos_cart product IDs: " + pos_cart.map(p => p.product_id).join(", "));
              return JSON.parse(localStorage.getItem("pos_cart"));
          }
          
@@ -10686,11 +10690,18 @@ function processOrderPayment(btn, shouldPrint) {
        CART READ + VALIDATE (SYNC)
     =============================== */
 
+    console.log("FRONTEND DEBUG - Before getCartProductsFromDOMSync()");
+    console.log("FRONTEND DEBUG - Current localStorage pos_cart:", JSON.parse(localStorage.getItem("pos_cart") || "[]"));
+
     const cartProducts = getCartProductsFromDOMSync();
     if (!cartProducts) {
       unlockPayBtn(btn);
       return;
     }
+
+    console.log("FRONTEND DEBUG - After getCartProductsFromDOMSync()");
+    console.log("FRONTEND DEBUG - cartProducts length:", cartProducts.length);
+    console.log("FRONTEND DEBUG - cartProducts product IDs:", cartProducts.map(p => p.product_id).join(", "));
 
     /* ===============================
        PAYMENT VALIDATION (SYNC)
@@ -10768,21 +10779,27 @@ function processOrderPayment(btn, shouldPrint) {
           CreditPointsUsed: creditPointsUsed,
           AvailableAdvancedAmount: document.getElementById('advancedAmountSpan')?.textContent || '0.00',
 
-          CartProducts: cartProducts.map(p => {
+        };
+        console.log("FRONTEND DEBUG - Building CartProducts from cartProducts array");
+        console.log("FRONTEND DEBUG - cartProducts array length:", cartProducts.length);
+        console.log("FRONTEND DEBUG - cartProducts array:", cartProducts);
+        console.log("FRONTEND DEBUG - cartProducts product IDs:", cartProducts.map(p => p.product_id).join(", "));
+
+        orderDetails.CartProducts = cartProducts.map(p => {
             const gstPercent = parseFloat(p.gst_percent || 0);
             const linePrice = parseFloat(p.price || 0) * parseInt(p.quantity || 1);
             const rowGst = (gstPercent / 100) * linePrice;
-            
+
             // Calculate discount percentage if available
             const discountPercent = parseFloat(p.gst_percent || 0);
-            
-            
+
+
             return {
               cartId: p.cart_id ?? null,
               product_id: p.product_id,
               name: p.name || p.heading_title || '',
               price: p.price ?? null,
-              
+
               discount_percent: discountPercent,
               total: p.total ?? null,
               gst_percent: gstPercent,
@@ -10790,13 +10807,22 @@ function processOrderPayment(btn, shouldPrint) {
               reward: p.reward ?? 0,
               quantity: p.quantity ?? 1,
               pos_quantity: p.pos_quantity ?? 0,
-              excluded: p.excluded || false
+              excluded: p.excluded || false,
+              discount: parseFloat(p.discount || 0),
+              discount_type: p.discount_type || 'percent',
+              discount_amount: parseFloat(p.discount_amount || 0)
             };
-          }),
+          });
+
+        console.log("FRONTEND DEBUG - CartProducts mapping complete");
+        console.log("FRONTEND DEBUG - orderDetails.CartProducts length:", orderDetails.CartProducts.length);
+        console.log("FRONTEND DEBUG - orderDetails.CartProducts product IDs:", orderDetails.CartProducts.map(p => p.product_id).join(", "));
 
           InvoiceInfo: {
             SUBTotal: getElementValue('subTotal'),
             DiscountIncluded: getElementValue('discountIncluded'),
+            OverallDiscount: getElementValue('discountIncluded'),
+            OverallDiscountMode: 'flat',
             TaxIncluded: getElementValue('taxIncluded'),
             TotalBeforeRoundoff: getElementValue('totalBeforeRoundoff'),
             RoundOffAmount: getElementValue('roundOffAmount'),
@@ -10837,6 +10863,10 @@ function processOrderPayment(btn, shouldPrint) {
 
         sessionStorage.setItem('paidOrderDetails', JSON.stringify(orderDetails));
         console.log("order details ", orderDetails);
+        console.log("STEP 2 - Complete JSON payload:", JSON.stringify(orderDetails, null, 2));
+        console.log("STEP 2 - previourseditorderid:", previourseditorderid);
+        console.log("STEP 2 - CartProducts count:", orderDetails.CartProducts.length);
+        console.log("STEP 2 - CartProducts:", JSON.stringify(orderDetails.CartProducts, null, 2));
         $.ajax({
           url: 'index.php?route=extension/purpletree_pos/pos/home|addorder',
           type: 'POST',
@@ -10962,12 +10992,19 @@ setTimeout(function () {
          function getCartProductsFromDOMSync() {
               const rows = document.querySelectorAll('.cart-row[data-product]');
               const products = [];
-            
+
+              console.log("FRONTEND DEBUG - getCartProductsFromDOMSync() called");
+              console.log("FRONTEND DEBUG - DOM rows found: " + rows.length);
+
+              const localStorageCart = JSON.parse(localStorage.getItem("pos_cart") || "[]");
+              console.log("FRONTEND DEBUG - localStorage pos_cart length: " + localStorageCart.length);
+              console.log("FRONTEND DEBUG - localStorage pos_cart product IDs: " + localStorageCart.map(p => p.product_id).join(", "));
+
               if (!rows.length) {
                 errorMessage('Cart is empty', 2000);
                 return null;
               }
-            
+
               for (let row of rows) {
                 let product;
                 try {
@@ -10976,14 +11013,18 @@ setTimeout(function () {
                   errorMessage('Invalid cart data. Please re-add product.', 3000);
                   return null;
                 }
-            
+
                 if (!validateCartProductSingle(product)) {
                   return null; // ❌ HARD STOP
                 }
-            
+
                 products.push(product);
               }
-            
+
+              console.log("FRONTEND DEBUG - DOM products length: " + products.length);
+              console.log("FRONTEND DEBUG - DOM products product IDs: " + products.map(p => p.product_id).join(", "));
+              console.log("FRONTEND DEBUG - Returning products from DOM");
+
               return products;
             }
 
@@ -13722,7 +13763,8 @@ if (data.upc && data.upc !== '') {
 
               var orderProducts = selectedOrder.products || [];
               var cartProducts = [];
-              console.log("order product",orderProducts);
+              console.log("FRONTEND DEBUG - restoreEditOrder: order products from DB", orderProducts);
+              console.log("FRONTEND DEBUG - restoreEditOrder: order products count", orderProducts.length);
               orderProducts.forEach(function (p) {
                   cartProducts.push({
                       product_id : p.product_id,
@@ -13735,7 +13777,10 @@ if (data.upc && data.upc !== '') {
                   });
               });
 
+              console.log("FRONTEND DEBUG - restoreEditOrder: cartProducts to save to localStorage", cartProducts);
+              console.log("FRONTEND DEBUG - restoreEditOrder: cartProducts count", cartProducts.length);
               localStorage.setItem("pos_cart", JSON.stringify(cartProducts));
+              console.log("FRONTEND DEBUG - restoreEditOrder: localStorage pos_cart updated");
 
               var cartArea = document.getElementById('cartArea');
               if (cartArea) cartArea.innerHTML = '';
@@ -13745,13 +13790,13 @@ if (data.upc && data.upc !== '') {
 
               updateCartTotals();
               updateInvoiceRightColumn();
-              
+
               $('#editOrderHistoryContent').hide();
               $('#cartArea').show();
               $('.cart-header-row').show();
               $('.discount-row').show();
               $('.search-section').show();
-              
+
               successMessage("Order " + orderId + " loaded for editing.", 3000);
           }
 
@@ -19156,7 +19201,10 @@ if (data.upc && data.upc !== '') {
                pos_quantity: product.pos_quantity ?? product.posquantity ?? 0,
                total: Number(product.price) * editableQuantity,
                excluded: product.excluded || false,
-               gst_percent: gstPercent
+               gst_percent: gstPercent,
+               discount: product.discount || 0,
+               discount_type: product.discount_type || 'percent',
+               discount_amount: product.discount_amount || 0
              };
           console.log("productObj...............",productObj);
           console.log("productObj....product...............",product);

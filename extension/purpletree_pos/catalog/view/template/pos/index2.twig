@@ -12393,7 +12393,8 @@ if (data.upc && data.upc !== '') {
                            price: p.price,
                            total: p.total,
                            discount: p.discount || 0,
-                           gst_percent: p.gst_percent || 0
+                           gst_percent: p.gst_percent || 0,
+                           excluded: (p.excluded === true || p.excluded === 1 || String(p.excluded).toLowerCase() === 'true') ? 1 : 0
                        };
                    }),
                    net_total: netTotal,
@@ -15427,7 +15428,7 @@ if (data.upc && data.upc !== '') {
           '</div><hr class="cart-hr">';
          cartArea.insertAdjacentHTML('beforeend', cartRowHTML);
          const newlyAddedRow = cartArea.lastElementChild.previousElementSibling || cartArea.lastElementChild;
-         if (product.excluded === true || product.excluded === '1') {
+         if (product.excluded === true || product.excluded === 1 || String(product.excluded).toLowerCase() === 'true') {
              const toggleBtn = newlyAddedRow.querySelector('.exclude-toggle-btn');
              if (toggleBtn) {
                  toggleBtn.classList.remove('included');

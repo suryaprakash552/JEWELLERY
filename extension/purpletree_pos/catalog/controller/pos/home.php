@@ -1985,6 +1985,26 @@ return $this->response->setOutput(
             
             // 2️⃣ RETURN ORDER
             } elseif ($previousOrderId > 0) {
+                // Restore pos_quentity for returned products
+                $oldProducts = $this->db->query("
+                    SELECT product_id, quantity
+                    FROM `" . DB_PREFIX . "wholesale_order_product`
+                    WHERE order_id = '" . (int)$previousOrderId . "'
+                ")->rows;
+
+                foreach ($oldProducts as $old) {
+                    $product_id = (int)$old['product_id'];
+                    $qty        = (int)$old['quantity'];
+
+                    if ($product_id <= 0 || $qty <= 0) continue;
+
+                    $this->db->query("
+                        UPDATE `" . DB_PREFIX . "pts_pos_product`
+                        SET pos_quentity = pos_quentity + " . (int)$qty . "
+                        WHERE product_id = '" . (int)$product_id . "'
+                    ");
+                }
+
                 // REVERSE OLD RETURN ORDER DUE TRANSACTION
      $oldTransaction = $this->db->query("
     SELECT amount, transactiontype

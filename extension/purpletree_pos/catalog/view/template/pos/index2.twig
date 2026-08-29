@@ -2206,7 +2206,15 @@
         }
       </style>
    </head>
-   <body style="width: 100%; scrollbar-width: none;">
+   <body style="width: 100%; scrollbar-width: none;" oncontextmenu="return false;">
+      <script>
+         // Immediate right-click prevention
+         document.addEventListener('contextmenu', function(e) {
+           e.preventDefault();
+           e.stopPropagation();
+           return false;
+         }, true);
+      </script>
       <div id="appCover" class="app-cover"></div>
       <div id="appLoader" class="app-loader">
          <div class="d-flex align-items-center gap-3">
@@ -2985,7 +2993,7 @@
   <option value="percent">Percent (%)</option>
 </select>
 <span id="discountPrefix">₹</span>
-<input type="number" id="itemDiscountValue" min="0" value="" oninput="updateSummary()" />
+<input type="number" id="itemDiscountValue" min="0" value="" oninput="validateDiscountInput(this); updateSummary()" />
   </span>
                             </div>
                             <div class="summary-item">
@@ -10308,7 +10316,7 @@ function restoreReturnOrder(orderId) {
                      price       : price,
                      name        : p.name,
             reward      : p.reward,
-            excluded    : p.excluded,
+            excluded    : (p.excluded == 1 || String(p.excluded).toLowerCase() === 'true') ? 1 : 0,
             gst_percent : parseFloat(p.gst_percent || p.gst || 0) || 0,
             discount    : parseFloat(p.discount || 0), // Original user input from order_product.discount
             discount_type: p.discount_type || 'percent' // Discount type from order_product
@@ -10326,7 +10334,7 @@ function restoreReturnOrder(orderId) {
             price       : item.price,
             name        : item.name,
             reward      : item.reward,
-            excluded    : item.excluded,
+            excluded    : (item.excluded == 1 || String(item.excluded).toLowerCase() === 'true') ? 1 : 0,
             gst_percent : parseFloat(item.gst_percent || item.gst || 0) || 0,
             discount    : item.discount || 0,
             discount_type: item.discount_type || 'percent'
@@ -11301,7 +11309,7 @@ if (data.upc && data.upc !== '') {
                       price      : parseFloat(p.price) || 0,
                       name       : p.name,
                       reward     : p.reward || 0,
-                      excluded   : p.excluded || 0,
+                      excluded   : (p.excluded == 1 || String(p.excluded).toLowerCase() === 'true') ? 1 : 0,
                       gst_percent: parseFloat(p.gst_percent || p.gst || 0) || 0,
                       discount   : parseFloat(p.discount || 0), // Original user input from order_product.discount
                       discount_type: p.discount_type || 'percent' // Discount type from order_product
@@ -11500,7 +11508,7 @@ if (data.upc && data.upc !== '') {
                       price      : parseFloat(p.price) || 0,
                       name       : p.name,
                       reward     : p.reward || 0,
-                      excluded   : p.excluded || 0,
+                      excluded   : (p.excluded == 1 || String(p.excluded).toLowerCase() === 'true') ? 1 : 0,
                       gst_percent: parseFloat(p.gst_percent || p.gst || 0) || 0,
                       discount   : parseFloat(p.discount || 0), // Original user input from order_product.discount
                       discount_type: p.discount_type || 'percent' // Discount type from order_product
@@ -11628,7 +11636,7 @@ if (data.upc && data.upc !== '') {
                       price       : price,
                       name        : p.name,
                       reward      : p.reward,
-                      excluded    : p.excluded,
+                      excluded    : (p.excluded == 1 || String(p.excluded).toLowerCase() === 'true') ? 1 : 0,
                       gst_percent : parseFloat(p.gst_percent || p.gst || 0) || 0,
                       discount    : parseFloat(p.discount || 0), // Original user input from order_product.discount
                       discount_type: p.discount_type || 'percent' // Discount type from order_product
@@ -11644,7 +11652,7 @@ if (data.upc && data.upc !== '') {
                       price       : item.price,
                       name        : item.name,
                       reward      : item.reward,
-                      excluded    : item.excluded,
+                      excluded    : (item.excluded == 1 || String(item.excluded).toLowerCase() === 'true') ? 1 : 0,
                       gst_percent : parseFloat(item.gst_percent || item.gst || 0) || 0,
                       discount    : item.discount || 0,
                       discount_type: item.discount_type || 'percent'
@@ -11668,7 +11676,7 @@ if (data.upc && data.upc !== '') {
                       price       : p.price,
                       name        : p.name,
                       reward      : p.reward,
-                      excluded    : p.excluded,
+                      excluded    : (p.excluded == 1 || String(p.excluded).toLowerCase() === 'true') ? 1 : 0,
                       gst_percent : parseFloat(p.gst_percent || p.gst || 0) || 0,
                       discount    : p.discount || 0,
                       discount_type: p.discount_type || 'percent'
@@ -17710,6 +17718,18 @@ window.userEditedPercent = false;
 
 
 
+
+function validateDiscountInput(input) {
+    const discountMode = document.getElementById('discountMode');
+    const mode = discountMode ? discountMode.value : 'flat';
+    
+    if (mode === 'percent') {
+        let value = parseFloat(input.value);
+        if (value > 100) {
+            input.value = 100;
+        }
+    }
+}
 
 function onDiscountModeChange() {
 

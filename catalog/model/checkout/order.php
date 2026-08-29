@@ -456,6 +456,13 @@ public function addwholesaleorder(array $data, array $invoice_extra = []): int {
                     WHERE box_id = '" . (int)$product_id . "'
                 )
             ");
+        } else {
+            // Decrease pos_quentity for regular products
+            $this->db->query("
+                UPDATE `" . DB_PREFIX . "pts_pos_product`
+                SET pos_quentity = GREATEST(0, pos_quentity - " . (int)$qty . ")
+                WHERE product_id = '" . (int)$product_id . "'
+            ");
         }
     }
 
@@ -816,6 +823,49 @@ $this->db->query("
                 `tax` = '" . (float)($product['tax'] ?? 0) . "',
                 `excluded`   = '" . (int)$excluded . "'";
             $this->db->query($sql);
+        }
+    }
+
+    // Decrease pos_quentity for new product quantities
+    $posQtyMap = [];
+    foreach ($data['products'] as $product) {
+        $pid = (int)($product['product_id'] ?? 0);
+        $qty = (int)($product['quantity'] ?? 0);
+        if ($pid <= 0 || $qty <= 0) continue;
+        $posQtyMap[$pid] = ($posQtyMap[$pid] ?? 0) + $qty;
+    }
+
+    foreach ($posQtyMap as $product_id => $qty) {
+        $info = $this->db->query("
+            SELECT product_id, box_id, upc
+            FROM `" . DB_PREFIX . "product`
+            WHERE product_id = '" . (int)$product_id . "'
+            LIMIT 1
+        ");
+        if (!$info->num_rows) continue;
+        $is_box = !empty($info->row['upc']);
+        if ($is_box) {
+            $this->db->query("
+                UPDATE `" . DB_PREFIX . "pts_pos_product`
+                SET pos_quentity = 0
+                WHERE product_id = '" . (int)$product_id . "'
+            ");
+            $this->db->query("
+                UPDATE `" . DB_PREFIX . "pts_pos_product`
+                SET pos_quentity = 0
+                WHERE product_id IN (
+                    SELECT product_id
+                    FROM `" . DB_PREFIX . "product`
+                    WHERE box_id = '" . (int)$product_id . "'
+                )
+            ");
+        } else {
+            // Decrease pos_quentity for regular products
+            $this->db->query("
+                UPDATE `" . DB_PREFIX . "pts_pos_product`
+                SET pos_quentity = GREATEST(0, pos_quentity - " . (int)$qty . ")
+                WHERE product_id = '" . (int)$product_id . "'
+            ");
         }
     }
 

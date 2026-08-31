@@ -1065,6 +1065,14 @@
 
 
 //Global variable
+function generateTempPassword() {
+  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
+  var password = '';
+  for (var i = 0; i < 12; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
+}
 var cartProductData = [];
 var pos_cart = [];
 var pos_cart1 = [];
@@ -4240,7 +4248,7 @@ function ptscustomerdata(customer_id){
       var l_name          = $('#l_name').val();
       var email           = $('#email').val();
       var telephone       = $('#telephone').val();
-	  var password        = "admin123";
+	  var password        = generateTempPassword();
 	  
 	  if(f_name.length == ''){
 	  $('#error_customer_msg').append('<span id="telephone-error">Please enter firstname.</span> ');

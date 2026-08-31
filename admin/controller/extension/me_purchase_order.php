@@ -4023,7 +4023,7 @@ class Mepurchaseorder extends \Opencart\System\Engine\Controller {
 		
 		unset($this->session->data['me_custom_total'][$this->request->get['row']]);
 		if(isset($this->request->post['order_id']) && $this->request->post['order_id'] > 0 && isset($this->request->post['custom_total'][$this->request->get['row']]['custom_total_id'])){
-			$this->db->query("DELETE FROM " . DB_PREFIX . "me_purchase_order_total WHERE order_id = '" . (int)$this->request->post['order_id'] . "' AND quick_order_total_id = '" . $this->request->post['custom_total'][$this->request->get['row']]['custom_total_id'] . "'");
+			$this->db->query("DELETE FROM " . DB_PREFIX . "me_purchase_order_total WHERE order_id = '" . (int)$this->request->post['order_id'] . "' AND quick_order_total_id = '" . (int)$this->request->post['custom_total'][$this->request->get['row']]['custom_total_id'] . "'");
 		}
 		$json['success'] = true;
 		

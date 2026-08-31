@@ -450,8 +450,8 @@
                 CURLOPT_POST => true, 
                 CURLOPT_RETURNTRANSFER => true, 
                 CURLOPT_USERAGENT => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36', 
-                CURLOPT_SSL_VERIFYHOST => 0, 
-                CURLOPT_SSL_VERIFYPEER => 0 
+                CURLOPT_SSL_VERIFYHOST => 2, 
+                CURLOPT_SSL_VERIFYPEER => 1 
             ) 
         );
 

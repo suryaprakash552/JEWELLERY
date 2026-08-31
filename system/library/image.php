@@ -45,13 +45,17 @@ class Image {
 	 */
 	public function __construct(string $file) {
 		if (!extension_loaded('gd')) {
-			exit('Error: PHP GD is not installed!');
+			throw new \Exception('Error: PHP GD is not installed!');
 		}
 
 		if (is_file($file)) {
 			$this->file = $file;
 
 			$info = getimagesize($file);
+
+			if ($info === false) {
+				throw new \Exception('Error: Could not read image info for ' . $file . '!');
+			}
 
 			$this->width = $info[0];
 			$this->height = $info[1];

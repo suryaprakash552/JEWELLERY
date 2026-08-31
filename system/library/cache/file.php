@@ -38,7 +38,21 @@ class File {
 					clearstatcache(false, $file);
 				}
 			} else {
-				return json_decode(file_get_contents($file), true);
+				$contents = file_get_contents($file);
+
+				if ($contents === false) {
+					error_log('Failed to read cache file: ' . $file);
+					return [];
+				}
+
+				$data = json_decode($contents, true);
+
+				if (json_last_error() !== JSON_ERROR_NONE) {
+					error_log('Failed to decode cache file: ' . $file . ' - ' . json_last_error_msg());
+					return [];
+				}
+
+				return $data;
 			}
 		}
 
@@ -61,7 +75,11 @@ class File {
 			$expire = $this->expire;
 		}
 
-		file_put_contents(DIR_CACHE . 'cache.' . preg_replace('/[^A-Z0-9\._-]/i', '', $key) . '.' . (time() + $expire), json_encode($value));
+		$result = file_put_contents(DIR_CACHE . 'cache.' . preg_replace('/[^A-Z0-9\._-]/i', '', $key) . '.' . (time() + $expire), json_encode($value));
+
+		if ($result === false) {
+			error_log('Failed to write cache file for key: ' . $key);
+		}
 	}
 
 	/**

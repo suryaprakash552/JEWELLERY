@@ -926,7 +926,7 @@ class Affiliate extends \Opencart\System\Engine\Controller {
 
 				echo $csv;
 			} else {
-				exit('Error: Headers already sent out!');
+				throw new \Exception('Error: Headers already sent out!');
 			}
 		} else {
 			return new \Opencart\System\Engine\Action('error/permission');

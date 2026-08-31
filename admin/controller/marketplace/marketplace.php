@@ -169,14 +169,25 @@ class Marketplace extends \Opencart\System\Engine\Controller {
 
 		$response = curl_exec($curl);
 
-		$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-		curl_close($curl);
-
-		if ($status == 200) {
-			$response_info = json_decode($response, true);
-		} else {
+		if ($response === false) {
+			error_log('Marketplace cURL request failed: ' . curl_error($curl));
+			curl_close($curl);
 			$response_info = [];
+		} else {
+			$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+			curl_close($curl);
+
+			if ($status == 200) {
+				$response_info = json_decode($response, true);
+
+				if (json_last_error() !== JSON_ERROR_NONE) {
+					error_log('Invalid JSON in marketplace response: ' . json_last_error_msg());
+					$response_info = [];
+				}
+			} else {
+				$response_info = [];
+			}
 		}
 
 		if (isset($response_info['extension_total'])) {
@@ -558,14 +569,25 @@ class Marketplace extends \Opencart\System\Engine\Controller {
 
 		$response = curl_exec($curl);
 
-		$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-		curl_close($curl);
-
-		if ($status == 200) {
-			$response_info = json_decode($response, true);
-		} else {
+		if ($response === false) {
+			error_log('Marketplace cURL request failed: ' . curl_error($curl));
+			curl_close($curl);
 			$response_info = [];
+		} else {
+			$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+			curl_close($curl);
+
+			if ($status == 200) {
+				$response_info = json_decode($response, true);
+
+				if (json_last_error() !== JSON_ERROR_NONE) {
+					error_log('Invalid JSON in marketplace response: ' . json_last_error_msg());
+					$response_info = [];
+				}
+			} else {
+				$response_info = [];
+			}
 		}
 
 		if ($response_info) {
@@ -821,14 +843,25 @@ class Marketplace extends \Opencart\System\Engine\Controller {
 
 			$response = curl_exec($curl);
 
-			$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-			curl_close($curl);
-
-			if ($status == 200) {
-				$response_info = json_decode($response, true);
-			} else {
+			if ($response === false) {
+				error_log('Marketplace cURL request failed: ' . curl_error($curl));
+				curl_close($curl);
 				$response_info = [];
+			} else {
+				$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+				curl_close($curl);
+
+				if ($status == 200) {
+					$response_info = json_decode($response, true);
+
+					if (json_last_error() !== JSON_ERROR_NONE) {
+						error_log('Invalid JSON in marketplace response: ' . json_last_error_msg());
+						$response_info = [];
+					}
+				} else {
+					$response_info = [];
+				}
 			}
 
 			if (isset($response_info['success'])) {
@@ -910,14 +943,25 @@ class Marketplace extends \Opencart\System\Engine\Controller {
 
 			$response = curl_exec($curl);
 
-			$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-			curl_close($curl);
-
-			if ($status == 200) {
-				$response_info = json_decode($response, true);
-			} else {
+			if ($response === false) {
+				error_log('Marketplace cURL request failed: ' . curl_error($curl));
+				curl_close($curl);
 				$response_info = [];
+			} else {
+				$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+				curl_close($curl);
+
+				if ($status == 200) {
+					$response_info = json_decode($response, true);
+
+					if (json_last_error() !== JSON_ERROR_NONE) {
+						error_log('Invalid JSON in marketplace response: ' . json_last_error_msg());
+						$response_info = [];
+					}
+				} else {
+					$response_info = [];
+				}
 			}
 
 			if (isset($response_info['download'])) {
@@ -1025,14 +1069,25 @@ class Marketplace extends \Opencart\System\Engine\Controller {
 
 			$response = curl_exec($curl);
 
-			$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-			curl_close($curl);
-
-			if ($status == 200) {
-				$response_info = json_decode($response, true);
-			} else {
+			if ($response === false) {
+				error_log('Marketplace cURL request failed: ' . curl_error($curl));
+				curl_close($curl);
 				$response_info = [];
+			} else {
+				$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+				curl_close($curl);
+
+				if ($status == 200) {
+					$response_info = json_decode($response, true);
+
+					if (json_last_error() !== JSON_ERROR_NONE) {
+						error_log('Invalid JSON in marketplace response: ' . json_last_error_msg());
+						$response_info = [];
+					}
+				} else {
+					$response_info = [];
+				}
 			}
 
 			if (isset($response_info['success'])) {
@@ -1080,19 +1135,30 @@ class Marketplace extends \Opencart\System\Engine\Controller {
 
 		$response = curl_exec($curl);
 
-		$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-		curl_close($curl);
-
-		if ($status == 200) {
-			$json = json_decode($response, true);
-		} else {
+		if ($response === false) {
+			error_log('Marketplace comments fetch failed: ' . curl_error($curl));
+			curl_close($curl);
 			$json = [];
+		} else {
+			$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+			curl_close($curl);
+
+			if ($status == 200) {
+				$json = json_decode($response, true);
+
+				if (json_last_error() !== JSON_ERROR_NONE) {
+					error_log('Invalid JSON in marketplace comments: ' . json_last_error_msg());
+					$json = [];
+				}
+			} else {
+				$json = [];
+			}
 		}
 
 		$data['comments'] = [];
 
-		if ($json['comments']) {
+		if (isset($json['comments']) && $json['comments']) {
 			$results = $json['comments'];
 
 			foreach ($results as $result) {
@@ -1165,14 +1231,25 @@ class Marketplace extends \Opencart\System\Engine\Controller {
 
 		$response = curl_exec($curl);
 
-		$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-		curl_close($curl);
-
-		if ($status == 200) {
-			$json = json_decode($response, true);
-		} else {
+		if ($response === false) {
+			error_log('Marketplace replies fetch failed: ' . curl_error($curl));
+			curl_close($curl);
 			$json = [];
+		} else {
+			$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+			curl_close($curl);
+
+			if ($status == 200) {
+				$json = json_decode($response, true);
+
+				if (json_last_error() !== JSON_ERROR_NONE) {
+					error_log('Invalid JSON in marketplace replies: ' . json_last_error_msg());
+					$json = [];
+				}
+			} else {
+				$json = [];
+			}
 		}
 
 		$data['replies'] = [];

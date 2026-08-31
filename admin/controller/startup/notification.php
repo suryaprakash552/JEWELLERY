@@ -25,12 +25,23 @@ class Notification extends \Opencart\System\Engine\Controller {
 
 			$response = curl_exec($curl);
 
+			if ($response === false) {
+				error_log('Notification fetch failed: ' . curl_error($curl));
+				curl_close($curl);
+				return null;
+			}
+
 			$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
 			curl_close($curl);
 
 			if ($status == 200) {
 				$notification = json_decode($response, true);
+
+				if (json_last_error() !== JSON_ERROR_NONE) {
+					error_log('Invalid JSON in notification response: ' . json_last_error_msg());
+					$notification = [];
+				}
 			} else {
 				$notification = [];
 			}

@@ -51,14 +51,25 @@ class Upgrade extends \Opencart\System\Engine\Controller {
 
 		$response = curl_exec($curl);
 
-		$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-		curl_close($curl);
-
-		if ($status == 200) {
-			$response_info = json_decode($response, true);
-		} else {
+		if ($response === false) {
+			error_log('Upgrade check failed: ' . curl_error($curl));
+			curl_close($curl);
 			$response_info = [];
+		} else {
+			$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+			curl_close($curl);
+
+			if ($status == 200) {
+				$response_info = json_decode($response, true);
+
+				if (json_last_error() !== JSON_ERROR_NONE) {
+					error_log('Invalid JSON in upgrade response: ' . json_last_error_msg());
+					$response_info = [];
+				}
+			} else {
+				$response_info = [];
+			}
 		}
 
 		if ($response_info) {
@@ -116,28 +127,37 @@ class Upgrade extends \Opencart\System\Engine\Controller {
 
 			$handle = fopen($file, 'w');
 
-			set_time_limit(0);
-
-			$curl = curl_init('https://github.com/opencart/opencart/archive/' . $version . '.zip');
-
-			curl_setopt($curl, CURLOPT_USERAGENT, 'OpenCart ' . VERSION);
-			curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-			curl_setopt($curl, CURLOPT_FORBID_REUSE, 1);
-			curl_setopt($curl, CURLOPT_FRESH_CONNECT, 1);
-			curl_setopt($curl, CURLOPT_TIMEOUT, 300);
-			curl_setopt($curl, CURLOPT_FILE, $handle);
-
-			curl_exec($curl);
-
-			fclose($handle);
-
-			$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-			if ($status != 200) {
+			if ($handle === false) {
 				$json['error'] = $this->language->get('error_download');
-			}
+			} else {
+				set_time_limit(0);
 
-			curl_close($curl);
+				$curl = curl_init('https://github.com/opencart/opencart/archive/' . $version . '.zip');
+
+				curl_setopt($curl, CURLOPT_USERAGENT, 'OpenCart ' . VERSION);
+				curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+				curl_setopt($curl, CURLOPT_FORBID_REUSE, 1);
+				curl_setopt($curl, CURLOPT_FRESH_CONNECT, 1);
+				curl_setopt($curl, CURLOPT_TIMEOUT, 300);
+				curl_setopt($curl, CURLOPT_FILE, $handle);
+
+				$result = curl_exec($curl);
+
+				fclose($handle);
+
+				if ($result === false) {
+					$json['error'] = $this->language->get('error_download');
+					error_log('Upgrade download failed: ' . curl_error($curl));
+				} else {
+					$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+					if ($status != 200) {
+						$json['error'] = $this->language->get('error_download');
+					}
+				}
+
+				curl_close($curl);
+			}
 		}
 
 		if (!$json) {

@@ -31,7 +31,21 @@ class File {
 		$file = DIR_SESSION . 'sess_' . basename($session_id);
 
 		if (is_file($file)) {
-			return json_decode(file_get_contents($file), true);
+			$contents = file_get_contents($file);
+
+			if ($contents === false) {
+				error_log('Failed to read session file: ' . $file);
+				return [];
+			}
+
+			$data = json_decode($contents, true);
+
+			if (json_last_error() !== JSON_ERROR_NONE) {
+				error_log('Failed to decode session data from file: ' . $file . ' - ' . json_last_error_msg());
+				return [];
+			}
+
+			return $data;
 		} else {
 			return [];
 		}
@@ -46,7 +60,12 @@ class File {
 	 * @return bool
 	 */
 	public function write(string $session_id, array $data): bool {
-		file_put_contents(DIR_SESSION . 'sess_' . basename($session_id), json_encode($data));
+		$result = file_put_contents(DIR_SESSION . 'sess_' . basename($session_id), json_encode($data));
+
+		if ($result === false) {
+			error_log('Failed to write session file for session: ' . $session_id);
+			return false;
+		}
 
 		return true;
 	}

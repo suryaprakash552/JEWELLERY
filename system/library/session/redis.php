@@ -23,6 +23,7 @@ class Redis {
 			$this->redis->pconnect(CACHE_HOSTNAME, CACHE_PORT);
 			$this->prefix = CACHE_PREFIX . '.session.'; // session prefix to identify session keys
 		} catch (\RedisException $e) {
+			throw new \Exception('Error: Could not connect to Redis session store at ' . CACHE_HOSTNAME . ':' . CACHE_PORT . '! Message: ' . $e->getMessage());
 		}
 	}
 

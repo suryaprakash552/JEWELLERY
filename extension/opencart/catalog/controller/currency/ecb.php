@@ -26,13 +26,23 @@ class ECB extends \Opencart\System\Engine\Controller {
 
 			$response = curl_exec($curl);
 
+			if ($response === false) {
+				error_log('ECB currency fetch failed: ' . curl_error($curl));
+				curl_close($curl);
+				return;
+			}
+
 			$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
 			curl_close($curl);
 
 			if ($status == 200) {
 				$dom = new \DOMDocument('1.0', 'UTF-8');
-				$dom->loadXml($response);
+
+				if (!$dom->loadXml($response)) {
+					error_log('ECB currency: failed to parse XML response');
+					return;
+				}
 
 				$cube = $dom->getElementsByTagName('Cube')->item(0);
 

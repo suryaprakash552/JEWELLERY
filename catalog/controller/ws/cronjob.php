@@ -68,8 +68,21 @@ class ControllerApiCronjob extends Controller
                         ));
                         
                         $res = curl_exec($curl);
+
+                        if ($res === false) {
+                            error_log('Cronjob cURL request failed: ' . curl_error($curl));
+                            curl_close($curl);
+                            continue;
+                        }
+
                         curl_close($curl);
                         $response=json_decode($res,true);
+
+                        if (json_last_error() !== JSON_ERROR_NONE) {
+                            error_log('Cronjob invalid JSON response: ' . json_last_error_msg());
+                            continue;
+                        }
+
                         if(isset($response['txn_status']) && $response['txn_status']=="Success")
                         {
                             $paytmParams = array(

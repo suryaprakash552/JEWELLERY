@@ -8,7 +8,10 @@ class Restaurant extends \Opencart\System\Engine\Controller {
         
         $this->load->model('restaurant/restaurant');
         
-        $restaurants = $this->model_restaurant_restaurant->getRestaurants();
+        $pincode = $this->request->get['pincode'] ?? $this->request->post['pincode'] ?? '';
+        $is_veg = $this->request->get['is_veg'] ?? $this->request->post['is_veg'] ?? '';
+        
+        $restaurants = $this->model_restaurant_restaurant->getRestaurants($pincode, $is_veg);
         
         $this->response->setOutput(json_encode([
             "status" => "success",

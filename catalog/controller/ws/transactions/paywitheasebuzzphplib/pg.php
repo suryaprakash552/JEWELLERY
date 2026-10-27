@@ -749,7 +749,7 @@
           CURLOPT_POSTFIELDS =>json_encode($json),
           CURLOPT_HTTPHEADER => array(
             'Content-Type: application/json',
-            'Cookie: OCSESSID=c6ba5ced033629736b811dce44; currency=INR; language=en-gb'
+            'Cookie: currency=INR; language=en-gb'
           ),
         ));
         

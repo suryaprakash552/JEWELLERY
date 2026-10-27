@@ -63,10 +63,9 @@ class ControllerTransactionspaywitheasebuzzphplibeasebuzz extends Controller {
         /*
         * Based on API call change the Merchant key and salt key for testing(initiate payment).
         */
-        $MERCHANT_KEY = "ORQBI1IV85";
-        $SALT = "KXHCDYRL8B";
-        //$ENV = "test";    // setup test enviroment (testpay.easebuzz.in).
-        $ENV = "prod";   // setup production enviroment (pay.easebuzz.in).
+        $MERCHANT_KEY = getenv('EASEBUZZ_MERCHANT_KEY') ?: '';
+        $SALT = getenv('EASEBUZZ_SALT') ?: '';
+        $ENV = getenv('EASEBUZZ_ENV') ?: 'prod';
        
         
         $easebuzzObj = new Easebuzz($MERCHANT_KEY, $SALT, $ENV);

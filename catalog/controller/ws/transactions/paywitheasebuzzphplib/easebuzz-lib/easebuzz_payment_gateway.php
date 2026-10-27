@@ -5,13 +5,9 @@
     
         class Easebuzz{
 
-        //private $MERCHANT_KEY = "2PBP7IABZ2";
-        //private $SALT = "DAH88E3UWQ";
-        //private $ENV = "test";
-        
-        private $MERCHANT_KEY = "ORQBI1IV85";
-        private $SALT = "KXHCDYRL8B";
-        private $ENV = "prod";
+        private $MERCHANT_KEY = '';
+        private $SALT = '';
+        private $ENV = 'prod';
 
 
         /*
@@ -24,9 +20,9 @@
         */
 
         function __construct($key, $salt, $env){
-            $this->MERCHANT_KEY = "ORQBI1IV85";
-            $this->SALT = "KXHCDYRL8B";
-            $this->ENV = "prod";
+            $this->MERCHANT_KEY = $key ?: getenv('EASEBUZZ_MERCHANT_KEY') ?: '';
+            $this->SALT = $salt ?: getenv('EASEBUZZ_SALT') ?: '';
+            $this->ENV = $env ?: getenv('EASEBUZZ_ENV') ?: 'prod';
         }
 
 

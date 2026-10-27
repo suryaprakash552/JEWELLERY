@@ -60,7 +60,7 @@ class ControllerTransactionspaywitheasebuzzphplibresponse extends Controller {
   CURLOPT_POSTFIELDS =>json_encode($response),
   CURLOPT_HTTPHEADER => array(
     'Content-Type: application/json',
-    'Cookie: OCSESSID=8c5e40765c0c5a1590fd805b06; currency=INR; language=en-gb'
+    'Cookie: currency=INR; language=en-gb'
   ),
 ));
 
